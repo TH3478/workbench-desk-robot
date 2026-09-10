@@ -14,16 +14,15 @@ node_modules/
 coverage.xml
 /site/
 
-# colcon / ament build artifacts generated at repository root.
+# 仓库根目录下生成的 colcon / ament 构建产物。
 /install/
 /log/
 
-# AI tooling working directories — must stay out of history.
-# Once committed, removing these requires rewriting history and a force-push.
-# NOTE: docs/task_packets/ is deliberately NOT ignored. A task packet is a
-# reviewed contract that bounds what an AI task may touch (allowed paths, tests,
-# evidence, stop conditions). It is referenced by `make task-check` and by
-# tools/scripts/check_task_packet.py as its default input.
+# AI 工具工作目录——必须留在历史之外。
+# 一旦提交，清除它们就需要重写历史并强推。
+# 注意：docs/task_packets/ 刻意不被忽略。任务包是一份经过评审的契约，
+# 界定 AI 任务可以触及的范围（允许路径、测试、证据、停止条件）。
+# `make task-check` 以及 tools/scripts/check_task_packet.py 的默认输入都会引用它。
 .claude/
 .codex/
 .cursor/
@@ -31,11 +30,10 @@ coverage.xml
 .github/copilot-instructions.md
 docs/superpowers/
 
-# Internal planning: team structure, staffing and stop-loss decisions remains
-# outside the repository. Public product evidence templates live under
-# docs/product/ and must not contain private participant data.
+# 内部规划：团队结构、人员配置与止损决策保留在仓库之外。
+# 公开的产品证据模板位于 docs/product/ 下，不得包含私有参与者数据。
 
-# Local run artifacts
+# 本地运行产物
 data/raw/
 data/processed/
 data/reports/

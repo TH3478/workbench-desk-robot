@@ -11,7 +11,7 @@ bootstrap:
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -e ".[dev]"
 
-# Both rules and formatting are gated in CI. Run `make fmt` to fix locally.
+# 规则与格式检查均由 CI 把关。本地修复请运行 `make fmt`。
 lint:
 	$(PYTHON) -m ruff check .
 	$(PYTHON) -m ruff format --check .
@@ -23,7 +23,7 @@ fmt:
 test:
 	$(PYTHON) -m pytest -v
 
-# Everything CI runs, in one command. Run this before opening a PR.
+# CI 运行的全部内容，一条命令搞定。开 PR 之前先运行它。
 check: lint test contract scenario-check golden-check context-check demo-scripted demo-offline
 
 contract:
@@ -54,8 +54,8 @@ demo-offline:
 
 demo: demo-offline
 
-# Simulation control is deliberately truthful: without a configured Gazebo
-# adapter, sim-run exits NOT_EXECUTED instead of manufacturing a pass.
+# 仿真控制刻意保持诚实：未配置 Gazebo 适配器时，sim-run 以 NOT_EXECUTED 退出，
+# 而不是伪造一个通过结果。
 sim: sim-run
 
 sim-doctor:

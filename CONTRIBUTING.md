@@ -1,12 +1,12 @@
-# Contributing
+# 贡献指南
 
-## Before coding
+## 编码之前
 
-1. Use a Ready Issue with one human Owner and acceptance criteria.
-2. Confirm the owning path and interface schemas.
-3. Branch from current `main`.
+1. 使用带有一位人类 Owner 与验收标准的 Ready Issue。
+2. 确认所属路径与接口 schema。
+3. 从当前 `main` 分支切出分支。
 
-## Branches
+## 分支命名
 
 ```text
 feat/<issue>-<short-name>
@@ -16,9 +16,9 @@ docs/<issue>-<short-name>
 chore/<issue>-<short-name>
 ```
 
-## Commits
+## 提交信息
 
-Use Conventional Commits and DCO sign-off:
+使用 Conventional Commits 规范并附带 DCO 签署：
 
 ```text
 feat(world-model): add deterministic tray verifier
@@ -26,15 +26,15 @@ feat(world-model): add deterministic tray verifier
 Signed-off-by: Your Name <you@example.com>
 ```
 
-## Pull requests
+## Pull Request
 
-- Keep one purpose per PR.
-- Do not mix interface, feature and formatting rewrites unless required.
-- Include exact commands and results.
-- Request the module Owner and every affected contract consumer.
-- Never force-push or commit directly to protected `main`.
+- 每个 PR 只做一件事。
+- 除非必要，不要把接口、功能与格式重写混在一起。
+- 附上确切的命令与结果。
+- 邀请模块 Owner 与每一位受影响的契约消费者评审。
+- 严禁强推（force-push）或直接向受保护的 `main` 提交。
 
-## Required local checks
+## 必做的本地检查
 
 ```bash
 make test
@@ -44,4 +44,4 @@ make context-check
 make demo-scripted
 ```
 
-ROS, simulation and firmware PRs add their path-specific checks. A screenshot is evidence for UI appearance, not for physical task completion or safety.
+ROS、仿真与固件相关 PR 还需附加各自路径的专项检查。截图只能作为 UI 外观的证据，不能作为物理任务完成或安全的证据。

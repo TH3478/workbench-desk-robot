@@ -1,44 +1,46 @@
-# Security policy
+# 安全策略
 
-## Supported versions
+## 支持版本
 
-Security fixes target the default branch and the latest published release. Older releases are unsupported unless the project owner explicitly names a backport. A published tag is not proof that hardware, simulation, or deployment safety gates passed.
+安全修复面向默认分支与最新已发布版本。除非项目所有者明确指定向后移植（backport），否则旧版本不受支持。发布 tag 并不能证明硬件、仿真或部署安全闸门已经通过。
 
-## Report a vulnerability privately
+## 私下报告漏洞
 
-Do not report vulnerabilities, credentials, private logs, or exploit details in a public Issue or pull request. Use [GitHub private vulnerability reporting](https://github.com/Quchaosheng/workbench-desk-robot/security/advisories/new). If that channel is unavailable, contact the project owner privately and include only enough information to establish a secure follow-up channel.
+请勿在公开 Issue 或 PR 中报告漏洞、凭据、私有日志或利用细节。请使用
+[GitHub 私有漏洞报告](https://github.com/Quchaosheng/workbench-desk-robot/security/advisories/new)。
+如果该渠道不可用，请私下联系项目所有者，并且只提供足以建立安全后续沟通渠道的信息。
 
-Include, when safe:
+在安全的前提下，请包含：
 
-- affected commit, release, component, and configuration;
-- prerequisites, minimal reproduction, and expected versus observed behavior;
-- impact on confidentiality, integrity, availability, robot-control authority, or evidence integrity;
-- known exploitation and suggested containment;
-- whether any secret, personal data, physical device, or third party is involved.
+- 受影响的提交、版本、组件与配置；
+- 前置条件、最小复现步骤、预期行为与实际行为；
+- 对机密性、完整性、可用性、机器人控制权限或证据完整性的影响；
+- 已知的利用方式与建议的遏制措施；
+- 是否涉及任何密钥、个人数据、实体设备或第三方。
 
-Do not include live credentials. Redact tokens and private event data from screenshots and logs.
+请勿包含现用的凭据。截图与日志中的 token 及私有事件数据必须打码。
 
-## Response targets
+## 响应目标
 
-These are response targets, not a bounty or guarantee:
+以下是响应目标，并非赏金或保证：
 
-| Stage | Target |
+| 阶段 | 目标 |
 |---|---:|
-| acknowledgement | 3 business days |
-| initial severity and owner | 5 business days |
-| containment plan for critical/high findings | 2 business days after triage |
-| coordinated status update | at least every 7 days while open |
+| 确认收到 | 3 个工作日 |
+| 初步定级与指派负责人 | 5 个工作日 |
+| 严重/高危问题的遏制计划 | 分诊后 2 个工作日 |
+| 协调式状态更新 | 未关闭期间至少每 7 天一次 |
 
-The human project owner makes disclosure, release, and risk-acceptance decisions. CI and AI tools cannot close a vulnerability or approve a safety claim.
+人类项目所有者负责披露、发布与风险接受决策。CI 与 AI 工具不能关闭漏洞，也不能批准安全声明。
 
-## Security boundaries
+## 安全边界
 
-- The public dashboard is read-only and must not publish ROS bridge, robot-control, firmware, emergency-stop, model-key, or private-log interfaces.
-- Models may propose bounded semantic actions; they never receive joint, velocity, firmware, release, or completion authority.
-- Physical task completion belongs to the independent verifier and requires evidence references.
-- Default container execution is offline, non-root, read-only, capability-dropped, and separated from the optional model network.
-- Secrets must use repository/environment secret stores and least-privilege short-lived tokens. They do not belong in source, images, fixtures, logs, or artifacts.
+- 公开看板是只读的，不得发布 ROS bridge、机器人控制、固件、急停、模型密钥或私有日志接口。
+- 模型只能提议受限的语义动作；它们永远不拥有关节、速度、固件、发布或任务完成权限。
+- 物理任务完成归属于独立验证器，且需要证据引用。
+- 容器默认以离线、非 root、只读、裁剪能力（capability-dropped）方式运行，并与可选的模型网络隔离。
+- 密钥必须使用仓库/环境密钥库与最小权限的短期 token。它们不得出现在源码、镜像、固定装置、日志或产物中。
 
-## Coordinated disclosure
+## 协调式披露
 
-Please allow time for containment, a reviewed fix, regression evidence, and affected-user guidance before public disclosure. The project will credit reporters who request credit and whose identity can be disclosed safely.
+请给遏制、评审后修复、回归证据与受影响用户指引留出时间，再进行公开披露。对于请求署名且身份可安全公开的报告者，项目将予以致谢。

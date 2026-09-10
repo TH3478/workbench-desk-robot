@@ -1,27 +1,27 @@
-# Workbench-1 repository rules
+# Workbench-1 仓库规则
 
-## Always true
+## 始终遵守
 
-- Work on one Issue and one bounded module at a time.
-- Read the relevant JSON Schema and examples before changing a producer or consumer.
-- Add or update a test for every deterministic behavior change.
-- Keep `robot/control/` and `firmware/` out of AI write tasks unless the human Owner explicitly approves them.
-- Never claim a task is complete without a command, test result and evidence reference.
+- 一次只处理一个 Issue 和一个有界模块。
+- 修改生产者或消费者之前，先阅读相关的 JSON Schema 与示例。
+- 每个确定性行为变更都要新增或更新测试。
+- 除非人类 Owner 明确批准，否则 `robot/control/` 与 `firmware/` 不参与 AI 写入任务。
+- 没有命令、测试结果与证据引用，绝不声称任务完成。
 
-## Review boundaries
+## 评审边界
 
-- `interfaces/` changes require three independent human approvals. The affected producer and every consumer must be notified before merge.
-- A PR that changes a schema in `interfaces/` MUST update the matching Pydantic model in `libs/contracts/` in the same PR, with `make contract` passing. Splitting them across two PRs is how the schema and the model drifted apart before.
-- `sim/` changes require simulation validation; robot kinematics/control changes require motion validation.
-- `services/world_model/` defines state meaning and verification; it does not define UI or robot control.
-- `services/agent_runtime/` defines planning and typed tools; it does not write WorldState facts.
-- Build, launch, CI and integration configuration changes require integration review.
+- `interfaces/` 变更需要三位独立人类评审批准。受影响的生产者与每一位消费者必须在合并前收到通知。
+- 修改 `interfaces/` 中 schema 的 PR 必须同时更新 `libs/contracts/` 中对应的 Pydantic 模型，且 `make contract` 通过。此前 schema 与模型正是因拆分到两个 PR 而产生漂移。
+- `sim/` 变更需要仿真验证；机器人运动学/控制变更需要运动验证。
+- `services/world_model/` 定义状态语义与验证；它不定义 UI 或机器人控制。
+- `services/agent_runtime/` 定义规划与类型化工具；它不写入 WorldState 事实。
+- 构建、启动、CI 与集成配置变更需要集成评审。
 
-## AI task rule
+## AI 任务规则
 
-AI write work requires a Task Packet with allowed paths, tests, evidence and stop conditions. Use `docs/task_packets/example-001-world-reducer.json` as the machine-readable example.
+AI 写入工作需要一份任务包（Task Packet），包含允许路径、测试、证据与停止条件。机器可读示例参见 `docs/task_packets/example-001-world-reducer.json`。
 
-## Required checks
+## 必做检查
 
 ```bash
 make test

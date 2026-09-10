@@ -1,0 +1,83 @@
+{
+  "issue": 2027,
+  "human_owner": "Quchaosheng",
+  "objective": "将仓库全部面向人类的文字内容（文档、代码注释、docstring、配置与 schema 的自由文本字段）原地翻译为规范中文并补充中文注释；运行时字符串、标识符、枚举值、命令与路径保持英文不变。",
+  "allowed_paths": [
+    "README.md",
+    "README.zh-CN.md",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "BOOTSTRAP-CHECKLIST.md",
+    "THIRD_PARTY_REVIEW.md",
+    "Makefile",
+    "mkdocs.yml",
+    "compose.yaml",
+    "Dockerfile",
+    ".env.example",
+    ".dockerignore",
+    ".editorconfig",
+    ".gitignore",
+    ".gitattributes",
+    ".pre-commit-config.yaml",
+    "pyproject.toml",
+    "docs/**",
+    "interfaces/**",
+    "libs/**",
+    "services/**",
+    "tools/**",
+    "integrations/**",
+    "apps/**",
+    "bsp/**",
+    "kernel/**",
+    "robot/**",
+    "firmware/**",
+    "tests/**",
+    "sim/**",
+    "tasks/**",
+    "docker/**",
+    "deploy/**",
+    ".github/**",
+    ".devcontainer/**",
+    "docs/task_packets/i18n-zh-comments-docs.json"
+  ],
+  "read_only_paths": [
+    "hardware/**",
+    "evaluation/**"
+  ],
+  "forbidden": [],
+  "acceptance": [
+    "make check 全部目标（lint/test/contract/scenario-check/golden-check/context-check/demo-scripted/demo-offline）通过",
+    "make docs 在 strict 模式下构建成功",
+    "make contract 通过且 interfaces 描述与 libs/contracts 模型保持同步",
+    "翻译范围内除标识符/命令/路径/枚举白名单外无残留英文散文",
+    "robot/control 与 firmware 的写入已获所有者明确批准（2027 任务对话记录）",
+    "interfaces/ 变更完成 3 人独立评审并通知全部生产者与消费者后方可合并"
+  ],
+  "commands": [
+    "make check",
+    "make docs",
+    "make contract",
+    "make scenario-check",
+    "python tools/scripts/check_task_packet.py docs/task_packets/i18n-zh-comments-docs.json",
+    "python tools/scripts/check_task_packet.py --base main docs/task_packets/i18n-zh-comments-docs.json"
+  ],
+  "evidence": [
+    "runs/i18n-zh-baseline/ 基线 make check 输出",
+    "runs/i18n-zh-final/ 终验 make check 与 make docs 输出",
+    "每个有界模块提交对应的 pytest/ruff 输出",
+    "残留英文散文抽样 grep 报告"
+  ],
+  "stop_conditions": [
+    "任一校验目标（make check/make docs/make task-check）失败且无法在本任务边界内修复",
+    "运行时字符串、标识符、枚举值或命令路径被意外改动",
+    "interfaces/ 契约结构（键、枚举、默认值）发生任何语义变化",
+    "robot/control 或 firmware 的改动超出注释与文档范围"
+  ],
+  "data_classification": "repo-docs-comments-only",
+  "risks_and_fallbacks": [
+    "make check 失败时仅回滚失败模块提交，不跨模块回滚",
+    "interfaces 评审未通过时阶段 4 单独挂起，其余阶段不受阻",
+    "golden-set 与遥测数据保持原样，如需翻译另立独立任务"
+  ]
+}

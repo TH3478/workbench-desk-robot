@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# linux/amd64 manifest verified from Docker Hub on 2026-08-28.
+# 2026-08-28 已从 Docker Hub 验证 linux/amd64 manifest。
 FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04@sha256:828c4d878adcaa4265d80c95d8ec877149b49bb2419a4cf3bb6aa889bbb7ca2e
 
 ARG ROS_KEY_SHA256=4a91c49af0d6f0016108b93698782b596c27ccd836937e18e0e36c3347dc602f
@@ -19,12 +19,12 @@ LABEL org.opencontainers.image.title="workbench-1 full development runtime" \
       org.opencontainers.image.base.name="nvidia/cuda:12.8.1-runtime-ubuntu24.04" \
       org.opencontainers.image.base.digest="sha256:828c4d878adcaa4265d80c95d8ec877149b49bb2419a4cf3bb6aa889bbb7ca2e"
 
-# GPU dependency layers in this single image:
-#   gpu-runtime: CUDA 12.8 user-space runtime; the host owns the driver/toolkit.
-#   gpu-simulation: ROS 2 Jazzy, Gazebo Harmonic, EGL/OGRE and MuJoCo.
-#   gpu-validation: architecture, driver, EGL renderer and physical-card checks.
-# NVIDIA drivers, NVIDIA Container Toolkit, PyTorch/JAX and an RL training stack
-# are deliberately not installed here.
+# 单镜像内的 GPU 依赖分层：
+#   gpu-runtime：CUDA 12.8 用户空间运行时；驱动/工具链由宿主机负责。
+#   gpu-simulation：ROS 2 Jazzy、Gazebo Harmonic、EGL/OGRE 与 MuJoCo。
+#   gpu-validation：架构、驱动、EGL 渲染器与实体显卡检查。
+# NVIDIA 驱动、NVIDIA Container Toolkit、PyTorch/JAX 以及强化学习训练栈
+# 刻意不在此处安装。
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \

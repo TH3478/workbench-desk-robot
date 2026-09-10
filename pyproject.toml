@@ -87,10 +87,9 @@ target-version = "py312"
 line-length = 120
 extend-exclude = ["build"]
 
-# Rules are deliberately a small, high-signal set. The point is to catch real
-# defects (undefined names, unused imports, mutable default arguments), not to
-# enforce taste. Widen this only when the team agrees the added rule is worth the
-# churn it causes.
+# 规则集刻意保持小而高信号。目的是抓真实缺陷（未定义名称、未使用导入、
+# 可变默认参数），而不是强加风格偏好。只有在团队认可新增规则带来的收益
+# 大于其引发的改动量时，才扩大这个集合。
 [tool.ruff.lint]
 select = [
   "F",    # pyflakes: undefined names, unused imports, f-string mistakes
@@ -102,16 +101,16 @@ select = [
   "RUF",  # ruff's own correctness rules
 ]
 ignore = [
-  # These scripts must add the local package paths to sys.path before they can
-  # import the packages under test, so the import cannot come first. The pattern
-  # is intentional and is the documented way to run the tools without installing.
+  # 这些脚本必须先将被测包的路径加入 sys.path 才能导入它们，
+  # 因此 import 不能放在最前面。该模式是有意为之，
+  # 也是不安装即可运行这些工具的文档化方式。
   "E402",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests repeat setup deliberately and use literal fixtures.
+# 测试刻意重复设置并使用字面量固定装置。
 "tests/**" = ["B011"]
 
-# Format is checked in CI. Run `make fmt` to auto-fix locally.
+# 格式由 CI 检查。本地可运行 `make fmt` 自动修复。
 [tool.ruff.format]
 quote-style = "double"

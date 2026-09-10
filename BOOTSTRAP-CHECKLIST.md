@@ -1,14 +1,14 @@
-# Project Owner bootstrap checklist
+# 项目 Owner 启动检查清单
 
-Complete these items before the team branches from the foundation:
+在团队基于此基础切出分支之前，请完成以下条目：
 
-- [ ] Approve the public repository name and organization.
-- [ ] Choose the source-code license; update ADR-0002 and add `LICENSE`.
-- [x] Track ownership on individual Issues and request reviewers per PR; do not publish a global owner map.
-- [ ] Create the GitHub remote and push the initial reviewed commit.
-- [ ] Protect `main`: PR required, required CI, resolved conversations, no force-push or deletion.
-- [ ] Create one Epic per module from the internal execution plan (kept outside this repo).
-- [ ] Require one Task Packet and one first-milestone Issue from each Owner.
-- [ ] Freeze the simulation world version, the scenario categories and the release holdout Owner.
+- [ ] 批准公开仓库名称与组织。
+- [ ] 选定源代码许可证；更新 ADR-0002 并添加 `LICENSE`。
+- [x] 在各 Issue 上跟踪归属关系，并按 PR 请求评审人；不发布全局 Owner 映射表。
+- [ ] 创建 GitHub 远端并推送初始的评审后提交。
+- [ ] 保护 `main`：必须 PR、必须 CI、解决所有讨论、禁止强推或删除。
+- [ ] 依据内部执行计划（保存在本仓库之外）为每个模块创建 Epic。
+- [ ] 要求每位 Owner 提供一份任务包与一个首里程碑 Issue。
+- [ ] 冻结仿真世界版本、场景类别与发布留出（holdout）Owner。
 
-Do not start feature implementation until its Issue owner, license decision and CI checks are recorded.
+在 Issue 负责人、许可证决策与 CI 检查记录完成之前，不要开始功能实现。

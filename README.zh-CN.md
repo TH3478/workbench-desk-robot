@@ -19,7 +19,7 @@
 VORA 是面向用户的产品品牌；Workbench 继续作为工程仓库和证据优先运行时的名称。
 标志由开放角度和偏心轨道构成，保持识别度，同时不把品牌绑定在某一种机器人用途上。
 
-[English](README.md) · [可旋转的 3D 产品视图](docs/assets/premium-product-render.html)
+[主 README（中文）](README.md) · [可旋转的 3D 产品视图](docs/assets/premium-product-render.html)
 
 ## 为什么做 Workbench？
 
