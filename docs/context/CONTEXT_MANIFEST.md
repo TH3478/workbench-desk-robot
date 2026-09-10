@@ -1,22 +1,22 @@
-# Context Manifest
+# 上下文清单
 
-## Always loaded
+## 始终加载
 
 - `AGENTS.md`
-- P0 scope and non-goals
-- interface/version rules
-- safety, privacy and license constraints
-- task packet and review rules
+- P0 范围与非目标
+- 接口/版本规则
+- 安全、隐私与许可约束
+- 任务包与评审规则
 
-## Retrieve on demand
+## 按需获取
 
-- owning module code and tests
-- one interface schema and example
-- one Issue / ADR
-- one `run_id` or scenario manifest
+- 所属模块的代码与测试
+- 一份接口 schema 与示例
+- 一份 Issue / ADR
+- 一份 `run_id` 或场景清单
 
-## Exclude by default
+## 默认排除
 
-- old plans, unrelated modules and all chat history
-- secrets, private logs and unreviewed web claims
-- release holdout expected answers
+- 旧计划、无关模块与全部聊天记录
+- 密钥、私有日志与未经评审的网络论断
+- 发布留出集的预期答案

@@ -1,33 +1,33 @@
-# Monthly report template
+# 月度报告模板
 
-- Reporting period: `YYYY-MM-DD` to `YYYY-MM-DD`
-- Baseline commit:
-- Prepared by / reviewed by:
+- 报告周期：`YYYY-MM-DD` 至 `YYYY-MM-DD`
+- 基线提交：
+- 编制人 / 审阅人：
 
-## Executive status
+## 执行状态
 
-| Phase | State | Forecast gate date | Variance | Evidence |
-|---|---|---|---:|---|
+| 阶段 | 状态 | 预测闸门日期 | 偏差 | 证据 |
+|---|---|---:|---|---|
 | P1 | | | | |
 | P2 | | | | |
 | P3 | | | | |
 
-## Delivered outcomes
+## 已交付成果
 
-For each claim, include acceptance criterion, immutable evidence, validator result, and remaining limitation. Do not count merged code alone as a delivered physical or release outcome.
+对每项声明，包含验收标准、不可变证据、验证器结果与剩余限制。不要把合并的代码单独算作已交付的物理或发布成果。
 
-## Quality and release metrics
+## 质量与发布指标
 
-Copy definitions from [quality metrics](quality-metrics.md). Report `UNKNOWN`, not zero, when an eligible measurement does not exist.
+定义从[质量指标](quality-metrics.md)复制。当合格测量不存在时报告 `UNKNOWN`，而不是零。
 
-## Schedule and capacity
+## 进度与容量
 
-Record milestone variance, changed dependencies, capacity moved, and forecast effect. Preserve the original baseline in [the plan](plan.md).
+记录里程碑偏差、变更的依赖、调动的容量与预测影响。原始基线保留在[计划](plan.md)中。
 
-## Risks and decisions
+## 风险与决策
 
-List triggered/new/closed risks with register IDs. Link scope, risk acceptance, and gate decisions to the [decision log](decision-log.md).
+按登记册 ID 列出已触发/新增/已关闭的风险。将范围、风险接受与闸门决策链接到[决策日志](decision-log.md)。
 
-## Next month
+## 下个月
 
-List no more than five outcomes. Each needs an owner, due date, acceptance evidence, and stop condition.
+列出不超过五项成果。每项需要负责人、截止日期、验收证据与停止条件。

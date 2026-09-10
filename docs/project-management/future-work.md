@@ -1,14 +1,14 @@
-# Future work
+# 后续工作
 
-These items begin only after the relevant phase gate. They are not part of the current release claim.
+这些项目仅在相应阶段闸门通过后启动。它们不属于当前发布声明的一部分。
 
-| Horizon | Candidate | Entry condition | First proof |
+| 时间线 | 候选项目 | 启动条件 | 首次证明 |
 |---|---|---|---|
-| after P1 | broaden task families and scenario diversity | formal P1 gate passes | new frozen manifests and pre-registered evaluation plan |
-| after P2 | production observability and multi-host hardening | stable service SLOs and deployment ownership | failure-injection drill with retained logs |
-| after P2 | physical adapter integration | hardware inputs and safety review are frozen | adapter conformance test without contract changes |
-| after P3 | additional arms/grippers | baseline real-hardware evidence passes | compatibility spike and explicit exit criteria |
-| after P3 | richer local models | deterministic offline path remains independent | licensed model record plus bounded golden-set comparison |
-| after P3 | operator workflow expansion | usability study identifies validated needs | tested prototype with no added control authority |
+| P1 之后 | 扩展任务族与场景多样性 | 正式 P1 闸门通过 | 新的冻结清单与预注册评估计划 |
+| P2 之后 | 生产可观测性与多主机加固 | 稳定的服务 SLO 与部署归属 | 保留日志的故障注入演练 |
+| P2 之后 | 物理适配器集成 | 硬件输入与安全评审已冻结 | 无契约变更的适配器符合性测试 |
+| P3 之后 | 更多机械臂/夹爪 | 真机基线证据通过 | 兼容性 Spike 与明确的退出标准 |
+| P3 之后 | 更丰富的本地模型 | 确定性离线路径保持独立 | 已记录许可的模型加受限黄金集对比 |
+| P3 之后 | 操作员工作流扩展 | 可用性研究识别出经过验证的需求 | 不新增控制权限的测试原型 |
 
-Each candidate needs a new Ready Issue and Task Packet before repository writes. Prioritize evidence quality and operator safety over feature count.
+每个候选项目在写入仓库前都需要一个新的 Ready Issue 与任务包。优先考虑证据质量与操作员安全，而非功能数量。

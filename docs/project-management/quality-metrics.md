@@ -1,18 +1,18 @@
-# Quality metrics
+# 质量指标
 
-| Metric | Target | Eligible source | Owner | Gate behavior |
+| 指标 | 目标 | 合格来源 | 负责人 | 闸门行为 |
 |---|---:|---|---|---|
-| false completion | 0 | formal raw event logs plus independent audit | World Model + Project Owner | any occurrence blocks release |
-| collision / joint-limit violation | 0 | Gazebo or hardware safety logs | Motion + Safety | any occurrence blocks release |
-| raw joint control from model | 0 | planner/tool boundary tests and logs | Runtime | any occurrence blocks release |
-| critical event field completeness | 100% | contract validator plus raw events | World Model | missing fields block affected claim |
-| fixed-script grasp success | >=90% simulation / >=70% real | frozen-scene physical runs | Motion + Simulation/Hardware | below target stops the phase gate |
-| verified task completion rate | >=80% | formal evaluation report linked to raw runs | Project Owner + World Model | below target stops the phase gate |
-| recovery success | >=70% | formal failure scenarios | World Model + Motion | below target requires mitigation or scope decision |
-| task latency P95 | <120s P1 / <60s P2 | formal evaluation telemetry | Performance | forecast and optimize; no fixture substitution |
-| scenario reproducibility | 100% | same-seed validator and materialized hashes | Simulation | drift blocks comparison |
-| external cold start | >=2 of 3 within 60 min | three unique validated participant records | Project Owner | absent records mean UNKNOWN/RED |
-| required CI checks | 100% pass | GitHub Actions commit status | Integration | failed required check blocks merge |
-| team delivery satisfaction | >=4/5 | anonymous monthly pulse with response count | PMO | report only after a real survey |
+| 虚假完成 | 0 | 正式原始事件日志加独立审计 | World Model + Project Owner | 任何一次出现即阻断发布 |
+| 碰撞 / 关节限位违规 | 0 | Gazebo 或硬件安全日志 | Motion + Safety | 任何一次出现即阻断发布 |
+| 模型直接输出关节控制 | 0 | 规划器/工具边界测试与日志 | Runtime | 任何一次出现即阻断发布 |
+| 关键事件字段完整率 | 100% | 契约验证器加原始事件 | World Model | 缺失字段阻断受影响声明 |
+| 固定脚本抓取成功率 | >=90% 仿真 / >=70% 真机 | 冻结场景物理运行 | Motion + Simulation/Hardware | 低于目标即停止阶段闸门 |
+| 已验证任务完成率 | >=80% | 关联原始运行的正式评估报告 | Project Owner + World Model | 低于目标即停止阶段闸门 |
+| 恢复成功率 | >=70% | 正式故障场景 | World Model + Motion | 低于目标需要缓解措施或范围决策 |
+| 任务时延 P95 | <120s P1 / <60s P2 | 正式评估遥测 | Performance | 预测并优化；不得用固定装置顶替 |
+| 场景可复现性 | 100% | 同种子验证器与物化哈希 | Simulation | 漂移阻断对比 |
+| 外部冷启动 | 3 人中的 >=2 人在 60 分钟内 | 三份经验证且唯一的参与者记录 | Project Owner | 记录缺失即视为 UNKNOWN/RED |
+| 必需 CI 检查 | 100% 通过 | GitHub Actions 提交状态 | Integration | 必需检查失败阻断合并 |
+| 团队交付满意度 | >=4/5 | 带回复人数的匿名月度脉搏调查 | PMO | 仅在实际调查后报告 |
 
-Use `UNKNOWN` when the eligible source is missing. Planning values, fixtures, screenshots, and generated templates cannot populate physical metrics.
+当合格来源缺失时使用 `UNKNOWN`。计划值、固定装置、截图与生成的模板不能填充物理指标。

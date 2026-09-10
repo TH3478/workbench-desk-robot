@@ -1,7 +1,7 @@
 {
   "issue": "132",
   "human_owner": "Quchaosheng",
-  "objective": "Integrate a reviewable dual-motor traction architecture, independent power childboard, and mechanical envelopes without representing unknown motor, regeneration, thermal, safety, supplier, or physical evidence as complete.",
+  "objective": "整合可评审的双电机牵引架构、独立电源子板与机械包络，同时不把未知的电机、再生、热、安全、供应商或物理证据表述为已完备。",
   "allowed_paths": [
     "hardware/motor_driver/**",
     "hardware/README.md",
@@ -45,22 +45,22 @@
     "firmware/**"
   ],
   "acceptance": [
-    "the system architecture distinguishes the two chassis traction motors from the six vendor-controlled UR5e joints",
-    "the traction childboard is independently replaceable and its controlled motor-power input does not assume the isolated converter can absorb regenerative energy",
-    "the childboard interface preserves the hardwired MOTOR_ENABLE_SAFE path and cannot treat a software request as a safety output",
-    "motor, driver, MOSFET, fuse, bulk capacitance, clamp, shunt, connector, and thermal selections remain fail-closed until approved ratings and evidence exist",
-    "motor voltage selection, regeneration, and bus overshoot are explicit release blockers for either the 12 V auxiliary baseline or a protected 48 V traction-bus alternative",
-    "connector pinout tables agree with the detailed controller schematic and generator",
-    "the childboard power and return topology explicitly closes VM_PROTECTED, VCC_LOGIC, GND_MOTOR, GND_LOGIC and the isolated CAN island with one STAR_GND_01 join",
-    "U1 nFAULT reaches two independent hardware safety-gate inhibit paths with default-low fail-closed behavior and no software dependency",
-    "the controlled harness package covers H02 J_PWR plus J_SAFE, J_CAN, J_ML, J_MR, J_ENC_L and J_ENC_R; H11-H14 terminate at external M1/M2 motor and encoder endpoints with explicit pin maps and active/shield/drain semantics while retaining MPN and physical-test holds",
-    "J_SAFE is explicitly a future controller J10/K1/K2 safety ECO endpoint and is not wired to or substituted by the current single-channel J11",
-    "all fourteen controlled harness rows are validated for endpoint identity, pin-map syntax, conductor-count reconciliation and shield/drain semantics",
-    "the placement contract fixes J_SAFE, J_CAN, J_ML and J_MR on the +Y_REAR edge and checks declared motor-harness bend radii",
-    "the harness report cross-checks the candidate 11 A dual-stall demand against the controller J2 10 A aggregate ceiling and keeps the mismatch release-blocking",
-    "mechanical artifacts include left and right motor envelopes plus a serviceable childboard envelope",
-    "deterministic validators and hardware tests cover the new engineering package",
-    "no supplier DFM, safety approval, firmware behavior, or physical bring-up evidence is inferred"
+    "系统架构把两个底盘牵引电机与六个厂商控制的 UR5e 关节区分开来。",
+    "牵引子板可独立更换，且其受控电机电源输入不假定隔离变换器能够吸收再生能量。",
+    "子板接口保留硬连线的 MOTOR_ENABLE_SAFE 路径，且不能把软件请求当作安全输出。",
+    "在获批的额定值与证据出现之前，电机、驱动器、MOSFET、保险丝、储能电容、钳位、采样电阻、连接器与热设计选型保持失败即拒绝。",
+    "电机电压选型、再生与总线过冲是 12 V 辅助基线与受保护的 48 V 牵引总线备选方案共同的显式发布阻断项。",
+    "连接器引脚表与详细的控制器原理图及生成器保持一致。",
+    "子板电源与回流拓扑通过一个 STAR_GND_01 汇接点显式闭合 VM_PROTECTED、VCC_LOGIC、GND_MOTOR、GND_LOGIC 与隔离 CAN 岛。",
+    "U1 的 nFAULT 到达两条独立的硬件安全闸门抑制路径，具备默认低电平的失败即拒绝行为，且不依赖软件。",
+    "受控线束包覆盖 H02 的 J_PWR 以及 J_SAFE、J_CAN、J_ML、J_MR、J_ENC_L 与 J_ENC_R；H11-H14 在外部 M1/M2 电机与编码器端点处终止，具有明确的引脚图与信号/屏蔽/排流语义，同时保留 MPN 与物理测试保留项。",
+    "J_SAFE 明确是未来控制器的 J10/K1/K2 安全 ECO 端点，不与当前单通道 J11 相连，也不由其替代。",
+    "全部十四行受控线束均针对端点标识、引脚图语法、导线数核对与屏蔽/排流语义完成校验。",
+    "布局契约把 J_SAFE、J_CAN、J_ML 与 J_MR 固定在 +Y_REAR 边缘，并检查所声明的电机线束弯曲半径。",
+    "线束报告把候选的 11 A 双堵转需求与控制器 J2 的 10 A 总上限进行交叉核对，并保持该不匹配为发布阻断项。",
+    "机械产物包括左右电机包络以及一个可维护的子板包络。",
+    "确定性验证器与硬件测试覆盖新的工程包。",
+    "不推断任何供应商 DFM、安全批准、固件行为或物理启动调试证据。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/motor-integration-traction-childboard.json",
@@ -79,17 +79,17 @@
     "hardware/motor_driver/safety-gate-connectivity.csv",
     "hardware/motor_driver/schematic-design.md",
     "hardware/manufacturing/generated/harness_report.json",
-    "hardware/motor_driver/kicad traction-childboard design artifacts if generated",
+    "hardware/motor_driver/kicad 的牵引子板设计产物（如已生成）",
     "hardware/mechanical/generated/analysis.json",
     "hardware/pcb/generated/connectivity_report.json",
-    "hardware test output"
+    "硬件测试输出"
   ],
   "stop_conditions": [
-    "an actual motor MPN or motor electrical envelope would have to be invented",
-    "a 60 V bus transient or regenerative energy path lacks an approved clamp and absorption design",
-    "the safety path could energize traction from software alone",
-    "the candidate power/ground return or nFAULT fan-out is not explicitly closed in the controlled topology tables",
-    "KiCad DRC, ERC, connectivity, or deterministic package validation fails",
-    "supplier DFM, approved AVL, calibrated physical measurements, or safety certification is required"
+    "将必须凭空捏造实际的电机 MPN 或电机电气包络。",
+    "60 V 总线瞬态或再生能量路径缺少获批的钳位与吸收设计。",
+    "安全路径可能仅凭软件就给牵引供电。",
+    "候选的电源/地回流或 nFAULT 扇出未在受控拓扑表中显式闭合。",
+    "KiCad DRC、ERC、连通性或确定性包校验失败。",
+    "需要供应商 DFM、获批的 AVL、经校准的物理测量或安全认证。"
   ]
 }

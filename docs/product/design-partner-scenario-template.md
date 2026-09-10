@@ -1,80 +1,75 @@
-# Design Partner Scenario Record
+# Design Partner 场景记录
 
-This record defines a bounded collaboration around a real task. It is not a
-free custom-development agreement and does not grant a partner or scenario
-authority over safety, release, or shared runtime contracts.
+本记录定义围绕一项真实任务的受限协作。它不是自由定制开发协议，也不授予伙伴或场景对安全、发布或共享运行时契约的权限。
 
-Complete the [Design Partner handoff boundary](design-partner-handoff.md)
-before scheduling a trial. That document defines the allowed semantic action
-surface, owner handoff inputs/outputs, stop authority, evidence ladder, and the
-required `continue` / `change` / `defer` / `reject` decision.
+在排期试用前，先填写 [Design Partner 交接边界](design-partner-handoff.md)。该文档定义了允许的语义动作范围、负责人交接输入/输出、停止权限、证据阶梯，以及必需的 `continue` / `change` / `defer` / `reject` 决策。
 
-## Partner and scope
+## 伙伴与范围
 
-- Partner reference (opaque):
-- Organization type:
-- Primary evaluator role:
-- Scenario ID/version:
-- Test environment class: `software` / `scripted_fixture` / `gazebo` / `physical`
-- Test window:
-- Product and adapter versions:
-- Out of scope:
-- Consent/reference agreement: `private_only` / `anonymous_case_ok` / `public_case_approved`
-- Data retention location and owner:
-- Handoff decision: `continue` / `change` / `defer` / `reject`
-- Handoff record/evidence reference:
+- 伙伴引用（不透明）：
+- 组织类型：
+- 主要评估者角色：
+- 场景 ID/版本：
+- 测试环境等级：`software` / `scripted_fixture` / `gazebo` / `physical`
+- 测试窗口：
+- 产品与适配器版本：
+- 范围之外：
+- 同意/引用协议：`private_only` / `anonymous_case_ok` / `public_case_approved`
+- 数据留存位置与负责人：
+- 交接决策：`continue` / `change` / `defer` / `reject`
+- 交接记录/证据引用：
 
-## Real task
+## 真实任务
 
-- User job:
-- Starting state:
-- Goal state:
-- Semantic actions under test:
-- Required adapters:
-- Measurable success condition:
-- Evidence required to confirm success:
-- Failure and recovery cases:
-- Preflight and abort conditions:
-- Product acceptance claim (separate from engineering/safety acceptance):
-- Motion/MCU/Safety acceptance status:
+- 用户任务：
+- 起始状态：
+- 目标状态：
+- 被测语义动作：
+- 所需适配器：
+- 可度量的成功条件：
+- 确认成功所需的证据：
+- 失败与恢复用例：
+- 预检与中止条件：
+- 产品验收主张（与工程/安全验收分开）：
+- 运动/MCU/安全验收状态：
 
-## Responsibilities
+## 职责
 
-| Area | Workbench owner | Partner owner |
+| 领域 | Workbench 负责人 | 伙伴负责人 |
 |---|---|---|
-| Environment preparation | | |
-| Test data or fixtures | | |
-| Operator time | | |
-| Logs/evidence export | | |
-| Issue triage | | |
-| Safety and stop authority | Trusted runtime / site owner | Partner must follow site procedure |
+| 环境准备 | | |
+| 测试数据或固定装置 | | |
+| 操作员时间 | | |
+| 日志/证据导出 | | |
+| Issue 分级 | | |
+| 安全与停止权限 | 可信运行时/现场负责人 | 伙伴方必须遵守现场规程 |
 
-## Exit criteria
+## 退出标准
 
-- [ ] Evaluator and test window confirmed.
-- [ ] Environment and version recorded.
-- [ ] Task can be started from a known state.
-- [ ] Normal and failure paths are defined.
-- [ ] Evidence bundle and privacy handling are agreed.
-- [ ] Consent, retention, and publication status are recorded.
-- [ ] Safety preflight and abort conditions are reviewed by the site owner.
-- [ ] `continue`, `change`, `defer`, or `reject` decision has an owner and date.
+- [ ] 评估者与测试窗口已确认。
+- [ ] 环境与版本已记录。
+- [ ] 任务可从已知状态启动。
+- [ ] 正常与失败路径已定义。
+- [ ] 证据包与隐私处理已达成一致。
+- [ ] 同意、留存与发布状态已记录。
+- [ ] 安全预检与中止条件已由现场负责人评审。
+- [ ] `continue`、`change`、`defer` 或 `reject` 决策有负责人和日期。
 
-## Evidence package
+## 证据包
 
-- Run ID(s):
-- Scenario manifest hash:
-- Commit/configuration hash:
-- Verifier and policy versions:
-- Result: `confirmed` / `refuted` / `insufficient_evidence` / `failed` / `not_executed` / `blocked`
-- `release_eligible`: `false` by default
-- Private evidence reference:
-- Missing evidence or blocker:
+- 运行 ID：
+- 场景清单哈希：
+- 提交/配置哈希：
+- 验证器与策略版本：
+- 结果：`confirmed` / `refuted` / `insufficient_evidence` / `failed` / `not_executed` / `blocked`
+- `release_eligible`：默认 `false`
+- 私有证据引用：
+- 缺失证据或阻塞项：
 
-## Guardrails
+## 护栏
 
-- Do not promise a custom feature, delivery date, price, or physical success without owner approval.
-- Do not place partner-identifying data or private logs in Git.
-- Do not convert a partner's verbal approval into `confirmed` without the required observation evidence.
-- Do not let a scenario manifest contain joint-level, CAN, controller, or emergency-stop fields.
-- Do not publish a partner name, quote, image, or metric without the recorded consent status.
+- 未经负责人批准，不得承诺定制功能、交付日期、价格或物理成功。
+- 不得将可识别伙伴身份的数据或私有日志放入 Git。
+- 在没有所需观测证据的情况下，不得把伙伴的口头认可转化为 `confirmed`。
+- 不得让场景清单包含关节级、CAN、控制器或急停字段。
+- 未经记录在案的同意状态，不得发布伙伴名称、语录、图片或指标。

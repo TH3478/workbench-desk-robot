@@ -1,21 +1,12 @@
-# API reference
+# API 参考
 
-The versioned HTTP contract is checked in as
-[`api-openapi-v1.json`](api-openapi-v1.json). `GET` is the only API method;
-`POST`, `PUT`, `PATCH`, and `DELETE` return `405 read_only`. The service emits
-`Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`,
-`X-Content-Type-Options: nosniff`, and `X-API-Version: 1` on `/api/v1/*`.
+版本化的 HTTP 契约以 [`api-openapi-v1.json`](api-openapi-v1.json) 形式检入。`GET` 是唯一的 API 方法；`POST`、`PUT`、`PATCH` 和 `DELETE` 返回 `405 read_only`。服务在 `/api/v1/*` 上输出 `Content-Type: application/json; charset=utf-8`、`Cache-Control: no-store`、`X-Content-Type-Options: nosniff` 和 `X-API-Version: 1`。
 
-`/api/*` is a compatibility alias for v1. Local and split-host clients use the
-same `/api/v1` paths. Run and event responses are capped at 4 MiB; source files
-are capped at 10 MiB and 10,000 events per run. Invalid run identifiers return
-`400`, unknown runs return `404`, malformed sources return `503`, and oversized
-responses return `413`. No endpoint writes, controls, or acknowledges a task.
+`/api/*` 是 v1 的兼容别名。本地与拆分主机的客户端使用相同的 `/api/v1` 路径。运行与事件响应上限为 4 MiB；源文件上限为 10 MiB，每次运行最多 10,000 个事件。无效的运行标识符返回 `400`，未知运行返回 `404`，格式错误的源返回 `503`，超大的响应返回 `413`。没有端点会写入、控制或确认任务。
 
-The compatibility policy is additive within v1. A future v2 must be introduced
-under `/api/v2`; aliases are not silently repointed.
+兼容性政策在 v1 内是增量式的。未来的 v2 必须通过 `/api/v2` 引入；别名不会被静默改指。
 
-The Python API pages are generated from source docstrings during the MkDocs build.
+Python API 页面在 MkDocs 构建期间由源码 docstring 生成。
 
 ::: workbench.kernel.lifecycle
 

@@ -1,33 +1,32 @@
-# Dashboard usability test
+# 看板可用性测试
 
-Status: **NOT_EXECUTED**. This protocol is not user feedback, accessibility conformance, or production acceptance.
+状态：**NOT_EXECUTED**。本协议不是用户反馈、无障碍合规证明或生产验收。
 
-## Participants and setup
+## 参与者与准备
 
-Recruit five people who did not implement the dashboard: at least two robot/operator-domain users and at least one keyboard/screen-reader user. Record consent, assistive technology, viewport/device, task order, and session ID without collecting unnecessary personal data. Use committed synthetic fixtures only.
+招募五名没有实现该看板的人：至少两名机器人/操作领域用户，以及至少一名键盘/屏幕阅读器用户。记录同意、辅助技术、视口/设备、任务顺序和会话 ID，不收集不必要的个人数据。只使用已提交的合成固定装置。
 
-## Tasks
+## 任务
 
-| Task | Success criterion | Evidence |
+| 任务 | 成功标准 | 证据 |
 |---|---|---|
-| find the run needing attention | selects `run-uncertain` without coaching | path, time, wrong turns |
-| explain why it is not confirmed | names missing fresh/light/confidence evidence | answer and referenced UI region |
-| compare live state with replay start/end | reaches both views and explains changed state | keyboard/pointer path and answer |
-| inspect one camera and one action/log reference | opens/closes evidence and identifies synthetic source | reference IDs and observed source label |
-| locate the failed first grasp and later recovery | identifies refuted attempt and confirmed conclusion separately | event sequence numbers |
-| state what the dashboard cannot control | names read-only/no ROS/no emergency-stop boundary | answer |
+| 找到需要关注的运行 | 在无人指导的情况下选中 `run-uncertain` | 路径、时间、错误转向 |
+| 解释它为何未被确认 | 说出缺失的新鲜度/光照/置信度证据 | 回答与所引用的 UI 区域 |
+| 比较实时状态与回放起止 | 到达两个视图并解释状态变化 | 键盘/指针路径与回答 |
+| 检查一个摄像头和一个动作/日志引用 | 打开/关闭证据并识别合成来源 | 引用 ID 与观察到的来源标签 |
+| 定位失败的首次抓取与后续恢复 | 分别识别被推翻的尝试与已确认的结论 | 事件序号 |
+| 说明看板不能控制什么 | 说出只读/无 ROS/无急停的边界 | 回答 |
 
-## Measures
+## 度量
 
-Record task success, time, errors, assistance, confidence (1-5), and short qualitative observation. Do not combine domain misunderstanding with interface failure without review. A screenshot proves appearance, not comprehension.
+记录任务成功与否、耗时、错误、辅助、置信度（1-5）和简短的定性观察。未经评审，不要把领域误解与界面失败混为一谈。截图证明的是外观，而不是理解。
 
-## Acceptance and iteration
+## 验收与迭代
 
-- all five participants complete attention, evidence, and authority-boundary tasks;
-- at least four of five complete replay without assistance;
-- no participant interprets insufficient evidence as confirmed completion;
-- keyboard/screen-reader path has no blocking issue;
-- every high-impact finding receives an owner, issue, acceptance test, and retest result.
+- 全部五名参与者完成关注、证据与权限边界任务；
+- 五名中至少四名在无辅助的情况下完成回放；
+- 没有参与者把证据不足理解为已确认完成；
+- 键盘/屏幕阅读器路径没有阻塞性问题；
+- 每项高影响发现都有负责人、issue、验收测试和复测结果。
 
-Preserve failures. Publish only aggregated, de-identified findings. Mark production usability as UNKNOWN until this protocol is executed and reviewed.
-
+保留失败。只发布聚合的、去标识化的发现。在本协议被执行和评审之前，将生产可用性标记为 UNKNOWN。

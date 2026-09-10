@@ -1,7 +1,7 @@
 {
   "issue": "container-full-stack-linux-amd64",
   "human_owner": "Quchaosheng",
-  "objective": "Deliver one reproducible Linux/amd64 NVIDIA-capable development image with a safe dashboard default and explicit ROS/Gazebo, GUI, MuJoCo, DDS, and hardware-diagnostic Compose profiles.",
+  "objective": "交付一个可复现的 Linux/amd64、支持 NVIDIA 的开发镜像，具备安全的看板默认配置，以及显式的 ROS/Gazebo、GUI、MuJoCo、DDS 与硬件诊断 Compose 配置。",
   "allowed_paths": [
     "Dockerfile",
     "requirements-mujoco.txt",
@@ -33,14 +33,14 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "runtime and Dev Container use the same CUDA 12.8.1 Ubuntu 24.04 digest",
-    "default dashboard starts without GPU, GUI, DDS LAN, USB, CAN, or privileged access",
-    "ros-sim, X11, Wayland, MuJoCo GPU, and hardware-shell profiles are explicit and fail closed",
-    "source is read-only and colcon build/install/log use named volumes",
-    "entrypoint sources Jazzy and workbench install then execs the user command",
-    "MuJoCo capability smoke is isolated from task, execution, WorldState, and verification contracts",
-    "APT/Python/MuJoCo versions, image digest, SBOM, vulnerability scan, and RTX 30/40/50 matrix evidence are recorded",
-    "container static tests and CPU dashboard smoke pass; unavailable host capabilities remain NOT_EXECUTED"
+    "运行时与 Dev Container 使用相同的 CUDA 12.8.1 Ubuntu 24.04 摘要。",
+    "默认看板启动时不使用 GPU、GUI、DDS LAN、USB、CAN 或特权访问。",
+    "ros-sim、X11、Wayland、MuJoCo GPU 与 hardware-shell 配置均为显式声明且失败即拒绝。",
+    "源码为只读，colcon 的 build/install/log 使用命名卷。",
+    "入口脚本先 source Jazzy 与 workbench 的安装环境，再 exec 用户命令。",
+    "MuJoCo 能力冒烟测试与任务、执行、WorldState 及验证契约相互隔离。",
+    "APT/Python/MuJoCo 版本、镜像摘要、SBOM、漏洞扫描与 RTX 30/40/50 矩阵证据均被记录。",
+    "容器静态测试与 CPU 看板冒烟测试通过；不可用的主机能力保持 NOT_EXECUTED。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_container_baseline.py tests/unit/test_container_profiles.py tests/unit/test_release_workflow.py -v",
@@ -60,19 +60,19 @@
     "make container-host-doctor"
   ],
   "evidence": [
-    "Task Packet boundary validation",
-    "container static test output",
-    "CPU dashboard health and read-only smoke output",
-    "colcon build/test logs and installed workbench_motion evidence",
-    "SBOM, image digest, package manifest, and vulnerability scan report",
-    "profile-specific PASS or NOT_EXECUTED reports"
+    "任务包边界校验。",
+    "容器静态测试输出。",
+    "CPU 看板健康与只读冒烟输出。",
+    "colcon 构建/测试日志与已安装的 workbench_motion 证据。",
+    "SBOM、镜像摘要、包清单与漏洞扫描报告。",
+    "各配置专属的 PASS 或 NOT_EXECUTED 报告。"
   ],
   "stop_conditions": [
-    "a frozen interface, JSON Schema, Pydantic contract, WorldState, replay, or event-log change is required",
-    "robot/control or firmware changes are required",
-    "host NVIDIA driver, Docker daemon, or real RTX hardware is unavailable for a claimed GPU result",
-    "required package or base digest cannot be obtained without silently changing versions",
-    "a profile requires privileged, NET_ADMIN, host IPC, xhost +, or automatic hardware motion",
-    "a scripted fixture or software renderer would be presented as Gazebo, GPU, or robot evidence"
+    "需要修改冻结的接口、JSON Schema、Pydantic 契约、WorldState、回放或事件日志。",
+    "需要修改 robot/control 或固件。",
+    "对于所声称的 GPU 结果，主机 NVIDIA 驱动、Docker 守护进程或真实 RTX 硬件不可用。",
+    "在不静默更换版本的情况下无法获取所需的软件包或基础镜像摘要。",
+    "某个配置需要特权、NET_ADMIN、host IPC、xhost + 或自动硬件运动。",
+    "脚本化固定装置或软件渲染器将被当作 Gazebo、GPU 或机器人证据来展示。"
   ]
 }

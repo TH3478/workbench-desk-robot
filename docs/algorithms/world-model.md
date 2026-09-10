@@ -1,31 +1,26 @@
-# World model algorithms
+# 世界模型算法
 
-How the world model decides what is true, and when it decides it cannot tell.
+世界模型如何决定什么是真实的，以及何时判定自己无法判断。
 
-This is the technical reference. Task breakdown and staffing live outside the
-repository.
-
----
-
-## Why this module carries the project's claim
-
-The project asserts one thing: *a command having been sent is not the same as
-the goal having been reached.*
-
-Every other module can report "my part finished." This one has to report
-"the goal was reached, here is the evidence" — or "I cannot tell, here is what
-is missing."
-
-The hard part is not the code. It is making **"I cannot tell" a supported
-conclusion rather than an excuse**. That needs real algorithms: multi-hypothesis
-tracking, conflict handling, belief decay, deterministic reconstruction.
+本文是技术参考。任务拆解与人员配置在仓库之外。
 
 ---
 
-## 1. Deterministic state reconstruction
+## 为什么本模块承载项目的主张
 
-The same event stream, replayed twice, must produce the same `state_hash`.
-Three ways to get this wrong:
+项目只主张一件事：*命令已被发送，不等于目标已经达成。*
+
+其他每个模块都可以报告“我这部分完成了”。本模块必须报告
+“目标已达成，这是证据”——或“我无法判断，这是缺失的部分”。
+
+难点不在代码，而在于让**“我无法判断”成为一种有依据的结论，而不是借口**。
+这需要真正的算法：多假设跟踪、冲突处理、信念衰减、确定性重建。
+
+---
+
+## 1. 确定性状态重建
+
+同一事件流回放两次，必须产生相同的 `state_hash`。三种常见的错误做法：
 
 ```python
 # Wrong: dict ordering is not stable across runs
@@ -38,7 +33,7 @@ h = hash((entity.x, entity.y, entity.z))
 state["updated_at"] = datetime.now()
 ```
 
-Correct:
+正确做法：
 
 ```python
 def state_hash(s: WorldState) -> str:
@@ -65,13 +60,11 @@ def confidence_bucket(c: float, width: float = 0.05) -> int:
     return int(c / width)
 ```
 
-`confidence_bucket` is the one people skip. Raw confidence is a float; feeding
-it in unbucketed makes the hash change every frame.
+`confidence_bucket` 是最容易被跳过的一环。原始置信度是浮点数；不对其分桶就直接参与计算，哈希会每一帧都变。
 
-### Snapshots
+### 快照
 
-A ten-minute task produces tens of thousands of events. Full replay is too slow
-for a UI that replays on every request.
+十分钟的任务会产生数万个事件。对于每次请求都要回放的 UI 来说，完整回放太慢。
 
 ```
 Snapshot every N events (start with N=500).
@@ -81,47 +74,39 @@ Required invariant:
     hash(restore(snapshot) + replay(delta)) == hash(replay(everything))
 ```
 
-That assertion is the whole point. A snapshot that disagrees with full replay is
-manufacturing state.
+该断言是全部要点所在。与完整回放不一致的快照就是在捏造状态。
 
-### Causal order, not timestamp order
+### 因果顺序，而不是时间戳顺序
 
-An action result can carry an *earlier* timestamp than the observation that
-triggered it — different nodes, different clock offsets.
+动作结果携带的时间戳可能*早于*触发它的观测——不同节点、不同时钟偏移。
 
 ```python
 events.sort(key=lambda e: e.timestamp)  # wrong
 events.sort(key=lambda e: e.sequence_no)  # right
 ```
 
-`sequence_no` establishes total order. Timestamps are diagnostic only and never
-participate in a transition decision. This is a reducer invariant and needs a
-test: build a stream whose timestamps run backwards while `sequence_no` runs
-forwards, then assert the state is still correct.
+`sequence_no` 建立全序。时间戳仅用于诊断，绝不参与状态转换决策。这是 reducer 的不变量，需要测试：构造一条时间戳倒序而 `sequence_no` 正序的事件流，然后断言状态仍然正确。
 
-| Field | Clock | Reason |
+| 字段 | 时钟 | 原因 |
 |---|---|---|
-| `sequence_no` | none (monotonic int) | total order |
-| `monotonic_ns` | monotonic | intervals, timeouts. NTP steps don't affect it |
-| `wall_clock` | wall clock | human-readable logs, cross-machine alignment |
-| anything in `state_hash` | **excluded** | time never enters the hash |
+| `sequence_no` | 无（单调整数） | 全序 |
+| `monotonic_ns` | 单调时钟 | 间隔、超时。NTP 步进不影响它 |
+| `wall_clock` | 墙钟 | 人类可读日志、跨机器对齐 |
+| `state_hash` 中的任何字段 | **排除** | 时间永不进入哈希 |
 
-Timeout logic must use monotonic. With wall clock, a single NTP correction can
-fire or suppress a watchdog.
+超时逻辑必须使用单调时钟。使用墙钟时，一次 NTP 校正就可能误触发或压制看门狗。
 
 ---
 
-## 2. Multi-hypothesis tracking
+## 2. 多假设跟踪
 
-### Why a single estimate is not enough
+### 为什么单一估计不够
 
-A hand occludes the module. The last direct observation put it at A. After the
-hand moves, it may already have been pushed to B.
+一只手遮挡了模块。最后一次直接观测把它放在 A 点。手移开后，它可能已被推到 B 点。
 
-A single-estimate model reports "at A" — stale information presented as fact.
-That is where false completions come from.
+单一估计模型报告“在 A”——把陈旧信息当作事实呈现。虚假完成正是由此而来。
 
-A multi-hypothesis model keeps:
+多假设模型保留：
 
 ```
 module_red: {
@@ -131,16 +116,13 @@ module_red: {
 }
 ```
 
-No hypothesis clears the threshold, so verification returns
-`insufficient_evidence` and the planner re-observes.
+没有假设超过阈值，因此验证返回 `insufficient_evidence`，规划器重新观测。
 
-**Without multi-hypothesis, `insufficient_evidence` can only fire on "never
-observed at all"** — which misses the common case, "observed but not sure."
+**没有多假设时，`insufficient_evidence` 只能在“从未观测到”时触发**——这漏掉了更常见的情况：“观测到了，但不确信”。
 
-### Data association
+### 数据关联
 
-Three identically coloured modules; a new frame shows three red blocks. Which is
-which?
+三个颜色相同的模块；新一帧显示三个红色方块。谁是谁？
 
 ```python
 from scipy.optimize import linear_sum_assignment
@@ -168,16 +150,13 @@ def associate(observations, tracks, w1=1.0, w2=0.5, w3=0.2):
     return matched, new, lost
 ```
 
-The algorithm is one library call. **The work is calibrating w1/w2/w3 and
-`COST_THRESHOLD`** so they behave under occlusion, lighting change, fast motion,
-and near-identical appearance. Use the annotated ground-truth set as the
-validation set.
+算法本身只是一次库调用。**工作在于标定 w1/w2/w3 与 `COST_THRESHOLD`**，使它们在遮挡、光照变化、快速运动与外观几乎相同的情况下依然正确。使用标注好的真值集作为验证集。
 
-Picking those weights by intuition is the usual way this task fails.
+凭直觉挑选这些权重是这类任务失败的常见方式。
 
-### Pruning
+### 剪枝
 
-Hypotheses multiply per frame per entity, so they need a ceiling.
+假设逐帧逐实体倍增，因此需要上限。
 
 ```
 Cap: <=5 hypotheses per entity.
@@ -189,19 +168,15 @@ Prune in order:
   3. still over the cap -> keep the top 5, fold the rest into `unknown`
 ```
 
-Step 3 must **add the pruned mass to `unknown`**, not discard it. Discarding
-makes the total stop summing to 1, and then the verifier's threshold comparison
-means nothing.
+第 3 步必须**把剪掉的概率质量加进 `unknown`**，而不是丢弃。丢弃会让总和不再等于 1，验证器的阈值比较就失去了意义。
 
 ---
 
-## 3. Belief decay
+## 3. 信念衰减
 
-Decay too fast and a stationary object drops to unknown, so the system
-re-observes forever and the task never finishes. Decay too slow and a moved
-object's stale pose is treated as fact, which produces false completions.
+衰减太快，静止物体跌入未知，系统就会永远重复观测，任务永远无法完成。衰减太慢，被移动物体的陈旧位姿就会被当作事实，从而产生虚假完成。
 
-Half-life has to vary by object kind:
+半衰期必须按物体类型区分：
 
 ```python
 HALF_LIFE_S = {
@@ -217,25 +192,23 @@ def decay(conf: float, elapsed_s: float, kind: str) -> float:
     return conf * (0.5 ** (elapsed_s / hl))
 ```
 
-That table is itself the deliverable — one global constant will not do.
+这张表本身就是交付物——一个全局常量行不通。
 
-The 0.5 s on `gripper_tip` matters most: give it the tray's half-life and the
-verifier will use a several-second-old tip pose to decide whether something is
-currently being held.
+`gripper_tip` 的 0.5 s 最为关键：给它托盘的半衰期，验证器就会拿几秒前的夹爪尖端位姿来决定某物当前是否被握住。
 
 ---
 
-## 4. Conflicting evidence
+## 4. 冲突证据
 
-Two observations put the same object in different places.
+两次观测把同一个物体放在了不同位置。
 
-| Strategy | Fits | Fails when |
+| 策略 | 适用 | 失效场景 |
 |---|---|---|
-| Newest wins | the object really is moving | a false detection overwrites good data |
-| Highest confidence wins | sensors differ in quality | a confident stale reading beats a fresh uncertain one |
-| Primary sensor wins | there is a clear primary | the primary fails and there is no fallback |
+| 新者胜 | 物体确实在移动 | 一次误检覆盖了好数据 |
+| 置信度最高者胜 | 传感器质量有差异 | 一条自信但陈旧的数据打败了新鲜但不确定的数据 |
+| 主传感器胜 | 存在明确的主传感器 | 主传感器失效且没有后备 |
 
-### The choice here: do not resolve
+### 本模块的选择：不消解
 
 ```python
 def resolve(obs_a, obs_b) -> Belief:
@@ -251,22 +224,17 @@ def resolve(obs_a, obs_b) -> Belief:
     return merge(obs_a, obs_b)  # merge only when they agree
 ```
 
-Same reasoning as three-valued verification: **the system does not guess.**
-Forcing a resolution *is* a guess, and a wrong one leaves no trace — the log
-shows a confident conclusion with no sign it was picked from two contradictory
-readings.
+与三值验证同理：**系统不猜测。** 强行消解*就是*猜测，而错误的猜测不留痕迹——日志显示一个自信的结论，却没有任何迹象表明它是在两个互相矛盾的读数中挑出来的。
 
-This is written down with its reasoning because the first instinct of whoever
-maintains this next will be to add a rule that auto-selects one. That hides
-uncertainty the system already knew about.
+之所以把推理过程写下来，是因为下一个维护者的第一反应会是加一条自动二选一的规则。那会掩盖系统本来就知道的不确定性。
 
 ---
 
-## 5. Verification
+## 5. 验证
 
-### Containment is three-valued, not boolean
+### 包含判断是三值的，不是二值的
 
-Is a module whose centre sits on the tray rim "inside"?
+中心落在托盘边缘上的模块算“在里面”吗？
 
 ```python
 def containment(module_aabb, cavity_aabb) -> VerificationStatus:
@@ -280,58 +248,47 @@ def containment(module_aabb, cavity_aabb) -> VerificationStatus:
     return INSUFFICIENT_EVIDENCE  # partial: caught on the rim
 ```
 
-The middle band is the point. A boolean test forces "wedged on the tray edge"
-into either success or failure, when what it actually means is *placed badly,
-retry* — `recovery_hint = retry_action`.
+中间区间正是要点所在。二值测试会迫使“卡在托盘边缘”被归为成功或失败，而它实际的含义是*放置不当，重试*——`recovery_hint = retry_action`。
 
-This is also why the tray must be modelled as five parts with a real interior
-cavity rather than a flat plate. A plate has no `cavity_aabb` and this test has
-nothing to work with.
+这也是为什么托盘必须建模为带真实内部空腔的五个部件，而不是一块平板。平板没有 `cavity_aabb`，这个测试就无从下手。
 
-### Threshold calibration does not optimise accuracy
+### 阈值标定不是为了优化准确率
 
-Take the annotated ground-truth frames, plot ROC, and **pick the threshold where
-false positives are zero.**
+取标注好的真值帧，绘制 ROC，然后**选取假阳性为零的阈值。**
 
-False positive = reported complete but was not = false completion = release
-blocker.
+假阳性 = 报告完成但实际未完成 = 虚假完成 = 发布阻断项。
 
-The cost is more false negatives (actually complete, reported uncertain). **That
-trade direction is the project's core claim** and must not be reversed to make
-a completion-rate number look better.
+代价是更多的假阴性（实际完成，报告为不确定）。**该取舍方向是项目的核心主张**，绝不能为了让完成率数字更好看而反转。
 
 ```
 Objective:   FP = 0, minimise FN subject to that
 Not:         maximise (TP + TN) / total
 ```
 
-### Failure taxonomy
+### 失败分类
 
-Ten `reason_code` values, each mapping to a recovery action:
+十个 `reason_code` 值，各自映射到一个恢复动作：
 
-| `reason_code` | Meaning | `recovery_hint` |
+| `reason_code` | 含义 | `recovery_hint` |
 |---|---|---|
-| `target_not_observed` | never observed | `reobserve` |
-| `target_lost` | was observed, now gone | `reobserve` |
-| `belief_stale` | observation expired | `reobserve` |
-| `confidence_below_threshold` | observed, not confident enough | `reobserve` |
-| `conflicting_observations` | observations disagree | `reobserve` |
-| `partial_containment` | caught on a boundary | `retry_action` |
-| `precondition_unmet` | action precondition false | `replan` |
-| `action_reported_failure` | the action layer reported failure | `retry_action` |
-| `geometry_mismatch` | pose far from prediction | `replan` |
-| `timeout_no_evidence` | timed out with no new evidence | `ask_confirm` |
+| `target_not_observed` | 从未观测到 | `reobserve` |
+| `target_lost` | 曾观测到，现在消失 | `reobserve` |
+| `belief_stale` | 观测已过期 | `reobserve` |
+| `confidence_below_threshold` | 观测到了，但置信度不足 | `reobserve` |
+| `conflicting_observations` | 观测互相矛盾 | `reobserve` |
+| `partial_containment` | 卡在边界上 | `retry_action` |
+| `precondition_unmet` | 动作前置条件为假 | `replan` |
+| `action_reported_failure` | 动作层报告失败 | `retry_action` |
+| `geometry_mismatch` | 位姿与预测相差甚远 | `replan` |
+| `timeout_no_evidence` | 超时且没有新证据 | `ask_confirm` |
 
-The first five all map to `reobserve` but keep distinct codes. That is not
-redundancy — they are counted separately in the metrics report, which is how you
-learn where the system actually stalls.
+前五个都映射到 `reobserve`，但保留不同代码。这不是冗余——它们在指标报告中被分别计数，这正是你了解系统实际卡在哪里的方式。
 
 ---
 
-## 6. Real-hardware noise sets the quantisation step
+## 6. 真机噪声决定量化步长
 
-A real camera watching a stationary object reports a different pose every frame.
-Measure the jitter before fixing the quantisation step in section 1.
+真实相机观察静止物体时，每一帧报告的位姿都不同。在确定第 1 节的量化步长之前，先测量抖动。
 
 ```
 1. Fix a module. Do not move it.
@@ -340,35 +297,28 @@ Measure the jitter before fixing the quantisation step in section 1.
 4. Quantisation step = 3σ (covers 99.7% of the jitter).
 ```
 
-Then backfill `eps` in `quantize()` and **re-run the hash-consistency tests** —
-the parameter changed, so that evidence has to be regenerated.
+然后回填 `quantize()` 中的 `eps` 并**重新运行哈希一致性测试**——参数变了，证据就必须重新生成。
 
-This dependency crosses from early simulation work into real-hardware work and
-is the easiest link in the module to lose. The `quantize()` docstring says so
-for that reason.
+这条依赖从早期仿真工作延伸至真机工作，也是本模块中最容易丢失的一环。`quantize()` 的 docstring 正是为此而写。
 
 ---
 
-## Invariants
+## 不变量
 
-1. **Only this module decides task completion.** No other module may assert
-   "the task succeeded."
-2. **Missing evidence is never filled with a default.** Missing is missing;
-   record a `reason_code`.
-3. **Oracle fields never reach the reducer or the verifier.** Evaluation ground
-   truth stays in the evaluation module. Using oracle data to compute a
-   perception score voids the whole run.
+1. **只有本模块决定任务完成。** 任何其他模块都不得断言“任务成功了”。
+2. **缺失证据绝不用默认值填补。** 缺失就是缺失；记录 `reason_code`。
+3. **Oracle 字段永远不能到达 reducer 或验证器。** 评估真值只存在于评估模块。用 Oracle 数据计算感知分数会使整个运行作废。
 
 ---
 
-## Metrics
+## 指标
 
-| Metric | Target |
+| 指标 | 目标 |
 |---|---|
-| `state_hash` consistency | 100% |
-| **False completion** | **0** (release blocker) |
-| Verification carries evidence refs | 100% |
-| Fixed-task replay success | ≥95% |
-| Event store throughput | >1000 events/s |
-| Hypotheses per entity | ≤5 |
-| Data association accuracy (validation set) | ≥90% |
+| `state_hash` 一致性 | 100% |
+| **虚假完成** | **0**（发布阻断项） |
+| 验证携带证据引用 | 100% |
+| 固定任务回放成功率 | ≥95% |
+| 事件库吞吐量 | >1000 事件/秒 |
+| 每实体假设数 | ≤5 |
+| 数据关联准确率（验证集） | ≥90% |

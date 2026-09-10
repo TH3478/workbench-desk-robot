@@ -2,16 +2,16 @@
 
 此仓库只维护一个 `linux/amd64` 全功能开发镜像。镜像基础固定为
 `nvidia/cuda:12.8.1-runtime-ubuntu24.04@sha256:828c4d…ca2e`，容器内安装 ROS 2 Jazzy、Gazebo Harmonic、MoveIt 2、
-TRAC-IK、ros2_control 和 MuJoCo 3.3.7。默认服务仍是无 GPU、无设备权限的只读 dashboard。
+TRAC-IK、ros2_control 和 MuJoCo 3.3.7。默认服务仍是无 GPU、无设备权限的只读看板。
 
 当前开发机的 NVIDIA 驱动和 Container Toolkit 能识别 RTX 4060 Laptop GPU；但容器只发现 Mesa EGL vendor，
 缺少 NVIDIA EGL vendor JSON。GPU 能力预检因此为 `NOT_EXECUTED`，不会把不可用主机能力误报为成功。已有的
-诊断证据必须分开记录：绕过 GPU 门禁的 Gazebo server smoke 在 `gz::common::FileLogger::Init` 附近以退出码
+诊断证据必须分开记录：绕过 GPU 门禁的 Gazebo server 烟测在 `gz::common::FileLogger::Init` 附近以退出码
 139 (`FAIL`) 崩溃；MuJoCo 若退回 Mesa/llvmpipe 则为软件渲染 (`FAIL`，不是 NVIDIA GPU 验收)。配置目标不等于
 实卡验收结果，也不能把 Mesa/llvmpipe 软件渲染描述成 GPU 成功。
 
 集成审查范围包括 Dockerfile/Compose、entrypoint、ROS/Gazebo 启动脚本和 CI；合并前必须由集成负责人复核
-`docker compose config`、镜像构建、dashboard 健康检查、colcon 和 profile fail-closed 行为。此记录不替代人工审批。
+`docker compose config`、镜像构建、看板健康检查、colcon 和 profile 失败即拒绝行为。此记录不替代人工审批。
 
 ## 宿主前提
 
@@ -41,7 +41,7 @@ docker run --rm --gpus all nvidia/cuda:12.8.1-runtime-ubuntu24.04 nvidia-smi
 | --- | --- | --- |
 | `/opt/ros/jazzy` | apt 安装的 ROS 2 Jazzy | 镜像只读 |
 | `/opt/workbench_ws` | 镜像构建时完成的 `workbench_motion` colcon workspace | 镜像只读 |
-| `/opt/workbench-venv` | dashboard 项目 Python 3.12 venv | 镜像只读 |
+| `/opt/workbench-venv` | 看板项目 Python 3.12 venv | 镜像只读 |
 | `/opt/workbench-mujoco-venv` | MuJoCo 3.3.7 容器专用 venv | 镜像只读 |
 | `/workspace/src` | 当前仓库的只读 bind mount | 只读 |
 | `/workspace/build` | 开发 colcon build volume | 命名卷 |
@@ -61,7 +61,7 @@ make container-check
 docker compose up dashboard
 ```
 
-浏览器访问 `http://127.0.0.1:8080`。dashboard 不声明 `gpus`、设备映射、DDS LAN、额外 capability 或 host network，
+浏览器访问 `http://127.0.0.1:8080`。看板不声明 `gpus`、设备映射、DDS LAN、额外 capability 或 host network，
 所以无 NVIDIA 显卡的开发机也可以使用。
 
 VS Code / Codex Dev Container 复用根目录 Dockerfile，不存在第二套 Ubuntu/ROS 依赖。源码按当前安全基线只读挂载；在宿主编辑，
@@ -79,7 +79,7 @@ BuildKit proxy 参数；不会意外继承开发者终端中的代理。代理�
 
 | 层 | 作用 | 何时需要 GPU |
 | --- | --- | --- |
-| `gpu-runtime` | CUDA 12.8 用户态库；驱动和设备由宿主注入 | 构建和 dashboard 不需要 |
+| `gpu-runtime` | CUDA 12.8 用户态库；驱动和设备由宿主注入 | 构建和看板不需要 |
 | `gpu-simulation` | Gazebo/OGRE/EGL 与 MuJoCo EGL | ROS headless、GUI、MuJoCo profile |
 | `gpu-validation` | 校验驱动、真实产品名、compute capability、NVIDIA renderer 和真实图像 | 发布实卡验收 |
 
@@ -142,7 +142,7 @@ WORKBENCH_SROS2_KEYSTORE=/absolute/path/to/keystore \
 - 单镜像体积、压缩/展开大小、构建时间和 registry 配额需要持续记录；未经 Owner 确认不拆镜像。
 - ROS apt、PyPI wheel、CUDA 基础镜像和 GitHub Actions 都需要定期重建、重新生成 SBOM，并审核许可证与 CVE。
 - 国内或离线团队应维护经过校验的镜像/apt/PyPI 镜像源，但不得静默改版本或绕过 checksum。
-- Laptop GPU、eGPU、MIG、WSL2、Jetson、ARM64 和专业 RTX/A 系列不属于当前三代 GeForce 验收范围，应单独建 Task Packet。
+- Laptop GPU、eGPU、MIG、WSL2、Jetson、ARM64 和专业 RTX/A 系列不属于当前三代 GeForce 验收范围，应单独建任务包。
 - X11 与 Wayland 截图证据可能包含桌面信息，上传前要做隐私审查；私钥和 keystore 永远不能进仓库或 CI artifact。
 - 真机 USB/CAN 需要 udev、组权限、总线速率、急停和现场安全评审；容器通过 doctor 不代表允许运动。
 - DDS 双物理主机、错误网卡、跨 Domain 隔离、发现服务器和缺失 keystore 的测试仍必须在真实网络上完成。

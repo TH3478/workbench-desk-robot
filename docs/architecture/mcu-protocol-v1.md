@@ -1,217 +1,166 @@
-# MCU logical-frame protocol v1.0
+# MCU 逻辑帧协议 v1.0
 
-Status: **frozen logical contract** for G1 / Issue #44.
+状态：G1 / Issue #44 的**已冻结逻辑契约**。
 
-The normative machine-readable sources are
-`interfaces/json_schema/mcu_protocol.schema.json` and the exported
-`workbench_contracts.McuFrame` Pydantic model. This document explains their
-meaning. If an implementation cannot satisfy both sources, it must reject the
-frame.
+规范性机器可读来源是 `interfaces/json_schema/mcu_protocol.schema.json` 和导出的
+`workbench_contracts.McuFrame` Pydantic 模型。本文档解释它们的含义。若一个实现无法同时满足
+两个来源，则必须拒绝该帧。
 
-## Boundary
+## 边界
 
-Version 1.0 freezes the transport-independent logical frames exchanged between
-the host runtime and the MCU adapter. It does **not** freeze a CAN identifier,
-byte order, DLC, checksum or mapping into the eight bytes of
-`firmware/mcu/core/hal.h::hal_can_frame`. That binary encoding requires a
-separate firmware-owned contract and must not be inferred from this JSON shape.
+1.0 版冻结了主机运行时与 MCU 适配器之间交换的、与传输无关的逻辑帧。它**不**冻结 CAN 标识符、
+字节序、DLC、校验和，或到 `firmware/mcu/core/hal.h::hal_can_frame` 八字节的映射。该二进制编码
+需要一个由固件单独拥有的契约，不得从本 JSON 结构推断。
 
-The existing Virtual MCU and C HAL are affected producers/consumers and must be
-updated by their owners before they claim v1.0 wire compatibility. G1 does not
-modify firmware or robot control. The logical semantics in this document are
-the stable input to the C safety state machine (#53), strict frame codec (#54),
-watchdog/STOP timing path (#60), and deduplication implementation (#61).
+现有 Virtual MCU 与 C HAL 是受影响的生产者/消费者，其 Owner 必须先更新它们，才能声称 v1.0
+线上兼容。G1 不修改固件或机器人控制。本文档中的逻辑语义是 C 安全状态机（#53）、严格帧
+编解码器（#54）、看门狗/STOP 时序路径（#60）和去重实现（#61）的稳定输入。
 
-## Common invariants
+## 通用不变量
 
-Every frame carries:
+每个帧都携带：
 
-- `protocol_version`: exactly `"1.0"`;
-- `frame_id`: a unique diagnostic identifier beginning with `mcu-frame-`;
-- `frame_kind`: one of the five shapes below;
-- `sent_at_us`: an unsigned 64-bit monotonic timestamp in microseconds;
-- `clock_id`: exactly `"monotonic"`.
+- `protocol_version`：恰为 `"1.0"`；
+- `frame_id`：以 `mcu-frame-` 开头的唯一诊断标识符；
+- `frame_kind`：下列五种形态之一；
+- `sent_at_us`：微秒单位的无符号 64 位单调时间戳；
+- `clock_id`：恰为 `"monotonic"`。
 
-Unknown fields, missing required fields, JSON booleans where integers are
-required, out-of-range integers, wall-clock timestamps and unknown enum values
-are invalid. Producers must not emit them. Consumers must reject the complete
-frame without applying a command or changing confirmed state.
+未知字段、缺少必填字段、需要整数的位置出现 JSON 布尔值、越界整数、墙上时钟时间戳以及未知
+枚举值均无效。生产者不得发出它们。消费者必须整体拒绝该帧，不得应用命令或改变已确认状态。
 
-The Schema declares the obsolete `sent_at` name only so the repository's
-limited object-schema compiler can inspect the field table. Every v1.0 frame
-branch explicitly rejects it; it is not a protocol field. `sent_at_us` is the
-only valid timestamp field. The compiler-generated flat model is not the
-normative MCU validator; consumers use the full JSON Schema or exported
-`McuFrame` model.
+Schema 声明已废弃的 `sent_at` 名称，只为让仓库有限的 object-schema 编译器能检查字段表。v1.0
+的每个帧分支都显式拒绝它；它不是协议字段。`sent_at_us` 是唯一有效的时间戳字段。编译器生成的
+扁平模型不是规范性 MCU 验证器；消费者使用完整 JSON Schema 或导出的 `McuFrame` 模型。
 
-`frame_id` is evidence identity. `command_id` is command correlation. A
-deliberate retry keeps the same command semantics and `command_id`, increments
-`retry_count`, and uses a new `frame_id` and send timestamp. A link-level copy
-may repeat the same retry count. Neither case turns a write into confirmation.
-Telemetry has no command correlation and uses `sequence_no` instead.
+`frame_id` 是证据身份。`command_id` 是命令关联。刻意重试保持相同的命令语义与 `command_id`，
+递增 `retry_count`，并使用新的 `frame_id` 和发送时间戳。链路层拷贝可以重复相同的重试计数。
+两种情况都不能把写入变成确认。遥测没有命令关联，改用 `sequence_no`。
 
-## Frame shapes
+## 帧形态
 
-| Kind | Direction | Required kind-specific fields | Meaning |
+| 类型 | 方向 | 类型特定必填字段 | 含义 |
 | --- | --- | --- | --- |
-| `command` | host to MCU | `command_id`, ordinary `opcode`, `retry_count` | Request an ordinary operation. Receipt or transport write is not completion. |
-| `ack` | MCU to host | command fields plus `result_code`, `fault_code`, `device_mode` | Deterministic response to one ordinary command. |
-| `telemetry` | MCU to host | `sequence_no`, `fault_code`, `device_mode` | Unsolicited state/fault snapshot. It never confirms a command. |
-| `stop` | host to MCU | stop-range `command_id`, `opcode=stop`, `retry_count` | Request safe stop using a disjoint identifier range. |
-| `stop_ack` | MCU to host | stop fields plus `result_code`, `fault_code`, `device_mode` | Response to one stop. Only a successful `stop_ack` confirms stopped state. |
+| `command` | 主机到 MCU | `command_id`、普通 `opcode`、`retry_count` | 请求一个普通操作。接收或传输写入不等于完成。 |
+| `ack` | MCU 到主机 | 命令字段加 `result_code`、`fault_code`、`device_mode` | 对一条普通命令的确定性响应。 |
+| `telemetry` | MCU 到主机 | `sequence_no`、`fault_code`、`device_mode` | 主动状态/故障快照。它从不确认命令。 |
+| `stop` | 主机到 MCU | stop 区段的 `command_id`、`opcode=stop`、`retry_count` | 使用不相交的标识符区段请求安全停止。 |
+| `stop_ack` | MCU 到主机 | stop 字段加 `result_code`、`fault_code`、`device_mode` | 对一次 stop 的响应。只有成功的 `stop_ack` 才确认已停止状态。 |
 
-Ordinary `command` and `ack` identifiers are `0..32767`. `stop` and
-`stop_ack` identifiers are `32768..65535`. This partition prevents an ordinary
-ack from being mistaken for a stop acknowledgement. Telemetry sequence numbers
-are unsigned 32-bit values (`0..4294967295`) and may wrap; consumers must not
-use them as command IDs. For telemetry ordering, receivers use
-`delta = (candidate - last_accepted) mod 4294967296`: zero is duplicate,
-`1..2147483647` is newer, and `2147483648..4294967295` is stale or ambiguous.
-Telemetry is never command confirmation regardless of ordering. Retry counts
-are `0..255`.
+普通 `command` 与 `ack` 标识符是 `0..32767`。`stop` 与 `stop_ack` 标识符是 `32768..65535`。
+该划分防止普通 ack 被误认为停止确认。遥测序号是无符号 32 位值（`0..4294967295`），可能回绕；
+消费者不得将其用作命令 ID。对于遥测排序，接收方使用
+`delta = (candidate - last_accepted) mod 4294967296`：零是重复，`1..2147483647` 是更新，
+`2147483648..4294967295` 是过期或歧义。无论顺序如何，遥测都不是命令确认。重试计数为
+`0..255`。
 
-Ordinary opcodes are `move`, `grip_open`, `grip_close`, `hold` and `heartbeat`.
-`stop` is valid only in `stop` and `stop_ack`.
+普通 opcode 是 `move`、`grip_open`、`grip_close`、`hold` 和 `heartbeat`。`stop` 仅在 `stop`
+和 `stop_ack` 中有效。
 
-## Correlation, retry and wrap semantics
+## 关联、重试与回绕语义
 
-The command identifier is an unsigned 16-bit value whose high bit is the
-command class. The low 15 bits form a serial number modulo 32768. Ordinary and
-STOP serial histories are independent; ordinary traffic can never consume or
-block the STOP history.
+命令标识符是无符号 16 位值，其最高位是命令类别。低 15 位构成模 32768 的序号。普通与 STOP
+序号历史相互独立；普通流量永远不会消耗或阻塞 STOP 历史。
 
-For a new ordinary logical request, the host advances the low 15-bit serial.
-For a retry, it keeps the same `command_id` and opcode. Command semantics are
-the tuple (`protocol_version`, `command_id`, `opcode`); `frame_id`,
-`retry_count`, and `sent_at_us` are attempt metadata and are not part of that
-tuple. The MCU classifies an ordinary candidate relative to the last accepted
-serial using
-`delta = (candidate - last_accepted) mod 32768`:
+对于新的普通逻辑请求，主机推进低 15 位序号。对于重试，它保持相同的 `command_id` 与 opcode。
+命令语义是元组（`protocol_version`、`command_id`、`opcode`）；`frame_id`、`retry_count` 和
+`sent_at_us` 是尝试元数据，不属于该元组。MCU 用
+`delta = (candidate - last_accepted) mod 32768` 对普通候选相对于最后接受的序号分类：
 
-- `delta=0` is a duplicate or retry of the current serial;
-- `1..16383` is newer, including the wrap from 32767 to 0;
-- `16384..32767` is stale or ambiguous and fails closed.
+- `delta=0` 是当前序号的重复或重试；
+- `1..16383` 是更新，包括从 32767 到 0 的回绕；
+- `16384..32767` 是过期或歧义，失败即拒绝。
 
-Normative boundary vectors are: `(last, candidate) = (32766, 32767)`,
-`(32767, 0)`, `(0, 1)`, and `(0, 16383)` are newer; `(0, 0)` is duplicate;
-`(0, 16384)`, `(0, 32767)`, and `(1, 0)` are stale or ambiguous.
+规范性边界向量为：`(last, candidate) = (32766, 32767)`、`(32767, 0)`、`(0, 1)` 和
+`(0, 16383)` 是更新；`(0, 0)` 是重复；`(0, 16384)`、`(0, 32767)` 和 `(1, 0)` 是过期或
+歧义。
 
-The host must keep the number of outstanding, skipped and retried ordinary IDs
-below the 16384 half-range. A receiver must retain a bounded correlation record
-for every ID that can still be retried under its configured in-flight and retry
-budgets. A retry matching the retained command semantics returns the original
-`result_code`, `fault_code` and `device_mode`; it must not execute side effects
-again. A repeated response may use a new `frame_id` and `sent_at_us`, and its
-`retry_count` echoes the received request. An already retained ID with different
-command semantics, or a stale/out-of-window ordinary ID, returns a failed
-ordinary ack with `duplicate_frame` and does not execute.
+主机必须把未完成、被跳过和重试的普通 ID 数量保持在 16384 半区间以下。接收方必须为每个仍可能
+在其配置的在途和重试预算内重试的 ID 保留一条有界关联记录。匹配已保留命令语义的重试返回原始
+`result_code`、`fault_code` 和 `device_mode`；它不得再次执行副作用。重复的响应可以使用新的
+`frame_id` 和 `sent_at_us`，其 `retry_count` 回显收到的请求。已保留 ID 但命令语义不同，或
+过期/超出窗口的普通 ID，返回带 `duplicate_frame` 的失败普通 ack 且不执行。
 
-A structurally valid STOP is accepted for safety processing from every state
-before correlation-history handling and cancels or prevents ordinary command
-execution. If safe stopped state is achieved, a matching STOP retry returns the
-same successful result without repeating side effects. If it cannot be
-achieved, the MCU emits the failed `stop_ack` defined below and remains faulted.
-The ordinary-command replay window must never suppress STOP processing.
+结构上有效的 STOP 在关联历史处理之前从任何状态都被接受用于安全处理，并取消或阻止普通命令
+执行。若达到安全停止状态，匹配的 STOP 重试返回同样的成功结果且不重复副作用。若无法达到，
+MCU 发出下文定义的失败 `stop_ack` 并保持故障状态。普通命令回放窗口绝不能压制 STOP 处理。
 
-Protocol v1.0 has no on-wire boot/session epoch. After either endpoint restarts,
-normal command dispatch must remain disabled until the owning transport has
-discarded queued pre-restart traffic and established a fresh trusted session by
-an out-of-band startup gate. The first ordinary serial is accepted only after
-that gate. A restart or ID wrap is not reset authorization.
+协议 v1.0 没有线上启动/会话纪元。任一端点重启后，普通命令分发必须保持禁用，直到所属传输
+丢弃了排队的重启前流量，并通过带外启动闸门建立了新的可信会话。第一个普通序号只能在该闸门
+之后被接受。重启或 ID 回绕都不是重置授权。
 
-## Result semantics
+## 结果语义
 
-`result_code` is deliberately closed to two values:
+`result_code` 刻意收敛为两个值：
 
-- `0`: accepted/successful response;
-- `1`: rejected/failed response.
+- `0`：接受/成功响应；
+- `1`：拒绝/失败响应。
 
-A successful ordinary `ack` requires `fault_code=none` and a non-faulted mode.
-A failed ordinary `ack` requires `device_mode=faulted` and exactly one of
-`duplicate_frame` or `malformed_frame`.
+成功的普通 `ack` 要求 `fault_code=none` 且模式无故障。失败的普通 `ack` 要求
+`device_mode=faulted` 且恰为 `duplicate_frame` 或 `malformed_frame` 之一。
 
-A successful `stop_ack` requires `fault_code=none` and
-`device_mode=stopped`. A failed `stop_ack` requires
-`fault_code=stop_rejected` and `device_mode=faulted`. No other combination is
-valid. In particular, a `stop` write, telemetry saying `stopped`, an ordinary
-ack, or absence of an error is not stop confirmation.
+成功的 `stop_ack` 要求 `fault_code=none` 且 `device_mode=stopped`。失败的 `stop_ack` 要求
+`fault_code=stop_rejected` 且 `device_mode=faulted`。其他组合均无效。特别是，`stop` 写入、
+遥测报告 `stopped`、普通 ack 或无错误都不构成停止确认。
 
-## Telemetry semantics
+## 遥测语义
 
-Device modes are `idle`, `moving`, `holding`, `stopped` and `faulted`. Healthy
-telemetry has `fault_code=none` and any non-faulted mode. Fault telemetry has
-`device_mode=faulted` and exactly `link_lost` or `watchdog_expired`.
+设备模式是 `idle`、`moving`、`holding`、`stopped` 和 `faulted`。健康遥测的 `fault_code=none`
+且模式无故障。故障遥测的 `device_mode=faulted` 且恰为 `link_lost` 或 `watchdog_expired`
+之一。
 
-Telemetry is evidence about the current device snapshot only. It cannot be used
-to infer that a particular command ID was accepted.
+遥测只是关于当前设备快照的证据。不能据此推断某个命令 ID 已被接受。
 
-## Fault-code registry
+## 故障码注册表
 
-| Code | Authority / occurrence | Deterministic meaning and required response |
+| 码 | 归属 / 出现时机 | 确定性含义与必需响应 |
 | --- | --- | --- |
-| `none` | MCU frame | No fault is asserted by this frame. It does not by itself confirm a command. |
-| `ack_timeout` | Host diagnostic; no MCU frame arrived | No matching ordinary ack was received before the configured deadline. The command remains unconfirmed; enter the host recovery policy. |
-| `stop_timeout` | Host diagnostic; no MCU frame arrived | No matching successful stop_ack was received before the stop deadline. Stopped state is unconfirmed; escalate via the safety policy. |
-| `stop_rejected` | Failed `stop_ack` | The MCU explicitly rejected or could not complete the stop request. The device is faulted; never report stopped confirmation. |
-| `link_lost` | Fault telemetry | The MCU detected loss of its required control/heartbeat link and entered faulted mode. |
-| `duplicate_frame` | Failed ordinary `ack` | The ordinary command ID is stale/out of window or conflicts with retained command semantics. The receiver must not execute it. An exact semantic retry returns the retained original result and is not this fault. |
-| `watchdog_expired` | Fault telemetry | The MCU watchdog deadline expired and the device entered faulted mode. |
-| `malformed_frame` | Failed ordinary `ack` | The MCU parsed enough correlation data to reject an otherwise invalid ordinary frame. No requested action may be assumed. |
+| `none` | MCU 帧 | 该帧不断言任何故障。它本身不确认命令。 |
+| `ack_timeout` | 主机诊断；无 MCU 帧到达 | 在配置期限内未收到匹配的普通 ack。命令仍未确认；进入主机恢复策略。 |
+| `stop_timeout` | 主机诊断；无 MCU 帧到达 | 在停止期限内未收到匹配的成功 stop_ack。停止状态未确认；按安全策略升级处理。 |
+| `stop_rejected` | 失败的 `stop_ack` | MCU 明确拒绝或无法完成停止请求。设备已故障；绝不报告停止确认。 |
+| `link_lost` | 故障遥测 | MCU 检测到其必需的控制/心跳链路丢失并进入故障模式。 |
+| `duplicate_frame` | 失败的普通 `ack` | 普通命令 ID 过期/超出窗口，或与已保留命令语义冲突。接收方不得执行它。精确语义重试返回已保留的原始结果，不属于本故障。 |
+| `watchdog_expired` | 故障遥测 | MCU 看门狗期限到期且设备进入故障模式。 |
+| `malformed_frame` | 失败的普通 `ack` | MCU 解析了足够的关联数据来拒绝一个无效的普通帧。不得假定任何请求动作。 |
 
-`ack_timeout` and `stop_timeout` describe the absence of a frame, so they are in
-the frozen fault vocabulary but cannot appear inside a valid MCU-originated
-frame. Consumers synthesize them only after their configured host deadline. The
-deadline values themselves are deployment policy, not part of protocol v1.0.
+`ack_timeout` 和 `stop_timeout` 描述帧的缺失，因此它们属于冻结故障词表，但不能出现在有效的
+MCU 发出的帧内部。消费者只能在配置的主机期限之后合成它们。期限数值本身是部署策略，不属于
+协议 v1.0。
 
-## Time and deadline semantics
+## 时间与期限语义
 
-`sent_at_us` is read from the sender's local monotonic clock and is scoped to
-that sender's current boot. It may restart at zero after reboot. Host and MCU
-clock origins are not synchronized, so a consumer must not subtract timestamps
-from different senders or use `sent_at_us` alone as freshness, timeout or replay
-evidence. Receivers record local monotonic arrival time for those decisions.
+`sent_at_us` 读取自发送方本地单调时钟，范围限定在该发送方当前一次启动内。重启后可能归零。
+主机与 MCU 时钟原点不同步，因此消费者不得对不同发送方的时间戳做减法，也不得仅用
+`sent_at_us` 作为新鲜度、超时或回放证据。接收方为这些决策记录本地单调到达时间。
 
-The host starts an ordinary acknowledgement deadline from its local successful
-transport dispatch and starts the STOP deadline from local STOP dispatch. The
-MCU measures its STOP-response bound from local receipt of a completely valid
-STOP to handing the correlated `stop_ack` to its transport. Transport dispatch
-or queueing is not physical actuation evidence, and the numerical deadline
-values remain controlled implementation constants owned by #55 and #60.
+主机从其本地成功的传输分发起算普通确认期限，从本地 STOP 分发起算 STOP 期限。MCU 从本地完整
+接收有效 STOP 到将关联的 `stop_ack` 交给传输来度量其 STOP 响应上界。传输分发或排队不是物理
+动作证据，具体期限数值仍是由 #55 与 #60 拥有的受控实现常量。
 
-Only a completely valid, serially new ordinary command (including a heartbeat)
-is eligible to refresh the MCU software link watchdog while execution is
-allowed. Malformed, conflicting, duplicate, retry and stale frames do not
-refresh it and therefore cannot keep execution alive indefinitely. STOP is
-processed for safety but does not extend an execution watchdog deadline.
+只有完全有效、序号为新的普通命令（包括 heartbeat）才能在允许执行期间刷新 MCU 软件链路
+看门狗。畸形、冲突、重复、重试和过期帧不刷新它，因此不能无限维持执行。STOP 为安全而处理，
+但不延长执行看门狗期限。
 
-## Reset authority
+## 重置授权
 
-Protocol v1.0 deliberately does not define a reset frame or reset opcode.
-Ordinary commands, heartbeat, telemetry, STOP, acknowledgement receipt and a
-transport reconnect cannot clear `stopped` or `faulted` state or authorize
-motion.
+协议 v1.0 刻意不定义重置帧或重置 opcode。普通命令、heartbeat、遥测、STOP、确认接收和传输
+重连都不能清除 `stopped` 或 `faulted` 状态，也不能授权运动。
 
-The platform-independent MCU safety state machine may accept a separate trusted
-reset event only after the live stop/watchdog/fault cause is cleared and the
-owning safety control path has established operator authorization where site
-policy requires it. That control path and its authentication are outside this
-logical-frame protocol; a caller must not derive reset authority solely from any
-v1.0 frame. An accepted reset enters `idle`, never an executing mode, and any
-later motion requires a new ordinary command. Power cycling starts a new
-non-executing session and does not restore pending motion. Adding an on-wire
-reset operation requires a new protocol version and the interface-owner
-approval process.
+平台无关的 MCU 安全状态机只能在实时 stop/看门狗/故障原因清除之后，且所属安全控制路径已在
+站点策略要求时建立操作员授权后，才可接受独立的可信重置事件。该控制路径及其认证在本逻辑帧
+协议之外；调用方绝不能仅从任何 v1.0 帧推导重置授权。被接受的重置进入 `idle`，绝不会进入
+执行模式，任何后续运动都需要新的普通命令。断电重启开启新的非执行会话，不恢复挂起的运动。
+新增线上重置操作需要新的协议版本和接口 Owner 审批流程。
 
-## Fail-closed handling
+## 失败即拒绝处理
 
-Consumers validate the entire frame before dispatch or state mutation. On any
-validation failure they must:
+消费者在分发或状态变更前验证整个帧。任何验证失败时它们必须：
 
-1. discard the frame as a protocol message;
-2. not execute a command or mark an action/stop confirmed;
-3. retain the raw input only as bounded diagnostic evidence;
-4. emit the owning subsystem's malformed-input diagnostic.
+1. 把该帧作为协议消息丢弃；
+2. 不执行命令、不把动作/stop 标记为已确认；
+3. 仅把原始输入作为有界诊断证据保留；
+4. 发出所属子系统的畸形输入诊断。
 
-The committed `interfaces/examples/mcu-frame-stop-ack.json` is the canonical
-successful stop acknowledgement. Contract tests validate it and a shared valid
-and invalid corpus through both Draft 2020-12 JSON Schema and Pydantic.
+已提交的 `interfaces/examples/mcu-frame-stop-ack.json` 是规范的成功停止确认。契约测试通过
+Draft 2020-12 JSON Schema 和 Pydantic 双通道验证它以及共享的有效/无效语料。

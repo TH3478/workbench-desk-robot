@@ -1,26 +1,26 @@
-# Physical bench, bring-up, and debugging
+# 物理台架、启动调试与问题排查
 
-Status: **NOT_EXECUTED**. This repository contains procedures and validators,
-not a fabricated board or signed physical result.
+状态：**NOT_EXECUTED**。本仓库包含的是规程与验证器，而不是已制造的板卡
+或经签署的实物结果。
 
-## Required HIL bench
+## 必备 HIL 台架
 
-- isolated/current-limited 0-60 V supply rated for the intended load;
-- two DMMs, four-channel oscilloscope, differential probe, current probe, and
-  logic analyser with current calibration records;
-- CAN-FD analyser, two controlled 120 Ohm terminations, known-good harnesses;
-- dual-channel E-stop fixture, guarded load or disabled motor-driver fixture;
-- thermal camera or bonded thermocouples, non-conductive mat, PPE, fire-safe
-  isolation area, and a second person for the safety tests;
-- Linux host with the intended CAN interface, camera, configuration hash, and
-  synchronized UTC clock.
+- 隔离/限流的 0-60 V 电源，额定值满足目标负载；
+- 两台 DMM、四通道示波器、差分探头、电流探头以及
+  带有效校准记录的逻辑分析仪；
+- CAN-FD 分析仪、两个受控的 120 Ohm 终端、已知良好的线束；
+- 双通道急停固定装置、受防护的负载或已禁用的电机驱动器固定装置；
+- 热像仪或粘贴式热电偶、绝缘垫、PPE、防火
+  隔离区域，以及安全测试所需的第二人；
+- Linux 主机，具备目标 CAN 接口、摄像头、配置哈希与
+  同步的 UTC 时钟。
 
-The board, harnesses, instruments, calibration references, operator, reviewer,
-and raw capture directory must be identified before power is applied.
+上电之前，必须先确认板卡、线束、仪器、校准基准、操作员、评审员
+与原始抓取目录的身份信息。
 
-## Software preflight
+## 软件预检
 
-The preflight only observes prerequisites; it sends no CAN or motion command:
+预检仅观测前置条件；它不发送任何 CAN 或运动指令：
 
 ```bash
 python3 tools/scripts/hardware_preflight.py \
@@ -28,30 +28,30 @@ python3 tools/scripts/hardware_preflight.py \
   --output runs/hardware/preflight.json
 ```
 
-`not_ready` is a stop. Create the E-stop marker only after the named operator
-has physically verified both channels and the safe output with power removed.
+`not_ready` 即停止。只有在指定操作员于断电状态下实地验证两条通道
+与安全输出之后，才能创建急停标记。
 
-## Staged bring-up
+## 分阶段启动调试
 
-1. Record board serial/revision, BOM/PCB hashes, harness IDs, firmware/config
-   SHA-256, operators, instruments, calibration records, ambient conditions and
-   photos. Open a defect immediately for visible damage or a revision mismatch.
-2. Execute steps 1-6 of `hardware/pcb/fabrication/bringup-test-plan.csv` with
-   motor power disabled. Stop on current limit, smoke, heat, wrong rail order,
-   excess ripple, isolation failure, or an unexpected enable.
-3. Execute the J10/U8/J11 truth table, including each open channel and channel
-   discrepancy. The 1 ms target needs an unedited logic-analyser capture.
-4. Run CAN classic/FD loopback, then each populated J4 interface. Preserve raw
-   frames and error counters; screenshots alone are insufficient.
-5. Run the 30-minute rated-load thermal step. Proceed to first-batch and
-   48-hour protocols only after QA and Safety owner review.
-6. Run all 20 rows in `hardware/validation/fault-scenarios.csv`. A stopped or
-   failed scenario stays `FAIL`/`HOLD`; it is not deleted and rerun as a new pass.
+1. 记录板卡序列号/版本、BOM/PCB 哈希、线束 ID、固件/配置
+   SHA-256、操作员、仪器、校准记录、环境条件与照片。发现可见损坏或
+   版本不匹配时立即开立缺陷。
+2. 在电机电源禁用的条件下执行 `hardware/pcb/fabrication/bringup-test-plan.csv`
+   的步骤 1-6。遇到限流、冒烟、过热、电源轨顺序错误、
+   纹波过大、隔离失效或意外使能时立即停止。
+3. 执行 J10/U8/J11 真值表，包括每条断开的通道与通道不一致情形。
+   1 ms 目标需要未经剪辑的逻辑分析仪抓取。
+4. 运行 CAN classic/FD 环回，然后逐项测试已贴装的 J4 接口。保留原始
+   帧与错误计数器；仅有截图是不够的。
+5. 运行 30 分钟额定负载热测试步骤。只有经 QA 与安全 Owner 评审后，
+   才能继续首批与 48 小时规程。
+6. 运行 `hardware/validation/fault-scenarios.csv` 中全部 20 行。已停止或
+   失败的场景保持 `FAIL`/`HOLD`；不得删除后再作为新通过项重跑。
 
-## Register evidence
+## 登记证据
 
-First assign the real hardware revision and configuration hash to the unit in
-`hardware/validation/first-batch-acceptance.csv`, then run:
+先在 `hardware/validation/first-batch-acceptance.csv` 中为受测单元分配
+真实的硬件版本与配置哈希，然后运行：
 
 ```bash
 python3 hardware/validation/tools/register_evidence.py \
@@ -65,26 +65,25 @@ python3 hardware/validation/tools/validate_validation.py
 python3 hardware/release/tools/check_release_readiness.py
 ```
 
-The validator re-hashes raw files and derives scenario status. Editing a CSV
-summary cannot create a pass.
+验证器会重新哈希原始文件并推导场景状态。编辑 CSV
+汇总无法造出通过结果。
 
-## Debug decision tree
+## 调试决策树
 
-- **No input/current limit:** power off; inspect J1/F1/U1, polarity and
-  VBAT-to-ground resistance. Never replace the fuse with a larger rating.
-- **Missing/wrong rail:** disconnect J2/J3; work downstream from TP1 to TP5.
-  Quarantine on isolation failure or unstable hot-swap cycling.
-- **CAN offline/errors:** verify 5V/GND CAN isolation, CANH/CANL polarity,
-  exactly two terminations, bit timing and shield policy before changing code.
-- **J4 interface failure:** compare connector direction and frozen pin mux;
-  capture reset, voltage and logic levels. Do not repurpose a safety pin.
-- **Unexpected enable/E-stop failure:** remove power, quarantine immediately,
-  attach the truth-table capture, and escalate to the Safety Owner.
-- **Thermal fault:** stop load, retain current/temperature traces, inspect
-  airflow and interfaces, and do not restart until disposition is signed.
+- **无输入/触发限流：**断电；检查 J1/F1/U1、极性以及
+  VBAT 对地电阻。切勿换成额定值更大的熔断器。
+- **电源轨缺失/错误：**断开 J2/J3；从 TP1 到 TP5 向下游排查。
+  发现隔离失效或热插拔循环不稳定时立即隔离。
+- **CAN 离线/出错：**在改动代码之前，先核对 5V/GND CAN 隔离、CANH/CANL 极性、
+  恰好两个终端、位时序与屏蔽策略。
+- **J4 接口故障：**对比连接器方向与冻结的引脚复用；
+  抓取复位、电压与逻辑电平。不得将安全引脚改作他用。
+- **意外使能/急停失效：**断电、立即隔离、
+  附上真值表抓取，并上报安全 Owner。
+- **热故障：**停止负载，保留电流/温度曲线，检查
+  风道与接口，在处置结论签署之前不得重启。
 
-For every observed failure add a row to `hardware/qa/defect-tracker.csv` with a
-unique ID, serialized unit/lot, containment, evidence and owner. Leave root
-cause/corrective action blank until verified; close only with linked retest
-evidence. Missing equipment or an unbuilt board is a project blocker, not a
-fabricated product defect.
+每发现一次故障，都要在 `hardware/qa/defect-tracker.csv` 中新增一行，包含
+唯一 ID、序列化单元/批次、遏制措施、证据与 Owner。根因/纠正措施
+在验证之前保持留空；只有在附有复测证据时才能关闭。设备缺失或
+板卡未制造属于项目阻塞项，而不是虚构的产品缺陷。

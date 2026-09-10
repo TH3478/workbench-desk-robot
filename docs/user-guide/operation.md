@@ -1,30 +1,21 @@
-# Daily operation
+# 日常操作
 
-Only trained operators may start a task. The approved task, payload, tool, speed,
-workspace, and software/configuration revision must match the site release.
+只有经过培训的操作员才能启动任务。已批准的任务、负载、工具、速度、工作区和软件/配置修订版本必须与现场发布一致。
 
-## Preflight
+## 预检
 
-- Inspect guards, covers, fasteners, connectors, cables, tools, payload, and floor.
-- Confirm no battery alarm, damage, unusual temperature, leakage, or odor.
-- Exercise each E-stop before automatic operation as required by the site plan.
-- Confirm the area is clear and the operator can reach the normal stop.
-- Check unit identity, configuration hash, calibration validity, and evidence capture.
+- 检查防护装置、盖板、紧固件、连接器、线缆、工具、负载和地面。
+- 确认无电池告警、损坏、异常温度、漏液或异味。
+- 按现场方案要求，在自动运行前测试每个 E-stop。
+- 确认区域清空，且操作员能够触及正常停止。
+- 检查单元标识、配置哈希、校准有效性和证据采集。
 
-## Start and run
+## 启动与运行
 
-Apply power through the approved sequence. Wait for BMS self-test, service readiness,
-arm readiness, and safety-chain confirmation. A request that remains in precharge,
-derate, or fault is diagnosed rather than repeatedly reset. Start at reduced speed
-after maintenance, payload change, calibration, transport, or software update.
+按已批准的顺序供电。等待 BMS 自检、服务就绪、机械臂就绪和安全链确认。一直处于预充电、降额或故障状态的请求应被诊断，而不是反复复位。在维护、负载变更、校准、运输或软件更新之后，以降速启动。
 
-During motion, stay outside the controlled volume and watch for unexpected path,
-sound, vibration, heat, smell, cable tension, dropped objects, or repeated recovery.
-Use normal stop for routine interruption and E-stop for hazardous or uncontrolled
-conditions. Do not reach into the workspace until energy and motion are controlled.
+运动期间留在受控空间之外，留意异常路径、声音、振动、发热、异味、线缆张力、物体掉落或反复恢复。常规中断使用正常停止，危险或不受控情况使用 E-stop。在能量与运动得到控制之前，不得把手伸入工作区。
 
-## Shutdown
+## 关机
 
-Finish or abort the task, remove payload hazards, park the arms, stop services,
-remove traction energy as required, and leave charging/storage in the approved state.
-Record faults, collisions, E-stops, recoveries, configuration changes, and damage.
+完成或中止任务、消除负载危险、停靠机械臂、停止服务、按要求移除牵引能量，并让充电/存储处于已批准的状态。记录故障、碰撞、E-stop、恢复、配置变更和损坏。

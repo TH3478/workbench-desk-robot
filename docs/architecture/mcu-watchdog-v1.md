@@ -1,119 +1,85 @@
-# MCU Watchdog and STOP Timing V1
+# MCU 看门狗与 STOP 时序 V1
 
-Issue #60 owns the platform-independent timing safety path that sits above the
-Wire V1 codec and beside the C safety state machine. It turns missing valid
-control activity and an unconfirmed STOP acknowledgement into deterministic
-safe outcomes without claiming a physical board timing result.
+Issue #60 拥有平台无关的时序安全路径，它位于 Wire V1 编解码器之上、C 安全状态机之旁。它把
+缺失的有效控制活动与未确认的 STOP 确认转化为确定性的安全结果，而不声称任何物理板卡时序结果。
 
-## Controlled constants
+## 受控常量
 
-The current implementation keeps all deployment-sensitive values in
-`firmware/mcu/core/watchdog.h`:
+当前实现把所有部署敏感值放在 `firmware/mcu/core/watchdog.h`：
 
-| Constant | Value | Meaning |
+| 常量 | 值 | 含义 |
 | --- | ---: | --- |
-| `MCU_HEARTBEAT_PERIOD_US` | 50,000 us | one-shot timer re-arm period |
-| `MCU_SOFTWARE_WATCHDOG_TIMEOUT_US` | 150,000 us | local link deadline after accepted activity |
-| `MCU_STOP_ACK_DEADLINE_US` | 10,000 us | bound from valid STOP receipt to transport handoff confirmation |
-| `MCU_HARDWARE_WATCHDOG_PERIOD_MS` | 500 ms | HAL hardware-watchdog configuration |
+| `MCU_HEARTBEAT_PERIOD_US` | 50,000 us | 单次定时器重新装载周期 |
+| `MCU_SOFTWARE_WATCHDOG_TIMEOUT_US` | 150,000 us | 接受活动后的本地链路期限 |
+| `MCU_STOP_ACK_DEADLINE_US` | 10,000 us | 从有效 STOP 接收到传输交接确认的上界 |
+| `MCU_HARDWARE_WATCHDOG_PERIOD_MS` | 500 ms | HAL 硬件看门狗配置 |
 
-These are implementation constants for deterministic Host/QEMU evidence. They
-are not CH32V307 interrupt-latency, motor-stop, electrical-bus or physical
-E-stop measurements.
+这些是用于确定性 Host/QEMU 证据的实现常量。它们不是 CH32V307 中断延迟、电机停止、电气总线
+或物理急停测量值。
 
-## Software link watchdog
+## 软件链路看门狗
 
-The transport/parser boundary must validate a complete frame and decide that
-its ordinary command serial is new before calling
-`mcu_watchdog_note_activity(..., MCU_WATCHDOG_ACTIVITY_VALID_NEW, ...)`.
-Only that explicit activity arms or refreshes the local deadline. Retries,
-duplicates, stale/out-of-window frames, malformed input and STOP never refresh
-an execution deadline.
+传输/解析器边界必须先验证完整帧并判定其普通命令序号为新的，才能调用
+`mcu_watchdog_note_activity(..., MCU_WATCHDOG_ACTIVITY_VALID_NEW, ...)`。只有该显式活动才
+装载或刷新本地期限。重试、重复、过期/超出窗口的帧、畸形输入和 STOP 永不刷新执行期限。
 
-The deadline is an absolute `uint64_t` monotonic timestamp. The core compares
-timestamps using the unsigned half-range rule, so a deadline crossing
-`UINT64_MAX` remains deterministic. The implementation assumes, as required by
-the contract, that any one timing window is shorter than half the counter
-range.
+该期限是绝对的 `uint64_t` 单调时间戳。核心使用无符号半区间规则比较时间戳，因此期限跨越
+`UINT64_MAX` 仍保持确定性。按契约要求，实现假定任一计时窗口都短于计数器区间的一半。
 
-When the deadline is reached while the state machine is `EXECUTING`, the core:
+当状态机处于 `EXECUTING` 时期限到达，核心将：
 
-1. dispatches `MCU_EVENT_WATCHDOG_EXPIRED`;
-2. enters the latched `FAULT` / `watchdog_expired` state;
-3. disables further link-deadline refresh; and
-4. publishes exactly one correlated telemetry record with a monotonically
-   assigned telemetry sequence.
+1. 分发 `MCU_EVENT_WATCHDOG_EXPIRED`；
+2. 进入锁存的 `FAULT` / `watchdog_expired` 状态；
+3. 禁止进一步的链路期限刷新；并且
+4. 恰好发布一条带单调递增遥测序号的关联遥测记录。
 
-Further polls do not emit another record. Ordinary activity cannot revive the
-state. Reset still requires the existing trusted authorization and an
-independent cause-cleared gate.
+后续轮询不再发出记录。普通活动无法复活该状态。重置仍需要现有的可信授权与独立的原因清除
+闸门。
 
-## STOP acknowledgement timing
+## STOP 确认时序
 
-For a completely valid STOP, the core dispatches the state-machine STOP event
-first, disables the software link deadline, stores the STOP command ID and
-attempt metadata, and creates a correlated `STOP_ACK` record immediately. The
-record is eligible for transport handoff until the inclusive
-`MCU_STOP_ACK_DEADLINE_US` deadline.
+对于完全有效的 STOP，核心先分发状态机 STOP 事件，禁用软件链路期限，存储 STOP 命令 ID 与
+尝试元数据，并立即创建关联的 `STOP_ACK` 记录。该记录在包含端点的
+`MCU_STOP_ACK_DEADLINE_US` 期限之前都有资格进行传输交接。
 
-The transport-facing adapter confirms the handoff with
-`mcu_watchdog_confirm_stop_ack()`. The command ID and retry count of the most
-recently emitted ACK must match the pending slot. A confirmation at the exact
-deadline is accepted; a late confirmation is rejected.
+面向传输的适配器用 `mcu_watchdog_confirm_stop_ack()` 确认交接。最近发出的 ACK 的命令 ID 与
+重试计数必须匹配挂起槽位。恰在期限上的确认被接受；迟到的确认被拒绝。
 
-If the handoff is not confirmed after the deadline, the pending slot is closed
-and exactly one local `STOP_TIMEOUT` record is published. This is a local
-absence-of-confirmation diagnostic, not a valid MCU Wire V1 fault frame and
-never evidence that stopped confirmation was received. The safe state remains
-active and trusted reset cannot clear the timing cause until the owner marks it
-cleared.
+若期限后交接未获确认，挂起槽位关闭并恰好发布一条本地 `STOP_TIMEOUT` 记录。这是本地缺少确认
+的诊断，不是有效的 MCU Wire V1 故障帧，也绝不是收到停止确认的证据。安全状态保持活动，可信
+重置在 Owner 标记原因清除之前不能清除该时序原因。
 
-An exact link-level STOP retry while the pending slot is live replays the cached
-original STOP ACK record, including its observed timestamp, retry count, wire
-result, fault and device mode, and does not extend the deadline. A
-protocol-level retry with the same STOP command ID and a strictly greater
-`retry_count` matches the same command semantics, emits a new observation that
-echoes the received `retry_count`, and preserves the original wire result,
-fault and device mode. A retry with the same count is an exact link replay; a
-lower/decreasing count, including a `255 -> 0` wrap, is stale and rejected
-without changing the pending slot. Neither accepted form repeats the STOP side
-effect or extends the deadline; the most recently emitted retry count is the
-one used for transport handoff confirmation and timeout correlation. Both
-replays remain unchanged in their semantic fields if the state machine enters a
-fault after the first ACK was created. A different pending STOP is rejected by
-the bounded single-slot implementation; retry deduplication and multi-command
-windows remain separate work.
+挂起槽位存活期间的精确链路层 STOP 重试回放缓存的原始 STOP ACK 记录，包括其观测时间戳、重试
+计数、线上结果、故障和设备模式，且不延长期限。相同 STOP 命令 ID 且 `retry_count` 严格更大的
+协议层重试匹配相同的命令语义，发出回显所收 `retry_count` 的新观测，并保留原始线上结果、故障
+和设备模式。相同计数的重试是精确链路回放；更低/递减的计数（包括 `255 -> 0` 回绕）是过期，
+在不改变挂起槽位的情况下被拒绝。两种被接受的形式都不重复 STOP 副作用，也不延长期限；最近
+发出的重试计数是用于传输交接确认与超时关联的那个。若状态机在第一个 ACK 创建后进入故障，
+两种回放的语义字段保持不变。不同的挂起 STOP 被有界单槽位实现拒绝；重试去重与多命令窗口仍属
+独立工作。
 
-## Hardware watchdog and HAL boundary
+## 硬件看门狗与 HAL 边界
 
-The core never touches timer or watchdog registers. It asks the HAL for:
+核心从不接触定时器或看门狗寄存器。它向 HAL 请求：
 
-- monotonic microseconds;
-- one-shot timer arm/disarm and interrupt enable;
-- hardware watchdog start/feed; and
-- bounded Host/QEMU evidence counters.
+- 单调微秒；
+- 单次定时器装载/解除与中断使能；
+- 硬件看门狗启动/喂狗；以及
+- 有界的 Host/QEMU 证据计数器。
 
-The QEMU HAL maps time to the virt machine CLINT `mtime`, dispatches a real
-machine-timer interrupt through `crt0.S`, and models the hardware watchdog as a
-finite deadline. The timer callback runs the same `mcu_watchdog_poll()` source
-as Host and feeds the modeled hardware watchdog only while the timing core and
-state machine remain valid, the state is not `FAULT`, and no active timing
-cause exists. Clearing a timing cause does not make a latched `FAULT` state
-feed-eligible.
+QEMU HAL 把时间映射到 virt 机器 CLINT `mtime`，通过 `crt0.S` 分发真实机器定时器中断，并把
+硬件看门狗建模为有限期限。定时器回调运行与 Host 相同的 `mcu_watchdog_poll()` 源码，且仅在
+时序核心与状态机保持有效、状态不是 `FAULT`、并且没有活动时序原因时喂建模的硬件看门狗。清除
+时序原因不会使锁存的 `FAULT` 状态具备喂狗资格。
 
-QEMU proves timer-interrupt routing, deadline arithmetic, single-record
-emission and the HAL feed decision. It does not prove CH32V307 register
-semantics, interrupt latency, CAN electrical behavior, mechanical stopping
-time, bus-off recovery or physical E-stop performance.
+QEMU 证明定时器中断路由、期限算术、单条记录发出和 HAL 喂狗决策。它不证明 CH32V307 寄存器
+语义、中断延迟、CAN 电气行为、机械停止时间、bus-off 恢复或物理急停性能。
 
-## Evidence and boundaries
+## 证据与边界
 
-The shared fake-clock tests cover valid-new activity, rejected activity,
-deadline equality, counter wraparound, STOP ACK correlation, exact-deadline
-confirmation, late confirmation, STOP timeout, reset gates and invalid input.
-The QEMU executable additionally demonstrates timer interrupts, one fault
-record and hardware-watchdog expiry after the timing core stops feeding it.
+共享模拟时钟测试覆盖有效新活动、被拒绝的活动、期限相等、计数器回绕、STOP ACK 关联、恰好
+期限确认、迟到确认、STOP 超时、重置闸门和无效输入。QEMU 可执行程序还演示定时器中断、一条
+故障记录，以及时序核心停止喂狗后的硬件看门狗到期。
 
-This issue does not implement the Host `SafeCANBus` transport adapter (#55),
-command deduplication (#61), HAL CAN drivers, vendor registers, motor control,
-bus-off recovery or physical hardware validation.
+本 Issue 不实现 Host `SafeCANBus` 传输适配器（#55）、命令去重（#61）、HAL CAN 驱动、厂商
+寄存器、电机控制、bus-off 恢复或物理硬件验证。

@@ -1,18 +1,16 @@
-# SocketCAN CAN bring-up and HIL evidence
+# SocketCAN CAN 启动调试与 HIL 证据
 
-Status: **procedure only; physical execution is `NOT_EXECUTED` until a named
-operator records the required evidence**.
+状态：**仅为规程；在指定操作员记录所需证据之前，物理执行状态为
+`NOT_EXECUTED`**。
 
-This document is the bring-up reference for `hardware/can_adapters`. The
-production Linux boundary is one `AF_CAN`/`CAN_RAW` descriptor owned by the
-controlled adapter. External dashboards and HTTP clients may read validated
-`CanExternalRecord` projections, but they must never receive the descriptor or
-write to CAN, debugfs, or a safety control path.
+本文档是 `hardware/can_adapters` 的启动调试参考。生产环境中的 Linux 边界
+是受控适配器所拥有的一个 `AF_CAN`/`CAN_RAW` 描述符。外部看板与 HTTP 客户端
+可以读取经校验的 `CanExternalRecord` 投影，但绝不能拿到该描述符，
+也不得写入 CAN、debugfs 或安全控制路径。
 
-## 1. Virtual prerequisite and evidence
+## 1. 虚拟前置条件与证据
 
-Run the virtual probe after a privileged `wbcan0` or `vcan0` interface is
-available:
+在具备特权的 `wbcan0` 或 `vcan0` 接口可用之后，运行虚拟探针：
 
 ```bash
 python3 kernel/wbcan/test_socketcan_ingress.py wbcan0 \
@@ -22,48 +20,46 @@ python3 kernel/wbcan/test_socketcan_ingress.py \
   --validate-report /tmp/wbcan-socketcan-ingress-report.json
 ```
 
-The report is scoped to `virtual-socketcan-ingress`. It records the Linux
-kernel, kernel-config hash, interface, source, exact ACK/telemetry/duplicate/
-invalid projections and cleanup state. A missing privilege, CAN netdevice or
-kernel capability is `NOT_EXECUTED`; it is never converted into `PASS`.
+该报告的范围限定为 `virtual-socketcan-ingress`。它记录 Linux
+内核、内核配置哈希、接口、来源、精确的 ACK/遥测/重复/
+无效投影与清理状态。缺少特权、CAN 网络设备或
+内核能力即为 `NOT_EXECUTED`；绝不会被转换成 `PASS`。
 
-Virtual `PASS` proves only the Linux software path:
+虚拟 `PASS` 仅证明 Linux 软件路径：
 
 ```text
 AF_CAN peer -> SocketCAN -> SocketCANTransport -> SafeCANBus
   -> Wire V1 validation -> bounded runtime -> CanExternalRecord
 ```
 
-It does not prove a transceiver, cable, physical controller, MCU, motor,
-emergency stop, PREEMPT_RT scheduling or a hard-real-time deadline.
+它并不能证明收发器、线缆、物理控制器、MCU、电机、
+急停、PREEMPT_RT 调度或硬实时时限。
 
-## 2. Host and interface preflight
+## 2. 主机与接口预检
 
-Record these fields before opening the physical bus:
+在开通物理总线之前，记录以下字段：
 
-| Field | Required value/evidence |
+| 字段 | 所需值/证据 |
 | --- | --- |
-| board and Linux image | board serial, revision, distribution, `uname -a` |
-| kernel configuration | `/proc/config.gz` or `/boot/config-$(uname -r)` SHA-256; `CONFIG_CAN`, `CONFIG_CAN_RAW`, `CONFIG_CAN_DEV` |
-| interface | exact `can0` name, network namespace, `ip -details link show can0` |
-| adapter | isolated USB-CAN-FD prototype model, serial, driver and firmware version |
-| timing | nominal/data bitrate, sample point, restart policy and host clock source |
-| harness | CANH/CANL polarity, isolation reference, two 120-ohm terminations and harness ID |
-| calibration | analyser, oscilloscope/probe and current instrument IDs with valid calibration records |
-| raw capture | immutable capture file path and SHA-256, not a screenshot-only summary |
+| 板卡与 Linux 镜像 | 板卡序列号、版本、发行版、`uname -a` |
+| 内核配置 | `/proc/config.gz` 或 `/boot/config-$(uname -r)` 的 SHA-256；`CONFIG_CAN`、`CONFIG_CAN_RAW`、`CONFIG_CAN_DEV` |
+| 接口 | 确切的 `can0` 名称、网络命名空间、`ip -details link show can0` |
+| 适配器 | 隔离 USB-CAN-FD 原型型号、序列号、驱动与固件版本 |
+| 时序 | 标称/数据比特率、采样点、重启策略与主机时钟源 |
+| 线束 | CANH/CANL 极性、隔离基准、两个 120 欧姆终端与线束 ID |
+| 校准 | 具有有效校准记录的分析仪、示波器/探头与电流仪器 ID |
+| 原始抓取 | 不可变的抓取文件路径与 SHA-256，而非仅有截图的汇总 |
 
-The first physical path is the isolated USB-CAN-FD prototype adapter. The
-repository does not select a carrier, bitrate, transceiver or vendor driver
-on behalf of the Electrical/Hardware owners. If any required value is still
-`TBD`, stop and record `NOT_EXECUTED`.
+第一条物理路径是隔离 USB-CAN-FD 原型适配器。本仓库
+不代替电气/硬件 Owner 选择载波、比特率、收发器或厂商驱动。
+若任何所需值仍为 `TBD`，则停止并记录 `NOT_EXECUTED`。
 
-The interface must be placed in the intended network namespace and permissions
-must be granted to the named service account or group. Do not broaden device
-permissions globally. Verify that only the controlled adapter opens the CAN
-receive fd; a dashboard or shell diagnostic may use a separate read-only
-capture socket only under the approved test plan.
+接口必须放入目标网络命名空间，并且权限必须授予指定的服务账号或组。
+不要全局放宽设备权限。确认只有受控适配器打开 CAN
+接收 fd；看板或 shell 诊断只有在经批准的测试计划下才可
+使用单独的只读抓取 socket。
 
-Example observation commands (they do not claim readiness):
+观测命令示例（这些命令不代表已就绪）：
 
 ```bash
 uname -a
@@ -73,55 +69,52 @@ sha256sum /boot/config-$(uname -r)
 ethtool -i can0
 ```
 
-## 3. Filter and timestamp contract
+## 3. 过滤器与时间戳契约
 
-Configure the adapter before enabling traffic:
+在启用流量之前配置适配器：
 
-- install only the approved standard Wire V1 arbitration-ID filters and a
-  separately reviewed CAN error filter;
-- keep standard, extended, RTR and error flag bits explicit;
-- require Classic CAN DLC 8 for Wire V1 and reject CAN-FD, truncation,
-  malformed ancillary data and contradictory raw IDs;
-- enable `SO_TIMESTAMPNS` and preserve the kernel timestamp, host monotonic
-  observation, host wall-clock observation, source, interface and ingress
-  sequence;
-- observe `SO_RXQ_OVFL` when present and retain the counter in the external
-  record; a drop counter is evidence of loss, not evidence of successful
-  delivery;
-- keep command, telemetry, health and external projection capacities fixed and
-  record their drop counters.
+- 只安装已批准的标准 Wire V1 仲裁 ID 过滤器与
+  经单独评审的 CAN 错误过滤器；
+- 显式保留标准帧、扩展帧、RTR 与错误标志位；
+- Wire V1 要求 Classic CAN DLC 8，并拒绝 CAN-FD、截断、
+  格式错误的附加数据以及相互矛盾的原始 ID；
+- 启用 `SO_TIMESTAMPNS`，并保留内核时间戳、主机单调时钟
+  观测、主机墙钟观测、来源、接口与入口
+  序号；
+- 在存在 `SO_RXQ_OVFL` 时观测它，并在外部
+  记录中保留计数器；丢弃计数是丢失的证据，而不是成功
+  送达的证据；
+- 保持指令、遥测、健康与外部投影的容量固定，并
+  记录各自的丢弃计数器。
 
-Only complete ACK, STOP_ACK and telemetry frames cross the Wire V1 boundary.
-Malformed, duplicate, late, uncorrelated, error and post-shutdown frames are
-rejections and cannot refresh a command or claim completion.
+只有完整的 ACK、STOP_ACK 与遥测帧才能跨越 Wire V1 边界。
+格式错误、重复、迟到、无关联、出错以及关机后的帧均为
+拒绝项，不能刷新指令或声称完成。
 
-## 4. Six-domain discovery and recovery
+## 4. 六域发现与恢复
 
-The BSP contract names six controller domains: `MCU-BASE`, `ARM-L-CTRL`,
-`ARM-R-CTRL`, `TOOL-L-CTRL`, `TOOL-R-CTRL` and `MCU-SAFETY`. The existing Wire
-V1 IDs do not contain a node address, so do not place independently responding
-domains on a shared bus by silently modifying an ID or payload. Use the
-owner-approved arbitration/segmentation decision for the physical fixture.
+BSP 契约定义了六个控制器域：`MCU-BASE`、`ARM-L-CTRL`、
+`ARM-R-CTRL`、`TOOL-L-CTRL`、`TOOL-R-CTRL` 与 `MCU-SAFETY`。现有 Wire
+V1 ID 不包含节点地址，因此不得通过悄悄修改 ID 或载荷的方式，
+将独立响应的域放到共享总线上。物理固定装置应使用
+经 Owner 批准的仲裁/分段方案。
 
-For each domain, capture:
+对每个域，抓取：
 
-1. fresh boot/session identity and heartbeat;
-2. source/interface identity and the exact raw frames;
-3. normal telemetry and ACK/action-result records;
-4. duplicate, late, malformed, link-down and bus-off/restart behavior;
-5. STOP and reset behavior with actuators disabled or replaced by a guarded
-   load; and
-6. the reviewer and safety owner disposition.
+1. 全新启动/会话身份与心跳；
+2. 来源/接口身份与精确的原始帧；
+3. 正常遥测与 ACK/动作结果记录；
+4. 重复、迟到、格式错误、链路断开与总线关闭/重启行为；
+5. 执行器禁用或替换为受防护负载条件下的 STOP 与复位行为；以及
+6. 评审员与安全 Owner 的处置结论。
 
-Missing `MCU-SAFETY` or any required domain is a fail-closed stop, not a
-partial success. Linux restart, MCU restart and bus-off must clear stale
-correlation state and require fresh discovery. Do not infer physical state
-from a virtual `wbcan` result.
+缺少 `MCU-SAFETY` 或任何必需域都视为失败即拒绝式停止，而不是
+部分成功。Linux 重启、MCU 重启与总线关闭必须清除过期的
+关联状态并重新进行发现。不得根据虚拟 `wbcan` 结果推断物理状态。
 
-## 5. Machine-readable HIL record
+## 5. 机器可读的 HIL 记录
 
-Store one immutable JSON record beside the raw capture. At minimum it must
-contain:
+在原始抓取旁边保存一份不可变的 JSON 记录。至少必须包含：
 
 ```json
 {
@@ -144,25 +137,24 @@ contain:
 }
 ```
 
-`PASS` requires every field to be populated, all six domains to be observed,
-the raw capture hash to recompute, all required fault/recovery checks to pass,
-and owner review to be recorded. Missing board, adapter, capture,
-calibration, privilege or physical inputs force `NOT_EXECUTED`. A failed
-electrical, safety or protocol check remains `FAIL` and must not be erased by
-a later rerun.
+`PASS` 要求每个字段均已填写、六个域全部观测到、
+原始抓取哈希可重新计算、所有必需的故障/恢复检查均通过、
+且已记录 Owner 评审。缺少板卡、适配器、抓取、
+校准、特权或物理输入一律判为 `NOT_EXECUTED`。电气、安全或协议检查
+失败保持 `FAIL`，且不得被后续重跑抹除。
 
-## 6. Cleanup checklist
+## 6. 清理检查清单
 
-At the end of every run:
+每次运行结束时：
 
-- disarm any test-only fault controls and leave the interface in the documented
-  safe state;
-- stop the runtime, join its one worker and close the adapter fd;
-- verify no stale external records remain after shutdown;
-- remove temporary virtual interfaces and close peer/capture sockets;
-- retain the raw capture, report, command transcript and cleanup result; and
-- record any cleanup failure as `FAIL`.
+- 解除所有仅用于测试的故障控制，使接口处于文档规定的
+  安全状态；
+- 停止运行时，汇合其唯一的工作线程并关闭适配器 fd；
+- 确认关机后没有残留的过期外部记录；
+- 移除临时虚拟接口并关闭对端/抓取 socket；
+- 保留原始抓取、报告、命令记录与清理结果；以及
+- 将任何清理失败记录为 `FAIL`。
 
-The procedure is an evidence gate, not a physical result. Until a reproducible
-record exists, the physical CAN, MCU, actuator, electrical and hard-real-time
-claims remain `NOT_EXECUTED`.
+本规程是证据闸门，而不是实物结果。在可复现的
+记录出现之前，物理 CAN、MCU、执行器、电气与硬实时
+声明均保持 `NOT_EXECUTED`。

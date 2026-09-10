@@ -1,7 +1,7 @@
 {
   "issue": 90,
   "human_owner": "Quchaosheng",
-  "objective": "Migrate runtime event evidence from JSONL to SQLite with persistent checkpoints and verified backup/restore.",
+  "objective": "将运行时事件证据从 JSONL 迁移到 SQLite，具备持久检查点与经验证的备份/恢复。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/event_store.py",
     "libs/kernel/tests/**",
@@ -12,20 +12,20 @@
   "read_only_paths": ["interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "SQLite stores strict events and checkpoints across restart",
-    "strict JSONL migration validates before writing",
-    "snapshot restore verifies schema, checksum, integrity, and event count before atomic replacement",
-    "corrupt, torn, duplicate, mixed-run, and sequence-invalid data fails closed",
-    "a repeatable benchmark reports append and replay throughput"
+    "SQLite 跨重启存储严格事件与检查点",
+    "严格 JSONL 迁移在写入前验证",
+    "快照恢复在原子替换之前验证 schema、校验和、完整性与事件计数",
+    "损坏、撕裂、重复、混合运行与序列无效的数据失败即拒绝",
+    "可重复的基准测试报告追加与回放吞吐"
   ],
   "commands": [
     "python3 libs/kernel/tests/benchmark_event_store.py",
     "python3 -m pytest tests/unit/test_kernel_event_store.py libs/kernel/tests -q"
   ],
-  "evidence": ["SQLite restart/checkpoint assertions", "backup checksum assertions", "benchmark output"],
+  "evidence": ["SQLite 重启/检查点断言", "备份校验和断言", "基准测试输出"],
   "stop_conditions": [
-    "a PostgreSQL driver or DSN is required",
-    "cross-process locking or distributed retention is required",
-    "schema/interface changes are required"
+    "需要 PostgreSQL 驱动或 DSN",
+    "需要跨进程锁或分布式留存",
+    "需要 schema/接口变更"
   ]
 }

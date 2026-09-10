@@ -1,39 +1,39 @@
-# Secure review standard
+# 安全评审标准
 
-## Review inputs
+## 评审输入
 
-Every review identifies the change owner, affected trust boundary, data class, dependencies, secrets/permissions, failure mode, tests, and evidence. Review the diff and generated artifacts; never accept a green check without understanding what it measured.
+每次评审都需识别变更 Owner、受影响的信任边界、数据类别、依赖、密钥/权限、失败模式、测试与证据。评审 diff 与生成的产物；绝不在不理解绿色勾号测量了什么的情况下接受它。
 
-## Required checks
+## 必需检查
 
-| Change type | Required review |
+| 变更类型 | 必需评审 |
 |---|---|
-| Python or service logic | CodeQL, Ruff correctness rules, behavior tests, input/error-path review |
-| dependency or action | dependency review, immutable action pin, license/source review, exit plan |
-| container or deployment | non-root/read-only/capability/network/secret review, image smoke test, SBOM |
-| model/runtime boundary | host allowlist, credential rejection, schema validation, no raw control authority |
-| interface or contract | three-owner approval, producer/consumer review, matching Pydantic model, `make contract` |
-| dashboard or logs | read-only HTTP boundary, output encoding, sensitive-data review, write-method rejection |
-| robot/control or firmware | human owner authorization and path-specific safety tests; outside routine AI write scope |
+| Python 或服务逻辑 | CodeQL、Ruff 正确性规则、行为测试、输入/错误路径评审 |
+| 依赖或 action | 依赖评审、不可变 action 固定、许可证/来源评审、退出计划 |
+| 容器或部署 | 非 root/只读/capability/网络/密钥评审、镜像冒烟测试、SBOM |
+| 模型/运行时边界 | 主机 allowlist、凭据拒绝、schema 验证、无原始控制授权 |
+| 接口或契约 | 三方 Owner 批准、生产者/消费者评审、匹配的 Pydantic 模型、`make contract` |
+| 看板或日志 | 只读 HTTP 边界、输出编码、敏感数据评审、写入方法拒绝 |
+| robot/control 或固件 | 人类 Owner 授权与路径特定安全测试；在常规 AI 写入范围之外 |
 
-## Reviewer checklist
+## 评审者清单
 
-- Validate all externally controlled input before use; fail closed on malformed, missing, duplicate, or ambiguous identity.
-- Preserve dispatch state, device state, verification state, and evidence separately.
-- Avoid shell construction, unsafe deserialization, path traversal, unrestricted URLs, and broad exception suppression.
-- Keep credentials out of command lines, logs, exceptions, fixtures, images, and artifacts.
-- Use minimal workflow/job permissions and immutable third-party action commits.
-- Test denied and degraded paths, not only the happy path.
-- Confirm logs support incident reconstruction without exposing secrets or unnecessary personal data.
-- Check that a fixture, mock, screenshot, or successful validator is not mislabeled as physical evidence.
+- 使用前验证所有外部控制的输入；畸形、缺失、重复或歧义身份时失败即拒绝。
+- 分开保留分发状态、设备状态、验证状态与证据。
+- 避免 shell 拼接、不安全反序列化、路径穿越、不受限 URL 与宽泛异常吞没。
+- 凭据不进命令行、日志、异常、固定装置、镜像与产物。
+- 使用最小工作流/任务权限与不可变三方 action commit。
+- 测试被拒绝与降级路径，而不只是正常路径。
+- 确认日志支持事件重建，同时不暴露密钥或不必要的个人数据。
+- 检查固定装置、mock、截图或通过的验证器没有被错误标记为物理证据。
 
-## Severity and release response
+## 严重度与发布响应
 
-| Severity | Example | Response |
+| 严重度 | 示例 | 响应 |
 |---|---|---|
-| critical | unauthenticated raw robot control, secret exfiltration, false-completion bypass | contain immediately; block release and affected deployment |
-| high | privilege escalation, remote code execution, evidence tampering, known exploitable dependency | fix or obtain documented human exception before release |
-| medium | bounded information disclosure or hardening gap with prerequisites | owner and due date required; evaluate release context |
-| low | defense-in-depth improvement with no demonstrated impact | backlog with rationale and review date |
+| critical | 未认证原始机器人控制、密钥外泄、虚假完成绕过 | 立即遏制；阻断发布与受影响部署 |
+| high | 权限提升、远程代码执行、证据篡改、已知可利用依赖 | 发布前修复或取得文档化人工例外 |
+| medium | 有前置条件的有界信息泄露或加固缺口 | 要求 Owner 与截止日期；评估发布上下文 |
+| low | 无实际影响的纵深防御改进 | 进入 backlog 并附理由与评审日期 |
 
-Risk acceptance records the finding, affected versions, compensating controls, owner, approver, expiry, and retest date. AI tools cannot accept risk.
+风险接受记录问题、受影响版本、补偿控制、Owner、批准人、有效期与复测日期。AI 工具不能接受风险。

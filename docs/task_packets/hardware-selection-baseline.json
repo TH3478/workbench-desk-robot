@@ -1,7 +1,7 @@
 {
   "issue": "HARDWARE-SELECTION-BASELINE",
   "human_owner": "Quchaosheng",
-  "objective": "Align the purchasable hardware selection baseline with the authoritative Revision D four-module holonomic mechanical envelope without claiming supplier or physical validation.",
+  "objective": "使可采购硬件选型基线与权威的 Revision D 四模块全向机械包络对齐，且不声称供应商或物理验证。",
   "allowed_paths": [
     "hardware/mechanical/design-spec.json",
     "hardware/mechanical/README.md",
@@ -15,11 +15,11 @@
   "read_only_paths": ["robot/control/**", "firmware/**", "interfaces/**"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "product baseline uses four independent 140 mm steer-drive modules and no passive support casters",
-    "arm and lift requirements match the full-system structure",
-    "candidates remain explicitly unapproved until supplier, safety, and physical evidence closes"
+    "产品基线使用四个独立的 140 mm 转向驱动模块，且无被动支撑脚轮",
+    "机械臂与升降需求与全系统结构匹配",
+    "在供应商、安全与物理证据闭合之前，候选保持显式未批准"
   ],
   "commands": ["python -m pytest tests/hardware/test_engineering_packages.py::MechanicalPackageTests -q"],
-  "evidence": ["pytest output", "diff review of candidate and release blockers"],
-  "stop_conditions": ["supplier drawing conflict", "safety implication", "physical validation represented as complete"]
+  "evidence": ["pytest 输出", "候选与发布阻塞项的 diff 评审"],
+  "stop_conditions": ["供应商图纸冲突", "安全隐患", "物理验证被表述为已完成"]
 }

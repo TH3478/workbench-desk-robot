@@ -1,7 +1,7 @@
 {
   "issue": "holonomic-mobile-base",
   "human_owner": "Quchaosheng",
-  "objective": "Replace the visually fixed enclosed base with a connected four-module steer-drive chassis that clearly supports autonomous forward, lateral, diagonal, and rotate-in-place motion while retaining retractable stabilizers for manipulation.",
+  "objective": "用相互连接的四模块转向驱动底盘替换视觉上固定的封闭底座，使其明确支持自主的前进、横向、对角与原地旋转运动，同时保留用于操作的可回缩稳定支腿。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "tests/hardware/test_engineering_packages.py",
@@ -12,12 +12,12 @@
   "read_only_paths": ["robot/**", "interfaces/**", "firmware/**", "hardware/pcb/**"],
   "forbidden": ["robot/control/**", "firmware/**", "services/**", "interfaces/**"],
   "acceptance": [
-    "the base has four independent steer-drive modules with visible connected wheel, fork, steering bearing, and chassis load paths",
-    "the declared motion modes include longitudinal, lateral, diagonal, and rotate-in-place movement",
-    "stabilizers are retracted during navigation and deploy only for stationary manipulation",
-    "SCAD, STEP, engineering drawings, interactive render, campaign image, BOM, and assembly sequence agree on the holonomic base",
-    "autonomous navigation software and physical drive validation remain explicitly incomplete",
-    "mechanical tests, Ruff, and Task Packet validation pass"
+    "底座具有四个独立的转向驱动模块，带有可见且相连的车轮、转向叉、转向轴承与底盘承载路径。",
+    "声明的运动模式包括纵向、横向、对角与原地旋转运动。",
+    "稳定支腿在导航期间回缩，仅在静止操作时展开。",
+    "SCAD、STEP、工程图、交互式渲染、宣传图、BOM 与装配顺序在全向底座上保持一致。",
+    "自主导航软件与物理驱动验证保持显式的不完整状态。",
+    "机械测试、Ruff 与任务包校验通过。"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -35,9 +35,9 @@
     "docs/assets/workbench-home-robot-premium.png"
   ],
   "stop_conditions": [
-    "the chassis change requires inventing finished navigation, motor-control, localization, or safety performance",
-    "wheel modules cannot maintain guarded steering hardware and a connected structural path",
-    "the base would lose the brake and stabilizer requirements needed for dual-arm manipulation",
-    "the visual would imply physical drive validation that has not occurred"
+    "底盘变更需要凭空捏造已完成的导航、电机控制、定位或安全性能。",
+    "车轮模块无法保持受保护的转向硬件与相连的结构路径。",
+    "底座将失去双臂操作所需的制动与稳定支腿要求。",
+    "视觉效果将暗示并未发生过的物理驱动验证。"
   ]
 }

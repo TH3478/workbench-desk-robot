@@ -1,25 +1,17 @@
-# Inspection and maintenance
+# 检查与维护
 
-Maintenance intervals are finalized from supplier instructions, duty cycle, pilot
-wear, and field data. The table below is a conservative planning baseline.
+维护周期根据供应商说明、工作周期、试运行磨损和现场数据最终确定。下表是保守的规划基线。
 
-| Interval | Work |
+| 周期 | 工作内容 |
 |---|---|
-| before shift | visual condition, cables, guards, tools, battery, E-stop, alarms |
-| weekly | fastener witness marks, cable chains, connectors, fans/filters, logs |
-| monthly | brake/anchor, arm backlash indicators, harness abrasion, spare inventory |
-| six months | safety exerciser calibration, E-stop timing, battery health review |
-| annual | full preventive maintenance, calibrated electrical and mechanical checks |
+| 班前 | 外观状态、线缆、防护装置、工具、电池、E-stop、告警 |
+| 每周 | 紧固件见证标记、拖链、连接器、风扇/过滤器、日志 |
+| 每月 | 制动器/锚固件、机械臂间隙指示、线束磨损、备件库存 |
+| 每六个月 | 安全演练器校准、E-stop 时序、电池健康回顾 |
+| 每年 | 全面预防性维护、经校准的电气与机械检查 |
 
-De-energize, isolate, verify zero energy, restrain stored/gravity energy, and apply
-site lockout/tagout before opening covers or entering a hazardous area. Battery,
-mains, safety, and arm service follows manufacturer procedures. Replacement parts
-must match the approved MPN/revision or complete engineering change control.
+在打开盖板或进入危险区域之前，断电、隔离、验证零能量、约束储存/重力能量，并执行现场上锁/挂牌（lockout/tagout）。电池、市电、安全和机械臂的维修遵循制造商规程。替换零件必须与批准的 MPN/修订版本一致，或完成工程变更控制。
 
-Every maintenance record names the unit, hours, revision, technician, date, work,
-parts/lot, tools and calibration, before/after evidence, test results, and release
-authority. After work, repeat all acceptance gates affected by the intervention.
+每条维护记录都要注明单元、运行小时数、修订版本、技术员、日期、工作内容、零件/批次、工具与校准、前后证据、测试结果和发布权限。工作完成后，重做所有受该干预影响的验收闸门。
 
-Quarantine worn, counterfeit-suspect, damaged, overheated, contaminated, or unknown
-parts. Do not return a unit to service with an open high-RPN action, missing guard,
-failed safety test, expired calibration, or unresolved battery condition.
+隔离磨损、疑似假冒、损坏、过热、受污染或来源不明的零件。在存在未关闭的高 RPN 事项、缺失防护装置、失败的安全测试、过期的校准或未解决的电池状况时，不得让单元恢复服役。

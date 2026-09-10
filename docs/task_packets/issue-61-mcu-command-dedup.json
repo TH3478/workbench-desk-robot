@@ -1,7 +1,7 @@
 {
   "issue": 61,
   "human_owner": "TH3478",
-  "objective": "Implement allocation-free MCU ordinary-command replay protection with deterministic duplicate ACK replay, fixed-width serial wrap handling, a trusted startup-session gate, and shared Host/QEMU boundary evidence.",
+  "objective": "实现无动态分配的 MCU 普通命令回放防护：确定性的重复 ACK 回放、定宽序列号回绕处理、可信的启动会话闸门与共享的 Host/QEMU 边界证据。",
   "allowed_paths": [
     "firmware/mcu/core/command_dedup.h",
     "firmware/mcu/core/command_dedup.c",
@@ -42,16 +42,16 @@
     ".github/**"
   ],
   "acceptance": [
-    "Ordinary command IDs use the frozen 15-bit serial and half-range comparison; max-minus-one, max, zero and one boundary vectors are deterministic.",
-    "The first structurally valid serial in a trusted session dispatches its state-machine event exactly once and produces one correlated ordinary ACK.",
-    "A retained command with matching ID and opcode replays the cached semantic ACK, echoes a non-decreasing retry_count and never dispatches the ordinary event again.",
-    "A retained command ID with a different opcode, a decreasing or wrapped retry_count, and a stale or ambiguous serial fail closed with duplicate_frame and no ordinary side effect.",
-    "The fixed eight-entry replay window evicts deterministically; out-of-window traffic is rejected and no dynamic allocation is used.",
-    "A forward serial wrap clears pre-wrap replay records before accepting zero so delayed old-epoch traffic cannot be accepted as a retry.",
-    "Initialization and session close disable ordinary dispatch; only a trusted gate that confirms queued traffic was discarded opens a fresh session, and an ordinary trusted reset does not erase replay history.",
-    "Structurally valid STOP traffic continues through the independent watchdog/STOP path and cannot be suppressed by a full ordinary-command window.",
-    "Only serially new accepted activity may refresh the software watchdog; duplicate, retry, conflict and stale traffic cannot extend its deadline.",
-    "The same exhaustive command-dedup tests run unchanged on Host and freestanding QEMU without vendor headers, floating point or hardware register access."
+    "普通命令 ID 使用冻结的 15 位序列号与半区间比较；max-minus-one、max、zero 与 one 边界向量是确定性的。",
+    "可信会话中第一个结构有效的序列号恰好派发其状态机事件一次，并产生一个关联的普通 ACK。",
+    "保留命令中 ID 与 opcode 匹配的重放缓存的语义 ACK，回显非递减的 retry_count，且绝不再次派发普通事件。",
+    "保留命令 ID 配不同 opcode、递减或回绕的 retry_count、过期或歧义序列号时，以 duplicate_frame 失败即拒绝且无普通副作用。",
+    "固定的 8 条目回放窗口确定性驱逐；窗口外流量被拒绝且不使用动态分配。",
+    "序列号正向回绕在接受 zero 之前清除回绕前回放记录，使延迟的旧纪元流量不能被当作重试接受。",
+    "初始化与会话关闭禁用普通派发；只有确认排队流量已被丢弃的可信闸门才能开启新会话，且普通可信复位不清除回放历史。",
+    "结构有效的 STOP 流量继续走独立的 watchdog/STOP 路径，且不能被填满的普通命令窗口抑制。",
+    "只有序列号上新的已接受活动可以刷新软件 watchdog；重复、重试、冲突与过期流量不能延长其截止时间。",
+    "同一套穷举 command-dedup 测试在 Host 与独立运行的 QEMU 上原样运行，不使用厂商头文件、浮点或硬件寄存器访问。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-61-mcu-command-dedup.json",
@@ -66,21 +66,21 @@
     "make context-check"
   ],
   "evidence": [
-    "Issue #61 Task Packet validation output.",
-    "Host command-dedup assertion and failure counts, including exhaustive serial boundary vectors.",
-    "ASan/UBSan output for the shared MCU corpus.",
-    "QEMU output from the same command-dedup test source.",
-    "verify-no-fp and size-check output for the freestanding image.",
-    "Repository test, contract, scenario and context-check output.",
-    "Final changed-path review and git diff --check proving the Task Packet boundary."
+    "Issue #61 任务包校验输出。",
+    "Host command-dedup 断言与失败计数，含穷举序列号边界向量。",
+    "共享 MCU 语料库的 ASan/UBSan 输出。",
+    "来自同一 command-dedup 测试源码的 QEMU 输出。",
+    "独立运行镜像的 verify-no-fp 与 size-check 输出。",
+    "仓库 test、contract、scenario 与 context-check 输出。",
+    "最终变更路径评审与证明任务包边界的 git diff --check。"
   ],
   "stop_conditions": [
-    "The implementation requires changing frozen JSON Schema, Pydantic models, Wire V1 numbers or logical protocol semantics.",
-    "An on-wire boot/session epoch or reset opcode would be required.",
-    "STOP would need to wait behind or consume the ordinary replay window.",
-    "The implementation requires a board HAL, vendor registers, motor control, host transport changes or physical CAN claims.",
-    "The configured host in-flight/retry budget cannot fit the fixed replay window.",
-    "The same core and test source cannot compile unchanged for Host and QEMU.",
-    "The implementation requires modifying .gitignore or unrelated local changes."
+    "实现需要变更冻结的 JSON Schema、Pydantic 模型、Wire V1 数值或逻辑协议语义。",
+    "需要新增线上 boot/session 纪元或 reset opcode。",
+    "STOP 需要排队等待或占用普通回放窗口。",
+    "实现需要板级 HAL、厂商寄存器、电机控制、主机传输变更或物理 CAN 声称。",
+    "配置的主机 in-flight/重试预算无法容纳固定回放窗口。",
+    "同一核心与测试源码无法原样为 Host 与 QEMU 编译。",
+    "实现需要修改 .gitignore 或包含无关本地变更。"
   ]
 }

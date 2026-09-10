@@ -1,7 +1,7 @@
 {
   "issue": 223,
   "human_owner": "Quchaosheng",
-  "objective": "Normalize malformed numeric and regular-expression schema validation failures to SchemaValidationError so the kernel broker remains fail-closed.",
+  "objective": "把畸形的数值与正则表达式 schema 校验失败统一规范为 SchemaValidationError，使内核代理保持失败即拒绝。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/schema_compiler.py",
     "tests/unit/test_kernel_schema_compiler.py",
@@ -18,13 +18,13 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "huge Python integers used with the supported number type do not leak OverflowError",
-    "NaN and positive or negative infinity are rejected with SchemaValidationError",
-    "malformed minimum and maximum bounds are reported as SchemaValidationError",
-    "malformed regular-expression patterns are reported as SchemaValidationError",
-    "malformed anyOf, not, and if branches are not treated as value mismatches",
-    "CommunicationBroker rejects malformed numeric payloads without appending to message_log",
-    "regression tests cover huge integers, non-finite floats, malformed bounds, malformed combinator branches, and broker rejection"
+    "与受支持数字类型一起使用的超大 Python 整数不会泄漏 OverflowError。",
+    "NaN 与正负无穷大以 SchemaValidationError 被拒绝。",
+    "畸形的最小值与最大值界限以 SchemaValidationError 报告。",
+    "畸形的正则表达式模式以 SchemaValidationError 报告。",
+    "畸形的 anyOf、not 与 if 分支不会被当作取值不匹配处理。",
+    "CommunicationBroker 拒绝畸形的数值负载，且不追加到 message_log。",
+    "回归测试覆盖超大整数、非有限浮点数、畸形界限、畸形组合器分支与代理拒绝。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-223-schema-validation-error.json",
@@ -36,15 +36,15 @@
     "git diff --check"
   ],
   "evidence": [
-    "focused validator and broker regression test output",
-    "full repository test output",
-    "contract, scenario, and context validation output",
-    "clean whitespace diff check and Task Packet validation output"
+    "聚焦的验证器与代理回归测试输出。",
+    "完整仓库测试输出。",
+    "契约、场景与上下文校验输出。",
+    "干净的空白差异检查输出与任务包校验输出。"
   ],
   "stop_conditions": [
-    "an interface schema change is required",
-    "a write outside the allowed paths is required",
-    "robot-control or firmware changes are required",
-    "the broker boundary requires catching unrelated unexpected exceptions"
+    "需要修改接口 schema。",
+    "需要在允许路径之外进行写入。",
+    "需要修改 robot-control 或固件。",
+    "代理边界需要捕获无关的意外异常。"
   ]
 }

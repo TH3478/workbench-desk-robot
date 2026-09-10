@@ -1,7 +1,7 @@
 {
   "issue": 190,
   "human_owner": "Quchaosheng",
-  "objective": "Reject duplicate JSON object keys before local or remote Dashboard event-source data is trusted.",
+  "objective": "在本地或远程看板事件源数据被信任之前，拒绝重复的 JSON 对象键。",
   "allowed_paths": [
     "services/backend/workbench_backend/read_model.py",
     "tests/unit/test_dashboard_backend.py",
@@ -16,10 +16,10 @@
   ],
   "forbidden": ["interfaces/**", "robot/control/**", "firmware/**"],
   "acceptance": [
-    "local JSONL rejects top-level and nested duplicate object keys before caching or readiness",
-    "remote JSON rejects top-level and nested duplicate object keys before projection or display",
-    "duplicate-key failures retain the existing ReadModelError boundary without leaking response bodies",
-    "valid local and split-host behavior remains unchanged"
+    "本地 JSONL 在缓存或就绪之前拒绝顶层与嵌套的重复对象键。",
+    "远程 JSON 在投影或展示之前拒绝顶层与嵌套的重复对象键。",
+    "重复键失败保留现有 ReadModelError 边界，且不泄漏响应体。",
+    "合法的本地行为与分离主机行为保持不变。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_dashboard_backend.py tests/unit/test_multi_host.py -v",
@@ -32,15 +32,15 @@
     "make context-check"
   ],
   "evidence": [
-    "focused local and remote duplicate-key test output",
-    "full repository test output",
-    "Task Packet boundary validation",
-    "contract scenario and context check output"
+    "聚焦的本地与远程重复键测试输出。",
+    "完整仓库测试输出。",
+    "任务包边界校验。",
+    "契约、场景与上下文检查输出。"
   ],
   "stop_conditions": [
-    "an interfaces schema change is required",
-    "a dependency or generalized JSON framework is required",
-    "a write or control endpoint is requested",
-    "a modification outside allowed_paths is required"
+    "需要修改 interfaces 中的 schema。",
+    "需要引入依赖或通用 JSON 框架。",
+    "要求提供写入或控制端点。",
+    "需要在 allowed_paths 之外进行修改。"
   ]
 }

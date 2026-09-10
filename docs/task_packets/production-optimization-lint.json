@@ -1,7 +1,7 @@
 {
   "issue": "production-optimization-lint",
   "human_owner": "Quchaosheng",
-  "objective": "Restore the repository Ruff gate after the production optimization modules landed, without changing their behavior.",
+  "objective": "在生产优化模块落地后恢复仓库的 Ruff 闸门，且不改变其行为。",
   "allowed_paths": [
     "libs/application/workbench/application/monitoring.py",
     "libs/application/workbench/application/system_manager_v2.py",
@@ -18,9 +18,9 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "Ruff check and format gates pass",
-    "the repository test suite passes",
-    "no production behavior is changed"
+    "Ruff check 与 format 闸门通过。",
+    "仓库测试套件通过。",
+    "不改变任何生产行为。"
   ],
   "commands": [
     "python -m ruff check .",
@@ -28,13 +28,13 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "Ruff output",
-    "repository test output",
-    "scoped diff"
+    "Ruff 输出。",
+    "仓库测试输出。",
+    "限定范围的 diff。"
   ],
   "stop_conditions": [
-    "behavioral changes are required",
-    "interface schema changes are required",
-    "robot-control or firmware changes are required"
+    "需要行为变更。",
+    "需要修改接口 schema。",
+    "需要修改 robot-control 或固件。"
   ]
 }

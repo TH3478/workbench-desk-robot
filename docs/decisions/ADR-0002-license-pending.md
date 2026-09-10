@@ -1,9 +1,9 @@
-# ADR-0002: Project license requires owner approval
+# ADR-0002: 项目许可证需要 Owner 批准
 
-## Status
+## 状态
 
-Pending.
+待定。
 
-## Decision needed
+## 所需决策
 
-The Product Owner must choose the repository license before public Release. Do not assume code, model-weight or asset permissions are the same. Until approved, external users have no implied permission beyond applicable law.
+Product Owner 必须在公开 Release 之前选择仓库许可证。不要假设代码、模型权重或资产的许可相同。在批准之前，除适用法律外，外部用户没有任何隐含许可。

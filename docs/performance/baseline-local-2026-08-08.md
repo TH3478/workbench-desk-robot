@@ -35,8 +35,8 @@
 
 ## 资源基线
 
-dashboard 容器 5 次、间隔 0.5s 的 `docker stats`：CPU P95 `2.12%`，内存最大 `14.0 MiB`（`14,701,036` bytes）。采样接口是 `/api/runs`，容器名称和原始样本保存在被忽略的 `runs/performance/resources.json`。
+dashboard 容器 5 次、间隔 0.5s 的 `docker stats`：CPU P95 `2.12%`，内存最大 `14.0 MiB`（`14,701,036` 字节）。采样接口是 `/api/runs`，容器名称和原始样本保存在被忽略的 `runs/performance/resources.json`。
 
 ## 本地模型
 
-Ollama `qwen2.5:0.5b`（397MB）在 CPU 上完成一次受限路由约 `1.3–2.7s`。模型只返回五类任务路由，确定性 builder 才生成 `TaskGraph`；`model-runtime` 网络为 Docker `internal`。模型权重许可仍需在正式发布前由负责人审核。
+Ollama `qwen2.5:0.5b`（397MB）在 CPU 上完成一次受限路由约 `1.3–2.7s`。模型只返回五类任务路由，确定性构建器才生成 `TaskGraph`；`model-runtime` 网络为 Docker `internal`。模型权重许可仍需在正式发布前由负责人审核。

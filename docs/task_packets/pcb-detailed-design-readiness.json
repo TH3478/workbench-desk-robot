@@ -1,7 +1,7 @@
 {
   "issue": "130",
   "human_owner": "Quchaosheng",
-  "objective": "Complete the reproducible eight-layer detailed PCB layout and keep procurement and order release blocked until signed and physical evidence exists.",
+  "objective": "完成可复现的八层详细 PCB 布局，并在签名与物理证据存在之前保持采购与订单发布阻塞。",
   "allowed_paths": [
     "hardware/pcb/**",
     "hardware/procurement/bom.csv",
@@ -11,14 +11,14 @@
   "read_only_paths": ["interfaces/**", "hardware/procurement/generated/**"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "all procurement-controlled grouped BOM lines have an approval owner and evidence slots",
-    "release remains blocked until every row has an approved MPN, approver, date, and evidence reference",
-    "detailed-schematic status requires component symbols and wired connectivity rather than architecture text alone",
-    "the canonical eight-layer PCB is reproducible from the generator and checked routing session",
-    "KiCad DRC and ERC report zero violations and the connectivity and layout audits pass",
-    "oscillator load capacitors have explicit local ground returns and the protected Jetson output and exposed pad have documented current and thermal transfer geometry",
-    "CAN routing uses paired same-layer paths with matched topology while supplier field solving and impedance-coupon evidence remain open",
-    "no physical bring-up or safety approval is inferred"
+    "所有受采购控制的成组 BOM 行都有批准 Owner 与证据槽位",
+    "在每行都有已批准 MPN、批准人、日期与证据引用之前，发布保持阻塞",
+    "详细原理图状态要求元件符号与连线连通性，而不仅是架构文本",
+    "规范八层 PCB 可由生成器与经检查的布线会话复现",
+    "KiCad DRC 与 ERC 报告零违规，且连通性与布局审计通过",
+    "晶振负载电容具有显式的局部接地回路，受保护的 Jetson 输出与裸露焊盘具有成文的电流与热传递几何",
+    "CAN 布线使用拓扑匹配的成对同层路径，而供应商场求解与阻抗试片证据保持未完成",
+    "不推断任何物理启动调试或安全批准"
   ],
   "commands": [
     "<kicad>/bin/python hardware/pcb/tools/generate_kicad_board.py --session hardware/pcb/kicad/controller.ses",
@@ -33,12 +33,12 @@
     "hardware/pcb/generated/connectivity_report.json",
     "hardware/pcb/generated/layout_report.json",
     "hardware/pcb/generated/release_readiness.json",
-    "PCB package test output"
+    "PCB 包测试输出"
   ],
   "stop_conditions": [
-    "an approver, approved orderable MPN, or datasheet revision is missing",
-    "KiCad bundled Python is unavailable",
-    "a generated candidate has any DRC violation, unconnected pad, connectivity mismatch, or failed layout hard gate",
-    "physical prototype measurements or safety certification are required"
+    "缺少批准人、已批准的可订购 MPN 或数据手册版本",
+    "KiCad 内置 Python 不可用",
+    "生成的候选存在任何 DRC 违规、未连接焊盘、连通性不匹配或布局硬闸门失败",
+    "需要物理原型测量或安全认证"
   ]
 }

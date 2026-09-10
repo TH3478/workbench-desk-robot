@@ -1,34 +1,34 @@
-# Risk management
+# 风险管理
 
-[`risks.csv`](risks.csv) is the source of truth. This page defines how the register is reviewed and escalated.
+[`risks.csv`](risks.csv) 是唯一事实来源。本页定义登记册如何评审与升级。
 
-## Scoring and response
+## 评分与响应
 
-| Probability / impact | Response |
+| 概率 / 影响 | 响应 |
 |---|---|
-| critical impact at any probability | review weekly; active owner and contingency required; blocks release while triggered |
-| high probability and high impact | review weekly; mitigation due within seven days |
-| medium | review at least monthly and at every phase gate |
-| low | monitor; close only with evidence or an explicit acceptance decision |
+| 任意概率下的致命影响 | 每周评审；需要现职负责人与应急预案；触发期间阻断发布 |
+| 高概率且高影响 | 每周评审；七天内给出缓解措施 |
+| 中等 | 至少每月及每个阶段闸门评审一次 |
+| 低 | 监控；仅在证据或明确的接受决策下关闭 |
 
-Allowed status values are `open`, `mitigating`, `monitoring`, `accepted`, and `closed`. `accepted` requires a named human decision and expiry/review date. Closing a risk requires an evidence link; elapsed time alone is not evidence.
+允许的状态值为 `open`、`mitigating`、`monitoring`、`accepted` 与 `closed`。`accepted` 需要指名的人类决策与到期/复审日期。关闭风险需要证据链接；仅时间流逝不是证据。
 
-## Active release blockers
+## 现役发布阻断项
 
-| Risk | Immediate mitigation | Escalation |
+| 风险 | 即时缓解 | 升级路径 |
 |---|---|---|
-| R-001 | exercise merged PR #21 on the next human-owned tag and retain its workflow result | no release-readiness claim until a post-fix tag succeeds |
-| R-002 | freeze the formal Gazebo command and raw-log layout | P1 gate remains stopped without 36 eligible runs and independent audit |
-| R-003 | resolve each hardware gate with physical/commercial evidence | keep `RELEASE_BLOCKED`; do not infer results from planning reports |
-| R-004 | obtain quotes, AVL approval, and incoming inspection | keep `ORDER_RELEASE_BLOCKED` |
-| R-005 | schedule three unique external participants | remove external reproducibility claims if records remain absent |
-| R-007 | enforce same-PR schema/model updates, three-owner review, and contract validation | reject the change before merge if any owner or consumer is missing |
-| R-009 | keep merged PR #25 scans green and decide required-check policy | unresolved high/critical findings block release |
+| R-001 | 在下一个人类主导的 tag 上演练已合并的 PR #21 并保留其工作流结果 | 修复后的 tag 成功之前，不得声明发布就绪 |
+| R-002 | 冻结正式 Gazebo 命令与原始日志布局 | 没有 36 次合格运行与独立审计，P1 闸门保持停止 |
+| R-003 | 以物理/商业证据解决每个硬件闸门 | 保持 `RELEASE_BLOCKED`；不得从计划报告推断结果 |
+| R-004 | 获取报价、AVL 批准与来料检验 | 保持 `ORDER_RELEASE_BLOCKED` |
+| R-005 | 安排三名唯一外部参与者 | 记录仍缺失则删除外部可复现性声明 |
+| R-007 | 执行同 PR 的 schema/模型更新、三位 Owner 评审与契约验证 | 缺少任何 Owner 或消费方即在合并前拒绝变更 |
+| R-009 | 保持已合并 PR #25 的扫描绿色并决定必需检查策略 | 未解决的高/致命发现阻断发布 |
 
-## Weekly review procedure
+## 每周评审流程
 
-1. Check every trigger against the latest eligible evidence.
-2. Confirm owner, next review date, mitigation progress, and contingency readiness.
-3. Add new risks before discussing schedule optimism.
-4. Record any acceptance, closure, or scope change in the decision log.
-5. Update the status dashboard only after the register and evidence agree.
+1. 对照最新合格证据检查每项触发条件。
+2. 确认负责人、下次评审日期、缓解进度与应急预案就绪度。
+3. 在讨论进度乐观情绪之前新增风险。
+4. 在决策日志中记录任何接受、关闭或范围变更。
+5. 仅当登记册与证据一致后更新状态看板。

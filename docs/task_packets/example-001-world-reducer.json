@@ -1,7 +1,7 @@
 {
   "issue": 1,
   "human_owner": "REPLACE_WITH_GITHUB_HANDLE",
-  "objective": "Apply ordered WorldEvents deterministically.",
+  "objective": "确定性地应用有序的 WorldEvents。",
   "allowed_paths": [
     "services/world_model/**",
     "tests/unit/**"
@@ -14,20 +14,20 @@
     "firmware/**"
   ],
   "acceptance": [
-    "same stream produces same state hash",
-    "duplicate event is idempotent"
+    "相同的流产生相同的状态哈希",
+    "重复事件是幂等的"
   ],
   "commands": [
     "make test",
     "make contract"
   ],
   "evidence": [
-    "unit test output",
-    "before and after state hash"
+    "单元测试输出",
+    "前后状态哈希"
   ],
   "stop_conditions": [
-    "interface conflict",
-    "missing fixture",
-    "safety implication"
+    "接口冲突",
+    "缺少固定装置",
+    "安全影响"
   ]
 }

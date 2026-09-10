@@ -1,7 +1,7 @@
 {
   "issue": "HW1",
   "human_owner": "TH3478",
-  "objective": "Extract deterministic motor-limit configuration from an expanded URDF without inventing hardware parameters that the URDF does not declare.",
+  "objective": "从展开后的 URDF 中提取确定性的电机限位配置，而不凭空发明 URDF 未声明的硬件参数。",
   "allowed_paths": [
     "Dockerfile",
     "docs/task_packets/hw1-urdf-parser.json",
@@ -24,10 +24,10 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "an expanded official UR5e URDF yields exactly six requested arm joints with documented effort, velocity and position limits",
-    "mechanical reduction is emitted only when an explicit URDF transmission declares it",
-    "missing, duplicate, non-finite or malformed motor parameters fail closed",
-    "the generated YAML is deterministic for the same URDF and joint selection"
+    "展开后的官方 UR5e URDF 恰好产出六个所需机械臂关节，并带有文档化的力矩、速度与位置限位。",
+    "仅当 URDF 中显式的 transmission 声明减速比时，才输出机械减速比。",
+    "缺失、重复、非有限或畸形的电机参数一律失败即拒绝。",
+    "对于相同的 URDF 与关节选择，生成的 YAML 是确定性的。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/hw1-urdf-parser.json",
@@ -40,14 +40,14 @@
     "make context-check"
   ],
   "evidence": [
-    "HW1 unit-test output",
-    "docs/hardware/hw1-ur5e-extraction.md: official UR5e xacro extraction command, source references and output hashes",
-    "generated deterministic motor configuration"
+    "HW1 单元测试输出。",
+    "docs/hardware/hw1-ur5e-extraction.md: 官方 UR5e xacro 提取命令、来源引用与输出哈希。",
+    "生成的确定性电机配置。"
   ],
   "stop_conditions": [
-    "the official description does not expose six requested arm joints",
-    "a requested value would need to be guessed rather than read from controlled input",
-    "the implementation would require a write under interfaces, firmware or robot/control",
-    "the requested source is not an expanded URDF document"
+    "官方描述未暴露六个所需机械臂关节。",
+    "某个所需数值将需要猜测，而不是从受控输入中读取。",
+    "实现将需要在 interfaces、firmware 或 robot/control 下进行写入。",
+    "所请求的源不是展开后的 URDF 文档。"
   ]
 }

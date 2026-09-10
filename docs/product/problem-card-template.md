@@ -1,61 +1,60 @@
-# Problem Card Template
+# 问题卡模板
 
-Copy this template for each candidate problem. Keep identifying information out
-of the repository; use an opaque participant reference.
+为每个候选问题复制本模板。不要把可识别身份的信息放进仓库；使用不透明的参与者引用。
 
-## Identity
+## 标识
 
-- Problem ID:
-- Status: `hypothesis` / `observed` / `repeated` / `promoted` / `rejected`
-- Source reference:
-- Participant reference:
-- Persona:
-- Scenario ID/version, if known:
-- Date observed:
-- Evidence class: `user_report` / `software` / `scripted_fixture` / `gazebo` / `physical`
-- Independent participant/run count:
+- 问题 ID：
+- 状态：`hypothesis` / `observed` / `repeated` / `promoted` / `rejected`
+- 来源引用：
+- 参与者引用：
+- 人物画像：
+- 场景 ID/版本（如已知）：
+- 观察日期：
+- 证据等级：`user_report` / `software` / `scripted_fixture` / `gazebo` / `physical`
+- 独立参与者/运行数：
 
-## Evidence
+## 证据
 
-- User's words (redacted, exact quote where consent permits):
-- Recent concrete example:
-- Current workflow:
-- Failure point:
-- Frequency:
-- Impact (time, cost, risk, or blocked work):
-- Current workaround:
-- Evidence references (opaque IDs only):
+- 用户原话（脱敏；在同意允许处保留原句）：
+- 近期具体事例：
+- 当前工作流程：
+- 失败点：
+- 频率：
+- 影响（时间、成本、风险或被阻塞的工作）：
+- 当前变通方案：
+- 证据引用（仅不透明 ID）：
 
-## Interpretation
+## 解读
 
-- Job to be done:
-- Why this may be a product problem rather than a one-off request:
-- Falsification condition:
-- Proposed success condition:
-- Candidate product or documentation response:
-- Non-goals:
-- Confidence: `low` / `medium` / `high` (explain why):
+- 待完成工作（Job to be done）：
+- 为什么这可能是产品问题而不是一次性请求：
+- 证伪条件：
+- 建议的成功条件：
+- 候选的产品或文档响应：
+- 非目标：
+- 置信度：`low` / `medium` / `high`（说明原因）：
 
-## Decision
+## 决策
 
-- Priority: `P0` / `P1` / `P2` / `defer`
-- Decision: `investigate` / `prototype` / `promote-to-PRD` / `reject`
-- Decision owner:
-- Next action:
-- Due date:
-- Linked Issue/PR:
+- 优先级：`P0` / `P1` / `P2` / `defer`
+- 决策：`investigate` / `prototype` / `promote-to-PRD` / `reject`
+- 决策负责人：
+- 后续动作：
+- 截止日期：
+- 关联 Issue/PR：
 
-## Promotion checklist
+## 晋升检查清单
 
-- [ ] The problem is grounded in a recent concrete task or failure.
-- [ ] At least two independent records support `repeated`, unless an exception is recorded.
-- [ ] The proposed success condition is observable and measurable.
-- [ ] A falsification condition is explicit.
-- [ ] The proposed response has a bounded scope and named evaluator.
+- [ ] 问题根植于近期具体的任务或失败。
+- [ ] 至少两条独立记录支持 `repeated`，除非记录了例外情况。
+- [ ] 建议的成功条件可观测、可度量。
+- [ ] 证伪条件明确。
+- [ ] 建议的响应有受限的范围和具名评估者。
 
-## Privacy and evidence check
+## 隐私与证据检查
 
-- [ ] No name, email, phone, budget, raw log, or identifiable media is present.
-- [ ] Source is stored privately and referenced by an opaque ID.
-- [ ] Fact, participant opinion, and team interpretation are separated.
-- [ ] This card does not claim Gazebo or physical evidence without the applicable artifact.
+- [ ] 不含姓名、邮箱、电话、预算、原始日志或可识别身份的媒体。
+- [ ] 来源私下保存，并以不透明 ID 引用。
+- [ ] 事实、参与者观点与团队解读相互分离。
+- [ ] 在没有相应产物的情况下，本卡不得声称 Gazebo 或物理证据。

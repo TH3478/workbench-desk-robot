@@ -1,67 +1,53 @@
-# Robot BSP CAN Contract V0.1
+# Robot BSP CAN 契约 V0.1
 
-Status: logical multi-domain contract frozen for prototype integration. CAN
-controller, bitrate, transceiver, wiring and physical timing remain pending
-electrical approval.
+状态：逻辑多域契约已冻结，用于原型集成。CAN 控制器、位速率、收发器、布线与物理时序仍待
+电气审批。
 
-## Node allocation
+## 节点分配
 
-| Domain | Node ID | Reset domain | Heartbeat |
-|---|---:|---|---|
-| Linux gateway | `0x01` | Linux board | host health, 100 ms |
-| `MCU-BASE` | `0x10` | base motion | 50 ms |
-| `ARM-L-CTRL` | `0x11` | left arm | 50 ms |
-| `ARM-R-CTRL` | `0x12` | right arm | 50 ms |
-| `TOOL-L-CTRL` | `0x13` | left tool | 100 ms |
-| `TOOL-R-CTRL` | `0x14` | right tool | 100 ms |
-| `MCU-SAFETY` | `0x1F` | independent safety | 20 ms |
+| 域 | 节点 ID | 重置域 | 心跳 |
+| --- |---:|---|---|
+| Linux 网关 | `0x01` | Linux 板 | 主机健康，100 ms |
+| `MCU-BASE` | `0x10` | 底座运动 | 50 ms |
+| `ARM-L-CTRL` | `0x11` | 左机械臂 | 50 ms |
+| `ARM-R-CTRL` | `0x12` | 右机械臂 | 50 ms |
+| `TOOL-L-CTRL` | `0x13` | 左工具 | 100 ms |
+| `TOOL-R-CTRL` | `0x14` | 右工具 | 100 ms |
+| `MCU-SAFETY` | `0x1F` | 独立安全 | 20 ms |
 
-Node IDs identify control domains, not necessarily individual chips. A vendor
-arm controller may contain several internal processors but must expose one
-domain identity at this boundary.
+节点 ID 标识控制域，不一定是单个芯片。厂商机械臂控制器内部可以有多个处理器，但必须在该边界
+暴露一个域身份。
 
-## Message priority
+## 消息优先级
 
-The existing MCU Wire V1 frame kinds remain authoritative. The prototype
-arbitration layout reserves the highest-priority ranges for stop and fault
-traffic; exact bit allocation is an electrical/controller implementation gate.
+现有 MCU Wire V1 帧类型仍是权威。原型仲裁布局为 stop 与故障流量保留最高优先级区间；确切的
+位分配是电气/控制器实现闸门。
 
-| Traffic | Priority | Direction | Rule |
+| 流量 | 优先级 | 方向 | 规则 |
 |---|---|---|---|
-| STOP / stop acknowledgement | highest | Linux or safety to domain / domain to Linux | accepted from every state; idempotent; no ordinary traffic can consume its sequence space |
-| safety fault / inhibit | very high | safety/domain to Linux | latched until the documented reset cause is cleared |
-| command / acknowledgement | normal | Linux to domain / domain to Linux | bounded deadline, correlation ID, duplicate and late result handling |
-| heartbeat | high | domain to Linux | timeout enters the domain-specific degraded state |
-| telemetry | low | domain to Linux | bounded best-effort queue; drops counted, never treated as command completion |
+| STOP / 停止确认 | 最高 | Linux 或安全到域 / 域到 Linux | 从任何状态接受；幂等；任何普通流量都不能消耗其序号空间 |
+| 安全故障 / 抑制 | 很高 | 安全/域到 Linux | 锁存，直到文档化的复位原因被清除 |
+| 命令 / 确认 | 普通 | Linux 到域 / 域到 Linux | 有界期限、关联 ID、重复与迟到结果处理 |
+| 心跳 | 高 | 域到 Linux | 超时进入该域特定的降级状态 |
+| 遥测 | 低 | 域到 Linux | 有界尽力而为队列；丢弃被计数，绝不当作命令完成 |
 
-## Failure behavior
+## 故障行为
 
-- Missing `MCU-SAFETY` heartbeat: hardware safety chain remains inhibited; Linux
-  must not attempt an automatic enable.
-- Missing `MCU-BASE`, arm or tool heartbeat: that domain is faulted and its
-  commands are rejected; other domains do not infer success from its absence.
-- Linux restart: all motion domains remain disabled until fresh discovery,
-  heartbeats and an owner-authorized reset sequence complete.
-- MCU restart: boot ID changes; old acknowledgements and telemetry cannot be
-  correlated to the new boot.
-- CAN bus-off: expose SocketCAN restart state, retain fault counters and keep
-  the affected domain inhibited until recovery is confirmed.
-- Duplicate command: return the original correlated result when the payload
-  matches; conflicting reuse of an ID is a fault/rejection.
-- Late acknowledgement: record as late/unmatched and never mutate a newer
-  action or claim completion.
+- `MCU-SAFETY` 心跳缺失：硬件安全链保持抑制；Linux 不得尝试自动使能。
+- `MCU-BASE`、机械臂或工具心跳缺失：该域故障且其命令被拒绝；其他域不从其缺失推断成功。
+- Linux 重启：所有运动域保持禁用，直到新发现、心跳与 Owner 授权的重置序列完成。
+- MCU 重启：启动 ID 改变；旧确认与遥测不能关联到新启动。
+- CAN bus-off：暴露 SocketCAN 重启状态，保留故障计数，并使受影响域保持抑制直到恢复被确认。
+- 重复命令：载荷匹配时返回原始关联结果；ID 冲突复用是故障/拒绝。
+- 迟到确认：记录为迟到/未匹配，绝不变更较新的动作或声称完成。
 
-## Required implementation evidence
+## 必需实现证据
 
-Before physical bring-up, the BSP implementation must add a concrete
-arbitration-ID table, bitrate/FD data phase, termination, transceiver part,
-device-tree nodes, and per-domain recovery tests. `wbcan` can validate the
-software semantics, but cannot provide bus-load, EMC, wire-latency or physical
-recovery evidence.
+物理启动调试之前，BSP 实现必须补充具体的仲裁 ID 表、位速率/FD 数据相位、终端、收发器部件、
+设备树节点和逐域恢复测试。`wbcan` 可以验证软件语义，但不能提供总线负载、EMC、线上延迟或
+物理恢复证据。
 
-The existing MCU Wire V1 contract uses five exact 11-bit frame-kind IDs and
-does not encode a node address. Issue #180's HAL bridge deliberately preserves
-those frozen values, so it proves one logical endpoint only. Six domains must
-not share those response IDs until an owner-approved versioned arbitration or
-bus-segmentation decision prevents ambiguous/colliding ACK and telemetry
-traffic. See `docs/architecture/mcu-can-hal-boundary-v1.md`.
+现有 MCU Wire V1 契约使用五个精确的 11 位帧类型 ID，不编码节点地址。Issue #180 的 HAL
+桥接器刻意保留这些冻结值，因此它只证明一个逻辑端点。在 Owner 批准的版本化仲裁或总线分段
+决策防止歧义/冲突的 ACK 与遥测流量之前，六个域不得共享这些响应 ID。参见
+`docs/architecture/mcu-can-hal-boundary-v1.md`。

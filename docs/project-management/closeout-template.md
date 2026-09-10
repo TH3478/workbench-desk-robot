@@ -1,25 +1,25 @@
-# Project closeout template
+# 项目收尾模板
 
-- Version / decision date / human approver:
-- Baseline and final commit:
-- Release or stop decision:
+- 版本 / 决策日期 / 人类审批人：
+- 基线与最终提交：
+- 发布或停止决策：
 
-## Scope outcome
+## 范围结果
 
-For each committed milestone, record delivered, deferred, removed, or failed; link the decision and acceptance evidence.
+对每个已承诺的里程碑，记录已交付、已推迟、已移除或失败；链接相关决策与验收证据。
 
-## Gate results
+## 闸门结果
 
-Include the exact metric definition, target, eligible result, raw evidence index, validator command/output, and independent reviewer. `UNKNOWN` is valid; fabricated completion is not.
+包含精确的指标定义、目标、合格结果、原始证据索引、验证器命令/输出与独立评审人。`UNKNOWN` 是合法状态；伪造完成不是。
 
-## Safety, security, and compliance
+## 安全、安保与合规
 
-List all open risks, accepted risks with expiry, incidents, unresolved findings, licenses, and physical/commercial gates. A software release does not close hardware gates.
+列出所有未关闭风险、带到期日的已接受风险、事故、未解决发现、许可证以及物理/商业闸门。软件发布不会关闭硬件闸门。
 
-## Operational handoff
+## 运营交接
 
-Name code, service, hardware, incident, and evidence owners. Link runbooks, backups, recovery tests, support boundaries, and versioned artifacts.
+指明代码、服务、硬件、事故与证据的责任人。链接运行手册、备份、恢复测试、支持边界与版本化制品。
 
-## Retrospective and follow-up
+## 回顾与后续
 
-Link lessons learned, deferred debt, owner/due date for every follow-up, and the next review. Do not close actions only because the project period ended.
+链接经验教训、遗留债务、每项后续的责任人/截止日期以及下一次评审。不得仅因项目周期结束就关闭行动项。

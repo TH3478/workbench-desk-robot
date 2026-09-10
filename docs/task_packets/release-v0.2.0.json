@@ -1,7 +1,7 @@
 {
   "issue": "RELEASE-v0.2.0",
   "human_owner": "Quchaosheng",
-  "objective": "Prepare the human-requested v0.2.0 software release by synchronizing package metadata, documenting the merged main-branch capabilities, and preserving explicit simulation, hardware, and safety evidence boundaries.",
+  "objective": "准备由人类请求的 v0.2.0 软件发布：同步包元数据、记录已合并的 main 分支能力，并保留显式的仿真、硬件与安全证据边界。",
   "allowed_paths": [
     "README.md",
     "README.zh-CN.md",
@@ -25,12 +25,12 @@
     "claims of Gazebo, physical robot, procurement, certification, or hardware release readiness"
   ],
   "acceptance": [
-    "all distributable package and health-endpoint version metadata reports 0.2.0",
-    "English and Chinese READMEs identify v0.2.0 as the current software release and describe only capabilities merged into main",
-    "README evidence boundaries keep scripted fixtures, Gazebo, MoveIt execution, camera, BSP image, and physical hardware claims separate",
-    "deployment examples reference the published v0.2.0 image tag",
-    "the release diff excludes every open pull request",
-    "repository required checks pass before tagging"
+    "所有可分发包与健康端点版本元数据均报告 0.2.0",
+    "英文与中文 README 将 v0.2.0 标识为当前软件发布，且只描述已合并进 main 的能力",
+    "README 证据边界使脚本化固定装置、Gazebo、MoveIt 执行、摄像头、BSP 镜像与物理硬件声称保持分离",
+    "部署示例引用已发布的 v0.2.0 镜像 tag",
+    "发布 diff 排除所有未合并的 pull request",
+    "打 tag 之前仓库必查项通过"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/release-v0.2.0.json",
@@ -38,15 +38,15 @@
     "git diff --check"
   ],
   "evidence": [
-    "task packet validation output",
-    "required check output",
-    "GitHub release-image workflow run",
-    "published v0.2.0 tag and GitHub Release URL"
+    "任务包校验输出",
+    "必查项输出",
+    "GitHub release-image 工作流运行记录",
+    "已发布的 v0.2.0 tag 与 GitHub Release URL"
   ],
   "stop_conditions": [
-    "the human owner has not explicitly requested publication",
-    "main changes after release validation and before tagging",
-    "a required check or release-image job fails",
-    "release notes would require an unmerged or ineligible physical claim"
+    "人类 Owner 尚未明确请求发布",
+    "在发布校验之后、打 tag 之前 main 发生变更",
+    "必查项或 release-image job 失败",
+    "发布说明需要未合并或不合格的物理声称"
   ]
 }

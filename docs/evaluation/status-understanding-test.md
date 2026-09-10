@@ -1,25 +1,25 @@
-# Status understanding protocol
+# 状态理解协议
 
-P1 acceptance requires at least four of five participants to correctly distinguish all four expression states and the three verification outcomes.
+P1 验收要求五名参与者中至少四人正确区分全部四种表达状态与三种验证结果。
 
-## Prompts
+## 提示
 
-Show the dashboard at these replay positions without naming the expected state:
+在不点明预期状态的情况下，在看板中展示以下回放位置：
 
-| Run / position | Expected interpretation |
+| 运行 / 位置 | 预期解读 |
 |---|---|
-| any run before event 0 | idle / waiting |
-| `run-uncertain`, event 2 | thinking / task in progress |
-| `run-uncertain`, event 5 | uncertain / cannot confirm because evidence is missing |
-| `run-recovery`, event 4 | refuted / first attempt did not meet the goal |
-| `run-confirmed`, event 5 | pleased / verifier confirmed the goal with evidence |
-| `run-recovery`, event 8 | recovery succeeded, earlier failure remains in history |
+| 事件 0 之前的任意运行 | idle / waiting（空闲 / 等待） |
+| `run-uncertain`，事件 2 | thinking / 任务进行中 |
+| `run-uncertain`，事件 5 | uncertain / 因证据缺失而无法确认 |
+| `run-recovery`，事件 4 | refuted / 首次尝试未达到目标 |
+| `run-confirmed`，事件 5 | pleased / 验证器以证据确认了目标 |
+| `run-recovery`，事件 8 | 恢复成功，先前的失败保留在历史中 |
 
-Ask each participant what the robot knows, what it does not know, and whether the screen authorizes any physical control.
+询问每位参与者机器人知道什么、不知道什么，以及屏幕是否授权任何物理控制。
 
-## Result sheet
+## 结果表
 
-| Participant | Idle | Thinking | Uncertain | Pleased | Refuted vs insufficient | Read-only boundary | Pass |
+| 参与者 | Idle | Thinking | Uncertain | Pleased | Refuted vs insufficient | 只读边界 | 通过 |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P1 | | | | | | | |
 | P2 | | | | | | | |
@@ -27,4 +27,4 @@ Ask each participant what the robot knows, what it does not know, and whether th
 | P4 | | | | | | | |
 | P5 | | | | | | | |
 
-The test owner signs and attaches the completed sheet. Empty rows are deliberately not counted as passes.
+测试负责人签字并附上填好的表格。空行故意不计为通过。

@@ -1,7 +1,7 @@
 {
   "issue": 48,
   "human_owner": "Quchaosheng",
-  "objective": "Reject malformed tool schemas atomically at the ToolRegistry registration boundary.",
+  "objective": "在 ToolRegistry 注册边界原子地拒绝畸形工具 schema。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/tool_registry.py",
     "tests/unit/test_tool_registry.py",
@@ -18,13 +18,13 @@
     "services/world_model/**"
   ],
   "acceptance": [
-    "registration rejects missing and unknown schema keys",
-    "required_params and optional_params are disjoint string sets",
-    "every allowed parameter has exactly one explicitly supported type",
-    "target_id_required is a bool",
-    "invalid registration leaves the registry unchanged",
-    "every accepted schema can be validated without an internal exception",
-    "default six-tool registration passes"
+    "注册拒绝缺失与未知的 schema 键",
+    "required_params 与 optional_params 是不相交的字符串集合",
+    "每个允许参数恰好有一个显式支持的类型",
+    "target_id_required 是 bool",
+    "无效注册保持注册表不变",
+    "每个被接受的 schema 都能在不抛出内部异常的情况下验证",
+    "默认六工具注册通过"
   ],
   "commands": [
     "python -m pytest tests/unit/test_tool_registry.py -v",
@@ -33,13 +33,13 @@
     "make context-check"
   ],
   "evidence": [
-    "tool registry regression test output",
-    "full test output",
-    "contract and context check output"
+    "工具注册表回归测试输出",
+    "完整测试输出",
+    "contract 与 context 检查输出"
   ],
   "stop_conditions": [
-    "interface or contract change is required",
-    "a write outside allowed_paths is required",
-    "a supported parameter type must be added"
+    "需要接口或契约变更",
+    "需要 allowed_paths 之外的写入",
+    "必须新增受支持的参数类型"
   ]
 }

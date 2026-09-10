@@ -1,59 +1,53 @@
-# Product Metrics and Decision Log
+# 产品指标与决策日志
 
-Metrics support decisions; they do not replace evidence. Use `UNKNOWN` when the
-eligible source is missing. Never infer physical performance from scripts,
-screenshots, or activity counts.
+指标支持决策，但不能替代证据。当合格来源缺失时使用 `UNKNOWN`。绝不要从脚本、截图或活动计数推断物理性能。
 
-## Outcome metrics
+## 结果指标
 
-| Metric | Definition | Minimum denominator / window | Eligible source | Gate use |
+| 指标 | 定义 | 最低分母/窗口 | 合格来源 | 闸门用途 |
 |---|---|---|---|---|
-| External cold start | Unique external users reaching the documented first task from a clean environment | 3 unique participants per study window | Private participant record plus versioned artifact | Supports onboarding readiness |
-| First-task completion | Users completing the declared task with required evidence | All eligible attempts in a declared window | Replayable run bundle and participant record | Supports product usability, not physical safety alone |
-| Task verification rate | Confirmed outcomes / eligible task runs | All eligible runs for one scenario/version/window | Canonical WorldState and verifier output | Shared runtime quality signal |
-| Insufficient-evidence rate | Runs unable to establish the goal state / eligible runs | Same denominator as verification rate | Event/evidence report | Drives instrumentation and UX work |
-| Recovery success | Bounded recoveries reaching a newly evidenced valid state / recovery attempts | All recovery attempts in a declared window | Recovery events plus verification | Must not hide failed attempts |
-| Time to reproduce | Time from feedback receipt to a deterministic reproduction | Each closed feedback record; report median and P95 | Feedback record and test artifact | Engineering support efficiency |
-| Repeated problem count | Distinct participants with the same problem card | Count independent participants, not messages | Anonymized research records | Promotion signal for roadmap |
-| Design Partner continuation | Partners completing the agreed test and choosing a next step | All partners whose test window ended | Scenario record and follow-up decision | Product/market signal |
+| 外部冷启动 | 从干净环境到达文档所述首个任务的独立外部用户 | 每个研究窗口 3 名独立参与者 | 私有参与者记录加带版本的产物 | 支持入门就绪评估 |
+| 首个任务完成 | 在具备所需证据的情况下完成所声明任务的用户 | 声明窗口内的所有合格尝试 | 可回放的运行包与参与者记录 | 支持产品易用性评估，但不单独支持物理安全结论 |
+| 任务验证率 | 已确认结果数/合格任务运行数 | 某一场景/版本/窗口的所有合格运行 | 规范的 WorldState 与验证器输出 | 共享运行时质量信号 |
+| 证据不足率 | 无法确立目标状态的运行数/合格运行数 | 分母与验证率相同 | 事件/证据报告 | 驱动埋点与 UX 工作 |
+| 恢复成功率 | 达到有全新证据的有效状态的受限恢复次数/恢复尝试次数 | 声明窗口内的所有恢复尝试 | 恢复事件加验证 | 不得隐藏失败的尝试 |
+| 复现耗时 | 从收到反馈到确定性复现的耗时 | 每条已关闭的反馈记录；报告中位数与 P95 | 反馈记录与测试产物 | 工程支持效率 |
+| 重复问题计数 | 持有同一问题卡的不同参与者 | 统计独立参与者，而不是消息数 | 匿名化研究记录 | 路线图晋升信号 |
+| Design Partner 续约 | 完成约定测试并选择下一步的伙伴 | 测试窗口已结束的所有伙伴 | 场景记录与后续决策 | 产品/市场信号 |
 
-## Activity metrics (diagnostic only)
+## 活动指标（仅用于诊断）
 
-Messages, meetings, demos, stars, forks, content posts, and contact-list size
-can explain reach, but cannot prove user value or readiness. Track them only with
-source and time period.
+消息、会议、演示、star、fork、内容发布和联系人列表规模可以解释触达范围，但不能证明用户价值或就绪程度。只应在附带来源与时间段的情况下追踪它们。
 
-## Funnel entry criteria
+## 漏斗进入标准
 
-Use explicit stage transitions instead of "interested" as a catch-all:
+使用明确的阶段转换，而不是用“感兴趣”当作万能兜底：
 
 `discovered -> contacted -> replied -> interviewed -> high_match -> demo -> trial -> first_task -> design_partner -> procurement -> paused/lost`
 
-An entry transition needs a dated record and next owner. For example, `trial`
-requires a named tester, known environment, declared task, test window, and
-installation material; a verbal “we can try it” is not enough.
+每次进入转换都需要一条带日期的记录和下一名负责人。例如，`trial` 需要具名测试者、已知环境、已声明的任务、测试窗口和安装材料；一句口头“我们可以试试”是不够的。
 
-## Decision log entry
+## 决策日志条目
 
-For each material product decision, record:
+对于每项重大产品决策，记录：
 
-- Decision ID and date:
-- Decision owner and reviewers:
-- Context and user problem:
-- Evidence references:
-- Options considered:
-- Decision and rationale:
-- Scope and non-goals:
-- Risks and assumptions:
-- Next validation:
-- Revisit date or trigger:
-- Linked Issue/PR/release report:
-- Review status: `open` / `accepted` / `rejected` / `deferred`:
+- 决策 ID 与日期：
+- 决策负责人与评审人：
+- 背景与用户问题：
+- 证据引用：
+- 考虑过的选项：
+- 决策与理由：
+- 范围与非目标：
+- 风险与假设：
+- 下一步验证：
+- 复核日期或触发条件：
+- 关联 Issue/PR/发布报告：
+- 评审状态：`open` / `accepted` / `rejected` / `deferred`：
 
-## Weekly review questions
+## 每周回顾问题
 
-1. What user evidence changed our understanding this week?
-2. Which problem is repeated across independent participants?
-3. Which scenario can be tested with a bounded, measurable task?
-4. Where is evidence insufficient or incorrectly classified?
-5. What will we stop, defer, or explicitly not build?
+1. 本周有哪些用户证据改变了我们的认知？
+2. 哪个问题在独立参与者之间重复出现？
+3. 哪个场景可以用受限且可度量的任务来测试？
+4. 哪些地方的证据不足或分类错误？
+5. 我们将停止、推迟或明确不做什么？

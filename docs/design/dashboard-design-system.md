@@ -1,56 +1,55 @@
-# Dashboard design system
+# 看板设计系统
 
-The operator dashboard is a quiet, read-only inspection surface. It helps an operator distinguish observed state, action/device state, verifier conclusions, missing evidence, and recovery history. It never exposes robot-control, firmware, emergency-stop, release, or completion authority.
+操作员看板是一个安静、只读的检查界面。它帮助操作员区分已观测状态、动作/设备状态、验证器结论、缺失证据和恢复历史。它从不暴露机器人控制、固件、急停、发布或完成权限。
 
-## UI/UX task map
+## UI/UX 任务图
 
-| Task | Artifact / acceptance |
+| 任务 | 产物/验收 |
 |---|---|
-| UI1 design system | this token, component, state, and accessibility contract |
-| UI2 interaction framework | run selection, filtering, live/replay tabs, evidence dialog, keyboard model |
-| UI3 implementation and integration | `apps/dashboard/` plus read-only backend behavior tests |
-| UI4 usability testing | [usability protocol](dashboard-usability-test.md), currently NOT_EXECUTED |
-| UI5 feedback iteration | issue #26 audit findings and PR review evidence |
-| UI6 production version | release criteria below; no production claim until they pass |
+| UI1 设计系统 | 本令牌、组件、状态与无障碍契约 |
+| UI2 交互框架 | 运行选择、过滤、实时/回放标签页、证据对话框、键盘模型 |
+| UI3 实现与集成 | `apps/dashboard/` 加上只读后端行为测试 |
+| UI4 可用性测试 | [可用性协议](dashboard-usability-test.md)，目前为 NOT_EXECUTED |
+| UI5 反馈迭代 | issue #26 审计发现与 PR 评审证据 |
+| UI6 生产版本 | 下方发布标准；在其通过之前不得声称生产可用 |
 
-## Visual language
+## 视觉语言
 
-- Neutral white and cool-gray surfaces support scanning; teal indicates selected/verified system state, green indicates confirmed, and amber indicates insufficient evidence or attention.
-- Color is never the only signal. Every state has visible text, and uncertainty is never styled or labeled as success.
-- Cards are reserved for individual panels or repeated runs. The shell, sidebar, and major workspace regions remain structural bands.
-- Typography is compact: task goals carry the strongest emphasis; panel headings, labels, IDs, timestamps, and evidence references step down predictably.
-- Lucide icons supplement labels and are hidden from the accessibility tree. Unfamiliar icon-only controls include accessible names and tooltips.
+- 中性白与冷灰表面便于扫视；青色表示已选择/已验证的系统状态，绿色表示已确认，琥珀色表示证据不足或需要关注。
+- 颜色绝不是唯一信号。每个状态都有可见文本，不确定性绝不会被样式化或标注为成功。
+- 卡片仅用于单个面板或重复的运行。外壳、侧边栏和主要工作区区域保持为结构色带。
+- 排版紧凑：任务目标最突出；面板标题、标签、ID、时间戳和证据引用按可预期的方式逐级弱化。
+- Lucide 图标辅助标签，并在无障碍树中隐藏。不熟悉的纯图标控件要有无障碍名称和提示框。
 
-## Stable components
+## 稳定组件
 
-| Component | Contract |
+| 组件 | 契约 |
 |---|---|
-| run filter | three pressed-state buttons; count updates politely |
-| run list | active run exposes pressed state and scrolls into view on narrow screens |
-| view tabs | one tab in the tab order; arrows cycle, Home/End jump, tab controls named panel |
-| status strip | atomic polite summary; status remains text-first |
-| attention banner | polite status region; missing evidence remains readable without color/icon |
-| replay | named icon controls, pressed play/pause, range value text includes event position/type |
-| evidence dialog | native modal semantics, named close control, synthetic source identified |
+| 运行过滤器 | 三个按下状态按钮；计数以礼貌方式更新 |
+| 运行列表 | 活动运行暴露按下状态，并在窄屏上滚动进入视野 |
+| 视图标签页 | Tab 键顺序中只有一个标签页；方向键循环切换，Home/End 跳转，标签控件命名面板 |
+| 状态条 | 原子性礼貌摘要；状态始终以文本为先 |
+| 关注横幅 | 礼貌状态区域；缺失证据在无颜色/图标时仍可读 |
+| 回放 | 带名称的图标控件、按下的播放/暂停状态、范围值文本包含事件位置/类型 |
+| 证据对话框 | 原生模态语义、命名的关闭控件、标注合成来源 |
 
-## Responsive contract
+## 响应式契约
 
-| Viewport | Layout |
+| 视口 | 布局 |
 |---|---|
-| >1080px | fixed scanning sidebar plus two-column operational workspace |
-| 781-1080px | narrower sidebar; stacked primary dashboard panels |
-| <=780px | run list becomes horizontal; workspace becomes a single column |
-| <=460px | compact controls, hidden redundant timestamps, stable 34px replay controls |
+| >1080px | 固定扫描侧边栏加双列运营工作区 |
+| 781-1080px | 更窄的侧边栏；主看板面板堆叠 |
+| <=780px | 运行列表变为横向；工作区变为单列 |
+| <=460px | 紧凑控件、隐藏冗余时间戳、稳定的 34px 回放控件 |
 
-At 320px, 390px, 768px, and 1440px there must be no page-level horizontal overflow, incoherent overlap, clipped control label, or inaccessible active run. The run carousel may scroll horizontally by design.
+在 320px、390px、768px 和 1440px 下，不得出现页面级横向溢出、不协调的重叠、被裁剪的控件标签或无法访问的活动运行。运行轮播按设计可以横向滚动。
 
-## Accessibility and release criteria
+## 无障碍与发布标准
 
-- keyboard-only completion of filter, run selection, tab change, replay, evidence open/close, range, and speed tasks;
-- correct tab/tabpanel, pressed, busy, live-region, dialog, and range value semantics;
-- visible focus and state text in default, forced-colors, and reduced-motion modes;
-- no critical/high accessibility finding in the supported dashboard path;
-- usability protocol completed with retained observations and no fabricated participants;
-- backend remains GET-only and write-method tests pass;
-- desktop/mobile screenshots and console logs attached to the reviewed PR or release evidence.
-
+- 仅用键盘完成过滤、运行选择、标签切换、回放、证据打开/关闭、范围和速度任务；
+- 正确的 tab/tabpanel、按下、忙碌、实时区域、对话框和范围值语义；
+- 在默认、强制颜色和减少动效模式下有可见的焦点与状态文本；
+- 在看板受支持路径中没有严重/高级无障碍问题；
+- 可用性协议已完成，观测结果被保留，且没有虚构的参与者；
+- 后端保持仅 GET，且写入方法测试通过；
+- 桌面/移动端截图和控制台日志附加到已评审的 PR 或发布证据上。

@@ -1,40 +1,40 @@
-# Project management baseline
+# 项目管理基线
 
-This directory is the PMO operating layer for the 12-week P1/P2/P3 program. It coordinates work; it does not replace engineering evidence or approve a release.
+本目录是 12 周 P1/P2/P3 计划的 PMO 运营层。它协调工作；它不取代工程证据，也不批准发布。
 
-## Evidence hierarchy
+## 证据层级
 
-1. Immutable raw events, hardware records, and external participant records.
-2. Deterministic validator output and GitHub Actions runs tied to a commit.
-3. Generated reports that preserve blocked and not-executed states.
-4. Status summaries and meeting notes that link to the evidence above.
+1. 不可变原始事件、硬件记录与外部参与者记录。
+2. 关联提交的确定性验证器输出与 GitHub Actions 运行。
+3. 保留受阻与未执行状态的生成报告。
+4. 链接上述证据的状态摘要与会议记录。
 
-Templates, scripted fixtures, estimates, and verbal updates never move a gate to green.
+模板、脚本化固定装置、估算与口头更新永远不会让闸门变绿。
 
-## Operating cadence
+## 运营节奏
 
-| Cadence | Input | Output | Accountable role |
+| 节奏 | 输入 | 输出 | 问责角色 |
 |---|---|---|---|
-| Daily | failed checks, new blockers, dependency changes | updated action and risk owners | Workstream owners |
-| Weekly | milestone evidence, risk triggers, capacity | status update, decisions, escalations | Project Owner / PMO |
-| Monthly | quality metrics, schedule variance, resource load | monthly report and reforecast | Project Owner |
-| Phase gate | gate checklist and immutable evidence | Go, Pivot, or Stop decision | Human Project Owner |
+| 每日 | 失败检查、新阻断项、依赖变更 | 更新的行动项与风险负责人 | 工作流负责人 |
+| 每周 | 里程碑证据、风险触发条件、容量 | 状态更新、决策、升级 | Project Owner / PMO |
+| 每月 | 质量指标、进度偏差、资源负载 | 月度报告与重新预测 | Project Owner |
+| 阶段闸门 | 闸门检查清单与不可变证据 | Go、Pivot 或 Stop 决策 | 人类 Project Owner |
 
-## PMO task map
+## PMO 任务映射
 
-| Task | Repository artifact |
+| 任务 | 仓库制品 |
 |---|---|
-| PMO1 project plan and Gantt | [Project plan](plan.md) |
-| PMO2 risk register | [`risks.csv`](risks.csv) |
-| PMO3 weekly meeting framework | [Weekly meeting](weekly-meeting.md) |
-| PMO4 progress dashboard | [Status dashboard](status.md) |
-| PMO5 risk mitigation plan | [Risk management](risk-management.md) |
-| PMO6 resource allocation | [Resource plan](resource-plan.md) |
-| PMO7 monthly report | [Monthly report template](monthly-report-template.md) |
-| PMO8 decision log | [Decision log](decision-log.md) |
-| PMO9 lessons learned | [Lessons learned](lessons-learned.md) |
-| PMO10 project closeout | [Closeout template](closeout-template.md) |
-| PMO11 quality metrics | [Quality metrics](quality-metrics.md) |
-| PMO12 later projects | [Future work](future-work.md) |
+| PMO1 项目计划与甘特图 | [项目计划](plan.md) |
+| PMO2 风险登记册 | [`risks.csv`](risks.csv) |
+| PMO3 周会框架 | [周会](weekly-meeting.md) |
+| PMO4 进度看板 | [状态看板](status.md) |
+| PMO5 风险缓解计划 | [风险管理](risk-management.md) |
+| PMO6 资源分配 | [资源计划](resource-plan.md) |
+| PMO7 月度报告 | [月度报告模板](monthly-report-template.md) |
+| PMO8 决策日志 | [决策日志](decision-log.md) |
+| PMO9 经验教训 | [经验教训](lessons-learned.md) |
+| PMO10 项目收尾 | [收尾模板](closeout-template.md) |
+| PMO11 质量指标 | [质量指标](quality-metrics.md) |
+| PMO12 后续项目 | [后续工作](future-work.md) |
 
-Update links and evidence before changing a status. The human Project Owner owns Go/No-Go, scope, release, and claims based on physical evidence.
+更新状态前先更新链接与证据。人类 Project Owner 拥有 Go/No-Go、范围、发布以及基于物理证据的声明。

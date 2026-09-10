@@ -1,7 +1,7 @@
 {
   "issue": 26,
   "human_owner": "Quchaosheng",
-  "objective": "Harden the read-only dashboard across responsive and keyboard use while preserving evidence and robot-authority boundaries.",
+  "objective": "在响应式与键盘使用场景下加固只读看板，同时保持证据与机器人权限边界不变。",
   "allowed_paths": [
     "apps/dashboard/*.js",
     "apps/dashboard/*.css",
@@ -24,14 +24,14 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "active filters runs playback and replay position expose programmatic state",
-    "view tabs implement controls selected state roving tabindex and arrow Home End keyboard behavior",
-    "the active run scrolls into view in the horizontal mobile list",
-    "dynamic summary attention busy and replay state use appropriate announcements",
-    "reduced-motion and forced-colors users retain stable readable state",
-    "desktop and mobile browser checks show no page-level overflow or incoherent overlap",
-    "the usability protocol remains NOT_EXECUTED until real participants provide records",
-    "the dashboard remains read-only with no control publisher"
+    "活动过滤器、运行回放与回放位置暴露可编程状态。",
+    "视图标签页实现控件、选中状态、roving tabindex 以及方向键、Home 与 End 键盘行为。",
+    "在横向移动端列表中，活动运行会滚动进入视野。",
+    "动态摘要、注意、忙碌与回放状态使用适当的通告。",
+    "减少动效与强制配色的用户保持稳定且可读的状态。",
+    "桌面端与移动端浏览器检查显示没有页面级溢出或不一致的重叠。",
+    "在真实参与者提供记录之前，可用性协议保持 NOT_EXECUTED。",
+    "看板保持只读，不包含任何控制发布者。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/dashboard-accessibility-ux.json",
@@ -40,17 +40,17 @@
     "make check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "dashboard accessibility and backend test output",
-    "desktop 1440x900 mobile 390x844 and narrow 320x568 browser screenshots",
-    "keyboard tab and replay state inspection",
-    "browser console log inspection",
-    "strict documentation and repository check output"
+    "任务包校验输出。",
+    "看板无障碍与后端测试输出。",
+    "桌面端 1440x900、移动端 390x844 与窄屏 320x568 的浏览器截图。",
+    "键盘 Tab 与回放状态检查。",
+    "浏览器控制台日志检查。",
+    "严格文档构建与仓库检查输出。"
   ],
   "stop_conditions": [
-    "a robot control ROS firmware or emergency-stop interface would be introduced",
-    "a frozen event contract or fixture meaning would need to change",
-    "participant feedback accessibility conformance or production usability would need to be fabricated",
-    "a layout or interaction cannot be verified at the target viewport"
+    "将引入机器人控制、ROS、固件或急停接口。",
+    "需要修改冻结的事件契约或固定装置的含义。",
+    "需要伪造参与者反馈、无障碍符合性或生产可用性。",
+    "某个布局或交互无法在目标视口下完成验证。"
   ]
 }

@@ -1,26 +1,26 @@
-# Supply-chain security
+# 供应链安全
 
-## Controlled inputs
+## 受控输入
 
-| Input | Control |
+| 输入 | 控制 |
 |---|---|
-| Python dependencies | bounded version ranges, PR dependency review, weekly Dependabot updates |
-| GitHub Actions | full 40-character commit pins with readable release comments |
-| runtime/dev images | immutable digest pins and a shared-base regression test |
-| model weights | separate source, license, redistribution, data, and hardware-fit review |
-| vendored UI assets | local license record and versioned files |
-| release image | tested candidate, SPDX JSON SBOM, registry digest, provenance manifest |
+| Python 依赖 | 有界版本区间、PR 依赖评审、每周 Dependabot 更新 |
+| GitHub Actions | 完整 40 字符 commit 固定与可读的发布注释 |
+| 运行时/开发镜像 | 不可变摘要固定与共享基座回归测试 |
+| 模型权重 | 独立的来源、许可证、再分发、数据与硬件适配评审 |
+| vendored UI 资产 | 本地许可证记录与版本化文件 |
+| 发布镜像 | 已测候选、SPDX JSON SBOM、registry 摘要、溯源清单 |
 
-## Update process
+## 更新流程
 
-1. Dependabot proposes a bounded update; it never merges or publishes.
-2. Dependency review checks newly introduced vulnerabilities and fails on high/critical findings.
-3. The owner reviews upstream release notes, source, license, transitive changes, and rollback path.
-4. Required tests run against the exact pin or digest.
-5. A human reviewer merges. A separate human-owned tag may publish only after release gates pass.
+1. Dependabot 提出有界更新；它绝不合并或发布。
+2. 依赖评审检查新引入的漏洞，并对高危/严重发现失败。
+3. Owner 评审上游发布说明、源码、许可证、传递变更与回滚路径。
+4. 必需测试针对精确 pin 或摘要运行。
+5. 人类评审者合并。独立的人类拥有 tag 只能在发布闸门通过后发布。
 
-SBOM generation inventories the built candidate. It does not prove a component is safe, licensed for every use, or present in a deployed physical unit. Store the SBOM and provenance with the release evidence index.
+SBOM 生成盘点已构建候选。它不证明组件安全、可用于所有场景或存在于已部署物理单元中。把 SBOM 与溯源随发布证据索引一起存放。
 
-## Triage
+## 分诊
 
-For every alert, record affected package/path, advisory/CVE, reachability, exploit prerequisites, severity, fixed version, owner, decision, evidence, and deadline. Dismissal requires a reason and review date; absence from the runtime path should be demonstrated, not assumed.
+对每条告警，记录受影响的包/路径、公告/CVE、可达性、利用前置条件、严重度、修复版本、Owner、决策、证据与截止日期。驳回需要理由与评审日期；不在运行时路径上应被证明，而不是假设。

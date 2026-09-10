@@ -1,25 +1,25 @@
-# Penetration-test plan
+# 渗透测试计划
 
-Status: **NOT_EXECUTED**. This plan is not a penetration-test result, attestation, or release approval.
+状态：**NOT_EXECUTED**。本计划不是渗透测试结果、证明或发布批准。
 
-## Authorization and scope
+## 授权与范围
 
-A human Project Owner must approve dates, testers, target commits/images, network range, data handling, emergency contacts, stop conditions, and physical-device exclusions in writing. Default scope is the isolated dashboard/backend container and optional local model boundary using synthetic event data. Public GitHub, third-party services, production credentials, firmware, emergency stop, and physical motion are out of scope unless separately authorized.
+人类 Project Owner 必须以书面形式批准日期、测试人员、目标 commit/镜像、网络范围、数据处理、紧急联系人、停止条件与物理设备排除。默认范围是使用合成事件数据的隔离看板/后端容器与可选本地模型边界。公共 GitHub、三方服务、生产凭据、固件、急停与物理运动不在范围内，除非另行授权。
 
-## Test cases
+## 测试用例
 
-| Area | Cases | Expected control |
+| 领域 | 用例 | 预期控制 |
 |---|---|---|
-| HTTP boundary | unsupported methods, traversal, malformed encoding, oversized identifiers, cache confusion | writes rejected; paths contained; bounded errors without sensitive data |
-| event ingestion | malformed JSONL, duplicate IDs, sequence rollback, forged evidence references | readiness fails closed; no partial trusted state |
-| model endpoint | remote hosts, redirects, credentials, DNS/host confusion, malformed output | request rejected before plan construction |
-| dashboard | stored/reflected script payloads, unsafe URLs, DOM injection, sensitive fixture data | output encoded; no executable attacker content or control path |
-| container | UID/capabilities, writable paths, host/network exposure, secret mounts | non-root, read-only, minimal network and mounts |
-| supply chain | dependency confusion, mutable action/image references, SBOM/provenance mismatch | immutable references and review gate detect drift |
-| availability | bounded malformed request rate and corrupted data source | service degrades predictably; evidence preserved |
+| HTTP 边界 | 不支持的方法、路径穿越、畸形编码、超大标识符、缓存混淆 | 写入被拒绝；路径受控；有界错误且不含敏感数据 |
+| 事件摄入 | 畸形 JSONL、重复 ID、序号回退、伪造证据引用 | 就绪状态失败即拒绝；无部分可信状态 |
+| 模型端点 | 远程主机、重定向、凭据、DNS/主机混淆、畸形输出 | 请求在规划构建前被拒绝 |
+| 看板 | 存储/反射脚本载荷、不安全 URL、DOM 注入、敏感固定装置数据 | 输出被编码；无可执行攻击内容或控制路径 |
+| 容器 | UID/capability、可写路径、主机/网络暴露、密钥挂载 | 非 root、只读、最小网络与挂载 |
+| 供应链 | 依赖混淆、可变 action/镜像引用、SBOM/溯源不匹配 | 不可变引用与评审闸门检测漂移 |
+| 可用性 | 有界畸形请求速率与损坏数据源 | 服务可预测降级；证据被保留 |
 
-## Evidence package
+## 证据包
 
-Retain authorization, target hashes/digests, tool names/versions/configuration, timestamps, raw findings, sanitized reproductions, severity rationale, remediation commits, retest results, unresolved risk acceptance, and tester signature. Store secrets and exploit material outside public artifacts.
+保留授权、目标哈希/摘要、工具名称/版本/配置、时间戳、原始发现、脱敏复现、严重度理由、修复 commit、复测结果、未解决风险接受与测试者签名。把密钥与利用材料存放在公共产物之外。
 
-Stop immediately on unintended physical motion, access to real secrets/private data, third-party impact, loss of evidence integrity, or a target outside authorization. Follow the incident-response plan if active compromise is suspected.
+若发生意外的物理运动、接触真实密钥/私有数据、三方影响、证据完整性损失或超出授权的目标，立即停止。若怀疑存在主动入侵，遵循事件响应计划。

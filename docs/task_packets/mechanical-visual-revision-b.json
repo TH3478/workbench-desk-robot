@@ -1,7 +1,7 @@
 {
   "issue": "mechanical-revision-b",
   "human_owner": "Quchaosheng",
-  "objective": "Refine the desk robot mechanical baseline into a more product-like Revision B while preserving the controlled envelope, PCB tray interface, stability gates, and explicit physical-validation boundaries.",
+  "objective": "将桌面机器人机械基线打磨为更具产品感的 Revision B，同时保留受控包络、PCB 托盘接口、稳定性闸门与显式的物理验证边界。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "tests/hardware/test_engineering_packages.py",
@@ -20,12 +20,12 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "Revision B keeps the 280 x 240 x 330 mm envelope, 260 x 220 mm chassis, 18 mm ground clearance, 150 x 72 mm display opening, and PCB mount pattern",
-    "SCAD and the CadQuery generator describe the same product-level structure: low chassis, tapered shoulder shell, separate 8 degree head, recessed display bezel, wheel pods, corner bumpers, cable channel, and service panel",
-    "the analytical stability, tray-fit, drop-screening, and physical-validation status remain explicit and pass the existing mechanical checks",
-    "generated general-arrangement evidence names the Revision B geometry and does not claim physical validation",
-    "a product hero visual uses the Revision B silhouette and does not depict the old transparent-box geometry",
-    "mechanical package tests, artifact generation, Ruff, and Task Packet validation pass"
+    "Revision B 保持 280 x 240 x 330 mm 包络、260 x 220 mm 底盘、18 mm 离地间隙、150 x 72 mm 显示屏开孔与 PCB 安装孔型",
+    "SCAD 与 CadQuery 生成器描述相同的产品级结构：低底盘、收窄肩部外壳、独立 8 度头部、内凹显示屏边框、轮舱、角部防撞条、走线槽与服务面板",
+    "解析稳定性、托盘适配、跌落筛选与物理验证状态保持显式，并通过现有机械检查",
+    "生成的总布置证据指明 Revision B 几何，且不声称物理验证",
+    "产品主视觉使用 Revision B 轮廓，且不描绘旧的透明箱体几何",
+    "机械包测试、产物生成、Ruff 与任务包校验通过"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -41,13 +41,13 @@
     "hardware/mechanical/generated/drawings/general-arrangement.svg",
     "hardware/mechanical/generated/analysis.json",
     "hardware/mechanical/generated/drop-screening.json",
-    "mechanical package unit-test output",
-    "Revision B product hero visual"
+    "机械包单元测试输出",
+    "Revision B 产品主视觉"
   ],
   "stop_conditions": [
-    "a change requires altering robot control, firmware, interfaces, or PCB ownership",
-    "a geometry change invalidates the PCB tray, stability, clearance, or impact gates",
-    "the resulting image would imply a physical prototype or test that does not exist",
-    "SolidWorks or CadQuery regeneration is unavailable; preserve the existing STEP and report the regeneration limitation rather than inventing a solid-model result"
+    "变更需要改动机器人控制、固件、接口或 PCB 归属",
+    "几何变更使 PCB 托盘、稳定性、间隙或冲击闸门失效",
+    "生成的图像会暗示并不存在的物理原型或测试",
+    "SolidWorks 或 CadQuery 重新生成不可用；保留现有 STEP 并报告重新生成限制，而不要虚构实体模型结果"
   ]
 }

@@ -1,51 +1,38 @@
-# Robot BSP V0.1 Cost-Conscious Selection
+# Robot BSP V0.1 注重成本选型
 
-Status: recommended engineering baseline for prototype build; supplier and
-electrical approval are still required before purchase or safety release.
+状态：原型构建的推荐工程基线；采购或安全发布前仍需要供应商与电气审批。
 
-## Selected baseline
+## 选定基线
 
-| Domain | Selection | Why this is the cost boundary |
+| 域 | 选型 | 为什么这是成本边界 |
 |---|---|---|
-| Linux main board | NVIDIA Jetson Orin Nano Super Developer Kit, 8 GB | GPU inference and ROS 2 headroom at substantially lower cost and power than AGX Orin; one board is enough for the high-level stack |
-| Linux storage | one  NVMe SSD, 512 GB minimum | avoids removable-SD wear for logs and models; capacity can be increased without changing the BSP |
-| Linux cooling | vendor active cooler plus chassis airflow | required for sustained vision workloads; no passive-only assumption |
-| Linux CAN during prototype | one isolated USB-CAN-FD adapter | avoids an immediate custom carrier-board CAN spin; replaceable during bring-up |
-| `MCU-BASE` | STM32H563, CAN-FD capable, 250 MHz class | one inexpensive MCU covers traction, encoders, lift and chassis telemetry with timing margin |
-| `MCU-SAFETY` | STM32G0B1, independent CAN-FD and safety GPIO domain | low-cost, simple safety controller with separate reset and watchdog domain |
-| `ARM-L-CTRL` / `ARM-R-CTRL` | vendor arm controller supplied with each arm | do not duplicate a proprietary servo controller in the robot BSP |
-| `TOOL-L-CTRL` / `TOOL-R-CTRL` | integrated vendor tool controller where available; otherwise small vendor CAN/RS-485 node | select per end-effector; keep the interface domain independent |
+| Linux 主板 | NVIDIA Jetson Orin Nano Super Developer Kit，8 GB | GPU 推理与 ROS 2 余量，成本与功耗远低于 AGX Orin；一块板足够高层栈 |
+| Linux 存储 | 一块 NVMe SSD，最低 512 GB | 避免可移除 SD 卡磨损影响日志与模型；容量可增加而不改变 BSP |
+| Linux 散热 | 厂商主动散热器加机箱风道 | 持续视觉负载所需；不假设纯被动 |
+| 原型期 Linux CAN | 一个隔离的 USB-CAN-FD 适配器 | 避免立即定制载板 CAN 改版；启动调试期间可替换 |
+| `MCU-BASE` | STM32H563，支持 CAN-FD，250 MHz 级 | 一颗便宜 MCU 以时序余量覆盖牵引、编码器、升降与底盘遥测 |
+| `MCU-SAFETY` | STM32G0B1，独立 CAN-FD 与安全 GPIO 域 | 低成本、简单安全控制器，独立重置与看门狗域 |
+| `ARM-L-CTRL` / `ARM-R-CTRL` | 每只机械臂随附的厂商机械臂控制器 | 不在机器人 BSP 中重复专有伺服控制器 |
+| `TOOL-L-CTRL` / `TOOL-R-CTRL` | 可用时用集成厂商工具控制器；否则用小型厂商 CAN/RS-485 节点 | 按末端执行器选择；保持接口域独立 |
 
-The selection is **one Linux board, two robot-owned MCUs, and four vendor/module
-controller domains**. The four module domains are counted for addressing,
-reset, health and safety analysis even when a vendor controller is physically
-integrated into an arm or tool.
+选型是**一块 Linux 板、两个机器人自有 MCU 和四个厂商/模块控制器域**。即使厂商控制器在物理
+上集成进机械臂或工具，四个模块域仍计入寻址、重置、健康与安全分析。
 
-## Cost controls
+## 成本控制
 
-- Do not buy an AGX Orin for the first prototype unless measured model latency
-  exceeds the Orin Nano Super envelope.
-- Do not design a custom Linux carrier board before USB-CAN, camera bandwidth,
-  power and thermal measurements identify a real limitation.
-- Keep the safety MCU electrically independent; cost reduction must not remove
-  the hardwired E-stop or safe-enable path.
-- Use one CAN-FD backbone for the prototype. Add a second bus only when a
-  measured bandwidth, fault-containment or cable-length requirement justifies it.
-- Use vendor arm/tool controllers rather than adding fourteen custom joint MCU
-  boards to the project.
+- 除非实测模型延迟超出 Orin Nano Super 包络，否则第一台原型不购买 AGX Orin。
+- 在 USB-CAN、相机带宽、功率与热测量指出真实限制之前，不设计定制 Linux 载板。
+- 保持安全 MCU 电气独立；降本不得移除硬连线急停或安全使能路径。
+- 原型使用一条 CAN-FD 主干。只有当实测带宽、故障遏制或线缆长度要求证明有必要时才增加第二条总线。
+- 使用厂商机械臂/工具控制器，而不是给项目增加十四块定制关节 MCU 板。
 
-## Required acceptance before purchase
+## 采购前必需验收
 
-1. Confirm the Jetson carrier power input, sustained thermal envelope, camera
-   count/bandwidth, and Linux BSP/JetPack release.
-2. Confirm the STM32H563 pin budget for traction, lift, encoders, CAN and
-   service programming; reserve safe output pins for hardware inhibit.
-3. Confirm the STM32G0B1 independent watchdog, dual-channel E-stop inputs,
-   safe-enable outputs and reset behavior with the Safety Owner.
-4. Obtain arm and tool controller protocols, power limits, CAN IDs and reset
-   behavior from suppliers before assigning their final node implementations.
-5. Measure prototype CPU/GPU utilization, CAN bus load, thermals and power;
-   upgrade the Linux board only from recorded evidence.
+1. 确认 Jetson 载板电源输入、持续热包络、相机数量/带宽与 Linux BSP/JetPack 版本。
+2. 确认 STM32H563 用于牵引、升降、编码器、CAN 与服务编程的引脚预算；为硬件抑制保留安全输出引脚。
+3. 与 Safety Owner 确认 STM32G0B1 的独立看门狗、双通道急停输入、安全使能输出与复位行为。
+4. 在为其分配最终节点实现之前，从供应商获取机械臂与工具控制器协议、功率限制、CAN ID 与复位行为。
+5. 测量原型 CPU/GPU 利用率、CAN 总线负载、热与功率；仅依据记录的证据升级 Linux 板。
 
-Until those checks are attached to the release evidence register, this remains
-`RECOMMENDED_PROTOTYPE_SELECTION`, not a production AVL or safety approval.
+在把这些检查附加到发布证据登记册之前，这仍是 `RECOMMENDED_PROTOTYPE_SELECTION`，不是生产
+AVL 或安全审批。

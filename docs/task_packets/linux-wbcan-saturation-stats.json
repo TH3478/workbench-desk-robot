@@ -1,7 +1,7 @@
 {
   "issue": 157,
   "human_owner": "TH3478",
-  "objective": "Make wbcan saturation evidence race-safe, bounded, machine-readable, and independently validated.",
+  "objective": "让 wbcan 饱和证据具备竞态安全、有界、机器可读且经独立验证的特性。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_state_concurrency.py",
@@ -21,25 +21,25 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "all netdev statistic writers are serialized by one IRQ-safe writer lock around u64_stats_sync updates",
-    "netdev statistics are exposed through ndo_get_stats64 with reader retry semantics",
-    "RX backlog rejection increments rx_dropped instead of claiming rx_packets",
-    "intentional drop-rx and allocation-failure paths remain observable in netdev statistics",
-    "concurrent TX and stats sampling never observes a counter regression",
-    "bounded concurrent producers use disjoint CAN IDs and deterministic sequence payloads",
-    "normal saturation evidence reports per-producer sent, received, lost, duplicate, reordered, unexpected, and longest no-progress values",
-    "repeated transient tx-full injections deliver every retried frame exactly once and leave the queue usable",
-    "slow-receiver evidence separates expected socket-buffer loss from unexplained netdev rx_dropped events",
-    "drop-tx and drop-rx intentional loss accounting is reported separately from unexplained loss and recovery delivery",
-    "developer-smoke and fixed release profiles expose bounded producer, frame, retry, fairness, reload, and duration budgets",
-    "release profile budget provenance records at least three repeated virtual baselines and explicit recovery headroom",
-    "unload/reload cycles close sockets, reap workers, remove module/interface/debugfs state, and prove a fresh post-reload delivery",
-    "CI validates and uploads the raw stress JSON even when a later gate fails",
-    "CI captures full dmesg with a marker-scoped post-stress window plus before/after slabinfo and meminfo resource snapshots and fails closed on kernel warning signatures",
-    "the bounded stress entrypoint emits a versioned JSON report with profile, budget, environment, provenance, stage timing, and PASS, FAIL, or NOT_EXECUTED status",
-    "malformed, incomplete, failed, or non-virtual stress reports fail validation",
-    "the existing seven fault modes and state lifecycle behavior remain unchanged",
-    "no physical CAN, MCU, actuator, or hard-real-time evidence is claimed"
+    "所有 netdev 统计写入者都通过围绕 u64_stats_sync 更新的单个 IRQ 安全写入锁完成串行化。",
+    "netdev 统计通过 ndo_get_stats64 以读取方重试语义对外暴露。",
+    "RX 积压拒绝递增 rx_dropped，而不是计入 rx_packets。",
+    "有意的 drop-rx 与分配失败路径在 netdev 统计中保持可观测。",
+    "并发 TX 与统计采样绝不会观测到计数器回退。",
+    "有界并发生产者使用互不相交的 CAN ID 与确定性的序列负载。",
+    "正常饱和证据按生产者分别报告已发送、已接收、丢失、重复、乱序、意外以及最长无进展的数值。",
+    "重复注入瞬态 tx-full 会把每个重试帧恰好送达一次，并保持队列可用。",
+    "慢接收方证据把预期的套接字缓冲区丢失与无法解释的 netdev rx_dropped 事件区分开来。",
+    "drop-tx 与 drop-rx 的有意丢包统计与无法解释的丢失及恢复送达分开报告。",
+    "开发者冒烟与固定发布配置暴露有界的生产者、帧、重试、公平性、重载与时长预算。",
+    "发布配置的预算来源记录至少三次重复的虚拟基线与显式的恢复余量。",
+    "卸载/重载循环会关闭套接字、回收工作线程、移除模块/接口/debugfs 状态，并证明重载之后有一次全新的送达。",
+    "即使后续闸门失败，CI 仍校验并上传原始的压力测试 JSON。",
+    "CI 抓取完整 dmesg，带以标记为界、位于压力测试之后的时间窗，以及前后对比的 slabinfo 与 meminfo 资源快照，并在出现内核告警特征时失败即拒绝。",
+    "有界压力测试入口产出带版本的 JSON 报告，包含配置、预算、环境、来源、阶段耗时以及 PASS、FAIL 或 NOT_EXECUTED 状态。",
+    "畸形的、不完整的、失败的或非虚拟化的压力测试报告无法通过校验。",
+    "现有七种故障模式与状态生命周期行为保持不变。",
+    "不声称任何物理 CAN、MCU、执行器或硬实时证据。"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -55,16 +55,16 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "kernel build and checkpatch output",
-    "privileged wbcan fault suite output",
-    "concurrent netdev statistics sampling output",
-    "per-producer bounded saturation accounting in the versioned JSON artifact",
-    "kernel diagnostic JSON and raw resource snapshots",
-    "marker-delimited dmesg without kernel warnings"
+    "内核构建与 checkpatch 输出。",
+    "特权 wbcan 故障套件输出。",
+    "并发 netdev 统计采样输出。",
+    "版本化 JSON 产物中按生产者划分的有界饱和统计。",
+    "内核诊断 JSON 与原始资源快照。",
+    "以标记为界且不含内核告警的 dmesg。"
   ],
   "stop_conditions": [
-    "the target kernel lacks u64_stats_sync or ndo_get_stats64",
-    "a CAN core API change is required",
-    "physical hardware evidence is required"
+    "目标内核缺少 u64_stats_sync 或 ndo_get_stats64。",
+    "需要修改 CAN 核心 API。",
+    "需要物理硬件证据。"
   ]
 }

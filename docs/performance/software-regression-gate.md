@@ -21,8 +21,8 @@ python tools/scripts/analyze_telemetry.py \
   --output runs/performance/baseline/telemetry.json
 ```
 
-在代码变更后用相同命令写入 `runs/performance/current/`。资源和 telemetry 报告
-至少需要 5 个样本；正式比较建议保留现有的 30 次 telemetry 运行。
+在代码变更后用相同命令写入 `runs/performance/current/`。资源和遥测报告
+至少需要 5 个样本；正式比较建议保留现有的 30 次遥测运行。
 
 ## 执行门禁
 
@@ -39,15 +39,15 @@ python tools/scripts/performance_regression.py \
 ```
 
 输出中的每项检查包含基线值、当前值、绝对上限和允许的相对退化上限。以下情况
-会失败关闭：
+会失败即拒绝：
 
 - 报告缺失、schema 版本错误或包含 `NaN`/`Infinity`；
 - 基线与当前的操作系统、Python 版本或启动 cache 模式不一致；
 - 样本数量不足或 P50/P95/max 顺序错误；
-- telemetry 含有 `hardware` 来源；
+- 遥测含有 `hardware` 来源；
 - 当前值超过绝对预算或相对退化上限。
 
-策略中的 2 GiB 和 2 CPU 是任务书的软件容器预算，启动和流水线阈值是开发环境
+策略中的 2 GiB 和 2 CPU 是任务包的软件容器预算，启动和流水线阈值是开发环境
 门禁。结果始终标记为 `local_software`，并明确保留
 `target_hardware_measurement: NOT_EXECUTED`。目标板、真实 ROS/Gazebo 和物理机器人
 必须重新建立各自的可比基线，不能沿用本门禁作为发布证据。

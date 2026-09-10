@@ -1,62 +1,53 @@
-# MCU CAN HAL Boundary V1
+# MCU CAN HAL 边界 V1
 
-Status: **platform-independent bridge implemented; physical target transport
-NOT_EXECUTED** for Issue #180.
+状态：Issue #180 的**平台无关桥接已实现；物理目标传输 NOT_EXECUTED**。
 
-This boundary connects the raw CAN controller envelope in
-`firmware/mcu/core/hal.h` to the frozen MCU CAN Wire V1 codec. It removes the
-former ambiguity between a CAN arbitration identifier and a logical command
-identifier without changing any Wire V1 number or payload byte.
+该边界把 `firmware/mcu/core/hal.h` 中的原始 CAN 控制器信封连接到已冻结的 MCU CAN Wire V1
+编解码器。它消除了 CAN 仲裁标识符与逻辑命令标识符之间此前的歧义，而不改变任何 Wire V1 数字
+或载荷字节。
 
-## Identifier boundary
+## 标识符边界
 
-The two identifiers have different widths and authorities:
+两个标识符有不同的宽度和权威：
 
-| Name | Width | Location | Meaning |
+| 名称 | 宽度 | 位置 | 含义 |
 | --- | ---: | --- | --- |
-| `arbitration_id` | 11 bits | CAN envelope | Selects one Wire V1 frame kind and arbitration priority. |
-| `command_id` | 16 bits | payload bytes 1..2 | Correlates an ordinary command or STOP and selects its disjoint ID partition. |
+| `arbitration_id` | 11 位 | CAN 信封 | 选择一种 Wire V1 帧类型与仲裁优先级。 |
+| `command_id` | 16 位 | 载荷字节 1..2 | 关联普通命令或 STOP，并选择其不相交的 ID 分区。 |
 
-A STOP therefore uses arbitration ID `0x080` while its payload command ID is
-`0x8000..0xffff`. A target HAL must never write the logical command ID into a
-CAN arbitration register.
+因此 STOP 使用仲裁 ID `0x080`，而其载荷命令 ID 是 `0x8000..0xffff`。目标 HAL 绝不能把逻辑
+命令 ID 写入 CAN 仲裁寄存器。
 
-`hal_can_frame` contains:
+`hal_can_frame` 包含：
 
-- `arbitration_id`, which must be at most `0x7ff`;
-- `dlc`;
-- an explicit flags byte for extended-ID, RTR, error and CAN FD metadata; and
-- eight Classic CAN data bytes.
+- `arbitration_id`，至多为 `0x7ff`；
+- `dlc`；
+- 一个显式的 flags 字节，用于 extended-ID、RTR、error 与 CAN FD 元数据；以及
+- 八个 Classic CAN 数据字节。
 
-The flags are not C bit-fields. Every target must translate its controller
-status into the declared masks explicitly, avoiding compiler-specific layout.
+flags 不是 C 位域。每个目标都必须把其控制器状态显式翻译成声明的掩码，避免编译器特定布局。
 
-## One encoding authority
+## 唯一编码权威
 
-`mcu_can_bridge_encode()` calls `mcu_frame_encode()` and then constructs a raw
-standard Classic CAN data envelope. `mcu_can_bridge_decode()` validates the raw
-envelope before calling `mcu_frame_decode()`. There is no second frame-kind or
-payload mapping in the HAL.
+`mcu_can_bridge_encode()` 调用 `mcu_frame_encode()`，然后构造原始标准 Classic CAN 数据信封。
+`mcu_can_bridge_decode()` 在调用 `mcu_frame_decode()` 之前验证原始信封。HAL 中不存在第二个
+帧类型或载荷映射。
 
-The decoder publishes no logical frame unless all of these conditions pass:
+只有全部以下条件通过时解码器才发布逻辑帧：
 
-1. flags are exactly `HAL_CAN_FRAME_FLAG_NONE`;
-2. `arbitration_id <= 0x7ff`;
-3. DLC is exactly eight;
-4. the arbitration ID is one of the five frozen Wire V1 IDs; and
-5. version, reserved bytes, enum values, ID partitions and cross-field
-   semantics all pass the existing codec.
+1. flags 恰为 `HAL_CAN_FRAME_FLAG_NONE`；
+2. `arbitration_id <= 0x7ff`；
+3. DLC 恰为 8；
+4. 仲裁 ID 是五个冻结 Wire V1 ID 之一；并且
+5. 版本、保留字节、枚举值、ID 分区和跨字段语义全部通过现有编解码器。
 
-Extended, RTR, error, CAN FD, unknown-flag, out-of-range-ID, unknown-ID,
-wrong-DLC and malformed Wire V1 inputs produce a bounded bridge rejection
-record. They do not dispatch a state-machine event, create an ACK, enter replay
-history or refresh the software watchdog. If execution is already active,
-malformed traffic cannot keep it alive; only a valid serially new ordinary
-command may refresh the existing deadline.
+Extended、RTR、error、CAN FD、未知标志、越界 ID、未知 ID、错误 DLC 和畸形 Wire V1 输入产生
+有界桥接拒绝记录。它们不分发状态机事件、不创建 ACK、不进入回放历史，也不刷新软件看门狗。
+若执行已激活，畸形流量无法维持它；只有有效的序号为新普通命令才能刷新现有期限。
 
-## MCU ingress direction and routing
+## MCU 入口方向与路由
 
-The MCU ingress accepts only `STOP` and ordinary `COMMAND` kinds:
+MCU 入口只接受 `STOP` 与普通 `COMMAND` 类型：
 
 ```text
 raw HAL envelope
@@ -67,76 +58,60 @@ raw HAL envelope
   -> response: mcu_frame_encode() -> hal_can_send()
 ```
 
-The STOP branch is tested before ordinary-command handling. It bypasses both
-the trusted ordinary-session gate and the fixed replay window; a missing or
-corrupt ordinary dedup object cannot suppress this path. ACK, STOP_ACK and
-telemetry frames are valid MCU-originated encodings, but are rejected as
-wrong-direction traffic if received by this MCU ingress and never reach safety
-state.
+STOP 分支在普通命令处理之前测试。它绕过可信普通会话闸门和固定回放窗口；普通去重对象缺失或
+损坏也无法压制该路径。ACK、STOP_ACK 和遥测帧是有效的 MCU 发出编码，但若被本 MCU 入口接收
+则作为错误方向流量拒绝，绝不触及安全状态。
 
-`mcu_can_bridge_poll()` consumes at most one HAL frame per call. The target is
-the single writer of the bridge, state machine, watchdog and dedup objects; it
-must serialize ISR/task ownership and configure controller filters/FIFO policy
-so STOP priority is preserved. The core does not create a hidden or unbounded
-receive queue.
+`mcu_can_bridge_poll()` 每次调用至多消费一个 HAL 帧。目标是桥接器、状态机、看门狗和去重对象
+的单一写者；它必须串行化 ISR/任务所有权并配置控制器过滤器/FIFO 策略，以保持 STOP 优先级。
+核心不创建隐藏或无限的接收队列。
 
-## Response handoff
+## 响应交接
 
-`hal_can_send() == true` means only that the complete encoded frame was handed
-to the target transport. It does not prove arbitration, wire delivery, remote
-receipt, motor state or physical stopping.
+`hal_can_send() == true` 只表示完整的编码帧已交给目标传输。它不证明仲裁、线上送达、远端
+接收、电机状态或物理停止。
 
-For an accepted STOP, a successful HAL handoff confirms the existing bounded
-STOP_ACK slot through `mcu_watchdog_confirm_stop_ack()`. If the HAL rejects the
-send, the ACK remains pending and the existing STOP timeout/retry policy stays
-active. Ordinary ACK results remain in the dedup cache, so a host retry can
-request the same semantic response without executing the command again.
+对于被接受的 STOP，成功的 HAL 交接通过 `mcu_watchdog_confirm_stop_ack()` 确认现有的有界
+STOP_ACK 槽位。若 HAL 拒绝发送，ACK 保持挂起，现有的 STOP 超时/重试策略保持活动。普通 ACK
+结果保留在去重缓存中，因此主机重试可以请求相同的语义响应而不再次执行命令。
 
-## Priority evidence
+## 优先级证据
 
-Wire V1 retains the strict numeric order:
+Wire V1 保留严格的数字顺序：
 
 ```text
 STOP 0x080 < STOP_ACK 0x081 < COMMAND 0x100 < ACK 0x101 < TELEMETRY 0x180
 ```
 
-The bounded Host fake accepts a set of pending frames and exposes the lowest
-arbitration ID first, retaining insertion order for equal IDs. A regression
-queues an ordinary command before STOP and proves STOP is still dispatched and
-handed off first while the ordinary session is closed. This is deterministic
-logic evidence only; it is not bus timing, controller FIFO, ISR latency or
-electrical arbitration evidence.
+有界 Host 模拟器接受一组挂起帧，并先暴露最低仲裁 ID，相同 ID 保持插入顺序。一个回归测试在
+普通命令之前排队 STOP，证明在普通会话关闭的情况下 STOP 仍先被分发和交接。这只是确定性逻辑
+证据；不是总线时序、控制器 FIFO、ISR 延迟或电气仲裁证据。
 
-## Six-domain BSP compatibility gate
+## 六域 BSP 兼容性闸门
 
-BSP V0.1 assigns logical node IDs to `MCU-BASE`, both arm controllers, both
-tool controllers and `MCU-SAFETY`, but its concrete multi-node arbitration
-bit allocation is still an implementation gate. Wire V1 currently assigns all
-11 arbitration bits to five exact frame-kind IDs and carries no node field in
-the eight-byte payload. Multiple independently responding domains therefore
-cannot be placed on one shared bus by silently OR-ing a node ID into these
-values: that would change the frozen contract and can create colliding ACKs.
+BSP V0.1 为 `MCU-BASE`、两个机械臂控制器、两个工具控制器和 `MCU-SAFETY` 分配逻辑节点 ID，
+但其具体的多节点仲裁位分配仍是实现闸门。Wire V1 目前把全部 11 个仲裁位分配给五个精确帧类型
+ID，且在八字节载荷中不携带节点字段。因此不能通过静默地把节点 ID OR 进这些值来把多个独立
+响应域放到一条共享总线上：那会改变冻结契约并可能产生冲突 ACK。
 
-This bridge remains a single logical Wire V1 endpoint until the Protocol,
-Firmware, Linux and Electrical owners approve one of the following in a
-separate versioned decision:
+本桥接器在 Protocol、Firmware、Linux 和 Electrical Owner 于独立的版本化决策中批准以下选项
+之一之前，仍是单一逻辑 Wire V1 端点：
 
-- a new arbitration layout with explicit source/destination ownership;
-- physically separated buses that preserve the existing IDs; or
-- a new payload/transport version with bounded node addressing.
+- 带显式来源/目标所有权的新仲裁布局；
+- 保留现有 ID 的物理分离总线；或
+- 带有界节点寻址的新载荷/传输版本。
 
-No option is selected or inferred by Issue #180's platform-independent slice.
+Issue #180 的平台无关部分不选择或推断任何选项。
 
-## Target evidence matrix
+## 目标证据矩阵
 
-| Target | Bridge/codec logic | CAN transport | Evidence boundary |
+| 目标 | 桥接/编解码逻辑 | CAN 传输 | 证据边界 |
 | --- | --- | --- | --- |
-| Host fake | `PASS` | `PASS` for bounded fake queues | No controller, wire or physical timing. |
-| RISC-V QEMU | `PASS` | `NOT_EXECUTED` | `hal_can_init/send/recv` remain false-returning stubs. |
-| Legacy CH32V307 target | build source absent | `NOT_EXECUTED` | No board HAL, linker/startup package or board run. |
-| BSP STM32H563 / STM32G0B1 | target absent | `NOT_EXECUTED` | No approved clock, pin, transceiver, filter, IRQ, linker or vendor HAL inputs. |
+| Host fake | `PASS` | 有界模拟队列 `PASS` | 无控制器、线上或物理时序。 |
+| RISC-V QEMU | `PASS` | `NOT_EXECUTED` | `hal_can_init/send/recv` 仍是返回 false 的桩。 |
+| 遗留 CH32V307 目标 | 构建源码缺失 | `NOT_EXECUTED` | 无板卡 HAL、链接/启动包或板卡运行。 |
+| BSP STM32H563 / STM32G0B1 | 目标缺失 | `NOT_EXECUTED` | 无获批的时钟、引脚、收发器、过滤器、IRQ、链接器或厂商 HAL 输入。 |
 
-The Host/QEMU tests prove envelope validation, codec reuse, direction gates,
-STOP-first dispatch and transport-handoff state semantics. They do not prove a
-real STM32 peripheral, six-domain arbitration, bitrate, bus-off recovery,
-physical CAN, actuators, E-stop behavior or hard-real-time deadlines.
+Host/QEMU 测试证明信封验证、编解码复用、方向闸门、STOP 优先分发和传输交接状态语义。它们不
+证明真实 STM32 外设、六域仲裁、位速率、bus-off 恢复、物理 CAN、执行器、急停行为或硬实时
+期限。

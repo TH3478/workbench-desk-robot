@@ -1,21 +1,21 @@
-# Lessons learned
+# 经验教训
 
-## Evidence boundaries must be encoded
+## 证据边界必须编码化
 
-Scripted evaluation makes interface behavior reviewable, but it is not Gazebo or hardware evidence. Keeping `release_eligible: false` in generated outputs is stronger than relying on a note in a meeting.
+脚本化评估使接口行为可评审，但它不是 Gazebo 或硬件证据。在生成输出中保持 `release_eligible: false` 比依赖会议记录里的一条说明更可靠。
 
-## Defaults are part of the threat and failure model
+## 默认值是威胁与故障模型的一部分
 
-The v0.1.0 release ran checks, built and smoke-tested the image, then failed because the SBOM action defaulted to uploading a release asset. Third-party action inputs and permissions need an explicit regression test, not only version pinning.
+v0.1.0 发布运行了检查、构建并对镜像做了冒烟测试，随后却因 SBOM action 默认上传发布资产而失败。第三方 action 的输入与权限需要显式的回归测试，而不只是版本锁定。
 
-## Cross-layer contracts need one change unit
+## 跨层契约需要一个变更单元
 
-Schema and Pydantic model changes previously drifted when split across PRs. The repository now requires same-PR updates, three-owner review, and full contract validation. Ownership rules should be executable wherever possible.
+Schema 与 Pydantic 模型的变更此前在拆分到多个 PR 时发生漂移。仓库现在要求同 PR 更新、三位 Owner 评审与完整契约验证。归属规则应尽可能可执行。
 
-## Blocked reports can still be successful controls
+## 受阻报告仍然可以是有效的控制手段
 
-Hardware/procurement validators pass while their business status remains `RELEASE_BLOCKED` or `ORDER_RELEASE_BLOCKED`. A successful validator means the report is internally consistent; it does not mean the physical gate passed.
+硬件/采购验证器通过，而其业务状态仍为 `RELEASE_BLOCKED` 或 `ORDER_RELEASE_BLOCKED`。验证器通过只说明报告内部一致；它并不意味着物理闸门通过。
 
-## Baselines and forecasts serve different purposes
+## 基线与预测服务不同目的
 
-The baseline preserves accountability. Forecasts may move as evidence arrives, but rewriting the baseline hides variance and weakens risk learning.
+基线保留问责性。预测可随证据到来而调整，但重写基线会掩盖方差并削弱风险学习。

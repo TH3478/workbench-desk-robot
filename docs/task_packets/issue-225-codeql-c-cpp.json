@@ -1,7 +1,7 @@
 {
   "issue": 225,
   "human_owner": "TH3478",
-  "objective": "Add required static analysis coverage for the kernel wbcan driver and freestanding MCU C code without replacing runtime safety evidence.",
+  "objective": "为内核 wbcan 驱动与独立运行的 MCU C 代码增加必需的静态分析覆盖，且不替代运行时安全证据。",
   "allowed_paths": [
     ".github/workflows/security.yml",
     "tests/unit/test_security_baseline.py",
@@ -19,12 +19,12 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "a pinned CodeQL C/C++ job analyzes kernel/wbcan and firmware/mcu",
-    "the C/C++ job uses manual build mode and records both kernel and freestanding MCU compiler invocations",
-    "CodeQL upload permissions are limited to the C/C++ and Python analysis jobs",
-    "the C/C++ analysis job cannot silently skip its build or be marked successful with continue-on-error",
-    "the existing wbcan fault suite and MCU QEMU checks remain separate runtime evidence",
-    "a deterministic security workflow regression test protects the C/C++ job configuration"
+    "一个锁定版本的 CodeQL C/C++ job 分析 kernel/wbcan 与 firmware/mcu",
+    "C/C++ job 使用手动构建模式，并记录内核与独立运行 MCU 两方的编译器调用",
+    "CodeQL 上传权限限于 C/C++ 与 Python 分析 job",
+    "C/C++ 分析 job 不能静默跳过构建，也不能以 continue-on-error 被标记为成功",
+    "现有 wbcan 故障套件与 MCU QEMU 检查仍为独立的运行时证据",
+    "确定性安全工作流回归测试守护 C/C++ job 配置"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-225-codeql-c-cpp.json",
@@ -34,16 +34,16 @@
     "git diff --check"
   ],
   "evidence": [
-    "security workflow regression test output",
-    "Task Packet validation output",
-    "full repository check output",
-    "strict documentation build output",
-    "CodeQL C/C++ and Python analysis results"
+    "安全工作流回归测试输出",
+    "任务包校验输出",
+    "全仓库检查输出",
+    "严格文档构建输出",
+    "CodeQL C/C++ 与 Python 分析结果"
   ],
   "stop_conditions": [
-    "a compiler database cannot be captured for either the kernel or freestanding MCU target",
-    "a firmware, interface, robot-control, or physical safety change is required",
-    "the analyzer is allowed to skip a build, suppress findings broadly, or replace runtime evidence",
-    "a repository branch-protection setting must be changed outside the code review"
+    "内核或独立运行 MCU 目标任一方的编译器数据库无法采集",
+    "需要固件、接口、机器人控制或物理安全变更",
+    "允许分析器跳过构建、大面积抑制发现或替代运行时证据",
+    "必须在代码评审之外变更仓库分支保护设置"
   ]
 }

@@ -1,96 +1,86 @@
 # MCU CAN Wire V1
 
-Status: **firmware-owned binary contract** for Issue #54, connected to the raw
-HAL envelope by Issue #180.
+状态：Issue #54 的**固件拥有的二进制契约**，由 Issue #180 连接到原始 HAL 信封。
 
-This document maps the frozen logical MCU protocol v1.0 into one Classic CAN
-data frame. The logical contract remains normative for frame meaning. Wire V1
-defines only transport encoding and does not change
-`interfaces/json_schema/mcu_protocol.schema.json` or the exported Pydantic
-models.
+本文档把冻结的逻辑 MCU 协议 v1.0 映射进一个 Classic CAN 数据帧。逻辑契约对帧含义仍是规范性
+的。Wire V1 只定义传输编码，不改变 `interfaces/json_schema/mcu_protocol.schema.json` 或导出
+的 Pydantic 模型。
 
-## Transport boundary
+## 传输边界
 
-- Classic CAN 2.0 data frames with standard 11-bit identifiers.
-- DLC is exactly 8 for every frame kind. Remote, extended-ID and CAN FD frames
-  are outside this codec.
-- Multi-byte integers use network byte order (big-endian).
-- Byte 0 is the compact protocol version. Logical version `"1.0"` is `0x10`.
-- CAN's frame CRC is the transport integrity check; Wire V1 adds no payload
-  checksum.
+- 带标准 11 位标识符的 Classic CAN 2.0 数据帧。
+- 每种帧类型 DLC 都恰为 8。远程、extended-ID 和 CAN FD 帧在本编解码器之外。
+- 多字节整数使用网络字节序（大端）。
+- 字节 0 是紧凑协议版本。逻辑版本 `"1.0"` 是 `0x10`。
+- CAN 的帧 CRC 是传输完整性检查；Wire V1 不增加载荷校验和。
 
-The raw controller boundary and rejection order are defined in
-`docs/architecture/mcu-can-hal-boundary-v1.md`. In particular,
-`hal_can_frame.arbitration_id` is the 11-bit value in the table below, while
-the logical 16-bit `command_id` remains inside payload bytes 1..2.
+原始控制器边界与拒绝顺序定义在 `docs/architecture/mcu-can-hal-boundary-v1.md`。特别是，
+`hal_can_frame.arbitration_id` 是下表所示 11 位值，而逻辑 16 位 `command_id` 保留在载荷字节
+1..2 内。
 
-The logical `frame_id`, `sent_at_us` and `clock_id` fields are adapter/evidence
-metadata and are not transmitted in the eight-byte CAN payload. A bridge owns
-their local generation and retention. They are never reconstructed as remote
-timestamps or used as cross-device freshness evidence.
+逻辑 `frame_id`、`sent_at_us` 和 `clock_id` 字段是适配器/证据元数据，不在八字节 CAN 载荷中
+传输。桥接器拥有它们的本地生成与保留。它们绝不会被重构为远端时间戳，或用作跨设备新鲜度
+证据。
 
-## Arbitration identifiers
+## 仲裁标识符
 
-| CAN ID | Frame kind | Direction | Priority rationale |
+| CAN ID | 帧类型 | 方向 | 优先级理由 |
 | --- | --- | --- | --- |
-| `0x080` | `stop` | host to MCU | Highest protocol priority. |
-| `0x081` | `stop_ack` | MCU to host | Correlated safety response. |
-| `0x100` | `command` | host to MCU | Ordinary command traffic. |
-| `0x101` | `ack` | MCU to host | Ordinary correlated response. |
-| `0x180` | `telemetry` | MCU to host | Lowest protocol priority. |
+| `0x080` | `stop` | 主机到 MCU | 最高协议优先级。 |
+| `0x081` | `stop_ack` | MCU 到主机 | 关联的安全响应。 |
+| `0x100` | `command` | 主机到 MCU | 普通命令流量。 |
+| `0x101` | `ack` | MCU 到主机 | 普通关联响应。 |
+| `0x180` | `telemetry` | MCU 到主机 | 最低协议优先级。 |
 
-Lower identifiers win CAN arbitration. The ID selects exactly one frame kind;
-all other standard identifiers are rejected by the codec.
+较低标识符赢得 CAN 仲裁。ID 恰好选择一种帧类型；所有其他标准标识符被编解码器拒绝。
 
-## Payload layouts
+## 载荷布局
 
-All offsets are zero-based and every reserved byte must be `0x00`.
+所有偏移从零开始，每个保留字节必须是 `0x00`。
 
-### Command and STOP
+### Command 与 STOP
 
-| Byte | Field |
+| 字节 | 字段 |
 | --- | --- |
 | 0 | version (`0x10`) |
-| 1..2 | `command_id`, unsigned 16-bit big-endian |
+| 1..2 | `command_id`，无符号 16 位大端 |
 | 3 | opcode |
 | 4 | `retry_count` |
-| 5..7 | reserved zero |
+| 5..7 | 保留零 |
 
-`command` accepts IDs `0x0000..0x7fff` and ordinary opcodes only. `stop`
-accepts IDs `0x8000..0xffff` and opcode `stop` only.
+`command` 只接受 ID `0x0000..0x7fff` 和普通 opcode。`stop` 只接受 ID `0x8000..0xffff` 和
+opcode `stop`。
 
-### ACK and STOP_ACK
+### ACK 与 STOP_ACK
 
-| Byte | Field |
+| 字节 | 字段 |
 | --- | --- |
 | 0 | version (`0x10`) |
-| 1..2 | `command_id`, unsigned 16-bit big-endian |
+| 1..2 | `command_id`，无符号 16 位大端 |
 | 3 | opcode |
-| 4 | echoed `retry_count` |
+| 4 | 回显的 `retry_count` |
 | 5 | `result_code` |
 | 6 | `fault_code` |
 | 7 | `device_mode` |
 
-`ack` accepts the ordinary ID/opcode partition. `stop_ack` accepts the STOP
-partition and opcode. Result, fault and mode combinations must satisfy the
-frozen logical protocol; encoding a numeric enum value is not sufficient.
+`ack` 接受普通 ID/opcode 分区。`stop_ack` 接受 STOP 分区与 opcode。结果、故障与模式组合必须
+满足冻结逻辑协议；仅编码一个数字枚举值是不够的。
 
-### Telemetry
+### 遥测
 
-| Byte | Field |
+| 字节 | 字段 |
 | --- | --- |
 | 0 | version (`0x10`) |
-| 1..4 | `sequence_no`, unsigned 32-bit big-endian |
+| 1..4 | `sequence_no`，无符号 32 位大端 |
 | 5 | `fault_code` |
 | 6 | `device_mode` |
-| 7 | reserved zero |
+| 7 | 保留零 |
 
-Telemetry has no command ID, opcode, retry count or result code and never
-confirms a command.
+遥测没有命令 ID、opcode、重试计数或结果码，从不确认命令。
 
-## Numeric registries
+## 数字注册表
 
-| Opcode | Value |
+| Opcode | 值 |
 | --- | --- |
 | reserved | `0x00` |
 | `move` | `0x01` |
@@ -100,23 +90,23 @@ confirms a command.
 | `stop` | `0x05` |
 | `heartbeat` | `0x06` |
 
-| Result | Value |
+| Result | 值 |
 | --- | --- |
 | accepted | `0x00` |
 | rejected | `0x01` |
 
-| Fault | Value | Valid MCU frame |
+| Fault | 值 | 有效 MCU 帧 |
 | --- | --- | --- |
-| `none` | `0x00` | ACK, STOP_ACK, telemetry as constrained by result/mode |
-| `ack_timeout` | `0x01` | never; host-only diagnostic |
-| `stop_timeout` | `0x02` | never; host-only diagnostic |
-| `stop_rejected` | `0x03` | failed STOP_ACK only |
-| `link_lost` | `0x04` | fault telemetry only |
-| `duplicate_frame` | `0x05` | failed ordinary ACK only |
-| `watchdog_expired` | `0x06` | fault telemetry only |
-| `malformed_frame` | `0x07` | failed ordinary ACK only |
+| `none` | `0x00` | 按 result/mode 约束的 ACK、STOP_ACK、遥测 |
+| `ack_timeout` | `0x01` | 绝不；仅主机诊断 |
+| `stop_timeout` | `0x02` | 绝不；仅主机诊断 |
+| `stop_rejected` | `0x03` | 仅失败 STOP_ACK |
+| `link_lost` | `0x04` | 仅故障遥测 |
+| `duplicate_frame` | `0x05` | 仅失败普通 ACK |
+| `watchdog_expired` | `0x06` | 仅故障遥测 |
+| `malformed_frame` | `0x07` | 仅失败普通 ACK |
 
-| Device mode | Value |
+| Device mode | 值 |
 | --- | --- |
 | `idle` | `0x00` |
 | `moving` | `0x01` |
@@ -124,13 +114,12 @@ confirms a command.
 | `stopped` | `0x03` |
 | `faulted` | `0x04` |
 
-All unlisted enum values are reserved and invalid.
+所有未列出的枚举值都是保留且无效的。
 
-## Canonical golden vector
+## 规范黄金向量
 
-The committed `interfaces/examples/mcu-frame-stop-ack.json` describes a
-successful STOP acknowledgement with command ID 32769 (`0x8001`), zero retry,
-no fault and stopped mode. Its Wire V1 representation is:
+已提交的 `interfaces/examples/mcu-frame-stop-ack.json` 描述命令 ID 32769（`0x8001`）、零
+重试、无故障、已停止模式的成功 STOP 确认。其 Wire V1 表示是：
 
 ```text
 CAN ID: 0x081
@@ -138,18 +127,14 @@ DLC:    8
 DATA:   10 80 01 05 00 00 00 03
 ```
 
-The JSON `frame_id`, `sent_at_us` and `clock_id` remain adapter metadata as
-defined above. The shared Host/QEMU C test corpus pins this byte vector.
+JSON 的 `frame_id`、`sent_at_us` 和 `clock_id` 如上所述仍是适配器元数据。共享的 Host/QEMU C
+测试语料固定该字节向量。
 
-## Fail-closed behavior and limits
+## 失败即拒绝行为与限制
 
-The decoder rejects the complete frame before publishing output when the ID,
-DLC, version, reserved bytes, enum values, ID partition or cross-field result
-semantics are invalid. The encoder validates the complete logical wire object
-and destination capacity before writing any output byte.
+当 ID、DLC、版本、保留字节、枚举值、ID 分区或跨字段结果语义无效时，解码器在发布输出前拒绝
+整个帧。编码器在写出任何输出字节前验证完整的逻辑线上对象和目标容量。
 
-Wire V1 does not implement command deduplication, watchdog scheduling, host
-transport dispatch, CAN controller registers, bus-off recovery, multi-node
-addressing or electrical validation. The Issue #180 bridge validates the raw
-envelope and routes decoded frames, but real target drivers and physical
-evidence remain separate owner-gated work.
+Wire V1 不实现命令去重、看门狗调度、主机传输分发、CAN 控制器寄存器、bus-off 恢复、多节点
+寻址或电气验证。Issue #180 桥接器验证原始信封并路由解码帧，但真实目标驱动与物理证据仍是
+独立的 Owner 把关工作。

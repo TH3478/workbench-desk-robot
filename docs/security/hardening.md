@@ -1,28 +1,28 @@
-# Hardening baseline
+# 加固基线
 
-## Application and authority
+## 应用与授权
 
-- Dashboard endpoints remain `GET`-only; write methods fail closed.
-- The dashboard has no ROS, MCU, motion, emergency-stop, secret, or release publisher.
-- Models return a bounded route; trusted deterministic builders construct semantic actions.
-- Remote or credentialed model endpoints are rejected by default.
-- Verifier conclusions require evidence and remain separate from action/device status.
+- 看板端点仅保留 `GET`；写入方法失败即拒绝。
+- 看板没有 ROS、MCU、运动、急停、密钥或发布类 publisher。
+- 模型返回受限路由；受信任的确定性构建器构造语义动作。
+- 远程或带凭据的模型端点默认被拒绝。
+- 验证器结论要求证据，并与动作/设备状态分离。
 
-## Container and network
+## 容器与网络
 
-- Run as non-root UID `10001` with a read-only filesystem, `no-new-privileges`, and all Linux capabilities dropped.
-- Bind the dashboard to localhost by default.
-- Keep the optional model runtime on an internal network; only the bootstrap profile receives egress for explicit provisioning.
-- Pin base and model images by digest; rebuild and rescan after updates.
-- Use a small writable `tmpfs`; do not mount host control sockets or secret directories into the dashboard.
+- 以非 root UID `10001` 运行，只读文件系统、`no-new-privileges`，并丢弃所有 Linux capability。
+- 看板默认绑定 localhost。
+- 可选模型运行时放在内部网络；只有 bootstrap profile 获得用于显式配置的出网权限。
+- 基础与模型镜像按摘要固定；更新后重建并重新扫描。
+- 使用小型可写 `tmpfs`；不把主机控制 socket 或密钥目录挂载进看板。
 
-## Secrets and logs
+## 密钥与日志
 
-- Use short-lived least-privilege GitHub/environment credentials and job-level permissions.
-- Never place tokens in source, image layers, Compose files, CLI arguments, screenshots, fixtures, event logs, or artifacts.
-- Structured logs retain run ID and monotonic sequence for investigation, but omit prompts/private payloads unless explicitly approved and access-controlled.
-- Rotate an exposed credential before investigating convenience or blame.
+- 使用短时最小权限的 GitHub/环境凭据与任务级权限。
+- 绝不把令牌放在源码、镜像层、Compose 文件、CLI 参数、截图、固定装置、事件日志或产物中。
+- 结构化日志保留 run ID 与单调序号用于调查，但省略提示词/私有载荷，除非显式批准且访问受控。
+- 在调查便利性或责任归属之前，先轮换已暴露的凭据。
 
-## Deployment review
+## 部署评审
 
-This baseline must be re-evaluated for TLS termination, authentication, reverse proxies, remote access, orchestration, host mounts, device access, and physical networks. The current localhost/offline assumptions do not authorize an internet-facing deployment.
+本基线必须针对 TLS 终止、认证、反向代理、远程访问、编排、主机挂载、设备访问与物理网络重新评估。当前的 localhost/离线假设不授权面向互联网的部署。

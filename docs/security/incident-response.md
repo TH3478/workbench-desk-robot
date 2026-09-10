@@ -1,31 +1,31 @@
-# Incident response
+# 事件响应
 
-## Roles
+## 角色
 
-| Role | Responsibility |
+| 角色 | 职责 |
 |---|---|
-| Incident Commander | scope, priority, safety, communications, and closure decision |
-| Security Lead | triage, evidence plan, containment options, and retest |
-| System/Module Owner | technical diagnosis, remediation, and recovery validation |
-| Project Owner | release/deployment decision, risk acceptance, and external disclosure |
-| Scribe | immutable timeline, actions, evidence references, and decision record |
+| 事件指挥官 | 范围、优先级、安全、沟通与关闭决策 |
+| 安全负责人 | 分诊、证据计划、遏制选项与复测 |
+| 系统/模块 Owner | 技术诊断、修复与恢复验证 |
+| 项目 Owner | 发布/部署决策、风险接受与对外披露 |
+| 记录员 | 不可变时间线、动作、证据引用与决策记录 |
 
-## Lifecycle
+## 生命周期
 
-1. **Receive privately:** acknowledge, create restricted record, assign commander and security lead.
-2. **Triage:** identify affected versions/assets, data, authority boundary, exploitation, and severity.
-3. **Preserve:** record time source, commit/image digests, logs, hashes, access, and chain of custody before destructive action when safety permits.
-4. **Contain:** revoke/rotate credentials, isolate service/network, stop publication or physical operation, and preserve evidence.
-5. **Eradicate:** remove root cause, add regression detection, scan related paths and versions.
-6. **Recover:** restore from a verified source, validate security/function/safety gates, monitor for recurrence.
-7. **Disclose and learn:** human-approved advisory, affected-user guidance, timeline, root cause, corrective actions, and effectiveness review.
+1. **私下接收：**确认、创建受限记录、指派指挥官与安全负责人。
+2. **分诊：**识别受影响版本/资产、数据、授权边界、可利用性与严重度。
+3. **保全：**在安全允许时，于破坏性动作之前记录时间源、commit/镜像摘要、日志、哈希、访问与保管链。
+4. **遏制：**撤销/轮换凭据、隔离服务/网络、停止发布或物理操作，并保全证据。
+5. **根除：**移除根因、增加回归检测、扫描相关路径与版本。
+6. **恢复：**从已验证来源恢复，验证安全/功能/安全闸门，监控复发。
+7. **披露与学习：**经人工批准的通报、受影响用户指南、时间线、根因、纠正动作与有效性评审。
 
-Safety takes priority over evidence preservation during immediate physical danger. Record the action and rationale as soon as safe.
+在立即物理危险期间，安全优先于证据保全。安全后尽快记录动作与理由。
 
-## Severity triggers
+## 严重度触发条件
 
-Critical/high examples include exposed credentials, raw robot/control authority, false-completion bypass, arbitrary code execution, evidence tampering, public private-log access, or an exploitable dependency in the runtime path. These block release and affected operation until fixed or covered by a time-bounded human risk decision.
+严重/高危示例包括暴露凭据、原始机器人/控制授权、虚假完成绕过、任意代码执行、证据篡改、公开私有日志访问，或运行时路径中可利用的依赖。这些问题阻断发布与受影响操作，直到修复或被有期限的人工风险决策覆盖。
 
-## Exercise
+## 演练
 
-Run a tabletop before P1 release using a synthetic leaked token plus forged evidence event. Verify private intake, rotation, service isolation, timeline/evidence capture, regression test, and coordinated status update. Record the exercise as a drill; do not call it a real incident or penetration test.
+在 P1 发布前使用合成的泄露令牌加伪造证据事件进行一次桌面推演。验证私下接收、轮换、服务隔离、时间线/证据采集、回归测试与协调状态更新。把演练记录为 drill；不要称之为真实事件或渗透测试。

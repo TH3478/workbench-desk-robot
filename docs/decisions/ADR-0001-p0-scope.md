@@ -1,13 +1,13 @@
-# ADR-0001: P0 is a fixed tabletop single-arm simulator
+# ADR-0001: P0 是固定桌面单臂模拟器
 
-## Status
+## 状态
 
-Accepted for v0.1.
+v0.1 已接受。
 
-## Decision
+## 决策
 
-Use Ubuntu 24.04, ROS 2 Jazzy and Gazebo Harmonic. P0 demonstrates one active arm moving a known red block into a tray. Mobile base, dual active arms, physical hardware and open-vocabulary perception are out of scope.
+使用 Ubuntu 24.04、ROS 2 Jazzy 与 Gazebo Harmonic。P0 演示一只活动机械臂把已知红色方块移入托盘。移动底座、双臂活动、物理硬件与开放词表感知不在范围内。
 
-## Consequence
+## 后果
 
-The team can prove planning, state, action, verification, recovery and replay in one month. Expansion requires a new ADR after the deterministic baseline passes.
+团队可以在一个月内证明规划、状态、动作、验证、恢复与回放。在确定性基线通过后，扩展需要新的 ADR。

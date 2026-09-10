@@ -1,23 +1,16 @@
-# Troubleshooting
+# 故障排查
 
-Troubleshooting is evidence-first and remote-first. Never bypass protection or
-repeat an energization that produces smoke, odor, heat, battery alarm, uncontrolled
-motion, or a safety-chain failure.
+故障排查遵循证据优先和远程优先。绝不绕过保护，也绝不重复一次产生烟雾、异味、发热、电池告警、不受控运动或安全链失效的上电。
 
-| Symptom | Safe first checks | Escalate when |
+| 症状 | 安全的首轮检查 | 何时上报 |
 |---|---|---|
-| no power | service disconnect, approved charger, visible damage, BMS state | battery damage, fuse operation, repeated trip |
-| stuck in precharge | bus/load disconnected state, event log, pack/config revision | timeout repeats or contactor feedback disagrees |
-| derated | temperature, SOC, current demand, cooling obstruction | threshold persists after safe cooldown |
-| arm not ready | E-stop, guard/interlock, calibration, controller status | mismatch repeats or brake/position is abnormal |
-| communication loss | approved cables, switch/link state, timestamps, service health | intermittent fleet pattern or safety data loss |
-| task failure | payload/tool identity, workspace, evidence bundle, last known state | collision, dropped object, repeated recovery |
+| 无电源 | 维修断连开关、经批准的充电器、可见损坏、BMS 状态 | 电池损坏、熔断器动作、反复跳闸 |
+| 卡在预充电 | 总线/负载断开状态、事件日志、电池包/配置修订版本 | 超时反复出现或接触器反馈不一致 |
+| 已降额 | 温度、SOC、电流需求、散热受阻 | 安全冷却后阈值仍持续 |
+| 机械臂未就绪 | E-stop、防护装置/互锁、校准、控制器状态 | 不匹配反复出现或制动器/位置异常 |
+| 通信中断 | 经批准的线缆、交换机/链路状态、时间戳、服务健康 | 间歇性车队模式或安全数据丢失 |
+| 任务失败 | 负载/工具标识、工作区、证据包、最后已知状态 | 碰撞、物体掉落、反复恢复 |
 
-Capture the case template before changing configuration. Export logs with checksum
-and time range. Record every attempted action and its result. Use only approved,
-reversible recovery steps. If an update or rollback is authorized, verify artifact
-signature/hash, stable power, backup, abort criteria, and post-change acceptance.
+在更改配置之前，先填写案例模板。导出带校验和与时间范围的日志。记录每次尝试的操作及其结果。只使用经批准的、可逆的恢复步骤。如果更新或回滚已获授权，验证产物签名/哈希、稳定电源、备份、中止标准和变更后验收。
 
-For S0/S1 conditions, stop use and apply fleet containment before root cause is
-complete. Returned units and storage devices follow chain-of-custody and privacy
-rules. A no-fault-found outcome still requires the evidence and reproduction record.
+对于 S0/S1 状况，在根本原因查明之前停止使用并实施车队遏制。退回的单元和存储设备遵循保管链与隐私规则。“未发现故障”的结果仍需要证据与复现记录。

@@ -1,7 +1,7 @@
 {
   "issue": "bsp-readiness-ci",
   "human_owner": "Quchaosheng",
-  "objective": "Run repository-side Linux BSP manifest and readiness checks on every pull request and main push.",
+  "objective": "在每个 pull request 与 main 推送时运行仓库侧的 Linux BSP 清单与就绪检查。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "bsp/validation/**",
@@ -20,10 +20,10 @@
     "invented JetPack, DTS or pin/IRQ evidence"
   ],
   "acceptance": [
-    "BSP manifest validation runs in CI",
-    "BSP readiness validation runs in CI",
-    "unit tests cover the BSP manifest contract",
-    "physical bring-up remains fail-closed and NOT_EXECUTED"
+    "BSP 清单校验在 CI 中运行",
+    "BSP 就绪校验在 CI 中运行",
+    "单元测试覆盖 BSP 清单契约",
+    "物理启动调试保持失败即拒绝与 NOT_EXECUTED"
   ],
   "commands": [
     "python bsp/validation/validate_manifests.py",
@@ -37,8 +37,8 @@
     "tests/unit/test_bsp_manifests.py"
   ],
   "stop_conditions": [
-    "a change would require physical board evidence",
-    "a target-specific DTS or kernel release is not sourced",
-    "a validation change weakens fail-closed behavior"
+    "变更需要物理板卡证据",
+    "目标专用 DTS 或内核发布没有出处",
+    "校验变更削弱失败即拒绝行为"
   ]
 }

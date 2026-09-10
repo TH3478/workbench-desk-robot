@@ -1,31 +1,31 @@
-# External cold-start protocol
+# 外部冷启动协议
 
-Acceptance requires at least two of three participants to reach a healthy dashboard within 60 minutes from a clean machine.
+验收要求三名参与者中至少两人在干净机器上 60 分钟内达到健康的看板。
 
-## Participant records
+## 参与者记录
 
-Copy [`cold-start-results.template.json`](cold-start-results.template.json) to a private evidence file and fill it after each clean-machine run. Validate the completed file with:
+将 [`cold-start-results.template.json`](cold-start-results.template.json) 复制为私有证据文件，并在每次干净机器运行后填写。用以下命令验证完成的文件：
 
 ```bash
 python tools/scripts/validate_cold_start.py runs/evaluation/cold-start-results.json
 ```
 
-The command intentionally fails until at least two of three real participants pass. The checked-in template is not evidence.
+该命令在至少三名真实参与者中的两人通过前会刻意失败。检入的模板不是证据。
 
-| Field | Value |
+| 字段 | 值 |
 |---|---|
-| Participant ID | |
-| OS and version | |
-| CPU / memory | |
-| Docker version | |
-| Started at | |
-| First `/healthz` 200 at | |
-| First `/readyz` 200 at | |
-| Elapsed minutes | |
-| Result | pass / fail |
-| Blocking log reference | |
+| 参与者 ID | |
+| 操作系统与版本 | |
+| CPU / 内存 | |
+| Docker 版本 | |
+| 开始时间 | |
+| 首次 `/healthz` 200 时间 | |
+| 首次 `/readyz` 200 时间 | |
+| 已用分钟数 | |
+| 结果 | pass / fail |
+| 阻断日志引用 | |
 
-## Path under test
+## 被测路径
 
 ```bash
 git clone https://github.com/Quchaosheng/workbench-desk-robot.git
@@ -35,4 +35,4 @@ curl --fail http://127.0.0.1:8080/healthz
 curl --fail http://127.0.0.1:8080/readyz
 ```
 
-Do not preinstall repository dependencies, reuse a prior image, or help the participant beyond the public README. Keep failures; they are release evidence, not scores to clean up.
+不要预装仓库依赖、复用既有镜像，或在公开 README 之外帮助参与者。保留失败记录；它们是发布证据，不是要清理的分数。

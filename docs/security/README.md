@@ -1,26 +1,26 @@
-# Security engineering baseline
+# 安全工程基线
 
-Security controls protect code, dependencies, evidence integrity, deployment, and robot authority. They do not substitute for functional, simulation, or physical safety validation.
+安全控制保护代码、依赖、证据完整性、部署与机器人授权。它们不能替代功能、仿真或物理安全验证。
 
-## Security task map
+## 安全任务图
 
-| Task | Control / artifact | State |
+| 任务 | 控制 / 产物 | 状态 |
 |---|---|---|
-| SEC1 code audit standard | [Secure review standard](secure-review-standard.md) plus CodeQL | ACTIVE after workflow merge |
-| SEC2 SBOM generation | pinned Anchore workflow and [supply-chain policy](supply-chain.md) | ACTIVE; next release proof pending |
-| SEC3 dependency scanning | PR dependency review and Dependabot configuration | ACTIVE after workflow merge |
-| SEC4 penetration test | [authorized test plan](penetration-test-plan.md) | NOT_EXECUTED |
-| SEC5 security hardening | [Hardening baseline](hardening.md) | PARTIAL; review per deployment |
-| SEC6 incident response | [Incident response](incident-response.md) | DEFINED; exercise pending |
-| SEC7 security documentation | `SECURITY.md` plus this handbook | DEFINED |
-| SEC8 compliance review | [Control matrix](compliance-matrix.md) | READINESS_ONLY; not certified |
+| SEC1 代码审计标准 | [安全评审标准](secure-review-standard.md) 加 CodeQL | 工作流合并后 ACTIVE |
+| SEC2 SBOM 生成 | 固定的 Anchore 工作流与[供应链策略](supply-chain.md) | ACTIVE；下一次发布证明待定 |
+| SEC3 依赖扫描 | PR 依赖评审与 Dependabot 配置 | 工作流合并后 ACTIVE |
+| SEC4 渗透测试 | [授权测试计划](penetration-test-plan.md) | NOT_EXECUTED |
+| SEC5 安全加固 | [加固基线](hardening.md) | PARTIAL；按部署评审 |
+| SEC6 事件响应 | [事件响应](incident-response.md) | DEFINED；演练待定 |
+| SEC7 安全文档 | `SECURITY.md` 加本手册 | DEFINED |
+| SEC8 合规评审 | [控制矩阵](compliance-matrix.md) | READINESS_ONLY；未经认证 |
 
-## Release-blocking rules
+## 发布阻断规则
 
-- unresolved critical/high code, dependency, secret, container, or authority-boundary finding;
-- a model or public interface gains raw control, emergency-stop, release, or completion authority;
-- required SBOM/provenance is missing or cannot be tied to the published digest;
-- penetration, compliance, or physical results are claimed without eligible evidence;
-- a response action would destroy incident or safety evidence.
+- 未解决的严重/高危代码、依赖、密钥、容器或授权边界问题；
+- 模型或公共接口获得原始控制、急停、发布或完成授权；
+- 必需 SBOM/溯源缺失或无法关联到已发布摘要；
+- 在无合格证据的情况下声称渗透、合规或物理结果；
+- 响应动作会破坏事件或安全证据。
 
-The Security Owner triages findings. Module owners implement fixes. A human Project Owner decides release and time-bounded risk acceptance.
+Security Owner 负责分诊问题。模块 Owner 实施修复。人类 Project Owner 决定发布与有期限的风险接受。

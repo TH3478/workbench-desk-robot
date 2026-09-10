@@ -1,8 +1,8 @@
 {
   "issue": 229,
   "human_owner": "TH3478",
-  "objective": "Verify the bounded Linux SocketCAN receive boundary from validated ingress through the host CAN adapter to a read-only external event projection, with truthful virtual and physical evidence labels.",
-  "decision_supported": "Issue #229 acceptance for SocketCAN ingress, Wire V1 validation, bounded runtime handoff, virtual regression, and physical-HIL procedure.",
+  "objective": "验证受限的 Linux SocketCAN 接收边界：从经主机 CAN 适配器的已验证入口到只读外部事件投影，并带真实的虚拟与物理证据标签。",
+  "decision_supported": "Issue #229 关于 SocketCAN 入口、Wire V1 验证、受限运行时交接、虚拟回归与物理 HIL 流程的验收。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "docs/architecture/host-can-transport-v1.md",
@@ -44,14 +44,14 @@
     "docs/hardware/can_bring_up.md"
   ],
   "acceptance": [
-    "The adapter uses one standard AF_CAN/CAN_RAW SocketCAN descriptor with kernel filtering, bounded poll/recvmsg, explicit close, and no adapter-local worker or unbounded queue.",
-    "Classic CAN standard, extended, RTR, error, DLC, truncation, raw arbitration-ID flags, and kernel timestamp records are validated before Wire V1 decoding; malformed records are observable rejections.",
-    "Only complete Wire V1 inbound ACK, STOP_ACK, and telemetry frames reach the bounded runtime and immutable read-only external projection; duplicate, late, uncorrelated, fault, and invalid frames cannot claim completion.",
-    "Link-down, bus-off/error frames, transport backpressure, slow external consumers, shutdown, and recovery have bounded fail-closed behavior with observable diagnostics and drop counters.",
-    "External records contain source, interface, ingress sequence, DLC, timestamps and source, event type, payload/protocol fields, health, evidence reference, and rejection/exposure status without a socket or write handle.",
-    "The deterministic virtual ingress probe exercises a real SocketCAN vcan path when privileged prerequisites exist, validates the exact external record, emits PASS/FAIL/NOT_EXECUTED, and cleans up interfaces and sockets.",
-    "The physical HIL procedure identifies the isolated USB-CAN-FD prototype path, six control domains, raw capture hash, kernel/interface/clock/calibration references, and fail-closed PASS/FAIL/NOT_EXECUTED derivation.",
-    "No firmware, frozen interface/schema, robot-control, physical CAN, MCU, actuator, PREEMPT_RT, or hard-real-time implementation claim is made by this task."
+    "适配器使用一个带内核过滤的标准 AF_CAN/CAN_RAW SocketCAN 描述符、受限的 poll/recvmsg、显式 close，且无适配器本地工作线程或无界队列。",
+    "经典 CAN 标准帧、扩展帧、RTR、错误、DLC、截断、原始仲裁 ID 标志与内核时间戳记录在 Wire V1 解码之前验证；畸形记录是可观测的拒绝。",
+    "只有完整的 Wire V1 入站 ACK、STOP_ACK 与遥测帧到达受限运行时与不可变只读外部投影；重复、迟到、不相关、故障与无效帧不能声称完成。",
+    "链路断开、bus-off/错误帧、传输背压、缓慢的外部消费方、关停与恢复均具有受限的失败即拒绝行为，并附可观测诊断与丢弃计数器。",
+    "外部记录包含来源、接口、入口序列、DLC、时间戳与来源、事件类型、载荷/协议字段、健康、证据引用与拒绝/暴露状态，且不含 socket 或写句柄。",
+    "确定性虚拟入口探针在特权前置条件具备时演练真实 SocketCAN vcan 路径，验证精确的外部记录，输出 PASS/FAIL/NOT_EXECUTED，并清理接口与 socket。",
+    "物理 HIL 流程识别隔离的 USB-CAN-FD 原型路径、六个控制域、原始抓包哈希、内核/接口/时钟/校准引用，以及失败即拒绝的 PASS/FAIL/NOT_EXECUTED 推导。",
+    "本任务不声称任何固件、冻结接口/schema、机器人控制、物理 CAN、MCU、执行器、PREEMPT_RT 或硬实时实现。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_can_transport.py tests/unit/test_socketcan_transport.py -q",
@@ -68,18 +68,18 @@
     "make -C kernel/wbcan"
   ],
   "evidence": [
-    "Focused unit tests for frame layout, transport lifecycle, Wire V1 validation, runtime correlation, bounded projection and shutdown.",
-    "Machine-readable virtual SocketCAN ingress report with an explicit evidence scope and PASS/FAIL/NOT_EXECUTED result.",
-    "Task Packet changed-path validation, repository contract/scenario/context checks, strict documentation build and kernel module build output.",
-    "Physical HIL bring-up record containing interface, adapter, six-domain discovery, kernel/config, clock, calibration, raw capture hash and reviewer references; absent physical inputs remain NOT_EXECUTED."
+    "针对帧布局、传输生命周期、Wire V1 验证、运行时关联、受限投影与关停的聚焦单元测试。",
+    "带显式证据范围与 PASS/FAIL/NOT_EXECUTED 结果的机器可读虚拟 SocketCAN 入口报告。",
+    "任务包变更路径校验、仓库契约/场景/上下文检查、严格文档构建与内核模块构建输出。",
+    "物理 HIL 启动调试记录，包含接口、适配器、六域发现、内核/配置、时钟、校准、原始抓包哈希与评审人引用；缺失的物理输入保持 NOT_EXECUTED。"
   ],
   "stop_conditions": [
-    "A change to Wire V1 identifiers, payload layout, public schema, firmware HAL, MCU behavior, robot control, or safety authority is required.",
-    "A second adapter-local lifecycle, worker, queue, callback registry, or unbounded retry/diagnostic path is required.",
-    "A physical CAN, USB-CAN-FD, MCU, actuator, PREEMPT_RT, electrical, or hard-real-time result cannot be reproduced with the recorded evidence and owner review.",
-    "The host lacks the privileges, kernel modules, interface, adapter, capture, or calibration input needed for a claimed PASS; record NOT_EXECUTED instead.",
-    "A write outside the allowed paths or a production debugfs/ioctl control API would be needed."
+    "需要变更 Wire V1 标识符、载荷布局、公共 schema、固件 HAL、MCU 行为、机器人控制或安全权威。",
+    "需要第二个适配器本地生命周期、工作线程、队列、回调注册表或无界重试/诊断路径。",
+    "物理 CAN、USB-CAN-FD、MCU、执行器、PREEMPT_RT、电气或硬实时结果无法用已记录证据与 Owner 评审复现。",
+    "主机缺少声称 PASS 所需的特权、内核模块、接口、适配器、抓包或校准输入；改为记录 NOT_EXECUTED。",
+    "需要允许路径之外的写入或生产 debugfs/ioctl 控制 API。"
   ],
-  "data_classification": "hardware ingress metadata and test evidence; no credentials or device write handles",
-  "model_policy": "No model output is admitted as a CAN frame, protocol decision, safety state, or physical evidence."
+  "data_classification": "硬件入口元数据与测试证据；不含凭据或设备写句柄",
+  "model_policy": "任何模型输出均不得被采纳为 CAN 帧、协议决策、安全状态或物理证据。"
 }

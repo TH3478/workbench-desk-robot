@@ -1,108 +1,91 @@
-# Workbench Product Brief
+# Workbench 产品简报
 
-Status: hypothesis baseline; validate with external users before treating as a market claim.
+状态：假设基线；在把它当作市场主张之前，先与外部用户验证。
 
-## Product statement
+## 产品陈述
 
-Workbench is an evidence-first runtime for robot task execution. It constrains
-agent behavior to semantic actions, records execution and observation evidence,
-verifies the resulting world state, and provides deterministic replay and a
-read-only operational view.
+Workbench 是一个面向机器人任务执行的证据优先运行时。它把智能体行为约束在语义动作之内，记录执行与观测证据，验证产生的世界状态，并提供确定性回放和只读的运营视图。
 
-## Initial ICP hypotheses
+## 初始 ICP 假设
 
-The first users to validate are small robot teams and research labs that:
+首先要验证的用户是小型机器人团队和研究实验室，他们：
 
-- build or deploy ROS-based mobile robots, arms, or household-task prototypes;
-- already have a real robot or repeatable simulation task;
-- lose time in task configuration, deployment, failure diagnosis, or proving that a task actually completed;
-- can nominate a technical evaluator and provide a bounded test environment.
+- 构建或部署基于 ROS 的移动机器人、机械臂或家务任务原型；
+- 已经拥有真实机器人或可重复的仿真任务；
+- 在任务配置、部署、故障诊断或证明任务确实完成上浪费时间；
+- 能够指定一名技术评估者并提供受限的测试环境。
 
-These are hypotheses, not a final market definition. Do not expand the target
-audience until interviews show a repeated problem and a credible path to use.
+这些是假设，不是最终的市场定义。在访谈显示出重复出现的问题和可信的使用路径之前，不要扩大目标受众。
 
-### Interview cohort rule
+### 访谈组规则
 
-Start with **8-10 effective interviews** across at least three of the groups
-above. The group counts are a sampling guide, not four mandatory quotas. An
-effective interview includes a recent concrete task or failure, current
-workaround, impact, and a willingness (or refusal) to test a bounded task.
-Record refusals and non-fit users; they are evidence about the boundary of the
-ICP rather than missing work.
+从**8-10 次有效访谈**开始，覆盖上述群体中的至少三类。各组数量是抽样指引，不是四个强制配额。一次有效访谈包含近期具体的任务或失败、当前变通方案、影响，以及测试受限任务的意愿（或拒绝）。记录拒绝和不匹配的用户；它们是关于 ICP 边界的证据，而不是遗漏的工作。
 
-## Personas to validate
+## 待验证的人物画像
 
-| Persona | Job to be understood | Evidence to collect |
+| 人物画像 | 待理解的用户工作 | 要收集的证据 |
 |---|---|---|
-| Robot developer / operator | Configure, run, diagnose, and repeat a task without hidden state | install time, task steps, failure recovery, logs used |
-| Technical lead / lab lead | Reduce integration risk and make results comparable across runs | interfaces, reproducibility needs, review burden, deployment constraints |
-| Project or business owner | Decide whether the workflow is worth continued investment | time saved, risk reduced, team capacity, procurement path |
+| 机器人开发者/操作员 | 在没有隐藏状态的情况下配置、运行、诊断并重复一项任务 | 安装耗时、任务步骤、失败恢复、所用日志 |
+| 技术负责人/实验室负责人 | 降低集成风险，让结果在多次运行之间可比较 | 接口、可复现性需求、评审负担、部署约束 |
+| 项目或业务负责人 | 判断该工作流程是否值得继续投入 | 节省的时间、降低的风险、团队产能、采购路径 |
 
-## Candidate jobs
+## 候选待完成工作
 
-- When a robot task reports success, determine whether the physical or simulated state actually satisfies the goal.
-- When a task fails, identify whether the cause is perception, action, evidence, policy, or environment without guessing.
-- When a scenario changes, replay the old result and compare it without mixing versions or evidence classes.
-- When onboarding a new operator or team, complete a bounded task from a clean environment with clear failure feedback.
+- 当机器人任务报告成功时，判断物理或仿真状态是否确实满足目标。
+- 当任务失败时，不经猜测地判断原因是感知、动作、证据、策略还是环境。
+- 当场景变更时，回放旧结果并进行比较，且不混用版本或证据等级。
+- 当新操作员或团队入门时，从干净环境完成一项受限任务，并获得清晰的失败反馈。
 
-## Current problem hypotheses
+## 当前问题假设
 
-1. Action completion is often mistaken for task completion.
-2. Failure evidence is scattered across logs, screenshots, and operator memory.
-3. Scenario-specific code tends to duplicate policy, event, and verification logic.
-4. Scripted demos are easier to produce than truthful evidence about Gazebo or physical execution.
-5. New users need a reproducible installation and first-task path before they can provide useful feedback.
+1. 动作完成经常被误认为任务完成。
+2. 失败证据散落在日志、截图和操作员的记忆中。
+3. 场景专属代码往往会重复策略、事件与验证逻辑。
+4. 相比关于 Gazebo 或物理执行的真实证据，脚本化演示更容易制作。
+5. 新用户需要可复现的安装与首个任务路径，然后才能提供有用的反馈。
 
-Each hypothesis needs a problem card with a real user quote, recent example,
-frequency, impact, current workaround, and a falsification condition.
+每个假设都需要一张问题卡，包含真实的用户原话、近期事例、频率、影响、当前变通方案和证伪条件。
 
-## Product promise for the current phase
+## 当前阶段的产品承诺
 
-For the current software phase, promise only:
+在当前软件阶段，只承诺：
 
-- deterministic offline and scripted runtime behavior within documented boundaries;
-- explicit `confirmed`, `refuted`, and `insufficient_evidence` outcomes;
-- replayable event and evidence artifacts;
-- read-only inspection of runs and limitations.
+- 在文档所述边界内的确定性离线与脚本化运行时行为；
+- 明确的 `confirmed`、`refuted` 和 `insufficient_evidence` 结果；
+- 可回放的事件与证据产物；
+- 对运行与限制的只读检查。
 
-Do not promise completed Gazebo task worlds, physical robot capability, or
-general-purpose autonomous household operation until their evidence gates pass.
+在相应证据闸门通过之前，不要承诺完整的 Gazebo 任务世界、物理机器人能力或通用的自主家务操作。
 
-## Non-goals
+## 非目标
 
-- A universal robot controller or motion-planning replacement.
-- A CRM or storage location for identifiable customer data.
-- A marketplace for arbitrary scenario plugins.
-- A claim that a user interview, screenshot, or scripted fixture proves physical success.
+- 通用机器人控制器或运动规划替代品。
+- 存放可识别客户数据的 CRM 或存储位置。
+- 任意场景插件的市场。
+- 声称用户访谈、截图或脚本化固定装置能证明物理成功。
 
-## Validation plan
+## 验证计划
 
-Run a small, diverse set of interviews before committing to a new scenario:
+在投入新场景之前，开展一组小型、多样的访谈：
 
-- 2-4 research-lab or university users;
-- 2-4 small robot-team members;
-- 1-3 integrators or field implementers;
-- 1-3 independent ROS/robot developers.
+- 2-4 名研究实验室或高校用户；
+- 2-4 名小型机器人团队成员；
+- 1-3 名集成商或现场实施人员；
+- 1-3 名独立 ROS/机器人开发者。
 
-For each conversation, record a problem card rather than a feature wish list.
-Promote a problem only when multiple records show the same job, failure, or
-cost, and at least one participant is willing to test a bounded task.
+对每次对话记录一张问题卡，而不是功能愿望清单。只有当多条记录显示相同的工作、失败或成本，且至少一名参与者愿意测试受限任务时，才晋升一个问题。
 
-## Product decision gates
+## 产品决策闸门
 
-| Gate | Minimum evidence | Decision allowed |
+| 闸门 | 最低证据 | 允许的决策 |
 |---|---|---|
-| Problem promotion | One concrete example, one source reference, and a falsification condition | Investigate or reject |
-| Roadmap promotion | Repeated pattern across independent participants or runs, measurable impact, and a named evaluator | Prototype or create a bounded Issue |
-| Scenario trial | Known starting state, semantic actions, measurable goal, failure matrix, and evidence owner | Schedule a Design Partner or simulation trial |
-| Release claim | Engineering gate plus eligible evidence class and reproducible artifact | Publish the scoped claim only |
+| 问题晋升 | 一个具体事例、一个来源引用和一个证伪条件 | 调查或拒绝 |
+| 路线图晋升 | 独立参与者或运行之间重复出现的模式、可度量的影响和一名具名评估者 | 制作原型或创建受限 Issue |
+| 场景试用 | 已知起始状态、语义动作、可度量目标、失败矩阵和证据负责人 | 排期 Design Partner 或仿真试用 |
+| 发布主张 | 工程闸门加合格证据等级和可复现产物 | 仅发布限定范围的主张 |
 
-These are default decision gates. A lower sample size may be accepted only when
-the Project Owner records the reason, risk, and follow-up evidence in the
-decision log.
+这些是默认的决策闸门。只有当 Project Owner 在决策日志中记录原因、风险与后续证据时，才可接受较低的样本量。
 
-## Decision rule
+## 决策规则
 
-Prioritize a scenario when it has a repeated user problem, a named evaluator,
-a bounded real task, a measurable success condition, and an evidence path that
-does not require weakening shared safety or verification boundaries.
+当一个场景具有重复出现的用户问题、具名评估者、受限的真实任务、可度量的成功条件，以及无需削弱共享安全或验证边界的证据路径时，对其排定优先级。

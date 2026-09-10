@@ -2,7 +2,7 @@
   "issue": "130,132",
   "issues": [130, 132],
   "human_owner": "Quchaosheng",
-  "objective": "Integrate the reviewable eight-layer controller PCB with the fail-closed chassis traction, wheel, battery, and replaceable motor-driver childboard engineering package.",
+  "objective": "将可评审的八层控制器 PCB 与失败即拒绝的底盘牵引、车轮、电池及可更换电机驱动子板工程包集成。",
   "allowed_paths": [
     "pyproject.toml",
     "docs/hardware/wiring.md",
@@ -33,14 +33,14 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "the detailed controller schematic, eight-layer board, controlled stackup, routed session, fabrication outputs, and connectivity/layout reports are reproducible",
-    "the controller keeps procurement, safety, supplier, and physical bring-up gates fail-closed",
-    "J2 contact capability is separated from the controlled 10 A aggregate system limit and U2 remains explicitly DNP until its approved MPN and land pattern ECO",
-    "CAN testpoint branches are machine-checked for short same-layer paired geometry while U7 system-isolation suitability remains release-blocking",
-    "the chassis package declares four wheel envelopes, two traction motor envelopes, a battery reservation, motor brackets, and a serviceable childboard support",
-    "the traction package distinguishes chassis motors from the fourteen joints in two vendor-controlled seven-axis arms and preserves independent hardware safety gating",
-    "motor, wheel, battery, isolated-power, regeneration, thermal, harness, DFM, and physical validation unknowns are not promoted to approved selections",
-    "deterministic hardware tests and release-readiness checks pass without modifying firmware, robot control, or shared interfaces"
+    "详细控制器原理图、八层板、受控叠层、布线会话、制造输出与连通性/布局报告均可复现",
+    "控制器保持采购、安全、供应商与物理启动调试闸门失败即拒绝",
+    "J2 触点能力与受控的 10 A 总系统限值分离，且 U2 在其获批 MPN 与焊盘 ECO 之前保持显式 DNP",
+    "CAN 测试点分支经机器检查以保证短同层成对几何，而 U7 系统隔离适用性仍为发布阻塞项",
+    "底盘包声明四个车轮包络、两个牵引电机包络、一个电池预留、电机支架与可维护的子板支撑",
+    "牵引包区分底盘电机与两个厂商控制的七轴机械臂中的十四个关节，并保持独立的硬件安全闸控",
+    "电机、车轮、电池、隔离电源、再生、热、线束、DFM 与物理验证的未知项不提升为已批准选型",
+    "确定性硬件测试与发布就绪检查通过，且不修改固件、机器人控制或共享接口"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -64,13 +64,13 @@
     "hardware/manufacturing/generated/harness_report.json",
     "hardware/mechanical/generated/analysis.json",
     "hardware/release/generated/release_readiness_report.json",
-    "hardware test output"
+    "硬件测试输出"
   ],
   "stop_conditions": [
-    "an approved orderable MPN, AVL, datasheet revision, or land pattern is missing",
-    "regenerative energy lacks an approved clamp and absorption path",
-    "a safety output could be created by software alone",
-    "KiCad, connectivity, layout, mechanical, motor-package, or release-readiness validation fails",
-    "supplier DFM, calibrated physical measurements, safety approval, or prototype bring-up is required"
+    "缺少已批准的可订购 MPN、AVL、数据手册版本或焊盘",
+    "再生能量缺少已批准的钳位与吸收路径",
+    "安全输出可仅由软件产生",
+    "KiCad、连通性、布局、机械、电机包或发布就绪校验失败",
+    "需要供应商 DFM、经校准的物理测量、安全批准或原型启动调试"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": "114",
   "human_owner": "Quchaosheng",
-  "objective": "Register the documented wbcan interface and use Linux CAN-core lifecycle and bus-off recovery paths.",
+  "objective": "注册文档化的 wbcan 接口，并使用 Linux CAN 核心的生命周期与总线关闭恢复路径。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -20,14 +20,14 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "the module registers wbcan0 through the wbcan%d name pattern",
-    "interface open and stop call the CAN-core lifecycle helpers",
-    "bus-off state uses can_change_state and can_bus_off",
-    "restart-ms automatically recovers without cycling the interface",
-    "the fault suite proves post-restart transmission",
-    "manual CAN-core restart remains supported",
-    "kernel build and checkpatch failures stop CI",
-    "CI installs and loads each CAN dependency and runs the privileged fault suite"
+    "模块通过 wbcan%d 命名模式注册 wbcan0。",
+    "接口的 open 与 stop 调用 CAN 核心的生命周期辅助函数。",
+    "总线关闭状态使用 can_change_state 与 can_bus_off。",
+    "restart-ms 无需重启接口即可自动恢复。",
+    "故障套件证明重启后的传输能力。",
+    "仍支持手动 CAN 核心重启。",
+    "内核构建与 checkpatch 失败会中断 CI。",
+    "CI 安装并加载每个 CAN 依赖，并运行特权故障套件。"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -36,14 +36,14 @@
     "sudo make -C kernel/wbcan test"
   ],
   "evidence": [
-    "kernel module build output",
-    "checkpatch output",
-    "privileged wbcan fault-suite output",
-    "automatic and manual recovery post-restart transmission assertions"
+    "内核模块构建输出。",
+    "checkpatch 输出。",
+    "特权 wbcan 故障套件输出。",
+    "自动与手动恢复及重启后传输断言。"
   ],
   "stop_conditions": [
-    "firmware or interface schema changes are required",
-    "the target kernel lacks the documented CAN-core lifecycle APIs",
-    "physical CAN hardware behavior is required"
+    "需要修改固件或接口 schema。",
+    "目标内核缺少文档化的 CAN 核心生命周期 API。",
+    "需要物理 CAN 硬件行为。"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": 189,
   "human_owner": "Quchaosheng",
-  "objective": "Keep approved local-model HTTP requests direct by ignoring all process environment proxy configuration.",
+  "objective": "忽略全部进程环境代理配置，使已批准的本地模型 HTTP 请求保持直连。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/local_model.py",
     "tests/unit/test_local_model.py",
@@ -23,11 +23,11 @@
     "services/backend/**"
   ],
   "acceptance": [
-    "Ollama HTTP calls ignore uppercase and lowercase environment proxy variables",
-    "a direct loopback response succeeds with no NO_PROXY exemption while an unreachable proxy is configured",
-    "endpoint validation redirect behavior response parsing and last_call semantics remain unchanged",
-    "the fix uses only the Python standard library and adds no dependency",
-    "the regression test makes no public network request"
+    "Ollama HTTP 调用忽略大写与小写形式的环境代理变量",
+    "在配置了不可达代理的情况下，直连 loopback 响应成功且无需 NO_PROXY 豁免",
+    "endpoint 校验、redirect 行为、响应解析与 last_call 语义保持不变",
+    "修复仅使用 Python 标准库且不新增依赖",
+    "回归测试不发起公网请求"
   ],
   "commands": [
     "python -m pytest tests/unit/test_local_model.py -v",
@@ -40,16 +40,16 @@
     "make context-check"
   ],
   "evidence": [
-    "focused local-model unit test output",
-    "Ruff check and format output",
-    "Task Packet validation output",
-    "required repository check outputs",
-    "GitHub Actions results"
+    "聚焦的本地模型单元测试输出",
+    "Ruff check 与 format 输出",
+    "任务包校验输出",
+    "仓库必查项输出",
+    "GitHub Actions 结果"
   ],
   "stop_conditions": [
-    "redirect behavior or response-body policy would need to change",
-    "an interface contract would need to change",
-    "robot control firmware hardware safety or physical validation paths require modification",
-    "the direct connection cannot preserve the existing approved-host policy"
+    "需要变更 redirect 行为或响应体策略",
+    "需要变更接口契约",
+    "机器人控制、固件、硬件安全或物理验证路径需要修改",
+    "直连无法保持现有的已批准主机策略"
   ]
 }

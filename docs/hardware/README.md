@@ -1,23 +1,22 @@
 # docs/hardware
 
-Hardware bring-up notes and integration guides.
+硬件启动调试与集成指南。
 
-- [Hardware wiring](wiring.md): controlled connector map and safe connection order.
-- [Physical bring-up](bringup.md): HIL bench, staged power-up, evidence, debugging, and defects.
-- [HW1 UR5e extraction](hw1-ur5e-extraction.md): source and configuration notes.
+- [硬件接线](wiring.md)：受控的连接器映射与安全的连接顺序。
+- [物理启动调试](bringup.md)：HIL（硬件在环）台架、分阶段上电、证据、调试与缺陷。
+- [HW1 UR5e 提取](hw1-ur5e-extraction.md)：来源与配置说明。
 
-General rule: all bring-up steps are scripted where possible. If a step
-requires manual action (physical wiring, screwdriver), it is documented
-with a photo reference and a verifiable outcome (e.g. "voltage reading X").
+总原则：所有启动调试步骤尽可能脚本化。若某一步需要人工操作（物理接线、
+螺丝刀），则须记录照片参照与可验证的结果（例如「电压读数 X」）。
 
-## Preflight
+## 预检
 
-The software-only preflight never sends a CAN, motor, or emergency-stop command:
+仅软件的预检绝不会发送 CAN、电机或急停指令：
 
 ```bash
 python tools/scripts/hardware_preflight.py --output runs/hardware/preflight.json
 ```
 
-It reports `not_ready` until Linux, the configured CAN interface, camera device,
-and an operator-created emergency-stop marker are all present. A `not_ready`
-result is an explicit block, not a request to continue with simulated hardware.
+在 Linux、已配置的 CAN 接口、摄像头设备以及由操作员创建的急停标记全部就绪
+之前，它会报告 `not_ready`。`not_ready` 结果表示明确阻止，而不是请求继续
+使用模拟硬件。

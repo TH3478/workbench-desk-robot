@@ -1,7 +1,7 @@
 {
   "issue": "robot-bsp-freeze-v0.1",
   "human_owner": "Quchaosheng",
-  "objective": "Define the robot Linux-board and multi-MCU BSP V0.1 logical topology, ownership, interface allocation, IRQ rules, power boundaries, and freeze gates without claiming physical hardware validation.",
+  "objective": "定义机器人 Linux 板与多 MCU BSP V0.1 的逻辑拓扑、归属、接口分配、IRQ 规则、电源边界与冻结闸门，且不声称物理硬件验证。",
   "allowed_paths": [
     "docs/architecture/robot-bsp-v0.1.md",
     "docs/architecture/robot-bsp-manifest-v0.1.yaml",
@@ -11,17 +11,17 @@
   "read_only_paths": ["interfaces/**", "firmware/**", "robot/control/**"],
   "forbidden": ["interfaces/**", "firmware/**", "robot/control/**"],
   "acceptance": [
-    "the document and manifest freeze one Linux board and six controller domains, including two robot-owned MCUs and four arm/tool module domains",
-    "the cost-conscious prototype selection identifies a Linux board, two robot-owned MCU parts, and supplier-controlled arm/tool domains without claiming AVL or safety approval",
-    "logical peripherals have owners and IRQ/DMA allocation rules without invented pin numbers",
-    "multi-node CAN addressing and unresolved physical decisions are explicit",
-    "the document does not claim physical BSP bring-up or production safety approval"
+    "文档与清单冻结一块 Linux 板与六个控制域，包括两个机器人自有 MCU 与四个机械臂/工具模块域",
+    "成本敏感的原型选型确定一块 Linux 板、两个机器人自有 MCU 器件与供应商控制的机械臂/工具域，且不声称 AVL 或安全批准",
+    "逻辑外设具有 Owner 与 IRQ/DMA 分配规则，且不虚构引脚编号",
+    "多节点 CAN 寻址与未决的物理决策显式化",
+    "文档不声称物理 BSP 启动调试或生产安全批准"
   ],
   "commands": [
     "python -m json.tool docs/task_packets/robot-bsp-freeze-v0.1.json",
     "python -c \"from pathlib import Path; import yaml; d=yaml.safe_load(Path('docs/architecture/robot-bsp-manifest-v0.1.yaml').read_text()); assert d['linux_board']['model'].startswith('NVIDIA_JETSON_ORIN_NANO'); assert len(d['robot_owned_mcus']) == 2\"",
     "python -c \"from pathlib import Path; p=Path('docs/architecture/robot-bsp-v0.1.md'); assert p.is_file() and 'six controller domains per robot' in p.read_text(encoding='utf-8')\""
   ],
-  "evidence": ["document review", "JSON parse output"],
-  "stop_conditions": ["a physical part number or pin assignment is presented as confirmed without an owner source", "the Linux board is allowed to bypass MCU-SAFETY"]
+  "evidence": ["文档评审", "JSON 解析输出"],
+  "stop_conditions": ["物理器件编号或引脚分配在没有 Owner 来源的情况下被表述为已确认", "允许 Linux 板绕过 MCU-SAFETY"]
 }

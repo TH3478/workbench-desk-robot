@@ -1,27 +1,20 @@
-# Workbench robot user manual
+# Workbench 机器人用户手册
 
-This manual covers trained operators and maintainers. Complete site risk review,
-installation acceptance, and training before use. Do not operate with removed
-guards, defeated interlocks, damaged cables, abnormal battery condition, or an
-unresolved safety alarm.
+本手册面向经过培训的操作员与维护人员。使用前完成现场风险评审、安装验收和培训。不得在防护装置被移除、互锁被禁用、线缆损坏、电池状态异常或安全告警未解决的情况下操作。
 
-## Normal operation
+## 正常运行
 
-1. Inspect the work area, robot, tools, battery, cables, guards, and E-stops.
-2. Verify the correct unit, payload/tooling, released configuration, and task area.
-3. Energize through the approved sequence and wait for the ready indication.
-4. Keep people outside the controlled motion area during automatic operation.
-5. Stop on unusual sound, heat, smell, motion, repeated fault, or damaged workpiece.
-6. At shutdown, park safely, stop motion, remove energy as required, and record faults.
+1. 检查工作区域、机器人、工具、电池、线缆、防护装置和 E-stop。
+2. 确认单元、负载/工具、已发布配置和任务区域正确。
+3. 按已批准的顺序上电，并等待就绪指示。
+4. 自动运行期间让人员保持在受控运动区域之外。
+5. 出现异常声音、发热、异味、运动、重复故障或工件损坏时停止。
+6. 关机时安全停靠、停止运动、按要求移除能量并记录故障。
 
-## Emergency and service
+## 紧急情况与维修
 
-Use an E-stop for hazardous or uncontrolled motion; it is not a routine cycle-stop.
-Do not reset until the cause is understood and the area is clear. Only trained,
-authorized personnel may isolate energy, open covers, replace modules, or update
-released software. Damaged batteries follow the site emergency and supplier plan.
+对危险或不受控的运动使用 E-stop；它不是常规的循环停止。在原因查明且区域清空之前不得复位。只有经过培训且获得授权的人员才能隔离能量、打开盖板、更换模块或更新已发布软件。损坏的电池按现场应急与供应商方案处理。
 
-For troubleshooting and escalation, use the field-support procedure and preserve
-the serial, revision, configuration hash, logs, timestamps, and actions attempted.
+对于故障排查与升级处理，使用现场支持规程，并保留序列号、修订版本、配置哈希、日志、时间戳和已尝试的操作。
 
-See [90-minute demonstration](demo-runbook.md) for the commissioning demo route.
+启动调试演示路线见 [90 分钟演示](demo-runbook.md)。

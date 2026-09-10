@@ -1,12 +1,12 @@
-# HW1 official UR5e extraction evidence
+# HW1 官方 UR5e 提取证据
 
-Status: **EXECUTED** on 2026-08-12 in the repository development environment.
+状态：**EXECUTED**，于 2026-08-12 在仓库开发环境中执行。
 
-This evidence uses the ROS Jazzy `ur_description` package as the controlled,
-non-generated source. The expanded URDF is a temporary generated artifact and
-is not treated as the source of the limits.
+本证据使用 ROS Jazzy 的 `ur_description` 包作为受控的
+非生成来源。展开后的 URDF 是临时生成的工件，
+不被视为限值的来源。
 
-## Controlled source references
+## 受控来源引用
 
 - `ros-jazzy-ur-description 3.5.1-1noble.20260615.175716`
 - `ros-jazzy-xacro 2.1.1-1noble.20260519.011123`
@@ -15,11 +15,11 @@ is not treated as the source of the limits.
 - `/opt/ros/jazzy/share/ur_description/config/ur5e/joint_limits.yaml`
   SHA-256: `1e908454a0fb073761a0c675f708eb003ca7d5333a9e0863ef87fe40d9abb3c7`
 
-The package's `joint_limits.yaml` cites the Universal Robots e-Series UR5e user
-manual and Universal Robots' maximum-joint-torque article as its upstream
-sources.
+该包的 `joint_limits.yaml` 以 Universal Robots e-Series UR5e 用户
+手册与 Universal Robots 的最大关节扭矩文章作为其上游
+来源。
 
-## Reproduction
+## 复现
 
 ```bash
 /opt/ros/jazzy/bin/xacro \
@@ -37,17 +37,17 @@ python3 libs/hardware/urdf_to_motor_config.py \
   --joint wrist_3_joint
 ```
 
-The expanded URDF had SHA-256
-`a21bf5fb70b3a1745bf2e4816e0f43654539737ba7f2585939ec773d159778d8`,
-was 11,870 bytes, and contained exactly six revolute joints. Every selected
-joint contained exactly one `<limit>` element. It contained no transmission,
-so every reduction below remains explicitly unknown.
+展开后的 URDF 的 SHA-256 为
+`a21bf5fb70b3a1745bf2e4816e0f43654539737ba7f2585939ec773d159778d8`，
+大小为 11,870 字节，恰好包含六个旋转关节。每个选中的
+关节都恰好包含一个 `<limit>` 元素。它不包含传动信息，
+因此以下所有减速比都明确未知。
 
-The extracted YAML below had SHA-256
-`9a32af8b6504b4e242d2f3bf9458d5a87c96ae45fb55a14e459644fe6c5fd7d1`
-and was 1,394 bytes.
+下方提取出的 YAML 的 SHA-256 为
+`9a32af8b6504b4e242d2f3bf9458d5a87c96ae45fb55a14e459644fe6c5fd7d1`，
+大小为 1,394 字节。
 
-## Extracted motor configuration
+## 提取出的电机配置
 
 ```yaml
 motors:

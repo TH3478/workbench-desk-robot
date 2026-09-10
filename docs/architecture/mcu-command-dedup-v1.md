@@ -1,120 +1,92 @@
-# MCU Command Deduplication V1
+# MCU 命令去重 V1
 
-Issue #61 implements the ordinary-command replay boundary between the strict
-Wire V1 decoder and the existing C safety state machine. It is allocation-free,
-uses no platform APIs, and runs from the same source on Host and QEMU.
+Issue #61 实现严格 Wire V1 解码器与现有 C 安全状态机之间的普通命令回放边界。它无分配、不使用
+平台 API，并在 Host 与 QEMU 上运行同一份源码。
 
-The frozen logical semantics remain in
-`docs/architecture/mcu-protocol-v1.md`. This document records the bounded C
-implementation choices; it does not add a field or change a Wire V1 value.
+冻结的逻辑语义保留在 `docs/architecture/mcu-protocol-v1.md`。本文档记录有界的 C 实现选择；
+它不新增字段，也不改变任何 Wire V1 值。
 
-## Serial classification
+## 序号分类
 
-Ordinary command IDs are `0..32767`. The complete low 15 bits are a serial
-number modulo 32768. For a candidate and the most recently accepted serial:
+普通命令 ID 是 `0..32767`。完整低 15 位是模 32768 的序号。对于候选与最近接受的序号：
 
 ```text
 delta = (candidate - last_accepted) mod 32768
 ```
 
-- `delta == 0` identifies the current retained command;
-- `1 <= delta <= 16383` is serially new;
-- `16384 <= delta <= 32767` is stale or ambiguous unless the exact ID is still
-  in the configured replay window.
+- `delta == 0` 标识当前保留的命令；
+- `1 <= delta <= 16383` 是序号为新；
+- `16384 <= delta <= 32767` 是过期或歧义，除非该精确 ID 仍在配置的回放窗口内。
 
-The implementation retains eight accepted ordinary-command records. This
-covers the current host policy of one in-flight ordinary command plus its
-bounded retry attempts. A retained earlier ID may replay while it remains in
-that window. The ninth distinct accepted command overwrites the oldest slot;
-later traffic for the evicted ID fails with `duplicate_frame`.
+实现保留八条已接受普通命令记录。这覆盖当前主机策略的一条在途普通命令及其有界重试尝试。保留
+的较早 ID 只要还在该窗口内即可回放。第九条不同的已接受命令覆盖最旧槽位；针对被淘汰 ID 的
+后续流量以 `duplicate_frame` 失败。
 
-A half-range-new candidate takes precedence over an old cache entry with the
-same numeric ID. If that forward transition crosses from a larger ID to a
-smaller ID, the receiver clears every pre-wrap record before storing the new
-one. Consequently `32766 -> 32767 -> 0 -> 1` advances normally, but a delayed
-pre-wrap `32767` after `0` is stale and cannot replay an old ACK.
+半区间新的候选优先于相同数字 ID 的旧缓存条目。若该前向转换从较大 ID 跨到较小 ID，接收方在
+存储新记录前清除所有回绕前记录。因此 `32766 -> 32767 -> 0 -> 1` 正常推进，但 `0` 之后延迟
+到达的回绕前 `32767` 是过期的，不能回放旧 ACK。
 
-The host must not exceed the eight-record retention budget. Expanding the
-in-flight policy requires an explicit review of this constant and the firmware
-storage budget; it must not silently rely on the 16384 half range as a queue.
+主机不得超出八条记录的保留预算。扩展在途策略需要对该常量和固件存储预算做显式评审；绝不能
+静默把 16384 半区间当作队列使用。
 
-## New command and replay behavior
+## 新命令与回放行为
 
-`mcu_command_dedup_receive()` accepts only a completely validated ordinary
-`COMMAND`. The first serially new command dispatches exactly one event to the C
-safety state machine:
+`mcu_command_dedup_receive()` 只接受完全验证过的普通 `COMMAND`。第一条序号为新的命令向 C
+安全状态机恰好分发一个事件：
 
-| Opcode | Safety event | Successful mode |
+| Opcode | 安全事件 | 成功模式 |
 | --- | --- | --- |
 | `move` | `BEGIN_MOVE` | `moving` |
 | `grip_open` | `BEGIN_MOVE` | `moving` |
 | `grip_close` | `BEGIN_MOVE` | `moving` |
 | `hold` | `BEGIN_HOLD` | `holding` |
-| `heartbeat` | `HEARTBEAT` | current non-faulted mode |
+| `heartbeat` | `HEARTBEAT` | 当前无故障模式 |
 
-The resulting ordinary ACK is cached even if the state machine rejects the
-new event. That prevents the same ID from becoming executable later after a
-state change. A repeated ID with the same opcode returns the cached
-`result_code`, `fault_code`, and `device_mode` without dispatching that event
-again.
+产生的普通 ACK 即使状态机拒绝新事件也会被缓存。这防止相同 ID 在状态变化后变得可执行。相同
+opcode 的重复 ID 返回缓存的 `result_code`、`fault_code` 和 `device_mode`，而不再次分发该
+事件。
 
-`retry_count` is attempt metadata. The same count is an exact link replay; a
-strictly greater count is a protocol retry and is echoed in the replayed ACK.
-A decreasing count, including `255 -> 0`, is stale and rejected. Retry traffic
-does not extend the software watchdog deadline.
+`retry_count` 是尝试元数据。相同计数是精确链路回放；严格更大的计数是协议重试，并在回放的
+ACK 中回显。递减计数（包括 `255 -> 0`）是过期的并被拒绝。重试流量不延长软件看门狗期限。
 
-A retained ID with a different opcode is a conflicting duplicate. Conflicts,
-decreasing attempts, and unretained stale or ambiguous IDs:
+保留 ID 但 opcode 不同是冲突重复。冲突、递减尝试和未保留的过期或歧义 ID：
 
-1. do not dispatch the requested ordinary event;
-2. enter or preserve the fail-closed MCU fault state;
-3. return a rejected ordinary ACK with `duplicate_frame`; and
-4. cannot refresh the software watchdog.
+1. 不分发请求的普通事件；
+2. 进入或保持失败即拒绝的 MCU 故障状态；
+3. 返回带 `duplicate_frame` 的拒绝普通 ACK；并且
+4. 不能刷新软件看门狗。
 
-Malformed Wire V1 input is rejected before this API by the codec and does not
-enter replay history. If an invalid wire object reaches this function, it
-returns no record and does not mutate the state machine or dedup state.
+畸形 Wire V1 输入由编解码器在本 API 之前拒绝，不进入回放历史。若无效线上对象到达本函数，
+它不返回记录，也不变更状态机或去重状态。
 
-## Session and reset boundary
+## 会话与重置边界
 
-Wire V1 has no boot/session epoch. `mcu_command_dedup_init()` therefore starts
-with ordinary dispatch closed and empty history. The transport may call
-`mcu_command_dedup_open_session(..., true)` only after it has discarded queued
-pre-session traffic and established the trusted out-of-band startup gate. A
-command received while closed produces no ACK and no state-machine event.
+Wire V1 没有启动/会话纪元。因此 `mcu_command_dedup_init()` 以普通分发关闭和空历史开始。
+传输只能在丢弃排队的会话前流量并建立可信带外启动闸门后调用
+`mcu_command_dedup_open_session(..., true)`。关闭期间收到的命令不产生 ACK，也不产生状态机
+事件。
 
-An active session cannot be reopened to erase history. The trusted transport
-must explicitly close it, drain old traffic, and then open a fresh session.
-MCU reboot follows the same closed initialization path.
+活动会话不能重开以抹除历史。可信传输必须显式关闭它，排干旧流量，然后打开新会话。MCU 重启
+走相同的关闭初始化路径。
 
-An authorized safety-state reset is not a transport restart and does not clear
-replay history. A duplicate command after reset still replays its historical
-ACK without restarting motion. Neither serial wrap nor session establishment
-is reset authorization.
+授权的安全状态重置不是传输重启，不清除回放历史。重置后的重复命令仍回放其历史 ACK，而不
+重新启动运动。序号回绕和会话建立都不是重置授权。
 
-## STOP independence
+## STOP 独立性
 
-STOP uses the disjoint `32768..65535` partition and does not enter this replay
-array. A valid STOP is routed directly to `mcu_watchdog_receive_stop()` before
-ordinary correlation handling. It remains processable when the ordinary
-window is full or the ordinary session gate is closed. Pending duplicate STOP
-handling, retry monotonicity, ACK handoff, and timeout behavior remain owned by
-`docs/architecture/mcu-watchdog-v1.md`.
+STOP 使用不相交的 `32768..65535` 分区，不进入本回放数组。有效 STOP 在普通关联处理之前直接
+路由到 `mcu_watchdog_receive_stop()`。在普通窗口已满或普通会话闸门关闭时它仍可处理。挂起的
+重复 STOP 处理、重试单调性、ACK 交接和超时行为仍由 `docs/architecture/mcu-watchdog-v1.md`
+拥有。
 
-The transport is the single writer of the dedup, state-machine, and watchdog
-objects. If ingress can arrive from an ISR and a task, that owner must serialize
-the calls and preserve STOP-first dispatch; this core does not hide a lock or
-critical section inside platform-independent code.
+传输是去重、状态机和看门狗对象的单一写者。若入口可能来自 ISR 和任务，该 Owner 必须串行化
+调用并保持 STOP 优先分发；本核心不在平台无关代码中隐藏锁或临界区。
 
-## Resource and evidence boundary
+## 资源与证据边界
 
-The state contains exactly eight static entries and is compile-time bounded to
-256 bytes. It has no allocator, floating point, vendor header, register access,
-clock source, thread, or queue. Host and QEMU run the same exhaustive 15-bit
-delta corpus plus retained replay, conflict, eviction, retry-wrap, session,
-trusted-reset, and STOP-priority vectors.
+状态恰好包含八个静态条目，并在编译期限制为 256 字节。它没有分配器、浮点、厂商头文件、寄存器
+访问、时钟源、线程或队列。Host 与 QEMU 运行相同的穷举 15 位 delta 语料，加上保留回放、冲突、
+淘汰、重试回绕、会话、可信重置和 STOP 优先级向量。
 
-These results prove platform-independent correlation and state-machine dispatch
-behavior. They do not prove a CAN controller, STM32/CH32 HAL, physical bus,
-actuator execution, motor stopping, electrical safety, or hard-real-time
-latency. Those remain separate owner-gated evidence.
+这些结果证明平台无关的关联与状态机分发行为。它们不证明 CAN 控制器、STM32/CH32 HAL、物理
+总线、执行器执行、电机停止、电气安全或硬实时延迟。那些仍是独立的 Owner 把关证据。

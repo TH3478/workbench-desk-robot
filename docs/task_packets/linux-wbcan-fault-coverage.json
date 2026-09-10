@@ -1,7 +1,7 @@
 {
   "issue": "138",
   "human_owner": "Quchaosheng",
-  "objective": "Give every advertised wbcan fault mode a bounded meaning and observable runtime coverage.",
+  "objective": "为每种对外宣传的 wbcan 故障模式赋予有界含义与可观测的运行时覆盖。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -12,11 +12,11 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "all seven non-none fault modes have observable runtime assertions",
-    "drop-rx accepts TX without delivering RX",
-    "tx-full retries once without duplicate delivery or TX counting",
-    "stuff-err emits a bounded warning and recovers after the next fault-free frame",
-    "CI reports successful coverage only after all advertised modes pass"
+    "全部七种非 none 故障模式都有可观测的运行时断言。",
+    "drop-rx 接受 TX 但不投递 RX。",
+    "tx-full 重试一次，且不产生重复投递或 TX 计数。",
+    "stuff-err 发出有界告警，并在下一个无故障帧之后恢复。",
+    "仅当所有对外宣传的模式通过后，CI 才报告覆盖成功。"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -26,14 +26,14 @@
     "sudo make -C kernel/wbcan test"
   ],
   "evidence": [
-    "module build output",
-    "checkpatch output",
-    "release workflow regression output",
-    "seven-mode privileged fault-suite output and job summary"
+    "模块构建输出。",
+    "checkpatch 输出。",
+    "发布工作流回归输出。",
+    "七模式特权故障套件输出与任务摘要。"
   ],
   "stop_conditions": [
-    "physical CAN error-counter timing is required",
-    "firmware or interface changes are required",
-    "the hosted runner cannot execute privileged module tests"
+    "需要物理 CAN 错误计数器时序。",
+    "需要修改固件或接口。",
+    "托管运行器无法执行特权模块测试。"
   ]
 }

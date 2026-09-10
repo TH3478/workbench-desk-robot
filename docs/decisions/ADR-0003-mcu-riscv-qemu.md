@@ -1,27 +1,23 @@
-# ADR-0003: Safety MCU targets RISC-V, verified in QEMU
+# ADR-0003: 安全 MCU 目标为 RISC-V，在 QEMU 中验证
 
-Status: accepted
-Date: 2026-08-05
+状态：已接受
+日期：2026-08-05
 
-## Context
+## 背景
 
-`firmware/virtual_mcu/` is a Python state machine. It is a useful contract stub
-— Motion can build against it before any hardware exists — but it proves
-nothing about firmware. A Python class asserting that it entered `safe_stop`
-does not show that a cross-compiled binary does the same under a real timer
-interrupt.
+`firmware/virtual_mcu/` 是一个 Python 状态机。它是好用的契约桩——Motion 可以在任何硬件存在
+之前针对它构建——但它证明不了固件的任何东西。一个 Python 类断言自己进入了 `safe_stop`，
+并不能说明交叉编译的二进制在真实定时器中断下也做同样的事。
 
-No MCU part had been chosen. Choosing one late means the whole firmware effort
-lands in the last month, next to real-hardware bring-up, which is where
-schedule risk is already highest.
+当时尚未选定 MCU 部件。选型过晚意味着整个固件工作挤在最后一个月，紧邻真实硬件启动调试——
+那里的进度风险已经最高。
 
-## Decision
+## 决策
 
-The safety MCU targets **RISC-V (rv32imac)**. The reference part is the
-**CH32V307** (on-chip CAN, ~¥10, single-purpose enough for a safety element).
-Firmware is verified in **QEMU in CI**, then on the board in P3.
+安全 MCU 目标为 **RISC-V（rv32imac）**。参考部件是 **CH32V307**（片上 CAN，约 ¥10，单一
+用途足以胜任安全元件）。固件在 **CI 中的 QEMU** 验证，然后在 P3 上板验证。
 
-Firmware splits into two layers:
+固件分为两层：
 
 ```
 firmware/mcu/
@@ -33,123 +29,106 @@ firmware/mcu/
   hal/host/       x86_64 build for fast logic tests
 ```
 
-`core/` compiles to three targets from one source. Swapping the board means
-writing a new `hal/`, not touching `core/`. That mirrors the project-wide rule
-that implementations are replaceable and contracts are not.
+`core/` 从一份源码编译到三个目标。换板卡意味着写新的 `hal/`，而不是碰 `core/`。这与全项目
+规则一致：实现可替换，契约不可替换。
 
-## The QEMU limit, stated plainly
+## QEMU 的局限，直说
 
-QEMU models **SJA1000** and **CTU CAN FD**, both over PCI. It does **not**
-model the CH32V307 CAN peripheral. MCU-specific CAN models are added to QEMU
-one part at a time (the STM32 bxCAN work is a patch series, not upstream).
+QEMU 建模 **SJA1000** 和 **CTU CAN FD**，都走 PCI。它**不**建模 CH32V307 CAN 外设。MCU
+专用 CAN 模型是一次一个部件地加入 QEMU 的（STM32 bxCAN 工作是一个补丁系列，不是上游）。
 
-So the split is:
+因此划分是：
 
-| Proven in QEMU | Requires the board |
+| QEMU 中已证明 | 需要板卡 |
 |---|---|
-| State machine transitions | CH32V307 CAN register behaviour |
-| Watchdog timing under a real timer interrupt | Bit timing (BRP/TSEG1/TSEG2/SJW) |
-| Dedup across sequence wraparound | Error frames, bus-off recovery |
-| Frame codec, ID partition enforcement | Electrical behaviour, EMI |
-| Absence of malloc and FP instructions | Brownout, power-on reset |
+| 状态机转换 | CH32V307 CAN 寄存器行为 |
+| 真实定时器中断下的看门狗时序 | 位时序（BRP/TSEG1/TSEG2/SJW） |
+| 跨序号回绕的去重 | 错误帧、bus-off 恢复 |
+| 帧编解码、ID 分区强制 | 电气行为、EMI |
+| 无 malloc 与 FP 指令 | 欠压、上电复位 |
 
-This does not widen what we claim. The README already lists CAN electrical
-behaviour and bus timing as not proven in simulation.
+这没有扩大我们的声明。README 已列出 CAN 电气行为与总线时序未经仿真证明。
 
-## Why RISC-V
+## 为什么是 RISC-V
 
-- Royalty-free ISA, fully open toolchain — reproducibility is a project goal
-- Mature upstream QEMU support for rv32
-- Cheap real parts available now (CH32V307, ESP32-C6, GD32VF103)
-- `core/` carries no vendor headers, so changing part means a new `hal/` only
+- 免版税 ISA，完全开放工具链——可复现性是项目目标
+- 上游 QEMU 对 rv32 支持成熟
+- 现在就能买到便宜的真实部件（CH32V307、ESP32-C6、GD32VF103）
+- `core/` 不带厂商头文件，因此换部件只意味着新的 `hal/`
 
-CH32V307 over ESP32-C6 specifically: this is a safety element doing e-stop and
-watchdog. WiFi and Bluetooth are attack surface on a component that must stay
-independent of the network.
+具体选 CH32V307 而非 ESP32-C6：这是一个执行急停与看门狗的安全元件。WiFi 与蓝牙是一个必须
+与网络保持独立的部件上的攻击面。
 
-## Alternatives rejected
+## 被否决的替代方案
 
-**Keep the Python model, test only on real hardware.** Pushes all firmware
-risk into P3 alongside arm bring-up. Fault coverage would be unproven until
-the last month.
+**保留 Python 模型，只在真实硬件上测试。**把所有固件风险推到 P3，与机械臂启动调试挤在一起。
+故障覆盖在最后一个月之前都无法证明。
 
-**Write a QEMU device model for the CH32V307 CAN peripheral.** A project in
-itself. Not worth it for v0.1.
+**为 CH32V307 CAN 外设写 QEMU 设备模型。**本身就是一个项目。对 v0.1 不值得。
 
-**ARM + STM32.** The QEMU bxCAN support is a patch series, not upstream-
-guaranteed. No advantage over RISC-V here, and it gives up the open-toolchain
-argument.
+**ARM + STM32。**QEMU bxCAN 支持是补丁系列，不是上游保证。这里没有相对 RISC-V 的优势，
+而且放弃了开放工具链的论据。
 
-## Cost
+## 成本
 
-The MCU track grows from roughly one week (Python state machine) to about
-2.5 weeks in P1: toolchain, startup code, QEMU harness, HAL split. P1 G-track
-milestones move out by about a week.
+MCU 轨道从大约一周（Python 状态机）增长到 P1 中约 2.5 周：工具链、启动代码、QEMU 测试框架、
+HAL 分层。P1 G-track 里程碑推迟约一周。
 
-CI gains a `mcu-qemu` job. It is cheap compared to Gazebo — no GPU, no display,
-seconds per run.
+CI 增加一个 `mcu-qemu` 任务。与 Gazebo 相比很便宜——无 GPU、无显示、每次运行几秒钟。
 
-## Consequences
+## 后果
 
-- `firmware/virtual_mcu/` (Python) stays through P1 as the contract Motion
-  builds against, and as the reference model for differential testing against
-  the C core. It is **retired at the end of P1**, once `core/` passes the same
-  fault suite. Two implementations of one state machine must not outlive P1.
-- The `mcu_protocol` schema does not change. Same wire format, real
-  implementation underneath.
-- P3 payoff: the same `core/` binary passes the same fault suite in QEMU and on
-  the board, with only `hal/` differing.
+- `firmware/virtual_mcu/`（Python）在 P1 期间保留，作为 Motion 构建所依据的契约，也作为对
+  C 核心做差分测试的参考模型。一旦 `core/` 通过相同故障套件，它在 **P1 结束时退役**。一个
+  状态机的两个实现不能活过 P1。
+- `mcu_protocol` schema 不变。同样的线上格式，底下是真实实现。
+- P3 回报：同一个 `core/` 二进制在 QEMU 和板卡上通过相同故障套件，只有 `hal/` 不同。
 
-## Toolchain
+## 工具链
 
-Upstream GCC works. WCH's private instructions (`mcpy`) are mandatory only on
-CH584/585, not on CH32V307, so MounRiver is not required.
+上游 GCC 可用。WCH 的私有指令（`mcpy`）只在 CH584/585 上强制，CH32V307 上不是，因此不需要
+MounRiver。
 
-| Toolchain | Triplet | Use |
+| 工具链 | Triplet | 用途 |
 |---|---|---|
-| Ubuntu `gcc-riscv64-unknown-elf` | `riscv64-unknown-elf-` | CI, if its rv32 multilib works |
-| [xpack `riscv-none-elf-gcc`](https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack) | `riscv-none-elf-` | fallback and local dev; newer, reliable rv32 |
-| WCH MounRiver | `riscv-none-elf-` | not needed for '307 |
+| Ubuntu `gcc-riscv64-unknown-elf` | `riscv64-unknown-elf-` | CI，若其 rv32 multilib 可用 |
+| [xpack `riscv-none-elf-gcc`](https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack) | `riscv-none-elf-` | 后备与本地开发；更新、可靠的 rv32 |
+| WCH MounRiver | `riscv-none-elf-` | '307 不需要 |
 
-Flashing uses [`wlink`](https://github.com/ch32-rs/wlink), not OpenOCD:
+烧录使用 [`wlink`](https://github.com/ch32-rs/wlink)，而不是 OpenOCD：
 
 ```
 wlink mode-switch --rv     # put WCH-LinkE into RV mode once
 wlink flash build/board/mcu.elf
 ```
 
-`wchisp flash` over USB ISP (BOOT0 + RESET) works with no adapter at all.
-OpenOCD is only needed for GDB, and requires the WCH fork built with
-`--enable-wlinke`.
+`wchisp flash` 走 USB ISP（BOOT0 + RESET），完全不需要适配器。OpenOCD 仅用于 GDB 调试时需要，
+且需要带 `--enable-wlinke` 构建的 WCH fork。
 
-## Hardware
+## 硬件
 
-**CH32V307 has a CAN controller but no CAN transceiver.** The transceiver is
-external and is not on the EVT board.
+**CH32V307 有 CAN 控制器但没有 CAN 收发器。**收发器是外置的，不在 EVT 板上。
 
-| Item | Part | Qty | Why |
+| 项目 | 部件 | 数量 | 为什么 |
 |---|---|---:|---|
-| Board | CH32V307V-EVT-R1 | 2 | On-board WCH-Link, no separate debugger needed |
-| **CAN transceiver** | SN65HVD230 module (3.3V) | 2 | **Required. Not on the board.** |
-| USB-CAN bridge | CANable 2.0 or PCAN-USB | 1 | Lets the host see real frames with `candump` |
-| Logic analyser | any 8-channel | 1 | FW22 watchdog timing |
-| Twisted pair + 2×120Ω | — | — | Terminate both ends of the bus |
+| 板卡 | CH32V307V-EVT-R1 | 2 | 板载 WCH-Link，无需独立调试器 |
+| **CAN 收发器** | SN65HVD230 模块（3.3V） | 2 | **必需。不在板上。** |
+| USB-CAN 桥 | CANable 2.0 或 PCAN-USB | 1 | 让主机用 `candump` 看到真实帧 |
+| 逻辑分析仪 | 任意 8 通道 | 1 | FW22 看门狗时序 |
+| 双绞线 + 2×120Ω | — | — | 总线两端都加终端 |
 
-Two boards, not one: CAN is a bus protocol. Arbitration, error frames and
-bus-off recovery (FW19) cannot be exercised with a single node.
+两块板，不是一块：CAN 是总线协议。仲裁、错误帧和 bus-off 恢复（FW19）无法用单个节点验证。
 
-3.3V transceiver specifically: CH32V307 I/O is 3.3V. A 5V TJA1050 would need
-level shifting, which is one more thing to get wrong.
+专门用 3.3V 收发器：CH32V307 I/O 是 3.3V。5V TJA1050 需要电平转换，那是又一个容易出错的地方。
 
-Buy at the end of P2 (task H1). FW1-FW16 are all QEMU; the board is first
-needed at FW17. One exception worth the ¥150: buy a single board early and run
-the FW3 state machine on it once, to test the assumption that QEMU-passing code
-also passes on hardware. Finding that out in P1 beats finding it out in P3.
+P2 末（任务 H1）购买。FW1-FW16 全部在 QEMU；FW17 才第一次需要板卡。有一个值得花 ¥150 的
+例外：早点买一块板，在上面跑一次 FW3 状态机，以检验“QEMU 通过的代码在硬件上也通过”这个
+假设。在 P1 发现这一点胜过在 P3 发现。
 
-## References
+## 参考
 
-- QEMU CAN emulation: https://www.qemu.org/docs/master/system/devices/can.html
-- SocketCAN vcan: https://www.kernel.org/doc/html/latest/networking/can.html
-- CH32V307 SDK and datasheet: https://github.com/openwch/ch32v307
-- Open-source CH32V toolchain guide: https://github.com/cjacker/opensource-toolchain-ch32v
-- Zephyr board page (pinout): https://docs.zephyrproject.org/latest/boards/wch/ch32v307v_evt_r1/doc/index.html
+- QEMU CAN 仿真：https://www.qemu.org/docs/master/system/devices/can.html
+- SocketCAN vcan：https://www.kernel.org/doc/html/latest/networking/can.html
+- CH32V307 SDK 与数据手册：https://github.com/openwch/ch32v307
+- 开源 CH32V 工具链指南：https://github.com/cjacker/opensource-toolchain-ch32v
+- Zephyr 板卡页面（引脚定义）：https://docs.zephyrproject.org/latest/boards/wch/ch32v307v_evt_r1/doc/index.html

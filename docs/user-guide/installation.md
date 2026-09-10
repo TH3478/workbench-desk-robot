@@ -1,31 +1,21 @@
-# Installation and site acceptance
+# 安装与现场验收
 
-Installation is performed by trained personnel under the site risk assessment.
-Confirm floor capacity, levelness, access, lighting, ventilation, emergency egress,
-network policy, charging location, and the controlled motion perimeter before the
-unit arrives. Keep the shipping package until incoming inspection is accepted.
+安装由经过培训的人员在现场风险评估框架下执行。在设备到达之前，确认地面承载能力、平整度、通道、照明、通风、应急出口、网络政策、充电位置和受控运动周界。保留运输包装直至来料检验通过。
 
-## Receiving
+## 收货
 
-1. Match purchase order, unit serial, crate labels, and packing list.
-2. Photograph exterior damage before moving the crate.
-3. Inspect tilt/shock indicators and quarantine a triggered shipment.
-4. Check the battery for impact, swelling, leakage, odor, heat, or damaged terminals.
-5. Record accessories, tools, certificates, and missing items.
+1. 核对采购订单、单元序列号、装箱标签和装箱清单。
+2. 移动箱子前先拍摄外部损坏情况。
+3. 检查倾斜/冲击指示器，对已触发的货物进行隔离。
+4. 检查电池有无撞击、鼓包、漏液、异味、发热或端子损坏。
+5. 记录附件、工具、证书和缺失物品。
 
-Do not energize a damaged unit. Escalate battery or structural damage through the
-site emergency procedure and Field Support.
+不得给损坏的单元上电。通过现场应急规程和 Field Support 上报电池或结构损坏。
 
-## Placement and connection
+## 就位与连接
 
-Position the base inside the approved operating area and engage the declared
-brakes/anchors. Verify stability, guard distances, arm swept volume, cable routing,
-protective earth, network isolation, charger rating, and E-stop access. Connect
-only keyed, labeled interfaces from the controlled installation drawing.
+将底座放置在已批准的操作区域内，并接合所声明的制动器/锚固件。核实稳定性、防护装置距离、机械臂扫掠体积、线缆走线、保护接地、网络隔离、充电器额定值和 E-stop 可达性。只连接受控安装图纸上带键位、带标签的接口。
 
-## Acceptance
+## 验收
 
-Record hardware revision, software/configuration hash, BMS configuration, tool and
-payload, calibration IDs, operator, date, and evidence bundle path. Execute visual,
-bond/isolation, power, E-stop, interlock, home, single-arm, dual-arm, recovery, and
-shutdown checks. Any missing evidence or failed safety check blocks handover.
+记录硬件修订版本、软件/配置哈希、BMS 配置、工具与负载、校准 ID、操作员、日期和证据包路径。执行外观、接合/绝缘、电源、E-stop、互锁、原点、单臂、双臂、恢复和关机检查。任何缺失的证据或失败的安全检查都会阻止交接。

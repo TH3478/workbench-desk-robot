@@ -1,7 +1,7 @@
 {
   "issue": "137",
   "human_owner": "Quchaosheng",
-  "objective": "Parse wbcan fault commands strictly and snapshot each selected fault configuration atomically.",
+  "objective": "严格解析 wbcan 故障命令，并原子地快照每种选定的故障配置。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -10,12 +10,12 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "the entire command and mode-specific arity are validated",
-    "rejected writes do not change the armed configuration",
-    "standard and 29-bit extended identifiers are distinct and untruncated",
-    "any matching uses no valid CAN identifier sentinel",
-    "fault and bit-flip parameters are selected under one lock",
-    "concurrent writes cannot mix two configurations"
+    "整个命令以及各模式专属的参数个数均接受校验。",
+    "被拒绝的写入不会改变已布防的配置。",
+    "标准标识符与 29 位扩展标识符相互区分且不被截断。",
+    "any 匹配不使用任何有效的 CAN 标识符作为哨兵值。",
+    "故障与位翻转参数在同一把锁下完成选定。",
+    "并发写入不可能混用两种配置。"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -23,10 +23,10 @@
     "sudo make -C kernel/wbcan reload",
     "sudo make -C kernel/wbcan test"
   ],
-  "evidence": ["module build output", "checkpatch output", "strict ABI and concurrent runtime assertions"],
+  "evidence": ["模块构建输出。", "checkpatch 输出。", "严格的 ABI 与并发运行时断言。"],
   "stop_conditions": [
-    "the numeric fault mode ABI would need renumbering",
-    "firmware or interface changes are required",
-    "a production control API is required"
+    "数字型故障模式 ABI 需要重新编号。",
+    "需要修改固件或接口。",
+    "需要生产控制 API。"
   ]
 }

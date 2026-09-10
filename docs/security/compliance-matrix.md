@@ -1,18 +1,18 @@
-# Security control readiness matrix
+# 安全控制就绪矩阵
 
-This is an internal readiness crosswalk, not a legal opinion, audit, certification, or claim of compliance with any named standard.
+这是内部就绪对照表，不是法律意见、审计、认证，也不是对任何命名标准的合规声明。
 
-| Control objective | Repository evidence | State | External work still required |
+| 控制目标 | 仓库证据 | 状态 | 仍需的外部工作 |
 |---|---|---|---|
-| vulnerability reporting | `SECURITY.md` private advisory route and response targets | DEFINED | operate and measure response process |
-| secure development review | secure review standard, CodeQL, tests, protected branch | PARTIAL | enable/require reviewed security checks after baseline PR |
-| dependency governance | Dependabot, PR dependency review, SBOM, third-party review | PARTIAL | ongoing triage and license/legal approval |
-| least privilege | read-only workflow default, job-scoped permissions, non-root container | IMPLEMENTED_BASELINE | deployment-specific IAM/network review |
-| secret protection | secret scanning/push protection and documented handling | PARTIAL | validity checks, rotation drill, environment review |
-| logging and evidence integrity | structured run/sequence logs and evidence index | IMPLEMENTED_BASELINE | retention/access policy for deployment |
-| incident response | roles, lifecycle, severity, and exercise design | DEFINED | tabletop and measured corrective actions |
-| penetration testing | authorized scope, cases, stop conditions, evidence package | NOT_EXECUTED | independent authorized execution and retest |
-| physical safety boundary | model/control separation, owner restrictions, fail-closed verification | PARTIAL | formal Gazebo and physical safety evidence |
-| release provenance | tested image, SPDX SBOM, digest/provenance workflow | PARTIAL | successful next human-owned release proof |
+| 漏洞报告 | `SECURITY.md` 私有通报路径与响应目标 | DEFINED | 运行并度量响应流程 |
+| 安全开发评审 | 安全评审标准、CodeQL、测试、受保护分支 | PARTIAL | 基线 PR 后启用/强制经评审的安全检查 |
+| 依赖治理 | Dependabot、PR 依赖评审、SBOM、三方评审 | PARTIAL | 持续分诊与许可证/法律审批 |
+| 最小权限 | 只读工作流默认、任务级权限、非 root 容器 | IMPLEMENTED_BASELINE | 部署特定的 IAM/网络评审 |
+| 密钥保护 | 密钥扫描/推送保护与文档化处理 | PARTIAL | 有效性检查、轮换演练、环境评审 |
+| 日志与证据完整性 | 结构化 run/sequence 日志与证据索引 | IMPLEMENTED_BASELINE | 部署的保留/访问策略 |
+| 事件响应 | 角色、生命周期、严重度与演练设计 | DEFINED | 桌面推演与可度量纠正动作 |
+| 渗透测试 | 授权范围、用例、停止条件、证据包 | NOT_EXECUTED | 独立授权执行与复测 |
+| 物理安全边界 | 模型/控制分离、Owner 限制、失败即拒绝验证 | PARTIAL | 正式 Gazebo 与物理安全证据 |
+| 发布溯源 | 已测镜像、SPDX SBOM、摘要/溯源工作流 | PARTIAL | 下一次人类拥有发布证明成功 |
 
-Review this matrix at every phase gate and after material architecture, deployment, model, hardware, or regulatory changes.
+在每个阶段闸门以及重大架构、部署、模型、硬件或监管变化后评审本矩阵。

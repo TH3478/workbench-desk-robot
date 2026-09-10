@@ -1,7 +1,7 @@
 {
   "issue": 54,
   "human_owner": "TH3478",
-  "objective": "Implement the allocation-free MCU CAN Wire V1 codec for the frozen logical command, ack, telemetry, stop and stop_ack frames, including strict identifier, length, field and reserved-byte validation.",
+  "objective": "为冻结的逻辑 command、ack、telemetry、stop 与 stop_ack 帧实现零分配的 MCU CAN Wire V1 编解码器，包括严格的标识符、长度、字段与保留字节校验。",
   "allowed_paths": [
     "firmware/mcu/core/frame_codec.h",
     "firmware/mcu/core/frame_codec.c",
@@ -37,15 +37,15 @@
     "firmware/virtual_mcu/**"
   ],
   "acceptance": [
-    "Wire V1 uses standard 11-bit CAN identifiers, fixed DLC 8, big-endian multi-byte fields and documented ID priority/order.",
-    "Each logical frame kind has one exact identifier and byte layout; command IDs enforce ordinary 0..32767 versus STOP 32768..65535 partitions.",
-    "Reserved bytes, reserved opcode values, unknown fault/mode/result values, invalid kind combinations and malformed lengths fail closed.",
-    "The decoder validates the supplied length before reading payload bytes and the encoder validates destination capacity before writing.",
-    "Command/STOP and ACK/STOP_ACK correlation fields round-trip without allocation or platform-specific code.",
-    "The canonical interfaces/examples/mcu-frame-stop-ack.json fields map to a committed golden stop_ack byte vector.",
-    "Shared codec tests run unchanged on Host and QEMU, including deterministic boundary/property cases.",
-    "The host sanitizer target runs the codec corpus and bounded malformed-input fuzz loop under AddressSanitizer and UndefinedBehaviorSanitizer.",
-    "The core contains no vendor headers, platform conditionals, floating point or dynamic allocation."
+    "Wire V1 使用标准 11 位 CAN 标识符、固定 DLC 8、大端多字节字段以及文档化的 ID 优先级/顺序。",
+    "每种逻辑帧类型都有唯一确定的标识符与字节布局；command ID 强制普通 0..32767 与 STOP 32768..65535 分区。",
+    "保留字节、保留操作码值、未知的故障/模式/结果值、无效的类型组合与畸形的长度一律失败即拒绝。",
+    "解码器在读取负载字节之前校验所提供的长度，编码器在写入之前校验目标容量。",
+    "Command/STOP 与 ACK/STOP_ACK 的关联字段在零分配、无平台特定代码的情况下完成往返。",
+    "规范接口 interfaces/examples/mcu-frame-stop-ack.json 的字段映射到已提交的黄金 stop_ack 字节向量。",
+    "共享编解码器测试在 Host 与 QEMU 上原样运行，包括确定性的边界/属性用例。",
+    "主机消毒器目标在 AddressSanitizer 与 UndefinedBehaviorSanitizer 下运行编解码器语料库与有界畸形输入模糊测试循环。",
+    "核心不包含任何厂商头文件、平台条件编译、浮点运算或动态分配。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-54-mcu-frame-codec.json",
@@ -60,18 +60,18 @@
     "make context-check"
   ],
   "evidence": [
-    "Wire V1 layout and reserved-field table in docs/architecture/mcu-wire-v1.md.",
-    "Host and QEMU shared golden-vector and malformed-input test output.",
-    "Sanitizer output from test-host-sanitize with the bounded property corpus.",
-    "verify-no-fp and size-check output for the QEMU firmware image.",
-    "Repository test, contract, scenario and context-check output.",
-    "Final git diff --check and changed-path review proving the Task Packet boundary."
+    "docs/architecture/mcu-wire-v1.md 中的 Wire V1 布局与保留字段表。",
+    "Host 与 QEMU 共享的黄金向量与畸形输入测试输出。",
+    "test-host-sanitize 在运行有界属性语料库时的消毒器输出。",
+    "针对 QEMU 固件镜像的 verify-no-fp 与 size-check 输出。",
+    "仓库测试、契约、场景与 context-check 输出。",
+    "最终的 git diff --check 与变更路径审查，证明任务包边界。"
   ],
   "stop_conditions": [
-    "The implementation requires changing the frozen JSON Schema, Pydantic models or logical protocol semantics.",
-    "The chosen Wire V1 layout cannot represent the canonical stop_ack fields or requires CAN FD fragmentation.",
-    "Implementation requires retry deduplication, watchdog timing, host transport dispatch, vendor registers or physical CAN validation.",
-    "The same codec and test source cannot compile unchanged for Host and QEMU.",
-    "A sanitizer finding cannot be reduced to a codec or test defect within the allowed paths."
+    "实现需要修改冻结的 JSON Schema、Pydantic 模型或逻辑协议语义。",
+    "所选 Wire V1 布局无法表示规范的 stop_ack 字段，或需要 CAN FD 分片。",
+    "实现需要重试去重、看门狗计时、主机传输分发、厂商寄存器或物理 CAN 验证。",
+    "同一份编解码器与测试源码无法原样编译用于 Host 与 QEMU。",
+    "某个消毒器发现无法归结为允许路径内的编解码器或测试缺陷。"
   ]
 }

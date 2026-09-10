@@ -1,26 +1,26 @@
-# Scripted failure and recovery cases
+# 脚本化失败与恢复用例
 
-These are deterministic interface fixtures, not Gazebo or hardware results. Their purpose is to keep failure semantics, evidence requirements and dashboard behavior reviewable before integration exists.
+这些是确定性接口固定装置，不是 Gazebo 或硬件结果。其目的是在集成存在之前，让失败语义、证据要求与看板行为保持可评审。
 
-## Occluded camera: evidence is insufficient
+## 相机被遮挡：证据不足
 
-Run: `run-uncertain`<br>
-Evidence: `apps/dashboard/data/run-uncertain.jsonl`
+运行：`run-uncertain`<br>
+证据：`apps/dashboard/data/run-uncertain.jsonl`
 
-The motion adapter reports `succeeded`, but the last observation confidence is `0.41`. The verifier returns `insufficient_evidence`, lists `fresh_camera_frame` and `target_confidence_above_0.80` as missing, and recommends `re_observe`. The dashboard renders `uncertain`, never `failed` or `pleased`.
+运动适配器报告 `succeeded`，但最后一次观测置信度为 `0.41`。验证器返回 `insufficient_evidence`，将 `fresh_camera_frame` 与 `target_confidence_above_0.80` 列为缺失，并建议 `re_observe`。看板渲染为 `uncertain`，绝不会是 `failed` 或 `pleased`。
 
-## First grasp fails: result is refuted
+## 首次抓取失败：结果判定为未满足
 
-Run: `run-recovery`, sequence `3-4`<br>
-Evidence: `apps/dashboard/data/run-recovery.jsonl`
+运行：`run-recovery`，序列 `3-4`<br>
+证据：`apps/dashboard/data/run-recovery.jsonl`
 
-The first grasp loses contact. The action result is `failed`; the verifier separately returns `refuted` with both a camera-frame and motion-log reference. Dispatch state is not treated as physical completion.
+首次抓取失去接触。动作结果为 `failed`；验证器单独返回 `refuted`，并同时引用相机帧与运动日志。派发状态不被视为物理完成。
 
-## Recovery succeeds: history remains visible
+## 恢复成功：历史保持可见
 
-Run: `run-recovery`, sequence `5-9`<br>
-Evidence: `apps/dashboard/data/run-recovery.jsonl`
+运行：`run-recovery`，序列 `5-9`<br>
+证据：`apps/dashboard/data/run-recovery.jsonl`
 
-The second attempt produces a new action result and fresh observation. Only then does the verifier emit `confirmed`. Replay retains the earlier refuted conclusion, so an operator can inspect both attempts rather than seeing a rewritten success-only history.
+第二次尝试产生新的动作结果与新鲜观测。只有此时验证器才发出 `confirmed`。回放保留先前被判定未满足的结论，因此操作员可以检查两次尝试，而不是看到被改写成只有成功的历史。
 
-Formal D7 review still needs 36 Gazebo runs with real logs and an independent false-completion audit. `tools/scripts/run_evaluation.py --runner external` is the integration boundary; `--runner scripted` always writes `release_eligible: false`.
+正式 D7 评审仍需要 36 次带真实日志的 Gazebo 运行与独立的虚假完成审计。`tools/scripts/run_evaluation.py --runner external` 是集成边界；`--runner scripted` 始终写入 `release_eligible: false`。

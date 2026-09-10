@@ -1,7 +1,7 @@
 {
   "issue": "95",
   "human_owner": "Quchaosheng",
-  "objective": "Enforce event identity, run isolation and contiguous sequence integrity across append, replay and checkpoints.",
+  "objective": "在 append、回放与检查点中强制事件标识、运行隔离与连续序列完整性。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/event_store.py",
     "libs/kernel/tests/test_k1_k10.py",
@@ -20,13 +20,13 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "a checkpoint created after reopening a log equals the persisted event count",
-    "replay from the current checkpoint returns no historical events",
-    "negative, boolean, and out-of-range checkpoints are rejected",
-    "malformed and non-object log records fail closed",
-    "default append rejects missing fields, duplicate event IDs, mixed runs, sequence gaps and unknown event types",
-    "legacy object logs require an explicit migration-only constructor flag",
-    "repository lint and tests pass"
+    "重新打开日志后创建的检查点等于已持久化的事件数量。",
+    "从当前检查点回放不会返回任何历史事件。",
+    "负数、布尔值与越界的检查点一律被拒绝。",
+    "畸形的与非对象的日志记录失败即拒绝。",
+    "默认 append 拒绝缺失字段、重复事件 ID、混合运行、序列缺口与未知事件类型。",
+    "遗留对象日志需要显式的、仅用于迁移的构造函数标志。",
+    "仓库 lint 与测试通过。"
   ],
   "commands": [
     "python libs/kernel/tests/test_k1_k10.py",
@@ -35,15 +35,15 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "restart checkpoint regression assertions",
-    "corrupt-log failure assertions",
-    "event-contract, identity, run and sequence regression assertions",
-    "K1-K10 integration test output",
-    "repository test output"
+    "重启检查点回归断言。",
+    "损坏日志失败断言。",
+    "事件契约、标识、运行与序列回归断言。",
+    "K1-K10 集成测试输出。",
+    "仓库测试输出。"
   ],
   "stop_conditions": [
-    "event schema changes are required",
-    "cross-process locking is required",
-    "robot-control or firmware changes are required"
+    "需要修改事件 schema。",
+    "需要跨进程锁。",
+    "需要修改 robot-control 或固件。"
   ]
 }

@@ -1,95 +1,88 @@
-# 90-Day Product Execution Plan
+# 90 天产品执行计划
 
-This is an evidence-gated operating plan for Workbench. Dates are planning
-targets, not evidence that a capability is complete. Engineering and physical
-claims still follow the repository's release gates.
+这是 Workbench 的一份以证据为闸门的运营计划。日期是计划目标，而不是能力已经完成的证据。工程与物理主张仍须遵循仓库的发布闸门。
 
-## Operating rule
+## 运营规则
 
-Run one learning loop and one delivery loop in parallel. Do not start a new
-scenario implementation because a feature request sounds plausible; start it
-only when the Definition of Ready, problem evidence, success condition, and
-rollback path are present.
+并行运行一个学习循环和一个交付循环。不要因为某个功能请求听起来合理就开始实现新场景；只有当 Definition of Ready、问题证据、成功条件和回滚路径齐备时才启动。
 
-## Days 1-30: understand the user and problem
+## 第 1-30 天：理解用户与问题
 
-### Deliverables
+### 交付物
 
-- Product brief and current ICP/Persona/JTBD hypotheses.
-- 8-10 documented interviews, with at least 3-5 repeated problem cards.
-- Product walkthrough from clean checkout: install, doctor, list, scripted run, replay, and dashboard inspection.
-- First product decision log with explicit assumptions and open questions.
+- 产品简报，以及当前的 ICP/Persona/JTBD 假设。
+- 8-10 次有记录的访谈，其中至少 3-5 张重复出现的问题卡。
+- 从全新检出开始的产品走查：install、doctor、list、脚本化运行、回放和看板检查。
+- 首份产品决策日志，含明确假设与待解问题。
 
-### Exit evidence
+### 退出证据
 
-- Every promoted problem has a source reference and falsification condition.
-- At least one problem maps to an existing scenario and one is a candidate for a new scenario.
-- The three most dangerous onboarding or task-completion blockers are named.
-- The product decision log records which assumptions remain untested.
+- 每个被晋升的问题都有来源引用和证伪条件。
+- 至少一个问题映射到现有场景，另一个是新场景的候选。
+- 明确列出三个最危险的入门或任务完成阻塞项。
+- 产品决策日志记录哪些假设仍未验证。
 
-## Days 31-60: turn evidence into an executable slice
+## 第 31-60 天：把证据变成可执行的切片
 
-### Deliverables
+### 交付物
 
-- PRD or Task Packet for one bounded problem.
-- Given/When/Then acceptance criteria, including failure and recovery behavior.
-- Internal demo report and clean-machine cold-start record.
-- Updated capability matrix and scenario evidence status.
+- 针对一个受限问题的 PRD 或任务包（Task Packet）。
+- Given/When/Then 验收标准，包括失败与恢复行为。
+- 内部演示报告与干净机器的冷启动记录。
+- 更新的能力矩阵与场景证据状态。
 
-### Exit evidence
+### 退出证据
 
-- A user can identify the entry point and expected result without an engineer taking over the main steps.
-- P0 acceptance criteria are complete; unverified claims remain visible.
-- The slice resolves through the Scenario Registry and shared runtime boundaries.
-- The Task Packet and user-facing acceptance criteria agree on the same outcome.
+- 用户可以在没有工程师接管主要步骤的情况下识别入口点和预期结果。
+- P0 验收标准完整；未经验证的主张保持可见。
+- 该切片经由场景注册表（Scenario Registry）和共享运行时边界落地。
+- 任务包与面向用户的验收标准对同一结果保持一致。
 
-## Days 61-90: external validation and decision
+## 第 61-90 天：外部验证与决策
 
-### Deliverables
+### 交付物
 
-- A bounded Design Partner test with a real task, named evaluator, test window, and success condition.
-- Installation/trial feedback records with reproducible environment and version details.
-- Release/readiness report linking user evidence to engineering evidence.
-- Quarter review: continue, change, defer, or stop decisions.
+- 一次受限的 Design Partner 测试，含真实任务、具名评估者、测试窗口和成功条件。
+- 安装/试用反馈记录，含可复现的环境与版本细节。
+- 将用户证据与工程证据关联起来的发布/就绪报告。
+- 季度回顾：继续、变更、推迟或停止决策。
 
-### Exit evidence
+### 退出证据
 
-- At least one external participant completes the declared task or produces a documented failure with sufficient evidence.
-- No fixture, interview, or marketing metric is represented as physical validation.
-- Every decision has an owner, next action, due date, and evidence reference.
-- A missing or conflicting artifact is reported as `UNKNOWN`, `insufficient_evidence`, or `blocked`, not silently scored as success.
+- 至少一名外部参与者完成所声明的任务，或产出有充分证据的、有记录的失败。
+- 任何固定装置、访谈或营销指标都不得被表述为物理验证。
+- 每项决策都有负责人、后续动作、截止日期和证据引用。
+- 缺失或矛盾的产物必须报告为 `UNKNOWN`、`insufficient_evidence` 或 `blocked`，而不是被默默计为成功。
 
-## Mapping to engineering Issues
+## 与工程 Issue 的映射
 
-| Product activity | Engineering contract |
+| 产品活动 | 工程契约 |
 |---|---|
-| Problem and scenario definition | #308, #311 |
-| Ready-to-build packet and acceptance | #310 |
-| Registry and existing task migration | #300, #301 |
-| Evidence identity and replay | #302, #313 |
-| Recovery and bounded failure handling | #305, #312 |
-| New scenario validation | #306 |
-| Quality and release decision | #304, #307, #314 |
+| 问题与场景定义 | #308、#311 |
+| 可开工的包与验收 | #310 |
+| 注册表与现有任务迁移 | #300、#301 |
+| 证据标识与回放 | #302、#313 |
+| 恢复与受限失败处理 | #305、#312 |
+| 新场景验证 | #306 |
+| 质量与发布决策 | #304、#307、#314 |
 
-## Weekly cadence
+## 每周节奏
 
-- Monday: choose one learning goal and one delivery goal.
-- Tuesday-Wednesday: interviews, user observation, or trial follow-up.
-- Thursday: convert evidence into problem cards, acceptance criteria, or Issue updates.
-- Friday: review metrics, blockers, decisions, and next actions.
+- 周一：选择一个学习目标和一个交付目标。
+- 周二至周三：访谈、用户观察或试用跟进。
+- 周四：把证据转化为问题卡、验收标准或 Issue 更新。
+- 周五：回顾指标、阻塞项、决策和后续动作。
 
-## Weekly scorecard
+## 每周记分卡
 
-Every Friday, publish a short record containing:
+每周五发布一份简短记录，包含：
 
-- learning goal and delivery goal;
-- new problem cards and independent participant count;
-- scenarios tested and evidence class/status;
-- completed, blocked, or deferred decisions;
-- one top risk, one owner, and one dated next action.
+- 学习目标与交付目标；
+- 新增问题卡与独立参与者数量；
+- 已测试的场景与证据等级/状态；
+- 已完成、被阻塞或推迟的决策；
+- 一项最高风险、一名负责人和一个带日期的后续动作。
 
-The scorecard is a navigation aid. It cannot override a Task Packet, verifier,
-release gate, or human Go/No-Go decision.
+记分卡是导航辅助。它不能凌驾于任务包、验证器、发布闸门或人工 Go/No-Go 决策之上。
 
-No activity metric (messages sent, meetings held, stars, or demos) substitutes
-for a documented user outcome or reproducible engineering evidence.
+任何活动指标（发送的消息、召开的会议、star 数或演示次数）都不能替代有记录的用户结果或可复现的工程证据。

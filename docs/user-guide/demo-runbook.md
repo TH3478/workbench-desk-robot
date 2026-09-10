@@ -1,20 +1,16 @@
-# 90-minute demonstration runbook
+# 90 分钟演示运行手册
 
-This route proves that a trained evaluator can move from inspection to a recorded
-safe demo in 90 minutes. It does not replace site acceptance or certification.
+本路线证明一名训练有素的评估者能在 90 分钟内从检查推进到一次有记录的、安全的演示。它不能替代现场验收或认证。
 
-| Time | Activity | Exit evidence |
+| 时间 | 活动 | 退出证据 |
 |---:|---|---|
-| 0-10 min | area, unit, battery, guards, E-stop, payload inspection | signed preflight |
-| 10-20 min | start services and verify released versions/configuration | readiness snapshot |
-| 20-30 min | operator controls, normal stop, E-stop and reset briefing | training acknowledgement |
-| 30-45 min | calibrate/confirm sensors and arm home positions | calibration IDs |
-| 45-60 min | run scripted single-arm task at reduced speed | task log and video |
-| 60-75 min | run coordinated dual-arm task with handoff/interlock | task log and video |
-| 75-85 min | inject one approved recoverable fault and restore | fault/recovery record |
-| 85-90 min | park, shutdown, export evidence, review pass/fail | evidence bundle checksum |
+| 0-10 分钟 | 区域、单元、电池、防护装置、E-stop、负载检查 | 已签字的预检 |
+| 10-20 分钟 | 启动服务并核实已发布版本/配置 | 就绪快照 |
+| 20-30 分钟 | 操作员控制、正常停止、E-stop 与复位讲解 | 培训确认 |
+| 30-45 分钟 | 校准/确认传感器与机械臂原点位置 | 校准 ID |
+| 45-60 分钟 | 以降速运行脚本化单臂任务 | 任务日志与视频 |
+| 60-75 分钟 | 运行带交接/互锁的协调双臂任务 | 任务日志与视频 |
+| 75-85 分钟 | 注入一个经批准的、可恢复的故障并恢复 | 故障/恢复记录 |
+| 85-90 分钟 | 停靠、关机、导出证据、回顾通过/失败 | 证据包校验和 |
 
-Abort on safety-chain failure, uncontrolled motion, unexpected collision, battery
-alarm, excessive temperature, repeated communication loss, evidence recorder loss,
-or any condition outside the approved demo envelope. Record an abort as a valid
-result; never compress later steps to preserve the 90-minute target.
+在出现安全链失效、不受控运动、意外碰撞、电池告警、温度过高、反复通信中断、证据记录器丢失，或任何超出已批准演示包络的情况时中止。把中止记为有效结果；绝不要为了保住 90 分钟目标而压缩后续步骤。

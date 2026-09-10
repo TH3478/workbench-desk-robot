@@ -1,7 +1,7 @@
 {
   "issue": 106,
   "human_owner": "Quchaosheng",
-  "objective": "Make Task Packet validation a fail-closed, repository-scoped write authorization boundary.",
+  "objective": "让任务包校验成为失败即拒绝的、仓库范围的写授权边界。",
   "allowed_paths": [
     "tools/scripts/check_task_packet.py",
     "tools/schemas/task-packet-v1.schema.json",
@@ -20,15 +20,15 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "a versioned strict JSON Schema validates every field and non-empty constraint",
-    "repository paths are normalized, relative, contained, and free of symlink escapes",
-    "allowed paths cannot overlap read-only or forbidden boundaries",
-    "identity and instruction fields have strict scalar and list shapes",
-    "commands are validated as evidence instructions and never executed",
-    "CI validates every committed Task Packet",
-    "CI rejects Git-visible added, modified, deleted and renamed paths outside one active packet boundary",
-    "documentation distinguishes the changed-path consistency gate from filesystem sandboxing and human approval",
-    "adversarial and valid packet tests pass"
+    "版本化的严格 JSON Schema 校验每个字段与非空约束。",
+    "仓库路径经过规范化，保持相对、包含于仓库内，且无符号链接逃逸。",
+    "允许路径不得与只读或禁止边界重叠。",
+    "身份与指令字段具有严格的标量与列表形态。",
+    "commands 作为证据指令接受校验，且绝不执行。",
+    "CI 校验每个已提交的任务包。",
+    "CI 拒绝单个活动任务包边界之外、Git 可见的新增、修改、删除与重命名路径。",
+    "文档把变更路径一致性闸门与文件系统沙箱及人工审批区分开来。",
+    "对抗性与合法任务包测试均通过。"
   ],
   "commands": [
     "python -m pytest tests/unit -k task_packet -v",
@@ -39,14 +39,14 @@
     "make context-check"
   ],
   "evidence": [
-    "task packet unit test output",
-    "example packet validation output",
-    "Git-visible changed-path boundary rejection output",
-    "required repository check output"
+    "任务包单元测试输出。",
+    "示例任务包校验输出。",
+    "Git 可见的变更路径边界拒绝输出。",
+    "必需的仓库检查输出。"
   ],
   "stop_conditions": [
-    "interfaces change required",
-    "robot control or firmware change required",
-    "existing packet cannot be migrated without changing its authorized scope"
+    "需要修改 interfaces。",
+    "需要修改机器人控制或固件。",
+    "现有任务包无法在不改变其授权范围的情况下完成迁移。"
   ]
 }

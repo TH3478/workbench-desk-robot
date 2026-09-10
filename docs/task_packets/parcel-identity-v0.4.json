@@ -1,7 +1,7 @@
 {
   "issue": "PARCEL-IDENTITY-v0.4",
   "human_owner": "Quchaosheng",
-  "objective": "Reject duplicate parcel identities during planning and independent verification, and keep replay configuration current.",
+  "objective": "在规划与独立验证期间拒绝重复的包裹身份，并保持回放配置为最新。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "services/world_model/**",
@@ -15,11 +15,11 @@
   "read_only_paths": ["interfaces/**", "libs/contracts/**"],
   "forbidden": ["robot/control/**", "firmware/**", "hardware/safety/**"],
   "acceptance": [
-    "duplicate tracking_id, barcode, or parcel_uid values fail closed before manipulation",
-    "world-model verification independently refutes duplicate parcel identities",
-    "place actions retain an identity guard marker",
-    "scripted place requests preserve policy, priority, reason, and capacity metadata",
-    "dashboard replay uses the latest visible task graph and configured priorities"
+    "重复的 tracking_id、barcode 或 parcel_uid 值在操作之前失败即拒绝",
+    "世界模型验证独立地证伪重复的包裹身份",
+    "place 动作保留身份防护标记",
+    "脚本化 place 请求保留策略、优先级、原因与容量元数据",
+    "看板回放使用最新的可见任务图与配置的优先级"
   ],
   "commands": [
     "python -m ruff check .",
@@ -29,13 +29,13 @@
     "docker compose up -d --build"
   ],
   "evidence": [
-    "planner duplicate-identity unit test",
-    "world-model duplicate-identity verification test",
-    "dashboard replay and priority source tests"
+    "规划器重复身份单元测试",
+    "世界模型重复身份验证测试",
+    "看板回放与优先级来源测试"
   ],
   "stop_conditions": [
-    "identity data is absent, in which case the normal evidence policy remains active",
-    "conditional execution would require a new contract",
-    "mobile navigation or parcel-locker access is requested"
+    "身份数据缺失，此时常规证据策略保持生效",
+    "条件执行需要新契约",
+    "请求了移动导航或包裹柜访问"
   ]
 }

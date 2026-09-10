@@ -1,8 +1,8 @@
-# Hardware wiring
+# 硬件接线
 
-This is the EVT wiring view for baseline `WB1-HW-ICD-REV-A`. The controlled
-pin-level source is `hardware/pcb/connector-pinout.csv`; unresolved rows in that
-file must be approved before a harness or populated PCB is ordered.
+这是基线 `WB1-HW-ICD-REV-A` 的 EVT 接线视图。受控的引脚级来源是
+`hardware/pcb/connector-pinout.csv`；该文件中未决的行必须先获得批准，才能
+下单线束或已贴片的 PCB。
 
 ```text
 36-60 V bench supply / battery
@@ -30,46 +30,44 @@ Childboard J_ML/J_MR (H11/H12) -> external M1/M2 motor terminals
 Childboard J_ENC_L/J_ENC_R (H13/H14) -> external M1/M2 encoder pins
 ```
 
-## Connector map
+## 连接器映射
 
-| Connector | Pins | Connection | Mandatory check before power |
+| 连接器 | 引脚 | 连接 | 上电前必查项 |
 |---|---:|---|---|
-| J1 | 1-2 `VBAT_RAW`; 3-4 `GND_PWR` | 36-60 V input, 10 A fused envelope | two parallel 18 AWG supply and return contacts; keying, polarity and fuse interrupt rating |
-| J2 | 1-2 `12V_ISO`; 3-4 `GND` | motor auxiliary, 120 W aggregate / 10 A controlled envelope; 16 A is contact capability only | driver inrush/regeneration approval and external branch fuse |
-| J3 | 1-2 `JETSON_12V`; 3-4 `GND` | Jetson developer-kit DC input | purchased dev-kit revision and polarity |
-| J4 | 1/3 `3V3`; 2/4 GND; 5-20 control; pin 8 `JETSON_ENABLE_REQ` | Jetson-to-MCU SPI/I2C/UART, Jetson enable, six CS, reset and safety status | pin mux and direction against the detailed schematic |
-| J5/J6 | 1 `CANH`; 2 `CANL`; 3 `GND_CAN_ISO`; 4 NC | isolated CAN-FD daisy chain | termination, shield policy, no logic-ground short |
-| J10 | A out/return, B out/return | dual-channel E-stop loop | channels independent; discrepancy must disable |
-| J11 | safe enable, E-stop sense, GND, 3V3 | current single-channel safety output | not compatible with childboard `J_SAFE`; do not split or repurpose |
-| J_PWR | 1-2 `12V_MOTOR_AUX`; 3-4 `GND_MOTOR` | childboard power input via H02, one-for-one from controller J2 | branch fuse, polarity, inrush, regeneration and 10 A aggregate limit |
-| J_SAFE | A enable/return, B enable/return | future controller J10/K1/K2 safety ECO via H09 | two independent channels, discrepancy latch, no software bypass |
-| J_CAN | `CANH`, `CANL`, `GND_CAN_ISO`, NC | isolated CAN command/diagnostic link via H10 | no local-ground tie; shield/drain termination remains TBD |
-| J_ML/J_MR | two motor terminals each | external M1/M2 traction motors via H11/H12 | 16 AWG Mini-Fit Jr candidate, 5.5 A candidate limit, 20 mm bend radius |
-| J_ENC_L/J_ENC_R | VCC, GND, A, B each | external M1/M2 encoders via H13/H14 | encoder electrical level and shield/drain termination remain TBD |
+| J1 | 1-2 `VBAT_RAW`; 3-4 `GND_PWR` | 36-60 V 输入，10 A 熔断包络 | 两条并联的 18 AWG 供电与回流触点；键位、极性与熔断器分断额定值 |
+| J2 | 1-2 `12V_ISO`; 3-4 `GND` | 电机辅助电源，120 W 总功率 / 10 A 受控包络；16 A 仅为触点承载能力 | 驱动器浪涌/回馈批准与外部支路熔断器 |
+| J3 | 1-2 `JETSON_12V`; 3-4 `GND` | Jetson 开发套件直流输入 | 所购开发套件版本与极性 |
+| J4 | 1/3 `3V3`; 2/4 GND; 5-20 control; pin 8 `JETSON_ENABLE_REQ` | Jetson 到 MCU 的 SPI/I2C/UART、Jetson 使能、六路 CS、复位与安全状态 | 对照详细原理图核对引脚复用与方向 |
+| J5/J6 | 1 `CANH`; 2 `CANL`; 3 `GND_CAN_ISO`; 4 NC | 隔离 CAN-FD 菊花链 | 终端匹配、屏蔽策略、不得与逻辑地短路 |
+| J10 | A out/return, B out/return | 双通道急停回路 | 通道相互独立；出现不一致必须禁用 |
+| J11 | safe enable, E-stop sense, GND, 3V3 | 当前单通道安全输出 | 与子板 `J_SAFE` 不兼容；不得拆分或改作他用 |
+| J_PWR | 1-2 `12V_MOTOR_AUX`; 3-4 `GND_MOTOR` | 子板电源输入，经 H02 与控制器 J2 一一对应 | 支路熔断器、极性、浪涌、回馈与 10 A 总电流上限 |
+| J_SAFE | A enable/return, B enable/return | 未来经 H09 实现的控制器 J10/K1/K2 安全 ECO | 两条独立通道、不一致锁存、无软件旁路 |
+| J_CAN | `CANH`, `CANL`, `GND_CAN_ISO`, NC | 经 H10 的隔离 CAN 指令/诊断链路 | 不得连接本地地；屏蔽/泄放端接仍为 TBD |
+| J_ML/J_MR | 各两个电机端子 | 经 H11/H12 连接外部 M1/M2 牵引电机 | 候选 16 AWG Mini-Fit Jr，候选限值 5.5 A，弯曲半径 20 mm |
+| J_ENC_L/J_ENC_R | 各含 VCC、GND、A、B | 经 H13/H14 连接外部 M1/M2 编码器 | 编码器电气电平与屏蔽/泄放端接仍为 TBD |
 
-Do not connect J5/J6 pin 3 to logic ground. Do not bridge
-`MOTOR_ENABLE_REQ` to `MOTOR_ENABLE_SAFE`; `JETSON_ENABLE_REQ` is a separate
-compute-power request. J7-J9 are downstream interface
-definitions and are not populated on this board revision.
+不要将 J5/J6 的引脚 3 连接到逻辑地。不要将
+`MOTOR_ENABLE_REQ` 桥接到 `MOTOR_ENABLE_SAFE`；`JETSON_ENABLE_REQ` 是独立的
+计算电源请求。J7-J9 是下游接口
+定义，本板修订版未贴装。
 
-All cable shields are single-ended chassis connections. H04-H10 drain at the
-controller cable entry; H13/H14 drain at the childboard cable entry. Never use
-the shield or drain as a signal or power return, and insulate the far end.
+所有电缆屏蔽层均为单端机箱连接。H04-H10 在
+控制器电缆入口处泄放；H13/H14 在子板电缆入口处泄放。切勿
+将屏蔽层或泄放线用作信号或电源回流，并须对远端做绝缘处理。
 
-## Bench connection order
+## 台架连接顺序
 
-1. Keep the supply off and current limit at 0.25 A. Leave J2/J3 disconnected.
-2. Verify J1 polarity, more than 10 kOhm VBAT-to-ground resistance, chassis
-   bonding, E-stop channel independence, and connector keying.
-3. Connect scope/DMM probes to TP1-TP5 before applying 36 V.
-4. Power J1, prove the protected and isolated rails, then remove power.
-5. Connect the Jetson at J3; connect motor auxiliary loads at J2 only after the
-   unloaded and Jetson stages pass.
-6. Connect J5/J6 with exactly two 120 Ohm terminations at the bus ends.
-7. Do not connect the childboard `J_SAFE` to current J11. Enable the future
-   safety ECO only after the J10/K1/K2 truth-table test proves both channels and
-   the discrepancy case.
+1. 保持电源关闭，电流限值设为 0.25 A。保持 J2/J3 断开。
+2. 核对 J1 极性、VBAT 对地电阻大于 10 kOhm、机箱
+   搭接、急停通道独立性与连接器键位。
+3. 在施加 36 V 之前，将示波器/DMM 探头接到 TP1-TP5。
+4. 给 J1 上电，验证受保护与隔离电源轨，然后断电。
+5. 在 J3 连接 Jetson；只有在空载与 Jetson 阶段通过后，才在 J2 连接电机辅助负载。
+6. 连接 J5/J6，总线两端各放置一个 120 Ohm 终端，且仅此两个。
+7. 不要将子板 `J_SAFE` 连接到当前的 J11。只有在 J10/K1/K2 真值表测试证明两条通道
+   及不一致情形均正确后，才能启用未来的安全 ECO。
 
-Acceptance values and required captures are controlled by
-`hardware/pcb/fabrication/bringup-test-plan.csv` and
-`hardware/pcb/testpoint-coverage.csv`.
+验收值与所需抓取由
+`hardware/pcb/fabrication/bringup-test-plan.csv` 与
+`hardware/pcb/testpoint-coverage.csv` 管控。
