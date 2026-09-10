@@ -454,7 +454,7 @@ class ReleaseReadinessTests(unittest.TestCase):
         closure = (ROOT / "hardware/release/selection-closure-register.csv").read_text(encoding="utf-8")
         power = json.loads((ROOT / "hardware/release/full-system-power-architecture.json").read_text(encoding="utf-8"))
         self.assertIn("Revision D", selection)
-        self.assertIn("four independent steer-drive modules", selection.lower())
+        self.assertIn("四个独立的转向驱动模块", selection)
         self.assertIn("four 140mm wheel", closure)
         self.assertNotIn("two 200 mm driven wheels", selection)
         self.assertEqual(

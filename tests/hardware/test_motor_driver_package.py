@@ -237,5 +237,5 @@ def test_task_packet_preserves_ownership_and_stop_conditions() -> None:
     )
     assert "hardware/motor_driver/**" in packet["allowed_paths"]
     assert {"interfaces/**", "robot/control/**", "firmware/**"} <= set(packet["forbidden"])
-    assert any("invented" in condition for condition in packet["stop_conditions"])
-    assert any("regenerative" in condition for condition in packet["stop_conditions"])
+    assert any("捏造" in condition for condition in packet["stop_conditions"])
+    assert any("再生能量路径" in condition for condition in packet["stop_conditions"])

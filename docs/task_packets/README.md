@@ -1,5 +1,5 @@
-# Task Packets
+# 任务包（Task Packets）
 
-Every bounded AI-assisted or human task starts with an owner, allowed paths, acceptance commands and evidence. The foundation validates JSON packets today; the team may add YAML support after pinning a YAML parser.
+每个有界的 AI 辅助或人工任务都以一位 Owner、允许路径、验收命令与证据为起点。当前基础校验器校验 JSON 任务包；团队在固定 YAML 解析器版本后可以增加 YAML 支持。
 
-With `--base`, the validator checks Git-visible changed paths against one packet. It is a consistency gate, not a filesystem sandbox: ignored build/runtime files are outside its scope, and human approval still comes from protected-branch review. Command checks recognize evidence-tool syntax but never execute or prove that an interpreter's arguments are safe.
+使用 `--base` 时，校验器会把 Git 可见的改动路径与某一任务包比对。这是一个一致性闸门，不是文件系统沙箱：被忽略的构建/运行时文件不在其检查范围内，人工批准仍来自受保护分支的评审。命令检查识别证据工具语法，但从不执行命令，也不证明某个解释器的参数是安全的。

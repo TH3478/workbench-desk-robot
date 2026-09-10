@@ -65,7 +65,7 @@ def read_csv(name: str) -> list[dict[str, str]]:
 
 
 def _reference_block(text: str, reference: str, opener: str) -> str:
-    """Return one KiCad object block without relying on global markers."""
+    """返回一个 KiCad 对象块，且不依赖全局标记。"""
     marker = f'(property "Reference" "{reference}"'
     marker_index = text.find(marker)
     if marker_index < 0:
@@ -87,7 +87,7 @@ def check_connector_limit_semantics(
     interface_text: str,
     wiring_text: str,
 ) -> dict[str, object]:
-    """Keep connector contact ratings distinct from controlled system limits."""
+    """保持连接器触点额定值与受控系统限值相互区分。"""
     j2_rows = [row for row in connectors if row.get("reference") == "J2"]
     h02_rows = [row for row in harness_rows if row.get("harness_id") == "H02"]
     power = motor_spec.get("power", {})
@@ -99,8 +99,8 @@ def check_connector_limit_semantics(
         "branch_protection_is_defined": len(j2_rows) == 1 and bool(j2_rows[0].get("branch_protection", "").strip()),
         "h02_matches_10a_limit": len(h02_rows) == 1 and h02_rows[0].get("max_current_a") == "10",
         "motor_spec_matches_10a_limit": power.get("aggregate_input_current_limit_a") == 10.0,
-        "interface_document_matches": "120 W maximum aggregate" in interface_text,
-        "wiring_document_matches": "120 W aggregate" in wiring_text,
+        "interface_document_matches": "最大总量 120 W" in interface_text,
+        "wiring_document_matches": "120 W 总功率" in wiring_text,
     }
     return {
         "pass": all(checks.values()),

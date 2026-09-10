@@ -63,7 +63,7 @@ def test_security_handbook_preserves_unexecuted_and_not_certified_states() -> No
     compliance = (ROOT / "docs" / "security" / "compliance-matrix.md").read_text(encoding="utf-8")
     policy = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
 
-    assert "Status: **NOT_EXECUTED**" in penetration_plan
-    assert "not a legal opinion, audit, certification" in compliance
+    assert "状态：**NOT_EXECUTED**" in penetration_plan
+    assert "不是法律意见、审计、认证" in compliance
     assert "/security/advisories/new" in policy
-    assert "Do not report vulnerabilities" in policy
+    assert "请勿在公开 Issue 或 PR 中报告漏洞" in policy

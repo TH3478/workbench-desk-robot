@@ -65,10 +65,10 @@ def test_status_never_substitutes_fixture_results_for_formal_evidence() -> None:
     status = (PMO / "status.md").read_text(encoding="utf-8")
     metrics = (PMO / "quality-metrics.md").read_text(encoding="utf-8")
 
-    assert "UNKNOWN - no formal Gazebo audit" in status
-    assert "scripted fixtures are not physics runs" in status
-    assert "hardware release blockers | 0 | 12 | RED" in status
-    assert "Use `UNKNOWN` when the eligible source is missing" in metrics
+    assert "UNKNOWN - 无正式 Gazebo 审计" in status
+    assert "脚本化固定装置不是物理运行" in status
+    assert "硬件发布阻断项 | 0 | 12 | RED" in status
+    assert "当合格来源缺失时使用 `UNKNOWN`" in metrics
 
 
 def test_merged_dependency_status_does_not_regress_to_pending() -> None:
@@ -81,6 +81,6 @@ def test_merged_dependency_status_does_not_regress_to_pending() -> None:
     assert "merge and verify the least-privilege SBOM fix" not in status
     assert "deliver the security baseline" not in status
     assert "PR #21 merged" in risks
-    assert "merged PR #21" in risk_plan
-    assert "merged PR #25" in risk_plan
-    assert "implemented in merged PR #21; release verification pending" in decisions
+    assert "已合并的 PR #21" in risk_plan
+    assert "已合并 PR #25" in risk_plan
+    assert "已在合并的 PR #21 中实现；发布验证待完成" in decisions

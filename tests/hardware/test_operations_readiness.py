@@ -31,8 +31,8 @@ def test_planning_values_are_not_claimed_as_physical_evidence() -> None:
     procurement = (ROOT / "hardware/procurement/planning-baseline.md").read_text(encoding="utf-8")
     mechanical = (ROOT / "hardware/mechanical/system-integration.md").read_text(encoding="utf-8")
     compliance = (ROOT / "hardware/compliance/README.md").read_text(encoding="utf-8")
-    assert "not a quote" in procurement
-    assert "not measured product claims" in mechanical
+    assert "不是报价" in procurement
+    assert "不是实测的产品指标" in mechanical
     assert "NOT_CERTIFIED" in compliance
 
 
@@ -47,7 +47,7 @@ def test_task_packet_is_bounded_and_fail_closed() -> None:
     assert packet["issues"] == list(range(20, 28))
     assert "firmware/**" in packet["forbidden"]
     assert "interfaces/**" in packet["forbidden"]
-    assert any("invented" in condition for condition in packet["stop_conditions"])
+    assert any(("invented" in condition) or ("捏造" in condition) for condition in packet["stop_conditions"])
 
 
 def test_bms_generated_report_preserves_design_and_physical_status() -> None:

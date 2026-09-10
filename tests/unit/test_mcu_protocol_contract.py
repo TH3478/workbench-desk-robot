@@ -206,13 +206,13 @@ def test_downstream_safety_semantics_are_explicitly_frozen() -> None:
     required_semantics = [
         "delta = (candidate - last_accepted) mod 32768",
         "delta = (candidate - last_accepted) mod 4294967296",
-        "including the wrap from 32767 to 0",
-        "must not execute side effects again",
-        "retry_count` echoes the received request",
-        "must not subtract timestamps from different senders",
-        "duplicate, retry and stale frames do not",
-        "does not define a reset frame or reset opcode",
-        "must not derive reset authority solely from any",
+        "包括从 32767 到 0 的回绕",
+        "它不得再次执行副作用",
+        "其 `retry_count` 回显收到的请求",
+        "消费者不得对不同发送方的时间戳做减法",
+        "重复、重试和过期帧不刷新它",
+        "刻意不定义重置帧或重置 opcode",
+        "绝不能仅从任何",
     ]
     for semantic in required_semantics:
         assert semantic in normalized_doc
