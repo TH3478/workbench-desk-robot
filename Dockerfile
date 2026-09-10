@@ -16,11 +16,11 @@ RUN test "${TARGETARCH}" = "amd64" || { echo "linux/amd64 is the only supported 
 LABEL org.opencontainers.image.title="workbench-1 full development runtime" \
       org.opencontainers.image.version="${WORKBENCH_VERSION}" \
       org.opencontainers.image.revision="${VCS_REF}" \
-      org.opencontainers.image.base.name="nvidia/cuda:12.8.1-runtime-ubuntu24.04" \
-      org.opencontainers.image.base.digest="sha256:828c4d878adcaa4265d80c95d8ec877149b49bb2419a4cf3bb6aa889bbb7ca2e"
+      org.opencontainers.image.base.name="nvidia/cuda:13.3.1-runtime-ubuntu24.04" \
+      org.opencontainers.image.base.digest="sha256:63da350831208559df18c7b8f3e0d5d1c984eaa815cdde690aacd6606cd0cb11"
 
 # 单镜像内的 GPU 依赖分层：
-#   gpu-runtime：CUDA 12.8 用户空间运行时；驱动/工具链由宿主机负责。
+#   gpu-runtime：CUDA 13.3 用户空间运行时；驱动/工具链由宿主机负责。
 #   gpu-simulation：ROS 2 Jazzy、Gazebo Harmonic、EGL/OGRE 与 MuJoCo。
 #   gpu-validation：架构、驱动、EGL 渲染器与实体显卡检查。
 # NVIDIA 驱动、NVIDIA Container Toolkit、PyTorch/JAX 以及强化学习训练栈
@@ -125,9 +125,9 @@ RUN mkdir -p \
     && /opt/workbench-venv/bin/python -m pip freeze --all > /usr/share/workbench/container/python-packages.txt \
     && /opt/workbench-mujoco-venv/bin/python -m pip freeze --all > /usr/share/workbench/container/mujoco-python-packages.txt \
     && printf '%s\n' \
-      'base=nvidia/cuda:12.8.1-runtime-ubuntu24.04' \
-      'base_digest=sha256:828c4d878adcaa4265d80c95d8ec877149b49bb2419a4cf3bb6aa889bbb7ca2e' \
-      'platform=linux/amd64' 'ubuntu=24.04' 'ros=jazzy' 'cuda=12.8.1' 'mujoco=3.3.7' \
+      'base=nvidia/cuda:13.3.1-runtime-ubuntu24.04' \
+      'base_digest=sha256:63da350831208559df18c7b8f3e0d5d1c984eaa815cdde690aacd6606cd0cb11' \
+      'platform=linux/amd64' 'ubuntu=24.04' 'ros=jazzy' 'cuda=13.3.1' 'mujoco=3.3.7' \
       > /usr/share/workbench/container/build-versions.txt \
     && useradd --create-home --uid 10001 --shell /bin/bash workbench \
     && chown -R workbench:workbench /opt/workbench_source /opt/workbench_ws /workspace /home/workbench

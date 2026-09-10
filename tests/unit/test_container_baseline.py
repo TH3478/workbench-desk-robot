@@ -8,7 +8,7 @@ except ModuleNotFoundError:  # pragma: no cover - 宿主环境 Python 3.10 的�
 
 
 ROOT = Path(__file__).resolve().parents[2]
-IMMUTABLE_CUDA_BASE = re.compile(r"^FROM nvidia/cuda:12\.8\.1-runtime-ubuntu24\.04@sha256:[0-9a-f]{64}$")
+IMMUTABLE_CUDA_BASE = re.compile(r"^FROM nvidia/cuda:13\.3\.1-runtime-ubuntu24\.04@sha256:[0-9a-f]{64}$")
 
 
 def test_runtime_and_devcontainer_use_the_same_immutable_base() -> None:

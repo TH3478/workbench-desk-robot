@@ -54,7 +54,7 @@ def test_dockerfile_declares_three_gpu_dependency_layers() -> None:
     assert set(matrix["dependency_layers"]) == {"gpu-runtime", "gpu-simulation", "gpu-validation"}
     for layer in matrix["dependency_layers"]:
         assert layer in dockerfile
-    assert "nvidia/cuda:12.8.1-runtime-ubuntu24.04@sha256:" in dockerfile
+    assert "nvidia/cuda:13.3.1-runtime-ubuntu24.04@sha256:" in dockerfile
     assert "nvidia-driver" not in dockerfile
     assert "nvidia-container-toolkit" not in dockerfile
 
