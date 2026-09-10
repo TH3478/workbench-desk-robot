@@ -1,9 +1,9 @@
-"""Behavioural tests for tool_registry — A1.
+"""tool_registry 的行为测试 —— A1。
 
-Covers: valid actions pass, unknown action_type rejected, missing required
-params, extra (forbidden) params, bool-as-int rejection, type mismatches,
-target_id requirement, register/get API, observe attribute allow-list,
-and full TaskGraph validation via build_template_plan.
+覆盖：合法动作通过、未知 action_type 被拒绝、缺失必填参数、
+多余（禁止）参数、bool 冒充 int 的拒绝、类型不匹配、
+target_id 要求、register/get API、observe 属性白名单，
+以及经由 build_template_plan 的完整 TaskGraph 校验。
 """
 
 from __future__ import annotations
@@ -20,13 +20,13 @@ sys.path[:0] = [
     str(ROOT / "tools/scripts"),
 ]
 
-from workbench_agent_runtime import build_template_plan  # exported via __init__
+from workbench_agent_runtime import build_template_plan  # 经 __init__ 导出
 from workbench_agent_runtime.tool_registry import ToolRegistry
 from workbench_agent_runtime.tool_schemas import TOOL_SCHEMAS
 from workbench_contracts import ActionType, SemanticAction
 
 # ---------------------------------------------------------------------------
-# helpers
+# 辅助函数
 # ---------------------------------------------------------------------------
 
 
@@ -67,13 +67,13 @@ class _ChangingSchema(Mapping):
 
 
 # ---------------------------------------------------------------------------
-# tests
+# 测试
 # ---------------------------------------------------------------------------
 
 
 class ToolRegistryRegistrationTests(unittest.TestCase):
-    """ToolRegistry knows all seven ActionTypes on construction,
-    supports register()/get(), and rejects invalid or duplicate registrations."""
+    """ToolRegistry 构造时即知晓全部七个 ActionType，
+    支持 register()/get()，并拒绝无效或重复注册。"""
 
     def setUp(self) -> None:
         self.registry = ToolRegistry()
@@ -258,19 +258,19 @@ class ToolRegistryRegistrationTests(unittest.TestCase):
             self.registry.get("not_an_enum")  # type: ignore[arg-type]
 
     def test_get_rejects_unregistered_action(self) -> None:
-        """A valid ActionType that was not registered must raise KeyError."""
+        """未注册的合法 ActionType 必须抛出 KeyError。"""
         empty = ToolRegistry(load_defaults=False)
         with self.assertRaises(KeyError):
             empty.get(ActionType.OBSERVE)
 
 
 class ToolRegistryValidationTests(unittest.TestCase):
-    """Core validation behaviour."""
+    """核心校验行为。"""
 
     def setUp(self) -> None:
         self.registry = ToolRegistry()
 
-    # -- valid actions --------------------------------------------------------
+    # -- 合法动作 ------------------------------------------------------------
 
     def test_observe_with_no_params_is_valid(self) -> None:
         result = self.registry.validate(_action(ActionType.OBSERVE))
@@ -398,7 +398,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
         result = self.registry.validate(_action(ActionType.STOP))
         self.assertTrue(result.is_valid)
 
-    # -- target_id requirement ------------------------------------------------
+    # -- target_id 要求 --------------------------------------------------------
 
     def test_grasp_without_target_id_is_rejected(self) -> None:
         result = self.registry.validate(_action(ActionType.GRASP))
@@ -425,20 +425,19 @@ class ToolRegistryValidationTests(unittest.TestCase):
         )
 
     def test_observe_without_target_id_is_valid(self) -> None:
-        """OBSERVE does not require target_id (global scan is valid)."""
+        """OBSERVE 不要求 target_id（全局扫描是合法的）。"""
         result = self.registry.validate(_action(ActionType.OBSERVE))
         self.assertTrue(result.is_valid)
 
-    # -- unknown / non-ActionType input ---------------------------------------
+    # -- 未知 / 非 ActionType 输入 ---------------------------------------------
 
     def test_non_action_type_input_is_rejected_without_raising(self) -> None:
-        """Passing a raw string as action_type must return ValidationResult,
-        not raise AttributeError.  We use model_construct to bypass
-        Pydantic coercion — this simulates a malformed frame from a buggy
-        caller or a wire format that does not round-trip through the enum."""
+        """以原始字符串作为 action_type 传入时必须返回 ValidationResult，
+        而不是抛出 AttributeError。我们使用 model_construct 绕过 Pydantic
+        强制转换——这模拟来自有缺陷调用方的畸形帧，或不能经由枚举往返的线格式。"""
         action = SemanticAction.model_construct(
             action_id="act-bad",
-            action_type="grasp",  # raw string, not ActionType enum
+            action_type="grasp",  # 原始字符串，而非 ActionType 枚举
             target_id="red_block",
         )
         result = self.registry.validate(action)
@@ -448,7 +447,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
             f"expected ActionType error in {result.errors}",
         )
 
-    # -- extra (forbidden) params ---------------------------------------------
+    # -- 多余（禁止）参数 --------------------------------------------------------
 
     def test_extra_param_is_rejected(self) -> None:
         result = self.registry.validate(_action(ActionType.OBSERVE, parameters={"joint_angle": 90}))
@@ -458,7 +457,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
             f"expected 'forbidden keys' in {result.errors}",
         )
 
-    # -- missing required params -----------------------------------------------
+    # -- 缺失必填参数 -----------------------------------------------------------
 
     def test_missing_required_destination_id_is_rejected(self) -> None:
         result = self.registry.validate(_action(ActionType.PLACE, target_id="red_block", parameters={}))
@@ -476,10 +475,10 @@ class ToolRegistryValidationTests(unittest.TestCase):
         result = self.registry.validate(_action(ActionType.EXPRESS, parameters={}))
         self.assertFalse(result.is_valid)
 
-    # -- type safety: bool-before-int -----------------------------------------
+    # -- 类型安全：bool 先于 int -------------------------------------------------
 
     def test_bool_passed_as_int_is_rejected(self) -> None:
-        """True is an int in Python — the registry must reject it."""
+        """在 Python 中 True 是 int——注册表必须拒绝它。"""
         result = self.registry.validate(
             _action(
                 ActionType.ASK_CONFIRM,
@@ -509,7 +508,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
             f"expected bool rejection in {result.errors}",
         )
 
-    # -- type safety: str fields -----------------------------------------------
+    # -- 类型安全：str 字段 -----------------------------------------------------
 
     def test_destination_id_not_a_string_is_rejected(self) -> None:
         result = self.registry.validate(
@@ -530,7 +529,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
         )
         self.assertFalse(result.is_valid)
 
-    # -- semantic constraints: express emotion enum ---------------------------
+    # -- 语义约束：express 情绪枚举 ---------------------------------------------
 
     def test_express_invalid_emotion_is_rejected(self) -> None:
         result = self.registry.validate(
@@ -545,7 +544,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
             f"expected emotion_state error in {result.errors}",
         )
 
-    # -- semantic constraints: observe attributes -----------------------------
+    # -- 语义约束：observe 属性 -------------------------------------------------
 
     def test_observe_with_known_attributes_is_valid(self) -> None:
         result = self.registry.validate(
@@ -582,7 +581,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
             f"expected string-only error in {result.errors}",
         )
 
-    # -- ValidationResult structure -------------------------------------------
+    # -- ValidationResult 结构 -------------------------------------------------
 
     def test_validation_result_contains_action_id(self) -> None:
         result = self.registry.validate(_action(ActionType.OBSERVE, action_id="my-action-42"))
@@ -599,7 +598,7 @@ class ToolRegistryValidationTests(unittest.TestCase):
 
 
 class PlannerIntegrationTests(unittest.TestCase):
-    """Every build_template_plan path passes the registry."""
+    """每一条 build_template_plan 路径都通过注册表。"""
 
     def test_build_place_plan_validates(self) -> None:
         plan = build_template_plan("Place the red block in the tray")
@@ -626,7 +625,7 @@ class PlannerIntegrationTests(unittest.TestCase):
         self.assertEqual(len(plan.steps), 12)
 
     def test_all_planner_steps_contain_only_semantic_actions(self) -> None:
-        """Smoke-test: no planner path emits joint or velocity tokens."""
+        """冒烟测试：没有规划器路径会产出 joint 或 velocity 令牌。"""
         for goal in (
             "Place the red block in the tray",
             "Assemble a three-part kit in the tray",

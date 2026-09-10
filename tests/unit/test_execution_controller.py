@@ -1,4 +1,4 @@
-"""Fail-closed execution-controller behaviour for Issue #59."""
+"""Issue #59 的失败即拒绝（fail-closed）执行控制器行为。"""
 
 from __future__ import annotations
 

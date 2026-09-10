@@ -1,9 +1,9 @@
-"""Behavioural tests for policy_validator — A5.
+"""policy_validator 的行为测试 —— A5。
 
-Covers exact field-set equality (reject extra AND missing), bool-before-int
-(duration_ms and other integer slots), type mismatches, fail-closed enforcement,
-TaskGraph-level aggregation, non-ActionType input, target_id requirement, and
-the rule that the validator never emits a VerificationResult.
+覆盖精确字段集相等（多余与缺失都拒绝）、bool 先于 int
+（duration_ms 及其他整数槽位）、类型不匹配、失败即拒绝的执行、
+TaskGraph 级聚合、非 ActionType 输入、target_id 要求，以及
+验证器绝不产出 VerificationResult 的规则。
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from workbench_agent_runtime.tool_schemas import TOOL_SCHEMAS
 from workbench_contracts import ActionType, SemanticAction, TaskGraph, TaskStep
 
 # ---------------------------------------------------------------------------
-# helpers
+# 辅助函数
 # ---------------------------------------------------------------------------
 
 
@@ -87,7 +87,7 @@ def _registry_with_stop_parameter(name: str, parameter_type: type) -> ToolRegist
 
 
 # ---------------------------------------------------------------------------
-# tests
+# 测试
 # ---------------------------------------------------------------------------
 
 
@@ -129,7 +129,7 @@ class PolicyValidatorValidActionTests(unittest.TestCase):
 
 
 class PolicyValidatorFieldSetTests(unittest.TestCase):
-    """Exact field-set equality: reject extra AND missing."""
+    """精确字段集相等：多余与缺失都拒绝。"""
 
     def setUp(self) -> None:
         self.validator = _validator()
@@ -145,11 +145,10 @@ class PolicyValidatorFieldSetTests(unittest.TestCase):
         self.assertTrue(any("missing required" in f.message for f in report.findings))
 
     def test_exact_field_set_equality_is_not_subset(self) -> None:
-        """A subset of allowed params that omits a required key must be rejected.
+        """允许参数中缺失必填键的子集必须被拒绝。
 
-        This is the A5 acceptance point: the field set must be EXACTLY equal to
-        the whitelist requirement, not merely a subset of the allow-list."""
-        # place requires destination_id; omitting it leaves a subset -> reject
+        这是 A5 的验收点：字段集必须恰好等于白名单要求，而不仅仅是允许列表的子集。"""
+        # place 要求 destination_id；省略它只剩子集 -> 拒绝
         report = self.validator.check(
             _graph(
                 _action(
@@ -163,13 +162,13 @@ class PolicyValidatorFieldSetTests(unittest.TestCase):
         self.assertTrue(any("missing required" in f.message for f in report.findings))
 
     def test_optional_fields_may_be_absent(self) -> None:
-        """Optional fields are not required; their absence must not fail."""
+        """可选字段不是必需的；它们缺失不应导致失败。"""
         report = self.validator.check(_graph(_action(ActionType.ASK_CONFIRM, parameters={"question": "ok?"})))
         self.assertTrue(report.is_valid)
 
 
 class PolicyValidatorBoolBeforeIntTests(unittest.TestCase):
-    """bool must be rejected for integer slots, not coerced to 1/0."""
+    """bool 必须被整数槽位拒绝，而不是强转为 1/0。"""
 
     def setUp(self) -> None:
         self.validator = _validator()
@@ -224,7 +223,7 @@ class PolicyValidatorBoolBeforeIntTests(unittest.TestCase):
 
 
 class PolicyValidatorSchemaConstraintTests(unittest.TestCase):
-    """A5 consumes value and relational constraints from ToolRegistry."""
+    """A5 从 ToolRegistry 消费取值与关系约束。"""
 
     def setUp(self) -> None:
         self.validator = _validator()
@@ -361,7 +360,7 @@ class PolicyValidatorAggregationTests(unittest.TestCase):
         self.assertEqual(len(report.findings), 2)
 
     def test_single_step_with_multiple_errors_reports_all(self) -> None:
-        # missing destination_id AND forbidden key on the same action
+        # 同一动作上同时缺失 destination_id 与出现禁止键
         report = self.validator.check(
             _graph(
                 _action(
@@ -382,7 +381,7 @@ class PolicyValidatorBoundaryTests(unittest.TestCase):
     def test_non_action_type_input_is_rejected(self) -> None:
         action = SemanticAction.model_construct(
             action_id="act-bad",
-            action_type="grasp",  # raw string, bypasses Pydantic coercion
+            action_type="grasp",  # 原始字符串，绕过 Pydantic 强制转换
             target_id="red_block",
         )
         report = self.validator.check(_graph(action))
@@ -399,23 +398,22 @@ class PolicyValidatorBoundaryTests(unittest.TestCase):
             TaskGraph(task_id="task-empty", goal="test", steps=[], planner="test", model_route="template")
 
     def test_validator_uses_injected_registry(self) -> None:
-        """The validator must read its whitelist from the injected registry,
-        not a hardcoded second copy."""
+        """验证器必须从注入的注册表读取其白名单，而不是硬编码的第二份副本。"""
         empty_registry = ToolRegistry(load_defaults=False)
         validator = _validator(registry=empty_registry)
         report = validator.check(_graph(_action(ActionType.OBSERVE)))
-        self.assertFalse(report.is_valid)  # nothing registered -> reject
+        self.assertFalse(report.is_valid)  # 无任何注册 -> 拒绝
 
 
 class PolicyValidatorRuleBoundaryTests(unittest.TestCase):
     def test_validator_does_not_emit_verification_result(self) -> None:
-        """Rule 2: completion is judged only by the world-model verifier.
-        The validator's output must be a PolicyReport, never a VerificationResult."""
+        """规则 2：完成与否只由世界模型验证器判定。
+        验证器的输出必须是 PolicyReport，绝不能是 VerificationResult。"""
         validator = _validator()
         report = validator.check(_graph(_action(ActionType.OBSERVE)))
         self.assertIsInstance(report, PolicyReport)
         self.assertIsInstance(report.findings, tuple)
-        # No VerificationResult is constructed anywhere in this path.
+        # 此路径的任何位置都不构造 VerificationResult。
         from workbench_contracts import VerificationResult
 
         self.assertNotIsInstance(report, VerificationResult)

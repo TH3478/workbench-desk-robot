@@ -45,14 +45,14 @@ HEADER = "result\ttest_id\tname\texpected\tactual\n"
 
 
 def _ready_then_sleeping_latency_worker(_stop: object, _start: object, ready: object, *_args: object) -> None:
-    """Become ready, then keep a worker alive long enough to force cleanup."""
+    """进入就绪状态，然后让 worker 存活足够长的时间，以强制触发清理。"""
 
     ready.set()
     time.sleep(10)
 
 
 def _nonzero_latency_worker(*_args: object) -> None:
-    """Exit abnormally so cleanup must reject the worker's exit status."""
+    """异常退出，使清理必须拒绝该 worker 的退出状态。"""
 
     raise SystemExit(7)
 
@@ -66,7 +66,7 @@ def _delayed_ready_cpu_worker(
     index: int,
     error_connection: object,
 ) -> None:
-    """Delay setup so the parent timing window can be tested independently."""
+    """延迟准备阶段，以便独立测试父进程的时间窗口。"""
 
     time.sleep(0.2)
     ready.set()
@@ -406,7 +406,7 @@ def test_stress_report_rejects_over_budget_or_incomplete_reload_evidence() -> No
     report = _stress_report()
     stages = report["stages"]
     assert isinstance(stages, list)
-    stages.pop(-2)  # remove unload_reload while retaining the cleanup suffix
+    stages.pop(-2)  # 移除 unload_reload，同时保留 cleanup 后缀
     with pytest.raises(ValueError, match=r"ordered execution prefix|every required"):
         STRESS.validate_stress_report(report)
 

@@ -47,7 +47,7 @@ def test_task_packet_is_bounded_and_fail_closed() -> None:
     assert packet["issues"] == list(range(20, 28))
     assert "firmware/**" in packet["forbidden"]
     assert "interfaces/**" in packet["forbidden"]
-    assert any(("invented" in condition) or ("捏造" in condition) for condition in packet["stop_conditions"])
+    assert any("虚构" in condition for condition in packet["stop_conditions"])
 
 
 def test_bms_generated_report_preserves_design_and_physical_status() -> None:

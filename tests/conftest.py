@@ -1,5 +1,5 @@
 """
-pytest 共享 fixtures,供全部测试使用。
+pytest 共享固定装置，供全部测试使用。
 """
 
 import sys
@@ -15,7 +15,7 @@ if str(SCRIPTS) not in sys.path:
 
 @pytest.fixture
 def temp_dir():
-    """临时目录,用完自动清理"""
+    """临时目录，用完自动清理"""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 

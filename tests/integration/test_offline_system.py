@@ -1,12 +1,11 @@
-"""Offline application integration gate.
+"""离线应用集成闸门。
 
-This suite exercises the software-only path that is available without ROS 2,
-Docker, a model server or physical hardware:
+本套件验证在无 ROS 2、Docker、模型服务器或实体硬件的情况下可用的纯软件路径：
 
-    template planner -> semantic TaskGraph -> read-only backend -> replay model
+    template 规划器 -> 语义 TaskGraph -> 只读后端 -> 回放模型
 
-The test deliberately uses the same public entry points as the offline runbook
-and never turns fixture data into hardware evidence.
+测试刻意使用与离线手册相同的公开入口点，
+并且绝不把固定装置数据当作硬件证据。
 """
 
 from __future__ import annotations

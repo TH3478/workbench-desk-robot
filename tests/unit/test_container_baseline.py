@@ -3,7 +3,7 @@ from pathlib import Path
 
 try:
     import tomllib
-except ModuleNotFoundError:  # pragma: no cover - host-only Python 3.10 fallback
+except ModuleNotFoundError:  # pragma: no cover - 宿主环境 Python 3.10 的回退方案
     import tomli as tomllib
 
 
