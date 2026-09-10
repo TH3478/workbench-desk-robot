@@ -96,12 +96,11 @@ events.sort(key=lambda e: e.sequence_no)  # right
 
 超时逻辑必须使用单调时钟。使用墙钟时，一次 NTP 校正就可能误触发或压制看门狗。
 
-### Bounded observed attributes
+### 有界观测属性
 
-Observed attributes follow the same evidence-first rule as pose and location:
-the value is useful only when the system can identify when, how confidently,
-and from which evidence it was observed. The public contract therefore carries
-three related fields on an entity or observation:
+观测属性遵循与位姿和位置相同的证据优先规则：只有当系统能说明该值是在何时、
+以多高的置信度、依据哪条证据被观测到时，它才有用。因此公共契约在实体或观测上
+携带三个相关字段：
 
 ```json
 {
@@ -121,50 +120,42 @@ three related fields on an entity or observation:
 }
 ```
 
-The vocabulary is finite and entity-scoped. Common entities may report
-`colour`, `presence`, `identity`, and `orientation`; parcel entities may also
-report `label_status`, `condition`, `tracking_id`, `barcode`, and `parcel_uid`;
-appliances and managed slots use the documented door/rack and slot keys. An
-unknown entity type receives only the common keys. Values are strings, with a
-maximum of 32 entries, 64 characters per key, 256 characters per value, and
-4096 bytes of canonical UTF-8 JSON. Text must be printable, valid UTF-8, and
-free of surrounding whitespace. Enumerated keys are validated against the
-finite values in `workbench_contracts.observed_attributes`.
+词表是有限的，并按实体限定作用域。通用实体可以上报 `colour`、`presence`、
+`identity` 和 `orientation`；包裹实体还可以上报 `label_status`、`condition`、
+`tracking_id`、`barcode` 和 `parcel_uid`；家电与受管槽位使用已文档化的
+门/货架键与槽位键。未知实体类型只获得通用键。取值均为字符串：最多 32 个条目，
+每个键 64 个字符，每个值 256 个字符，规范化 UTF-8 JSON 最大 4096 字节。文本
+必须可打印、是合法 UTF-8，且首尾无空白。枚举键依据
+`workbench_contracts.observed_attributes` 中的有限取值进行验证。
 
-Metadata is bounded independently: at most 32 keys and 16 KiB of canonical
-UTF-8 JSON; timestamps, sources, and evidence references are bounded text;
-evidence has one to 32 unique references; confidence is finite and in `[0, 1]`;
-and belief is one of `observed`, `inferred`, `stale`, or `lost`. Modern
-`observed-attributes-v1` payloads require metadata for every attribute. The
-explicit `legacy-observed-attributes-v0` marker is a compatibility path for
-older parcel events, not a way to introduce unknown keys or unbounded data.
+元数据独立受限：最多 32 个键、16 KiB 规范化 UTF-8 JSON；时间戳、来源与证据
+引用是有界文本；证据有 1 至 32 个唯一引用；置信度有限且位于 `[0, 1]`；信念是
+`observed`、`inferred`、`stale` 或 `lost` 之一。现代 `observed-attributes-v1`
+载荷要求每个属性都携带元数据。显式的 `legacy-observed-attributes-v0` 标记是
+旧包裹事件的兼容路径，而不是引入未知键或无界数据的途径。
 
-Reducer update semantics are intentionally asymmetric:
+Reducer 的更新语义刻意不对称：
 
-| Update | Meaning | Required invariant |
+| 更新 | 含义 | 必需不变量 |
 |---|---|---|
-| `complete` | Replace the entity's attribute values and metadata; omitted keys are removed. | Establishes or resets the complete baseline. |
-| `partial` | Merge only the named keys and retain other baseline keys. | A prior complete baseline must exist; older per-key metadata cannot overwrite newer metadata. |
+| `complete` | 整体替换实体的属性值与元数据；省略的键被移除。 | 建立或重置完整基线。 |
+| `partial` | 只合并指定的键，保留其余基线键。 | 必须先存在完整基线；较旧的逐键元数据不能覆盖较新的元数据。 |
 
-The reducer replays these updates by `sequence_no`, ignores provably older wall
-timestamps, and treats duplicate event IDs idempotently. A schema-version
-conflict is rejected except for an explicit legacy-to-modern complete migration.
-`ActionResult` events never enter this attribute update path, so a reported
-action cannot manufacture observation truth.
+Reducer 按 `sequence_no` 回放这些更新，忽略可证明更旧的墙钟时间戳，并对重复的
+事件 ID 幂等处理。schema 版本冲突一律拒绝，唯一例外是显式的旧到新完整迁移。
+`ActionResult` 事件绝不进入这条属性更新路径，因此已上报的动作不可能捏造观测
+真值。
 
-Attribute metadata ages with the same explicit replay boundary as other world
-facts. Callers provide both an `ObservationFreshnessPolicy` for the exact
-`(source, entity_type)` pair and an `ObservationAgingBoundary`; the aging code
-does not read process time or apply a wildcard fallback. Comparable wall-clock
-metadata becomes `observed`, then `stale`, then `lost` at the configured
-thresholds. Missing, future, incomparable, or unconfigured timestamps are
-`lost`; an `inferred` value remains inferred while its observation is fresh.
+属性元数据与其它世界事实一样，按相同的显式回放边界老化。调用方既要为精确的
+`(source, entity_type)` 对提供 `ObservationFreshnessPolicy`，也要提供
+`ObservationAgingBoundary`；老化代码不读取进程时间，也不应用通配回退。可比的
+墙钟元数据在配置的阈值处依次变为 `observed`、`stale`、`lost`。缺失、来自未来、
+不可比或未配置的时间戳均为 `lost`；`inferred` 值在其观测仍然新鲜时保持推断
+状态。
 
-The canonical public `WorldState` projection includes attribute values, their
-schema version, metadata, and evidence in `state_hash` material. Snapshot
-timing metadata such as `reduced_at` is excluded from the semantic hash. This
-keeps replay integrity sensitive to a changed observed fact while avoiding a
-hash change caused only by when a snapshot was serialized.
+规范的公共 `WorldState` 投影把属性值、其 schema 版本、元数据与证据纳入
+`state_hash` 材料。`reduced_at` 之类的快照计时元数据被排除在语义哈希之外。这让
+回放完整性对观测事实的变化保持敏感，同时避免哈希仅因快照的序列化时刻而改变。
 
 ---
 

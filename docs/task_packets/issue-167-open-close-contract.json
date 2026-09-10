@@ -1,8 +1,8 @@
 {
   "issue": 167,
   "human_owner": "TH3478",
-  "objective": "Add bounded version-compatible OPEN and CLOSE semantic actions addressed only by configured articulated-entity identifiers, while preserving the independent STOP, execution, observation, and verification boundaries.",
-  "decision_supported": "Can Agent Runtime expose guarded articulated-entity open and close intent through the reviewed semantic contract without accepting raw motion, contact, geometry, or controller parameters?",
+  "objective": "新增有界的、版本兼容的 OPEN 与 CLOSE 语义动作，它们只能通过已配置的关节实体标识符寻址，同时保持 STOP、执行、观测与验证边界的相互独立。",
+  "decision_supported": "Agent Runtime 能否通过已评审的语义契约暴露受守护的关节实体打开与关闭意图，而不接受原始运动、接触、几何或控制器参数？",
   "allowed_paths": [
     "docs/task_packets/issue-167-open-close-contract.json",
     "interfaces/json_schema/semantic_action.schema.json",
@@ -76,16 +76,16 @@
     "docs/task_packets/issue-167-open-close-contract.json"
   ],
   "acceptance": [
-    "ActionType and the public SemanticAction JSON Schema register open and close while all existing action values and examples remain valid.",
-    "Each open or close action requires a non-empty opaque configured articulated-entity target_id.",
-    "The open and close parameter objects are closed and currently empty; callers cannot provide pose, trajectory, joint, velocity, acceleration, effort, force/torque, geometry, path, or arbitrary controller fields.",
-    "Pydantic construction and JSON ingress enforce the target and closed-parameter boundary, including strict rejection of unknown top-level fields.",
-    "The generated Schema Compiler model enforces the same conditional target and parameter constraints for both actions.",
-    "ToolRegistry registers both actions, requires their targets, rejects blank targets and forbidden parameters, and preserves independent STOP registration.",
-    "PolicyValidator accepts valid open and close actions and can require confirmation for either action without changing STOP behavior.",
-    "Execution-controller evidence forwards open and close intent without inventing motion parameters, reports adapter failures explicitly, and preserves queued STOP preemption at the next dispatch boundary.",
-    "A completed open or close ActionResult remains adapter execution evidence only and does not assert an observed articulated state or World Model verification.",
-    "The Task Packet boundary, focused tests, contract, scenario, context, full test, lint, and whitespace checks pass; interface changes remain subject to Runtime, World Model, Integration, and Motion owner review before merge."
+    "ActionType 与公开的 SemanticAction JSON Schema 都注册 open 和 close，同时所有既有动作值与示例保持有效。",
+    "每个 open 或 close 动作都要求一个非空的不透明已配置关节实体 target_id。",
+    "open 与 close 的参数对象是封闭的且当前为空；调用方不得提供位姿、轨迹、关节、速度、加速度、effort、力/力矩、几何、路径或任意控制器字段。",
+    "Pydantic 构造与 JSON 入口强制实施目标与封闭参数边界，包括严格拒绝未知的顶层字段。",
+    "生成的 Schema Compiler 模型对两个动作强制实施相同的条件目标与参数约束。",
+    "ToolRegistry 注册这两个动作，要求其目标，拒绝空白目标与禁用参数，并保持 STOP 的独立注册。",
+    "PolicyValidator 接受有效的 open 与 close 动作，并能对任一动作要求确认，而不改变 STOP 行为。",
+    "执行控制器证据在转发 open 与 close 意图时不虚构运动参数，显式报告适配器失败，并在下一个派发边界保留排队中的 STOP 抢占。",
+    "已完成的 open 或 close ActionResult 仍然只是适配器执行证据，且不得断言任何已观测的关节状态或 World Model 验证。",
+    "任务包边界、聚焦测试、契约、场景、上下文、完整测试、lint 与空白检查全部通过；接口改动在合并前仍需接受 Runtime、World Model、Integration 与 Motion Owner 评审。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-167-open-close-contract.json --base origin/main",
@@ -100,27 +100,27 @@
     "git diff --check"
   ],
   "evidence": [
-    "Task Packet changed-path validation against the fixed origin/main base.",
-    "Focused contract, registry, policy, schema-compiler, and execution-controller tests for valid open/close actions, closed parameters, explicit adapter failure, STOP independence, and legacy compatibility.",
-    "Schema/example and Pydantic JSON round-trip output from make contract.",
-    "Full test, Ruff, scenario, context, and whitespace-check output.",
-    "Runtime, World Model, Integration, and Motion owner approval references on the eventual pull request."
+    "针对固定 origin/main 分支基的任务包改动路径校验。",
+    "针对有效 open/close 动作、封闭参数、显式适配器失败、STOP 独立性以及既有兼容性的聚焦契约、注册表、策略、Schema Compiler 与执行控制器测试。",
+    "来自 `make contract` 的 Schema/示例与 Pydantic JSON 往返输出。",
+    "完整测试、Ruff、场景、上下文与空白检查输出。",
+    "最终 pull request 上的 Runtime、World Model、Integration 与 Motion Owner 批准引用。"
   ],
   "stop_conditions": [
-    "Implementation requires robot/control, Nav2, mapping, planners, fixture execution, firmware, hardware, or physical appliance changes.",
-    "A public parameter cannot remain closed and typed without exposing raw motion, contact, geometry, or controller details.",
-    "An executor would need to guess a generic articulated handle or claim observed state from ActionResult alone.",
-    "A required change falls outside allowed_paths or conflicts with an unrelated user worktree edit.",
-    "The interface change lacks the required Runtime, World Model, Integration, or Motion owner approval for merge.",
-    "A required validation command fails for a reason that cannot be fixed within this bounded contract and consumer scope."
+    "实现需要 robot/control、Nav2、建图、规划器、固定装置执行、固件、硬件或物理家电改动。",
+    "公开参数无法在保持封闭且有类型的同时不暴露原始运动、接触、几何或控制器细节。",
+    "执行器将需要猜测一个通用的关节式把手，或仅凭 ActionResult 声称已观测状态。",
+    "所需改动落在 allowed_paths 之外，或与无关用户的 worktree 修改冲突。",
+    "接口改动缺少合并所需的 Runtime、World Model、Integration 或 Motion Owner 批准。",
+    "某个必需的校验命令因无法在本有界契约与消费者范围内修复的原因而失败。"
   ],
   "max_iterations": 3,
   "data_classification": "repository-contract",
   "model_policy": "external_allowed",
   "risks_and_fallbacks": [
-    "No articulated-entity catalog, handle geometry, force limit, or execution adapter is introduced; deployment configuration and unknown-target failure remain Motion-owned.",
-    "The empty parameter shape deliberately exposes no caller-controlled policy selector; any future closed selector set requires a separately reviewed contract change.",
-    "A successful adapter ActionResult remains distinct from post-action observation and World Model verification owned by #151 and related consumers.",
-    "Existing tabletop planners remain unchanged and continue emitting only their existing actions; appliance interaction skills belong to #160 after this contract is approved."
+    "不引入任何关节实体目录、把手几何、力上限或执行适配器；部署配置与未知目标失败仍归 Motion 拥有。",
+    "空参数形状刻意不暴露任何调用方控制的策略选择器；未来任何封闭的选择器集合都需要单独评审的契约改动。",
+    "成功的适配器 ActionResult 仍与动作后观测及 World Model 验证相区分，后者由 #151 及相关消费者拥有。",
+    "既有的桌面规划器保持不变，继续只产出其既有动作；家电交互技能在本契约获批后归属 #160。"
   ]
 }

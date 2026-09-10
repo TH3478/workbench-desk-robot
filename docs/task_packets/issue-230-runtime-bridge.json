@@ -1,8 +1,8 @@
 {
   "issue": 230,
   "human_owner": "TH3478",
-  "objective": "Implement the first bounded ROS 2 LifecycleNode bridge for the existing DeviceRuntime and SocketCAN adapter without changing frozen public schemas or safety ownership.",
-  "decision_supported": "Issue #230 acceptance for a concrete SocketCAN-to-read-only-consumer path, delayed ROS 2 lifecycle integration, bounded projection draining, explicit QoS/domain settings, and truthful loopback evidence.",
+  "objective": "为既有的 DeviceRuntime 与 SocketCAN 适配器实现第一个有界的 ROS 2 LifecycleNode 桥接，而不改动冻结的公开 schema 或安全归属。",
+  "decision_supported": "Issue #230 验收：具体的 SocketCAN 到只读消费者路径、延迟的 ROS 2 生命周期集成、有界的投影排空、显式的 QoS/域设置与真实的回环证据。",
   "allowed_paths": [
     "docs/architecture/ros2-device-runtime-bridge-v1.md",
     "docs/task_packets/issue-230-runtime-bridge.json",
@@ -42,14 +42,14 @@
     "docs/architecture/ros2-device-runtime-bridge-v1.md"
   ],
   "acceptance": [
-    "The ROS-free bridge core reuses one DeviceRuntime and accepts only immutable validated CanExternalRecord and CanDiagnostic projections through an explicit field allowlist.",
-    "Telemetry, ACK/action-result and health publications have separate bounded QoS definitions, fixed per-tick drain work and observable source queue/drop metrics; an unsupported or non-exposed object is never serialized.",
-    "The ROS 2 integration delays rclpy imports until its factory is called, creates a LifecycleNode with lifecycle publishers and a bounded timer, and does not require ROS 2 to import workbench.hardware.",
-    "Lifecycle configure, activate, deactivate, cleanup and shutdown are fail-closed and idempotent at the bridge boundary; deactivation stops the existing runtime and a later activation recreates a clean adapter/runtime without an orphan worker or stale projection.",
-    "The default SocketCAN factory wires SocketCANTransport into SafeCANBus while leaving Fast DDS as a deployment-selected RMW and keeping commands, E-stop, watchdog, safe-enable and direct motion authority outside the bridge.",
-    "The bridge records domain ID, RMW selection, topic names, reliability/history/depth, executor thread bound, queue capacities and security profile without changing interfaces/ schemas.",
-    "Unit tests cover strict parameter validation, JSON allowlisting, bounded drain and publisher failure, queue/drop accounting, lifecycle failure and restart cleanup, and a fake SocketCAN adapter path.",
-    "Documentation and test evidence distinguish ROS/fake/virtual loopback behavior from physical CAN, MCU, actuator, PREEMPT_RT and hard-real-time evidence; unexecuted physical evidence remains NOT_EXECUTED."
+    "无 ROS 的桥接核心复用同一个 DeviceRuntime，并且只通过显式的字段允许清单接受不可变的、经验证的 CanExternalRecord 与 CanDiagnostic 投影。",
+    "遥测、ACK/动作结果与健康发布具有各自有界的 QoS 定义、每次 tick 固定的排空工作量以及可观测的来源队列/丢弃指标；不受支持或未暴露的对象绝不会被序列化。",
+    "ROS 2 集成将 rclpy 导入推迟到其工厂被调用之时，创建带有生命周期发布器与有界定时器的 LifecycleNode，并且不要求 ROS 2 才能导入 workbench.hardware。",
+    "生命周期的 configure、activate、deactivate、cleanup 与 shutdown 在桥接边界上失败即拒绝且幂等；停用会停止既有运行时，之后的激活重新创建一个干净的适配器/运行时，而不留下孤儿工作线程或陈旧的投影。",
+    "默认的 SocketCAN 工厂把 SocketCANTransport 接入 SafeCANBus，同时让 Fast DDS 保持为部署所选的 RMW，并把命令、急停、看门狗、安全使能与直接运动权限留在桥接之外。",
+    "桥接记录域 ID、RMW 选择、主题名、可靠性/历史/深度、执行器线程绑定、队列容量与安全配置，而不改动 interfaces/ 中的 schema。",
+    "单元测试覆盖严格参数校验、JSON 允许清单、有界排空与发布器失败、队列/丢弃记账、生命周期失败与重启清理，以及 fake SocketCAN 适配器路径。",
+    "文档与测试证据将 ROS/fake/虚拟回环行为与物理 CAN、MCU、执行器、PREEMPT_RT 与硬实时证据区分开；未执行的物理证据保持为 NOT_EXECUTED。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-230-runtime-bridge.json --base origin/main",
@@ -65,21 +65,21 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "Task Packet changed-path validation output",
-    "ROS-free focused unit test output and Ruff check/format output",
-    "ROS 2 Jazzy lifecycle smoke output when the host environment is available",
-    "required repository test, contract, scenario, context and documentation checks",
-    "scoped diff review with explicit virtual-versus-physical evidence limits",
-    "owner review from Integration, Motion and Perception for lifecycle, QoS, source metadata and safety boundaries"
+    "任务包改动路径校验输出",
+    "无 ROS 聚焦单元测试输出与 Ruff check/format 输出",
+    "主机环境可用时的 ROS 2 Jazzy 生命周期冒烟输出",
+    "必需的仓库测试、契约、场景、上下文与文档检查",
+    "带显式虚拟对物理证据边界的限定范围 diff 评审",
+    "来自 Integration、Motion 与 Perception 的针对生命周期、QoS、来源元数据与安全边界的 Owner 评审"
   ],
   "stop_conditions": [
-    "A public interface/schema, firmware, robot-control or service implementation change is required.",
-    "The bridge needs a second unbounded worker, queue, lifecycle owner, direct DDS hardware callback or raw device handle.",
-    "DDS would become the E-stop, watchdog, safe-enable or direct motion authority.",
-    "A ROS or virtual SocketCAN loopback result would be used as physical CAN, MCU, actuator, PREEMPT_RT or hard-real-time evidence.",
-    "The existing DeviceRuntime cannot be stopped and recreated within the configured bounded shutdown deadline.",
-    "A required change falls outside the allowed paths or requires an unapproved owner decision."
+    "需要改动公开接口/schema、固件、机器人控制或服务实现。",
+    "桥接需要第二个无界的工作线程、队列、生命周期所有者、直接 DDS 硬件回调或原始设备句柄。",
+    "DDS 将成为急停、看门狗、安全使能或直接运动的权限方。",
+    "ROS 或虚拟 SocketCAN 回环结果将被用作物理 CAN、MCU、执行器、PREEMPT_RT 或硬实时证据。",
+    "既有的 DeviceRuntime 无法在配置的有界关闭期限内停止并重建。",
+    "所需改动落在允许路径之外，或需要未经批准的 Owner 决策。"
   ],
-  "data_classification": "validated device telemetry, health metadata and deployment configuration; no credentials, sockets or device write handles",
-  "model_policy": "No model output is admitted as a hardware command, lifecycle decision, safety state, DDS configuration authority or physical evidence."
+  "data_classification": "经验证的设备遥测、健康元数据与部署配置；不含凭证、套接字或设备写句柄",
+  "model_policy": "任何模型输出都不得被接纳为硬件命令、生命周期决策、安全状态、DDS 配置权限或物理证据。"
 }

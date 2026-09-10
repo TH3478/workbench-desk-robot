@@ -1,7 +1,7 @@
 {
   "issue": "LINUX6",
   "human_owner": "Quchaosheng",
-  "objective": "Define and test a bounded software IRQ lifecycle with shared-line ownership, top-half acknowledgement, bottom-half work cancellation and fail-closed stop/remove behavior without claiming real IRQ jitter.",
+  "objective": "定义并测试一个有界的软件 IRQ 生命周期，包括共享中断线所有权、上半部确认、下半部工作取消与失败即拒绝的停止/移除行为，同时不声称真实的 IRQ 抖动。",
   "allowed_paths": [
     "hardware/linux_drivers/irq/**",
     "tests/unit/test_irq_contract.py",
@@ -26,12 +26,12 @@
     "hardware/pcb/**"
   ],
   "acceptance": [
-    "shared and non-shared IRQ ownership is validated before enable or trigger",
-    "trigger creates bounded bottom-half work while active handler count is observable",
-    "stop waits for active handlers, flushes pending work and fails closed on timeout",
-    "close completes the stop/flush lifecycle before clearing owners",
-    "tests cover shared IRQ routing, queue backpressure, cancellation, timeout and closed state",
-    "the implementation is software-only and does not claim IRQ jitter below 100 microseconds"
+    "共享与非共享 IRQ 所有权在使能或触发之前即被校验",
+    "触发创建有界的下半部工作，同时活动处理器数量可观测",
+    "停止等待活动处理器，冲刷待处理工作，并在超时时失败即拒绝",
+    "关闭在清除所有者之前完成停止/冲刷生命周期",
+    "测试覆盖共享 IRQ 路由、队列背压、取消、超时与关闭状态",
+    "实现仅限软件，并且不声称低于 100 微秒的 IRQ 抖动"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/linux-irq-contract.json",
@@ -44,16 +44,16 @@
     "git diff --check"
   ],
   "evidence": [
-    "focused IRQ lifecycle and cancellation test output",
-    "shared-owner and bottom-half queue assertions",
-    "stop timeout fail-closed assertion",
-    "repository gate output",
-    "physical IRQ and jitter evidence marked NOT_EXECUTED"
+    "聚焦的 IRQ 生命周期与取消测试输出",
+    "共享所有者与下半部队列断言",
+    "停止超时失败即拒绝断言",
+    "仓库闸门输出",
+    "标记为 NOT_EXECUTED 的物理 IRQ 与抖动证据"
   ],
   "stop_conditions": [
-    "a real IRQ number, device register or device-tree choice is required",
-    "PREEMPT_RT or physical jitter measurement is required",
-    "a frozen interface, firmware, robot-control or PCB change is required",
-    "fake IRQ evidence would be presented as target-hardware real-time validation"
+    "需要真实的 IRQ 号、设备寄存器或设备树选择",
+    "需要 PREEMPT_RT 或物理抖动测量",
+    "需要改动冻结的接口、固件、机器人控制或 PCB",
+    "伪造的 IRQ 证据将被当作目标硬件的实时验证呈现"
   ]
 }

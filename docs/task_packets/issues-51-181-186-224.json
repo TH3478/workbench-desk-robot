@@ -2,7 +2,7 @@
   "issues": [51, 181, 186, 224],
   "issue": 51,
   "human_owner": "Quchaosheng",
-  "objective": "Close local-model redirect egress, mixed-goal fail-open routing, executable dangerous golden-set coverage, and release workflow safety gates.",
+  "objective": "关闭本地模型重定向出口、混合目标的失败即放行路由、可执行的危险黄金集覆盖与发布工作流安全闸门。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/local_model.py",
     "services/agent_runtime/workbench_agent_runtime/planner.py",
@@ -14,10 +14,10 @@
   "read_only_paths": ["interfaces/**", "firmware/**", "robot/control/**"],
   "forbidden": ["hardware/safety/**"],
   "acceptance": [
-    "redirects cannot clear the local endpoint boundary",
-    "mixed supported and unsafe goals reject before a TaskGraph is returned",
-    "all dangerous golden requests execute through the public planner and accepted requests fail validation with dataset, ID, task and steps",
-    "focused tests cover the regression behavior"
+    "重定向不得清除本地端点边界",
+    "受支持与不安全目标混合时，在返回 TaskGraph 之前即拒绝",
+    "所有危险的黄金集请求都通过公开规划器执行，且被接受的请求会携带数据集、ID、任务与步骤在验证中失败",
+    "聚焦测试覆盖回归行为"
   ],
   "commands": [
     "python -m pytest tests/unit/test_local_model.py tests/unit/test_agent_runtime.py tests/unit/test_evaluation_tools.py -q",
@@ -25,6 +25,6 @@
     "python -m ruff check services/agent_runtime/workbench_agent_runtime/local_model.py services/agent_runtime/workbench_agent_runtime/planner.py tools/scripts/validate_golden_set.py tests/unit/test_local_model.py tests/unit/test_agent_runtime.py",
     "python tools/scripts/check_task_packet.py docs/task_packets/issues-51-181-186-224.json"
   ],
-  "evidence": ["focused pytest output", "golden-check output", "ruff output"],
-  "stop_conditions": ["interface or firmware changes are required", "redirect policy cannot be enforced without changing the API"]
+  "evidence": ["聚焦 pytest 输出", "golden-check 输出", "ruff 输出"],
+  "stop_conditions": ["需要改动接口或固件", "不改变 API 就无法执行重定向策略"]
 }

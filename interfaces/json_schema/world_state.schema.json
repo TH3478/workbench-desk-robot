@@ -24,7 +24,7 @@
           "evidence_refs": {"type": "array", "items": {"type": "string"}},
           "attributes": {
             "type": "object",
-            "description": "Finite observed attributes. Keys use the bounded vocabulary; canonical UTF-8 JSON is limited to 4096 bytes.",
+            "description": "有限的观测属性。键使用有界词汇表；规范 UTF-8 JSON 限制为 4096 字节。",
             "maxProperties": 32,
             "additionalProperties": false,
             "properties": {
@@ -46,7 +46,7 @@
           "attributes_schema_version": {"type": "string", "enum": ["observed-attributes-v1", "legacy-observed-attributes-v0"]},
           "attribute_metadata": {
             "type": "object",
-            "description": "Per-attribute timestamp, confidence, belief, source and evidence metadata. Canonical UTF-8 JSON is limited to 16384 bytes.",
+            "description": "逐属性的时间戳、置信度、信念、来源与证据元数据。规范 UTF-8 JSON 限制为 16384 字节。",
             "maxProperties": 32,
             "additionalProperties": false,
             "properties": {

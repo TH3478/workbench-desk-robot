@@ -1,8 +1,8 @@
 {
   "issue": 168,
   "human_owner": "TH3478",
-  "objective": "Carry a bounded, versioned observed-attribute map from canonical Observation through reduction into WorldState without creating an unrestricted property channel.",
-  "decision_supported": "Can parcel, appliance, and managed-slot consumers use observed attributes with strict schema/model parity, per-attribute evidence, deterministic reducer semantics, and explicit aging without weakening the World Model truth boundary?",
+  "objective": "把一个有界、带版本的观测属性映射从规范 Observation 经归约带入 WorldState，而不创建一个不受限制的属性通道。",
+  "decision_supported": "包裹、家电与受管槽位消费者能否在严格的 schema/模型一致、逐属性证据、确定性归约语义与显式老化下使用观测属性，而不削弱 World Model 的真相边界？",
   "allowed_paths": [
     "interfaces/examples/observation-red-block.json",
     "interfaces/examples/world-state-block-in-tray.json",
@@ -81,16 +81,16 @@
     "docs/task_packets/issue-168-observed-entity-attributes.json"
   ],
   "acceptance": [
-    "Observation and WorldState expose one strict finite string-to-string attribute map with a maximum of 32 entries, bounded key and value text, printable valid UTF-8, and a canonical serialized-size limit.",
-    "The documented vocabulary covers common attributes, parcel identity and condition, appliance door/rack state, and managed-slot state with entity-specific applicability and finite enums.",
-    "Unknown or invalid keys and values fail closed at contract or ingestion boundaries; modern attributes cannot bypass per-attribute metadata requirements.",
-    "Each modern attribute carries timestamp, finite confidence, evidence references, belief, clock, and source metadata, and metadata ages to stale or lost through an explicit freshness policy and replay boundary.",
-    "ActionResult events cannot create or refresh observed attributes.",
-    "Complete observations replace the attribute baseline, partial observations merge only named keys after a complete baseline, and provably older per-key updates cannot overwrite newer values.",
-    "The canonical WorldState projection and semantic hash include attribute values, schema version, metadata, and evidence needed for deterministic replay integrity.",
-    "JSON Schema and Pydantic validation agree on modern metadata, conditional required fields, finite vocabulary, and explicit legacy compatibility.",
-    "Parcel payloads have an explicit legacy-observed-attributes-v0 migration path without permitting arbitrary legacy keys.",
-    "Focused tests cover bounds, vocabulary, schema/model parity, ingestion materialization, complete/partial updates, legacy migration, action-result isolation, aging, hash changes, and parcel verification quality."
+    "Observation 与 WorldState 暴露一个严格的有限字符串到字符串属性映射，最多 32 个条目，键与值文本有界，为可打印的有效 UTF-8，并具有规范序列化大小上限。",
+    "文档化的词汇表覆盖通用属性、包裹身份与状况、家电门/架状态以及受管槽位状态，并带有实体特定的适用范围与有限枚举。",
+    "未知或无效的键与值在契约或摄取边界上失败即拒绝；现代属性不得绕过逐属性元数据要求。",
+    "每个现代属性携带时间戳、有限置信度、证据引用、信念、时钟与来源元数据，并且元数据通过显式的新鲜度策略与回放边界老化为 stale 或 lost。",
+    "ActionResult 事件不得创建或刷新观测属性。",
+    "完整观测替换属性基线，部分观测仅在完整基线之后合并已命名的键，且可证明更旧的逐键更新不得覆盖较新的值。",
+    "规范的 WorldState 投影与语义哈希包含属性值、schema 版本、元数据与确定性回放完整性所需的证据。",
+    "JSON Schema 与 Pydantic 校验在现代元数据、条件必填字段、有限词汇表与显式既有兼容性上保持一致。",
+    "包裹载荷具有显式的 legacy-observed-attributes-v0 迁移路径，且不允许任意的既有键。",
+    "聚焦测试覆盖边界、词汇表、schema/模型一致性、摄取物化、完整/部分更新、既有迁移、动作结果隔离、老化、哈希变化与包裹验证质量。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-168-observed-entity-attributes.json",
@@ -106,22 +106,22 @@
     "git diff --check"
   ],
   "evidence": [
-    "Focused contract, ingestion, reducer, verifier, aging, hash, and schema-compiler test output.",
-    "Contract, lint, full-test, scenario, context, whitespace, and Task Packet validation output.",
-    "Schema/model parity and versioned example validation output.",
-    "Changed-path audit showing no firmware, robot-control, simulation, or CI workflow changes."
+    "聚焦的契约、摄取、归约器、验证器、老化、哈希与 Schema Compiler 测试输出。",
+    "契约、lint、完整测试、场景、上下文、空白与任务包校验输出。",
+    "schema/模型一致性与带版本示例的校验输出。",
+    "改动路径审计，显示没有固件、机器人控制、仿真或 CI 工作流改动。"
   ],
   "stop_conditions": [
-    "The requested behavior requires an ontology service, graph database, arbitrary JSON properties, or a generic property framework.",
-    "A public interface change cannot be reviewed together with its Pydantic model and executable tests.",
-    "The reducer or verifier would need to infer observed truth from ActionResult or simulator Oracle data.",
-    "A write outside the allowed paths is required, especially firmware, robot control, hardware, simulation, or CI workflow code.",
-    "Native hardware, physical camera, or hard-real-time evidence is requested but is unavailable in the current Linux environment."
+    "所请求的行为需要本体服务、图数据库、任意 JSON 属性或通用属性框架。",
+    "公开接口改动无法与其 Pydantic 模型和可执行测试一并评审。",
+    "归约器或验证器将需要从 ActionResult 或仿真器 Oracle 数据推断观测真相。",
+    "需要在允许路径之外写入，尤其是固件、机器人控制、硬件、仿真或 CI 工作流代码。",
+    "要求原生硬件、物理相机或硬实时证据，但当前 Linux 环境无法提供。"
   ],
   "max_iterations": 3,
   "risks_and_fallbacks": [
-    "Interfaces and contracts require Runtime, World Model, and Integration approval before merge; local tests do not replace those approvals.",
-    "Linux validation cannot establish native Windows, physical sensor, actuator, or hard-real-time behavior.",
-    "If an existing legacy producer uses a key outside the finite vocabulary, stop and request an explicit contract decision instead of widening validation silently."
+    "接口与契约在合并前需要 Runtime、World Model 与 Integration 批准；本地测试不能替代这些批准。",
+    "Linux 校验无法确立原生 Windows、物理传感器、执行器或硬实时行为。",
+    "如果既有生产者使用了有限词汇表之外的键，则停止并请求显式的契约决策，而不是悄悄放宽校验。"
   ]
 }
