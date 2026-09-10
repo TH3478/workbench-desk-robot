@@ -1,11 +1,11 @@
-# arm_drivers
+# 机械臂驱动
 
-Vendor SDK wrappers → `ros2_control` hardware interface.
+厂商 SDK 封装 → `ros2_control` 硬件接口。
 
-One subdirectory per arm model, e.g. `franka/`, `ur/`, `custom/`.
+每个机械臂型号一个子目录，例如 `franka/`、`ur/`、`custom/`。
 
-**What to implement**: a `hardware_interface::SystemInterface` subclass that
-talks to the real arm SDK and emits the same `action_result` as the Gazebo
-simulation. joint limits, safety limits and bring-up sequence go here too.
+**待实现**：一个 `hardware_interface::SystemInterface` 子类，与真实机械臂 SDK
+通信，并发出与 Gazebo 仿真相同的 `action_result`。关节限制、安全限制和
+启动调试序列也放在这里。
 
-Cross-compilation notes (for ARM boards): `docs/hardware/cross_compile.md`
+交叉编译说明（针对 ARM 板卡）：`docs/hardware/cross_compile.md`

@@ -1,9 +1,8 @@
-"""Validate the reviewable BMS state machine without claiming physical evidence.
+"""校验可评审的 BMS 状态机，而不声称任何物理证据。
 
-The CSV files in ``hardware/power`` are a controlled design baseline. This
-validator intentionally checks the complete baseline rather than accepting any
-graph that happens to be internally connected: a deleted protection edge or an
-unexpected recovery edge must fail closed and be visible in the report.
+``hardware/power`` 中的 CSV 文件是受控设计基线。本验证器有意校验完整基线，
+而不是接受任何恰好内部连通的状态图：被删除的保护边或意外的恢复边必须触发
+失败即拒绝，并在报告中可见。
 """
 
 from __future__ import annotations
@@ -118,9 +117,8 @@ STATE_CONTRACT: dict[str, dict[str, str]] = {
     },
 }
 
-# The order is part of the reviewable baseline. It makes generated evidence
-# and its hash stable, while also making a missing row fail the completeness
-# check instead of silently changing the meaning of a default path.
+# 顺序是可评审基线的一部分。它使生成的证据及其哈希保持稳定，同时让缺失的
+# 行在完整性检查中失败，而不是静默改变默认路径的含义。
 TRANSITION_CONTRACT: tuple[dict[str, str], ...] = (
     {
         "source_state": "OFF",
@@ -277,7 +275,7 @@ ALLOWED_LATCH_VALUES = frozenset({"yes", "no"})
 
 
 class BmsTableError(ValueError):
-    """Raised when a BMS CSV cannot be parsed as its declared table."""
+    """当 BMS CSV 无法按其声明的表格解析时抛出。"""
 
 
 def _normalise_value(value: object) -> str:
@@ -312,7 +310,7 @@ def _normalise_rows(
 
 
 def read_csv(path: str | Path, fields: tuple[str, ...]) -> list[dict[str, str]]:
-    """Read one controlled CSV and reject header/shape drift."""
+    """读取一个受控 CSV，并拒绝表头/结构漂移。"""
 
     resolved = Path(path)
     try:
@@ -352,19 +350,19 @@ def _canonical_csv(fields: tuple[str, ...], rows: Sequence[Mapping[str, str]]) -
 
 
 def transition_table_hash(rows: Sequence[Mapping[str, str]]) -> str:
-    """Return the SHA-256 of the normalized, ordered transition CSV."""
+    """返回规范化且有序的转移 CSV 的 SHA-256。"""
 
     return hashlib.sha256(_canonical_csv(TRANSITION_FIELDS, rows)).hexdigest()
 
 
 def state_table_hash(rows: Sequence[Mapping[str, str]]) -> str:
-    """Return the SHA-256 of the normalized, ordered state CSV."""
+    """返回规范化且有序的状态 CSV 的 SHA-256。"""
 
     return hashlib.sha256(_canonical_csv(STATE_FIELDS, rows)).hexdigest()
 
 
 def validate_state_rows(rows: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    """Validate state declarations and their fail/default behavior."""
+    """校验状态声明及其失败/默认行为。"""
 
     normalised, parse_errors = _normalise_rows(rows, STATE_FIELDS)
     checks: dict[str, bool] = {}
@@ -449,7 +447,7 @@ def validate_state_rows(rows: Sequence[Mapping[str, object]]) -> dict[str, objec
 def validate_transition_rows(
     state_rows: Sequence[Mapping[str, object]], transitions: Sequence[Mapping[str, object]]
 ) -> dict[str, object]:
-    """Validate the complete guarded transition graph against the baseline."""
+    """对照基线校验完整的带守卫转移图。"""
 
     normalised_states, state_parse_errors = _normalise_rows(state_rows, STATE_FIELDS)
     normalised, parse_errors = _normalise_rows(transitions, TRANSITION_FIELDS)
@@ -588,7 +586,7 @@ def validate(
     write_report: bool = True,
     output_path: Path = OUTPUT_PATH,
 ) -> dict[str, Any]:
-    """Return a structural report and optionally write its deterministic JSON artifact."""
+    """返回结构报告，并可选地写出其确定性 JSON 产物。"""
 
     load_errors: list[str] = []
     if state_rows is None:

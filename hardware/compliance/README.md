@@ -1,62 +1,54 @@
-# Certification and regulatory evidence plan
+# 认证与法规证据计划
 
-Issue 26 controls CE, FCC, and UN 38.3 readiness. The repository makes no claim
-that the product is certified. The responsible legal manufacturer and target
-markets must be confirmed before the standards list and laboratory scope freeze.
+Issue 26 控制 CE、FCC 和 UN 38.3 的准备工作。本仓库不声称产品已获认证。
+在标准清单和实验室范围冻结之前，必须先确认负法律责任的生产商和目标市场。
 
-## CE program
+## CE 计划
 
-The technical file identifies the product, intended use, foreseeable misuse,
-variants, drawings, BOM, risk assessment, applied standards, verification results,
-labels, instructions, supplier evidence, and signed declaration. Determine the
-applicability of EMC, Radio Equipment, Machinery, Low Voltage, RoHS, WEEE, and
-battery obligations with a qualified compliance owner. An EU Declaration of
-Conformity is signed only after applicable evidence is complete.
+技术文件应标明产品、预期用途、可预见的误用、变体、图纸、BOM、风险评估、
+适用标准、验证结果、标签、说明书、供应商证据和签署的声明。应与合格的合规
+Owner 一起确定 EMC、无线电设备、机械、低电压、RoHS、WEEE 和电池义务的
+适用性。欧盟符合性声明只有在适用证据齐备之后才能签署。
 
-## FCC program
+## FCC 计划
 
-Classify intentional and unintentional radiators, radio modules, host integration,
-antennas, cables, power supplies, and operating modes. Confirm whether supplier
-module authorization can be used and meet its grant conditions. Pre-scan worst-case
-modes before formal testing. FCC identifiers, statements, labeling, user instructions,
-and Supplier's Declaration of Conformity responsibilities must match the final build.
+对有意和无意辐射体、无线电模块、宿主集成、天线、线缆、电源和工作模式进行
+分类。确认是否可以使用供应商模块授权，并满足其授权条件。在正式测试前对
+最坏情况模式进行预扫描。FCC 标识、声明、标签、用户说明书和供应商符合性
+声明责任必须与最终构建一致。
 
-## UN 38.3 and battery transport
+## UN 38.3 与电池运输
 
-Obtain the pack-level UN 38.3 test summary with manufacturer, model, mass, Wh,
-test laboratory, report number/date, and completed T.1-T.8 applicability. Cell-only
-evidence is insufficient for a separately designed pack. Maintain SDS, packaging,
-state-of-charge, terminal protection, quantity, marking, documentation, carrier,
-and damaged/defective battery rules for each transport mode.
+获取电池包级 UN 38.3 测试摘要，包括制造商、型号、质量、Wh、测试实验室、
+报告编号/日期以及已完成的 T.1-T.8 适用性。仅有电芯级证据不足以支撑单独
+设计的电池包。为每种运输方式维护 SDS、包装、荷电状态、端子保护、数量、
+标记、文件、承运商以及损坏/缺陷电池规则。
 
-## Before-order certificate gate
+## 下单前证书闸门
 
-No affected PO is released until evidence for the exact MPN/revision is verified:
+在精确 MPN/修订版本的证据通过验证之前，不发布任何受影响的 PO：
 
-- battery pack and charger: UN 38.3 summary plus required safety/transport records;
-- mains PSU/inlet/cable: market-appropriate safety approvals and ratings;
-- radio module/antenna: grant/certificate and host-integration conditions;
-- E-stop/safety relay: declaration, safety data, lifecycle, and application limits;
-- flammability-critical polymer: material grade and lot-linked rating evidence;
-- restricted substances: supplier declaration and, where risk warrants, test report.
+- 电池包与充电器：UN 38.3 摘要以及必需的安全/运输记录；
+- 市电 PSU/入口/线缆：适合市场的安全认证和额定值；
+- 无线电模块/天线：授权/证书和宿主集成条件；
+- E-stop/安全继电器：声明、安全数据、生命周期和应用限制；
+- 易燃性关键聚合物：材料牌号和与批次关联的等级证据；
+- 受限物质：供应商声明，并在风险需要时附测试报告。
 
-Evidence checks compare manufacturer, MPN, revision, rating, factory/site where
-relevant, issue/expiry date, report scope, and issuing body. Distributor web pages,
-generic family certificates, draft reports, and cropped logos do not satisfy the gate.
-Approved deviations require the compliance owner, project owner, expiry, containment,
-and a documented route to closure; legal requirements cannot be waived internally.
+证据检查要对比制造商、MPN、修订版本、额定值、相关场合的工厂/场地、
+签发/到期日期、报告范围和签发机构。经销商网页、通用系列证书、报告草稿和
+裁剪过的 logo 均不满足闸门要求。经批准的偏差需要合规 Owner、项目 Owner、
+到期时间、遏制措施和通往闭环的书面路径；法律要求不得在内部豁免。
 
-## Formal test readiness
+## 正式测试就绪
 
-Freeze representative hardware, software/configuration, cables, peripherals,
-radio settings, power supplies, and operating modes. Record serials and retain a
-golden unit. Run worst-case functional modes, monitor safety, preserve lab data,
-and control every modification after a failure. A passing pre-scan is engineering
-evidence only. Final reports, declarations, labels, manuals, and change-control
-assessment remain required before shipment.
+冻结代表性硬件、软件/配置、线缆、外设、无线电设置、电源和工作模式。记录
+序列号并保留一台黄金样机。运行最坏情况功能模式、监控安全、保存实验室数据，
+并在任何失败后控制每一次修改。预扫描通过只是工程证据。出货前仍需最终报告、
+声明、标签、手册和变更控制评估。
 
-Status: `NOT_CERTIFIED`. CE/FCC scope confirmation, supplier certificates,
-pack-level UN 38.3 evidence, formal testing, and signed declarations are blockers.
+状态：`NOT_CERTIFIED`。CE/FCC 范围确认、供应商证书、电池包级 UN 38.3 证据、
+正式测试和签署声明都是阻塞项。
 
-`evidence-matrix.csv` is the pre-PO stop register; every row requires exact
-MPN/revision and issuing evidence before an affected order can be released.
+`evidence-matrix.csv` 是下单前拦截登记表；每一行都需要精确的 MPN/修订版本和
+签发证据，才能发布受影响的订单。

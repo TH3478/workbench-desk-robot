@@ -1,21 +1,18 @@
-# Procurement engineering package
+# 采购工程包
 
-This package turns the PCB, mechanical, and manufacturing design inputs into a
-controlled purchasing workflow. It is intentionally honest about what is and is
-not known: rows marked `QUOTE_REQUIRED`, `AVL_REQUIRED`, or `NOT_RELEASED` are
-not purchase claims. A buyer can use the quote register and PO checklist to
-close those gates without changing the engineering baseline.
+本工程包将 PCB、机械与制造设计输入转化为受控的采购工作流。它刻意如实反映已知
+与未知：标记为 `QUOTE_REQUIRED`、`AVL_REQUIRED` 或 `NOT_RELEASED` 的行都不是采购
+承诺。采购员可以使用报价登记册与 PO 检查清单关闭这些闸门，而不改变工程基线。
 
-## Files
+## 文件
 
-- `bom.csv`: controlled line-item BOM with quantity, candidate, source, owner,
-  and release status.
-- `quote-register.csv`: two or more quote-request channels for each critical
-  item; supplier prices remain blank until a quote is received.
-- `supplier-scorecard.csv`: repeatable quality/lead-time/cost/technical review.
-- `cost-and-leadtime.md`: calculation rules and decision gates.
-- `po-checklist.csv`: order-release checks and required evidence.
-- `inventory-policy.md`: receiving, quarantine, traceability, and spares rules.
+- `bom.csv`：受控的逐行 BOM，含数量、候选、来源、Owner 与发布状态。
+- `quote-register.csv`：每个关键物料的两个或更多询价渠道；在收到报价之前供应商
+  价格保持空白。
+- `supplier-scorecard.csv`：可重复的质量/交期/成本/技术评审。
+- `cost-and-leadtime.md`：计算规则与决策闸门。
+- `po-checklist.csv`：下单发布检查与所需证据。
+- `inventory-policy.md`：收货、隔离、可追溯性与备件规则。
 
-Run `python hardware/procurement/tools/validate_procurement.py` to regenerate
-the deterministic report under `generated/`.
+运行 `python hardware/procurement/tools/validate_procurement.py` 可在 `generated/`
+下重新生成确定性报告。

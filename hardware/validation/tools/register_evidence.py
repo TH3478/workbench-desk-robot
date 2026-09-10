@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append one validated hardware-evidence record."""
+"""追加一条已验证的硬件证据记录。"""
 
 from __future__ import annotations
 

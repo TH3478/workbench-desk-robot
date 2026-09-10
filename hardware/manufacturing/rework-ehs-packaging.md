@@ -1,39 +1,36 @@
-# Rework, EHS, and packaging controls
+# 返工、EHS 与包装控制
 
-## Nonconforming product and rework
+## 不合格品与返工
 
-1. Stop, label, and move the unit to MRB with its serial, operation, defect code,
-   photo, suspected cause, and last passing gate. Never continue downstream testing.
-2. MRB chooses use-as-is, rework, repair, return, or scrap. Safety, isolation,
-   structural, and regulatory deviations cannot be accepted by production alone.
-3. Rework uses a released instruction, trained operator, controlled tools, and one
-   recorded cycle. A second cycle requires engineering approval; a third is prohibited.
-4. After rework repeat the failed gate and every downstream gate. PCB heat rework
-   triggers visual/AOI plus electrical retest; E-stop work triggers the complete safety test.
-5. Trend defect Pareto daily during pilot. Three consecutive identical defects or
-   any safety escape stops the line and opens corrective action.
+1. 停机、贴标，并将设备连同其序列号、工序、缺陷代码、照片、疑似原因与最后一个
+   通过的闸门转入 MRB。绝不要继续下游测试。
+2. MRB 在让步接收、返工、维修、退回或报废中做出选择。安全、隔离、结构与法规
+   偏差不能仅由生产部门接受。
+3. 返工使用已发布的指导书、经过培训的操作员、受控工具，且只记录一个循环。第二个
+   循环需要工程批准；第三个循环被禁止。
+4. 返工后重复失败闸门与所有下游闸门。PCB 热返工会触发目检/AOI 加电气复测；急停
+   相关作业触发完整安全测试。
+5. 试产期间每日更新缺陷帕累托趋势。连续三次相同缺陷或任何安全缺陷逃逸都会停线
+   并启动纠正措施。
 
-## EHS rules
+## EHS 规则
 
-- ESD bench, grounded wrist strap, dissipative mat, ionizer where insulators cannot be removed.
-- Powered tests use guarding, current limiting, insulated tools, and a visible emergency disconnect.
-- Disconnect and verify zero energy before touching 48 V conductors; remove jewellery.
-- Lithium battery lots remain in a fire-rated cabinet; swollen, hot, dropped, or damaged packs go to a fire-safe quarantine area.
-- Solder extraction runs at the source. Operators follow paste/flux SDS, wash hands, and wear eye protection.
-- Torque tools and presses use ergonomic supports; heavy cartons use team lift or a lift table.
-- Keep aisles/exits clear. Log spills, near misses, shocks, burns, smoke, and battery events immediately.
+- ESD 工作台、接地腕带、静电耗散垫；无法移除绝缘体的位置使用离子风机。
+- 通电测试使用防护罩、限流、绝缘工具与可见的急停断开装置。
+- 接触 48 V 导体前先断开并验证零能量；摘下首饰。
+- 锂电池批次存放于防火柜；鼓包、发热、跌落或受损的电池组转入防火隔离区。
+- 焊烟抽排从源头进行。操作员遵循锡膏/助焊剂 SDS，勤洗手并佩戴护目装备。
+- 扭矩工具与压机使用人机工效支撑；重纸箱采用双人搬运或升降台。
+- 保持通道/出口畅通。立即记录泄漏、未遂事件、触电、灼伤、冒烟与电池事件。
 
-## Packaging and transport validation
+## 包装与运输验证
 
-Fit wheel restraints and display protector, then place the robot in an EPE/EPP cradle
-with at least 50 mm energy-absorbing material on every face. Bag accessories separately
-so they cannot strike the product. Use double-wall carton, tamper seal, serial/carton
-label, centre-of-gravity and orientation marks, and UN-compliant battery handling when
-the battery ships installed.
+安装车轮约束件与显示屏保护罩，然后将机器人放入 EPE/EPP 缓冲托架，每个面至少
+有 50 mm 吸能材料。附件单独装袋，以免撞击产品。使用双层瓦楞纸箱、防拆封条、
+序列号/纸箱标签、重心与朝向标记；电池随整机发运时按 UN 要求处理电池。
 
-Validation uses one instrumented production-equivalent pack: conditioning at low,
-ambient, and high temperature; vibration profile for the selected transport mode;
-then face, edge, and corner drops appropriate to package mass. Acceptance is no
-safety defect, no functional failure, no connector loosening, no shell crack, display
-damage, or packaging intrusion. Record acceleration, before/after photos, functional
-test JSON, and packaging revision. A passed test applies only to that exact packaging revision.
+验证使用一个带传感器的生产等价包装：分别在低温、常温与高温下预处理；按所选
+运输方式施加振动谱；然后进行与包装质量相称的面、棱、角跌落。验收标准为：无
+安全缺陷、无功能失效、无连接器松动、无外壳开裂、无显示屏损坏、无包装侵入。
+记录加速度、前后照片、功能测试 JSON 与包装版本。通过测试只适用于该确切包装
+版本。

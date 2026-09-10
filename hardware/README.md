@@ -1,8 +1,7 @@
 # hardware
 
-Real-hardware adapters. Each subdirectory wraps a physical device behind the same
-contracts used in simulation, so swapping vcan for real CAN or a mock camera for
-a USB camera doesn't change anything upstream.
+真实硬件适配器。每个子目录都将一个物理设备封装在与仿真中相同的契约之后，
+因此把 vcan 换成真实 CAN、或把模拟相机换成 USB 相机，都不会改变任何上游逻辑。
 
 ```
 hardware/
@@ -20,13 +19,12 @@ hardware/
   release/          Cross-package release-readiness register and fail-closed gate
 ```
 
-**Rule**: every adapter here must satisfy the same contract as its simulation counterpart.
-`CanMotorAdapter` must emit the same `action_result` as the virtual device.
-The verifier never knows which one is running.
+**规则**：这里的每个适配器都必须满足与其仿真对应物相同的契约。
+`CanMotorAdapter` 必须发出与虚拟设备相同的 `action_result`。
+验证器永远不会知道正在运行的是哪一个。
 
-## Release truth
+## 发布事实
 
-The engineering packages are reproducible and testable, but they do not imply a
-physical build, supplier quote, laboratory certification, or field run. The
-procurement, QA, and validation reports deliberately keep those external gates
-blocked until dated evidence is attached.
+工程包是可复现、可测试的，但它们并不代表已进行实物构建、供应商报价、
+实验室认证或现场运行。采购、QA 和验证报告会有意让这些外部闸门保持阻塞，
+直到附上带日期的证据为止。

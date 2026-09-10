@@ -1,12 +1,11 @@
-# 48 V power and BMS control package
+# 48 V 电源与 BMS 控制包
 
-This package defines the engineering baseline for issue 20. It is a design and
-verification plan, not evidence that a battery pack is certified or safe to ship.
-The system uses a nominal 48 V removable pack feeding a service disconnect,
-branch protection, precharge/contactors, the traction bus, and isolated auxiliary
-conversion. Pack limits must come from the selected cell and pack supplier.
+本包定义 issue 20 的工程基线。它是设计和验证计划，不是电池包已认证或可
+安全出货的证据。系统使用标称 48 V 可拆卸电池包，馈入维护断开、支路保护、
+预充/接触器、牵引母线和隔离辅助变换。电池包限制必须来自所选电芯和电池包
+供应商。
 
-## Topology
+## 拓扑
 
 ```text
 48 V pack -> service fuse -> manual disconnect -> precharge/main contactors
@@ -16,79 +15,71 @@ BMS AFE -> cell taps + pack current + temperature -> safety MCU -> contactor dri
 E-stop/safety chain ---------------------------------------> contactor inhibit
 ```
 
-The service fuse is the last-resort energy interrupter and is not a control
-device. The BMS owns charge/discharge limits and contactor permission. The robot
-controller may request power but cannot override a BMS or safety-chain inhibit.
-Precharge must reach the supplier-approved bus ratio before the main contactor
-closes. Weld detection compares commanded state, auxiliary contact, and bus decay.
+维护保险丝是最后手段的能量切断器，不是控制器件。BMS 拥有充/放电限制和
+接触器许可权。机器人控制器可以请求供电，但不能覆盖 BMS 或安全链的禁止
+信号。主接触器闭合前，预充必须达到供应商批准的母线电压比。熔接检测对比
+指令状态、辅助触点和母线衰减。
 
-## Three protection levels
+## 三级保护
 
-| Level | Mechanism | Typical triggers | Required response |
+| 等级 | 机制 | 典型触发条件 | 要求的响应 |
 |---|---|---|---|
-| L1 software | derate/request inhibit | warning temperature, low SOC, transient current | reduce limit, log, remain observable |
-| L2 BMS hardware | contactor open | cell OV/UV, sustained OC, OT/UT, isolation fault | remove charge/discharge permission, latch fault |
-| L3 independent | fuse/manual disconnect/E-stop chain | short circuit, welded path, responder action | interrupt energy without application software |
+| L1 软件 | 降额/请求禁止 | 温度告警、低 SOC、瞬态电流 | 降低限值、记录、保持可观测 |
+| L2 BMS 硬件 | 断开接触器 | 电芯 OV/UV、持续 OC、OT/UT、绝缘故障 | 撤销充/放电许可、锁存故障 |
+| L3 独立 | 保险丝/维护断开/E-stop 链 | 短路、熔接路径、响应人员动作 | 不经应用软件切断能量 |
 
-All thresholds are controlled configuration tied to pack revision. Missing,
-stale, implausible, or contradictory measurements cause a transition to a
-non-energized state. Automatic restart after a latched protection event is
-forbidden. Reset requires removal of the trigger and an explicit local action.
+所有阈值都是与电池包修订版本绑定的受控配置。测量缺失、过期、不合理或
+互相矛盾都会转换到不带电状态。锁存保护事件后禁止自动重启。复位要求先
+消除触发条件，再执行显式的本地操作。
 
-## BMS states
+## BMS 状态
 
-| State | Entry | Allowed outputs | Exit criteria |
+| 状态 | 进入条件 | 允许的输出 | 退出条件 |
 |---|---|---|---|
-| OFF | pack absent or service disconnect open | contactors open | valid pack and wake request |
-| SELF_TEST | wake accepted | contactors open, sensing on | configuration and sensors valid |
-| STANDBY | self-test passed | contactors open | authorized charge or run request |
-| PRECHARGE | run request and safety chain healthy | precharge contactor only | bus ratio and timeout pass |
-| RUN | precharge passed | main contactor, bounded current | stop request or any trip |
-| CHARGE | approved charger and temperature window | charge contactor, bounded current | full, unplug, or any trip |
-| DERATE | warning threshold crossed | reduced current limit | hysteresis recovery or trip |
-| FAULT_LATCHED | protection or invalid state | all contactors open | service diagnosis and local reset |
-| SERVICE | authenticated maintenance mode | contactors open by default | exit service and repeat self-test |
+| OFF | 电池包不在位或维护断开打开 | 接触器打开 | 电池包有效且有唤醒请求 |
+| SELF_TEST | 唤醒被接受 | 接触器打开、传感开启 | 配置和传感器有效 |
+| STANDBY | 自检通过 | 接触器打开 | 授权的充电或运行请求 |
+| PRECHARGE | 运行请求且安全链健康 | 仅预充接触器 | 母线电压比和超时通过 |
+| RUN | 预充通过 | 主接触器、受限电流 | 停止请求或任何跳闸 |
+| CHARGE | 批准的充电器和温度窗口 | 充电接触器、受限电流 | 充满、拔插或任何跳闸 |
+| DERATE | 越过告警阈值 | 降低的电流限值 | 滞回恢复或跳闸 |
+| FAULT_LATCHED | 保护或无效状态 | 所有接触器打开 | 维护诊断和本地复位 |
+| SERVICE | 已认证的维护模式 | 默认接触器打开 | 退出维护并重复自检 |
 
-## Verification gates
+## 验证闸门
 
-- Confirm pack voltage range, cell chemistry, fuse interrupt rating, contactor DC
-  rating, precharge energy, creepage, connector touch safety, and service access.
-- Inject every sensor open/short/stuck fault and confirm de-energized behavior.
-- Measure precharge time, inrush, contactor opening time, bus discharge time,
-  overcurrent response, temperature response, and welded-contactor detection.
-- Record pack serial, revision, BMS configuration hash, operator, date,
-  calibrated instruments, ambient conditions, and raw waveform references.
-- Require supplier UN 38.3 test summary and applicable transport documentation
-  before ordering production battery packs or arranging shipment.
+- 确认电池包电压范围、电芯化学体系、保险丝分断额定值、接触器直流额定值、
+  预充能量、爬电距离、连接器触摸安全和维护通道。
+- 注入每一种传感器开路/短路/卡滞故障，并确认不带电行为。
+- 测量预充时间、浪涌电流、接触器断开时间、母线放电时间、过流响应、
+  温度响应和接触器熔接检测。
+- 记录电池包序列号、修订版本、BMS 配置哈希、操作员、日期、已校准仪器、
+  环境条件和原始波形参照。
+- 在订购量产电池包或安排发货之前，要求供应商提供 UN 38.3 测试摘要和
+  适用的运输文件。
 
-Status: `DESIGN_BASELINE_ONLY`. Pack supplier data, hazard analysis, physical
-fault injection, thermal testing, and certification evidence remain release blockers.
+状态：`DESIGN_BASELINE_ONLY`。电池包供应商数据、危害分析、物理故障注入、
+热测试和认证证据仍是发布阻塞项。
 
-Machine-readable attachments: `bms-state-machine.csv` defines state ownership,
-`bms-transitions.csv` controls guarded transitions and contactor actions, and
-`protection-thresholds.csv` is the three-level protection register. Threshold
-values intentionally remain supplier/configuration inputs until the exact pack
-revision is selected.
+机器可读附件：`bms-state-machine.csv` 定义状态归属，`bms-transitions.csv`
+控制受保护的转换和接触器动作，`protection-thresholds.csv` 是三级保护
+寄存器。在选定精确的电池包修订版本之前，阈值有意保持为供应商/配置输入。
 
-## Executable baseline check
+## 可执行基线检查
 
-Run the deterministic repository-side check with:
+用以下命令运行确定性的仓库侧检查：
 
 ```bash
 python hardware/power/tools/validate_bms_state_machine.py
 ```
 
-The validator checks the CSV headers and row shape, the complete controlled
-state/event set, unique source/event keys, known states, contactor actions,
-reset authorities, non-empty guards, explicit fault behavior, and the guarded
-`FAULT_LATCHED -> SELF_TEST` local-reset path. It also requires the reviewable
-transition order and emits a SHA-256 for the normalized transition table in
-`generated/bms_state_machine_report.json`.
+验证器检查 CSV 表头和行形状、完整的受控状态/事件集、唯一的源/事件键、
+已知状态、接触器动作、复位权限、非空守卫、显式故障行为，以及受保护的
+`FAULT_LATCHED -> SELF_TEST` 本地复位路径。它还要求可评审的转换顺序，并在
+`generated/bms_state_machine_report.json` 中为规范化转换表输出 SHA-256。
 
-The report's structural `pass` means only that the design tables are
-internally complete. It deliberately remains `status:
-DESIGN_BASELINE_ONLY`, `physical_results: NOT_EXECUTED`, and
-`release_ready: false` until Electrical/Safety Owner approval, supplier data,
-calibrated measurements, and physical fault-injection evidence are attached.
-The existing operations-readiness command consumes this check but retains its
-broader `EXTERNAL_EVIDENCE_REQUIRED` release status.
+报告的结构性 `pass` 只表示设计表内部完备。在获得 Electrical/Safety Owner
+批准、供应商数据、校准测量和物理故障注入证据之前，它有意保持 `status:
+DESIGN_BASELINE_ONLY`、`physical_results: NOT_EXECUTED` 和
+`release_ready: false`。现有的运营就绪命令消费这项检查，但保留其更宽泛的
+`EXTERNAL_EVIDENCE_REQUIRED` 发布状态。

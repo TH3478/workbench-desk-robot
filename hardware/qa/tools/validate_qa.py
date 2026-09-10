@@ -1,4 +1,4 @@
-"""Validate quality plans and keep physical results explicitly unexecuted."""
+"""校验质量计划，并保持物理结果明确为未执行状态。"""
 
 from __future__ import annotations
 

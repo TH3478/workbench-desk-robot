@@ -222,7 +222,7 @@ def calculate_directional_stability(
     threshold_deg: float,
     ground_plane_z_mm: float = 0.0,
 ) -> dict[str, object]:
-    """Calculate directional tip margins for an axis-aligned support polygon."""
+    """为轴对齐的支撑多边形计算方向性倾翻裕度。"""
     directions = support_polygon.get("edges", {})
     results: dict[str, object] = {}
     for direction in DIRECTIONS:
@@ -277,7 +277,7 @@ def _invalid_analysis(validation: dict[str, object]) -> dict[str, object]:
 
 
 def geometry_context() -> dict[str, float | str]:
-    """Return the shared raised-pose Z datums used by every mechanical exporter."""
+    """返回所有机械导出器共用的抬起位姿 Z 基准。"""
     coordinate = SPEC["coordinate_system"]
     travel = float(SPEC["lifting_platform"]["travel"])
     torso_height = float(SPEC["torso"]["height"])
@@ -634,7 +634,7 @@ def analyse() -> dict[str, object]:
 
 
 def step_box(width: float, depth: float, height: float) -> str:
-    # AP203 faceted envelope with six closed faces; origin is centred on X/Y.
+    # AP203 分面包络体，含六个闭合面；原点在 X/Y 上居中。
     pts = [
         (-width / 2, -depth / 2, 0),
         (width / 2, -depth / 2, 0),
@@ -1024,7 +1024,7 @@ def export_cad_package() -> bool:
 
 
 def measure_step_bounds(path: Path) -> dict[str, float] | None:
-    """Measure the generated assembly so the exported STEP is checked, not assumed."""
+    """测量生成的装配体，使导出的 STEP 经过校验而非默认成立。"""
     try:
         import cadquery as cq
     except ImportError:

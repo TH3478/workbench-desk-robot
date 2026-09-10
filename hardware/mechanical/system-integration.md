@@ -1,80 +1,61 @@
-# Revision D system integration
+# Revision D 系统集成
 
-This document controls the current Revision D mobile household manipulator. The
-earlier 55 kg dual-arm workbench and two-wheel/four-caster planning cases are
-obsolete and must not be used for purchasing, stability, harness, or assembly
-decisions.
+本文档控制当前的 Revision D 移动家用操作机器人。早期 55 kg 双臂工作台与两轮/
+四脚轮计划方案已经过时，不得用于采购、稳定性、线束或装配决策。
 
-## Controlled configuration
+## 受控配置
 
-- 540 x 520 mm navigation base with four independent 140 mm steer-drive modules.
-- 1100 mm stowed height and 1450 mm raised height with 350 mm lift travel.
-- Four stowed/deployed stabilizers; the raised concept STEP represents an
-  820 x 820 mm support polygon.
-- Two seven-axis arm envelopes with internal cable routing and one coordinated
-  shared bimanual workspace.
-- 48 V battery and high-power branches separated from controller J2 auxiliary
-  power.
+- 540 x 520 mm 导航底座，配四个独立的 140 mm 转向驱动模块。
+- 收起高度 1100 mm、升起高度 1450 mm，升降行程 350 mm。
+- 四个可收起/展开的稳定支脚；升起的概念 STEP 表示一个 820 x 820 mm 支撑多边形。
+- 两条七轴机械臂包络，内部走线，以及一个协调的共享双臂工作空间。
+- 48 V 电池与高功率分支与控制器 J2 辅助电源分离。
 
-`design-spec.json#components` is the sole source for the `REV-D-MASS-001`
-analytical mass model. `generated/analysis.json` records its source hashes,
-revision, derived load cases, and center of gravity. `mass-ledger.csv` is a
-validated mirror, while `mass-ledger-legacy.csv` retains the superseded 55 kg
-planning baseline with explicit mappings and `EXCLUDED` inclusion rules. Any
-duplicate, missing, non-finite, negative, unit-mismatched, frame-mismatched, or
-stale row fails closed. All values remain estimates until a serialized assembly
-is weighed and its center of gravity is measured.
+`design-spec.json#components` 是 `REV-D-MASS-001` 分析质量模型的唯一来源。
+`generated/analysis.json` 记录其来源哈希、版本、推导的载荷工况与重心。
+`mass-ledger.csv` 是经验证的镜像，而 `mass-ledger-legacy.csv` 保留已被取代的
+55 kg 计划基线，并带有显式映射与 `EXCLUDED` 纳入规则。任何重复、缺失、非有限、
+为负、单位不符、坐标系不符或过期的行都会失败即拒绝。在序列化装配体称重并测量
+其重心之前，所有数值都只是估算值。
 
-## Stability and motion clearance
+## 稳定性与运动净空
 
-The navigation load case uses the lift lowered, tools stowed, brakes available,
-and stabilizers retracted. The manipulation load case uses the lift raised,
-bimanual payload forward, wheel brakes applied, and all four stabilizers loaded.
-Both cases must include manufacturing tolerance, floor friction, joint
-calibration error, stop distance, cable stiffness, payload overhang, and battery
-configuration before release.
+导航载荷工况采用升降机构降下、工具收纳、制动器可用、稳定支脚收起。操作载荷
+工况采用升降机构升起、双臂负载前伸、车轮制动施加、四个稳定支脚全部承力。发布
+前，两种工况都必须计入制造公差、地面摩擦、关节标定误差、停止距离、线缆刚度、
+负载悬伸与电池配置。
 
-The analytical tip-angle formula is
-`degrees(atan2(support_margin_mm, cg_z_mm - ground_plane_z_mm))`. Results are
-published for +X, -X, +Y, and -Y against the explicit rectangular drive and
-deployed-stabilizer support polygons; each result names its limiting edge and
-pose identifier. The drive gate is the minimum across its stowed and emergency
-stop cases. The stabilized gate is the minimum across raised, payload,
-shared-workspace, and stabilizer-deployed cases. These thresholds are screening
-gates, not safety functions.
-Acceptance requires controlled pull, 5-degree slope, emergency-stop, brake-hold,
-stabilizer-deployment, and first-wheel-lift tests. Any undocumented ballast,
-tether, fixture, or operator restraint invalidates the result.
+分析倾覆角公式为 `degrees(atan2(support_margin_mm, cg_z_mm - ground_plane_z_mm))`。
+结果针对显式的矩形行驶支撑多边形与展开稳定支脚支撑多边形，按 +X、-X、+Y 与 -Y
+方向发布；每个结果都注明其限制边与位姿标识。行驶闸门取其收起与急停工况的最小
+值。稳定闸门取升起、负载、共享工作空间与稳定支脚展开工况的最小值。这些阈值是
+筛选闸门，不是安全功能。验收需要受控拉拔、5 度坡道、急停、制动保持、稳定支脚
+展开与首轮抬升测试。任何未记录的配重、系绳、固定装置或操作员约束都会使结果
+无效。
 
-The motion envelope remains partitioned into left-only, right-only, coordinated
-shared, and forbidden volumes. Review arm-to-arm, arm-to-base, arm-to-head,
-arm-to-lift, tool-to-cable, payload-to-cover, and payload-to-operator clearance.
-`interference-checklist.csv` remains `NOT_EXECUTED` until full-joint CAD sweeps
-and guarded physical tests are attached.
+运动包络仍划分为仅左侧、仅右侧、协调共享与禁入体积。评审臂对臂、臂对底座、臂
+对头部、臂对升降机构、工具对线缆、负载对盖板以及负载对操作员的净空。在全关节
+CAD 扫掠与防护型实物测试附入之前，`interference-checklist.csv` 保持 `NOT_EXECUTED`。
 
-## Assembly process
+## 装配流程
 
-1. Verify base datums, steering retention, wheel bearings, suspension travel,
-   normally-closed brakes, bumper and stabilizer pockets.
-2. Install the battery, BMS, disconnect, fuse, precharge and contactors low in
-   the base; record mass, location and mounting torque.
-3. Install the lift guides, synchronized screws, brakes, lock pins, hard limits
-   and pinch sensors; measure parallelism and skew before fitting the torso.
-4. Install power distribution, safety controller, protective bonding and
-   electronics tray before covers restrict access.
-5. Mount both arm bases to controlled shoulder datums using a rated lift aid;
-   manual handling outside the supplier limit is prohibited.
-6. Route energy chains and internal joint harnesses through complete steering,
-   lift and arm sweeps with strain-relief witness marks.
-7. Install the neck mount, head, sensors, guards, E-stop devices and tools.
-8. Execute bonding, power-off movement, interference, stability and guarded
-   low-speed tests before enabling payload work.
-9. Close covers, apply tamper marks, weigh the serialized unit and sign the
-   assembly traveller.
+1. 核验底座基准、转向保持、车轮轴承、悬架行程、常闭制动器、防撞条与稳定支脚凹槽。
+2. 将电池、BMS、断开装置、保险丝、预充与接触器低位安装到底座中；记录质量、位置
+   与安装扭矩。
+3. 安装升降导轨、同步丝杠、制动器、锁销、硬限位与夹挤传感器；在安装躯干之前
+   测量平行度与偏斜。
+4. 在盖板限制可达性之前安装配电、安全控制器、保护接地与电子器件托盘。
+5. 使用额定起吊辅助将两条臂的基座安装到受控肩部基准；禁止超出供应商限值的人工
+   搬运。
+6. 在完整的转向、升降与机械臂扫掠下布置拖链与关节内部线束，并施加应力消除见证
+   标记。
+7. 安装颈部支架、头部、传感器、防护罩、急停装置与工具。
+8. 在启用负载作业之前，执行接地连通、断电移动、干涉、稳定性与防护型低速测试。
+9. 合上盖板、施加防拆标记、称重序列化设备并签署装配随工单。
 
-Assembly feasibility gates include tool access, captive hardware, connector
-keying, lift points, torque visibility, service loops, battery replacement,
-controller replacement, sharp edges, pinch points, tolerance stack, coating
-masks and packaging restraints.
+装配可行性闸门包括工具可达性、防脱紧固件、连接器防呆、起吊点、扭矩可视性、服务
+环、电池更换、控制器更换、锐边、夹挤点、公差累积、涂层遮蔽与包装约束。
 
-Status: `CONCEPT_PHYSICAL_VALIDATION_REQUIRED`. The 77.5 kg analytical mass, calculated centers of gravity, directional tip angles, and STEP geometry are not measured product claims. Simulation or document-only evidence cannot close the physical release gate.
+状态：`CONCEPT_PHYSICAL_VALIDATION_REQUIRED`。77.5 kg 分析质量、计算出的重心、
+方向倾覆角与 STEP 几何都不是实测的产品指标。仿真或纯文档证据不能关闭实物发布
+闸门。

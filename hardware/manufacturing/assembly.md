@@ -1,6 +1,6 @@
-# Assembly work instructions
+# 组装作业指导书
 
-## Process flow
+## 流程路线
 
 ```mermaid
 flowchart LR
@@ -17,41 +17,38 @@ flowchart LR
   R --> D
 ```
 
-The route and timing source of truth is `routing.csv`. The following instructions
-supplement the drawing and never override a drawing tolerance or safety requirement.
+流程路线与工时的真实来源是 `routing.csv`。以下指导书是对图纸的补充，绝不覆盖
+图纸公差或安全要求。
 
-## Workstation instructions
+## 工位作业指导
 
-1. **Receive / kit:** quarantine unlabelled material. Verify part number, revision,
-   lot, quantity, damage, supplier declaration, and moisture-sensitivity status.
-   Print the serial traveller only after the BOM revision matches the work order.
-2. **SMT / reflow:** verify stencil revision and paste expiry; record first-piece
-   paste coverage. Load the approved centroid/BOM. Run the locked SAC305 profile;
-   do not hand-edit placements without an ECN. Segregate the first article for AOI.
-3. **PCBA inspect / test:** inspect polarity, bridges, tombstones, void-sensitive
-   power pads, and 8 mm isolation barrier. Test behind a shield with current-limited
-   36 V input, then measure 12V_ISO, JETSON_12V, 3.3 V, ripple, isolation, E-stop input, and CAN.
-4. **Chassis:** install motor brackets loosely, reference the datum fixture, torque
-   M3 steel fasteners to 0.55 N m and marked plastic fasteners to 0.25 N m unless the
-   drawing states otherwise. Apply witness mark after calibrated torque is recorded.
-5. **Controller / protective bond:** fit stand-offs, board, insulating barriers, and
-   protective/chassis bonds. Measure bond resistance below 0.10 ohm using four-wire
-   compensation. No harness may be trapped under the PCB or touch a sharp edge.
-6. **Harness:** mate only matching keyed connectors; verify two-stage latch engagement.
-   Maintain 5 mm edge clearance, bend-radius rules, service loops, and separation of
-   48 V, switch nodes, CAN, and ADC wiring. Use `harness-spec.csv` for wire gauge,
-   length, color, shielding and bend radius. Fit strain relief before continuity test.
-7. **Shell / display:** clean the display window, attach its bracket at the 8 degree
-   datum, perform gap/flush inspection, install the TPU bumper, and confirm that vents
-   are unobstructed. Do not use adhesive outside the controlled dispense drawing.
-8. **Safety / functional:** with wheels restrained, verify power-off, input current,
-   rail sequence, E-stop trip and latched reset, CAN at both ends, sensors, display,
-   motor-enable interlock, and 30-minute thermal soak. Store raw fixture JSON by serial.
-9. **Final / pack:** audit fastener marks, labels, cosmetic zones, evidence records,
-   accessories, transit locks, desiccant/humidity indicator where required, and carton ID.
+1. **收货 / 配料：**隔离无标签物料。核验料号、版本、批次、数量、损伤、供应商
+   声明与湿敏等级状态。只有在 BOM 版本与工单一致后，才打印序列化随工单。
+2. **SMT / 回流焊：**核验钢网版本与锡膏有效期；记录首件锡膏覆盖率。加载已批准
+   的质心/BOM。运行锁定的 SAC305 温度曲线；没有 ECN 不得手工修改贴装位置。将
+   首件单独隔离供 AOI 检查。
+3. **PCBA 检验 / 测试：**检查极性、桥连、立碑、对空洞敏感的电源焊盘，以及 8 mm
+   隔离屏障。在防护罩后方以限流的 36 V 输入进行测试，然后测量 12V_ISO、
+   JETSON_12V、3.3 V、纹波、隔离、急停输入与 CAN。
+4. **机箱：**先松装电机支架，以基准固定装置为参考，将 M3 钢制紧固件拧至
+   0.55 N m、带标记的塑料紧固件拧至 0.25 N m，除非图纸另有规定。记录校准扭矩后
+   施加点检标记。
+5. **控制器 / 保护接地：**安装支撑柱、板卡、绝缘屏障与保护/机箱接地。使用四线
+   补偿法测量接地电阻，要求低于 0.10 欧姆。任何线束都不得被压在 PCB 下方或
+   接触锐边。
+6. **线束：**只对插匹配的防呆连接器；确认两级锁扣均已扣合。保持 5 mm 边缘净空、
+   弯曲半径规则、服务环，以及 48 V、开关节点、CAN 与 ADC 布线的相互分离。线规、
+   长度、颜色、屏蔽与弯曲半径以 `harness-spec.csv` 为准。在导通测试之前安装应力
+   消除装置。
+7. **外壳 / 显示屏：**清洁显示窗口，按 8 度基准安装其支架，进行间隙/齐平度检查，
+   安装 TPU 防撞条，并确认散热孔无遮挡。不得在受控点胶图纸范围之外使用胶粘剂。
+8. **安全 / 功能：**在车轮受约束的情况下，核验断电、输入电流、电源轨时序、急停
+   跳闸与闭锁复位、两端 CAN、传感器、显示屏、电机使能互锁，以及 30 分钟热浸泡。
+   按序列号存储固定装置的原始 JSON。
+9. **终检 / 包装：**核查紧固件标记、标签、外观区域、证据记录、附件、运输锁止件、
+   所需的干燥剂/湿度指示卡与纸箱 ID。
 
-## Stop conditions
+## 停线条件
 
-Stop the line for any E-stop failure, isolation-barrier contamination, protective
-bond failure, smoke/odour, repeated identical defect on three consecutive units,
-unknown drawing revision, expired calibration, or defect escape from an earlier gate.
+出现以下任一情况即停线：急停失败、隔离屏障污染、保护接地失败、冒烟/异味、
+连续三台出现相同的重复缺陷、图纸版本不明、校准过期，或缺陷从更早的闸门逃逸。

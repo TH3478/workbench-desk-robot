@@ -1,55 +1,49 @@
-# USD 5,100 procurement planning baseline
+# USD 5,100 采购计划基线
 
-Issue 22 uses USD 5,100 as the planning BOM ceiling for one configured unit.
-This is a target allocation, not a quote, purchase price, or approved MPN list.
-The controlled `bom.csv` remains order-blocked until dated supplier evidence is
-attached. Currency, tax, freight, tooling, NRE, spares, and tariff treatment must
-be stated when real quotes replace these allocations.
+Issue 22 将 USD 5,100 作为一台配置整机的计划 BOM 上限。这是目标分配，不是报价、
+采购价或经批准的 MPN 清单。在附上带日期的供应商证据之前，受控的 `bom.csv` 保持
+下单阻塞。当真实报价取代这些分配时，必须注明币种、税、运费、模具、NRE、备件
+与关税处理方式。
 
-| Cost group | Planning allocation (USD) |
+| 成本组 | 计划分配 (USD) |
 |---|---:|
-| two robot arms and controllers | 2,400 |
-| compute, storage, and networking | 850 |
-| cameras, safety sensors, and HMI | 550 |
-| 48 V battery, BMS, charger, and power distribution | 450 |
-| frame, covers, casters, fasteners, and harnesses | 500 |
-| PCB assemblies, fixtures amortization, and packaging | 350 |
-| **Total** | **5,100** |
+| 两条机器人臂与控制器 | 2,400 |
+| 计算、存储与网络 | 850 |
+| 相机、安全传感器与 HMI | 550 |
+| 48 V 电池、BMS、充电器与配电 | 450 |
+| 框架、盖板、脚轮、紧固件与线束 | 500 |
+| PCB 组件、固定装置摊销与包装 | 350 |
+| **合计** | **5,100** |
 
-Each critical line requires manufacturer, exact MPN, lifecycle status, lead time,
-MOQ, warranty, country of origin, substitution policy, and two quote channels.
-The buyer records the quote date and validity window. Engineering approves fit,
-form, function, interfaces, and safety evidence before Procurement releases a PO.
+每个关键物料行都需要制造商、确切 MPN、生命周期状态、交期、MOQ、质保、原产国、
+替换政策与两个询价渠道。采购员记录报价日期与有效期窗口。在采购部门签发 PO
+之前，工程部门批准适配、外形、功能、接口与安全证据。
 
-## Certificate gate
+## 证书闸门
 
-Critical power, battery, charger, mains, radio, safety relay, E-stop, and polymer
-parts require the applicable declaration, certificate, report, or material record
-before ordering. URLs and sales claims are not certificates. Evidence must name
-the manufacturer and exact MPN/revision and be checked against the shipped label.
-Battery orders additionally require a valid UN 38.3 test summary for the pack,
-not merely for a cell used inside it.
+关键电源、电池、充电器、市电、无线电、安全继电器、急停与聚合物零件在下单前
+需要适用的声明、证书、报告或材料记录。URL 与销售宣传不是证书。证据必须注明
+制造商与确切的 MPN/版本，并与发货标签核对。电池订单还要求针对电池组（而不只是
+其中使用的电芯）的有效 UN 38.3 测试摘要。
 
-## Supplier scoring
+## 供应商评分
 
-Score quality 30%, technical capability 25%, delivery 20%, total landed cost 15%,
-and compliance/continuity 10%. A supplier below 70/100, with a zero in compliance,
-or with unresolved counterfeit/traceability risk is not approved regardless of
-price. Selection records name the reviewer, date, evidence, exceptions, and expiry.
+评分权重为：质量 30%、技术能力 25%、交付 20%、总到岸成本 15%、合规/连续性 10%。
+低于 70/100、合规为零或存在未解决的假冒/可追溯性风险的供应商，无论价格如何都
+不予批准。选型记录注明评审人、日期、证据、例外与有效期。
 
-## Order-release checklist
+## 下单发布检查清单
 
-- Planning total is at or below USD 5,100 or the project owner approves variance.
-- Exact MPN and approved alternates are frozen against the engineering baseline.
-- Critical certificates are verified before the affected PO is sent.
-- Dated quotes, lead times, MOQ, payment, warranty, Incoterms, and freight are known.
-- Supplier score is reproducible and conflicts of interest are disclosed.
-- Incoming inspection and lot/serial traceability requirements are on the PO.
-- Long-lead and single-source risks have an owner, trigger, and mitigation.
+- 计划总额不超过 USD 5,100，或项目 Owner 批准偏差。
+- 确切 MPN 与经批准的替代料对照工程基线冻结。
+- 关键证书在相关 PO 发出之前验证。
+- 带日期的报价、交期、MOQ、付款、质保、Incoterms 与运费均已明确。
+- 供应商评分可复现，利益冲突已披露。
+- PO 上载明来料检验与批次/序列可追溯性要求。
+- 长交期与单一来源风险有 Owner、触发条件与缓解措施。
 
-Status: `ORDER_RELEASE_BLOCKED` until real quotes, approved MPNs, certificates,
-and buyer/engineering sign-off replace the planning assumptions.
+状态：在真实报价、经批准的 MPN、证书以及采购/工程签核取代计划假设之前，为
+`ORDER_RELEASE_BLOCKED`。
 
-`planning-bom.csv` is the arithmetic source for the USD 5,100 allocation and
-`supplier-scorecard-planning.csv` prevents an unassessed supplier from being
-treated as approved.
+`planning-bom.csv` 是 USD 5,100 分配的算术来源，`supplier-scorecard-planning.csv`
+防止未经评估的供应商被当作已批准。

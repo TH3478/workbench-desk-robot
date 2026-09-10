@@ -1,16 +1,15 @@
-# safety
+# 安全
 
-Hardware safety layer: e-stop, watchdog, safety PLC bridge.
+硬件安全层：e-stop、看门狗、安全 PLC 桥接。
 
-This module has authority over motion regardless of software state. It is the
-only place where a command issued by the robot runtime can be physically
-overridden.
+本模块对运动拥有权威，无论软件处于何种状态。它是唯一可以物理覆盖机器人
+运行时发出命令的地方。
 
-**Rule**: nothing in `services/` or `apps/` may bypass this layer.
-Software safe-stop (from `firmware/virtual_mcu`) is not a substitute for
-hardware e-stop. They are separate circuits.
+**规则**：`services/` 或 `apps/` 中的任何内容都不得绕过本层。
+软件安全停止（来自 `firmware/virtual_mcu`）不能替代硬件 e-stop。
+它们是相互独立的电路。
 
-Planned:
-- USB e-stop button driver
-- Safety relay bridge (Pilz PNOZmulti or similar)
-- Watchdog heartbeat to motion controller
+计划：
+- USB e-stop 按钮驱动
+- 安全继电器桥接（Pilz PNOZmulti 或类似产品）
+- 到运动控制器的看门狗心跳

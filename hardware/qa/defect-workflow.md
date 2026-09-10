@@ -1,12 +1,10 @@
-# Defect and corrective-action workflow
+# 缺陷与纠正措施工作流
 
 `OPEN -> CONTAINED -> ROOT_CAUSE_PENDING -> CORRECTIVE_ACTION -> VERIFY -> CLOSED`
 
-Any safety, electrical overstress, or traceability defect moves the affected lot
-to `QUARANTINED` before analysis. The defect record must include the first known
-bad serial/lot, containment quantity, reproduction steps, suspected cause,
-disposition authority, corrective-action revision, and verification evidence.
+任何安全、电气过应力或可追溯性缺陷都会在分析之前将受影响批次转为
+`QUARANTINED`。缺陷记录必须包含首个已知的坏件序列号/批次、遏制数量、复现步骤、
+疑似原因、处置权限、纠正措施版本与验证证据。
 
-Use the manufacturing defect codes as the controlled vocabulary. A rework is not
-closed until the same inspection gate is repeated and linked to the defect ID.
-Do not delete failed records; close them with a disposition and evidence path.
+使用制造缺陷代码作为受控词汇表。返工只有在重复同一检验闸门并关联缺陷 ID 之后
+才算关闭。不要删除失败记录；用处置与证据路径将其关闭。

@@ -1,14 +1,11 @@
-# Inventory and receiving policy
+# 库存与收货政策
 
-1. Receive against the PO revision and quarantine every lot until incoming
-   inspection is complete.
-2. Record supplier, manufacturer part number, lot/date code, quantity, CoC and
-   storage conditions. Never substitute a component class without AVL approval.
-3. Keep ESD-sensitive electronics in controlled packaging; keep batteries and
-   flammables in the designated storage zone from the manufacturing EHS rules.
-4. Use FIFO for ordinary parts and FEFO for shelf-life-limited materials.
-5. Reserve one repair set and one destructive-test set only after the project
-   owner approves the quantity. Unapproved shortages trigger a purchase risk,
-   not an undocumented substitution.
-6. Nonconforming lots remain physically segregated and are dispositioned through
-   the QA MRB workflow. Inventory records must reference the defect ID.
+1. 按 PO 版本收货，并在来料检验完成之前隔离每个批次。
+2. 记录供应商、制造商料号、批次/日期码、数量、CoC 与存储条件。未经 AVL 批准
+   绝不要替换元件类别。
+3. ESD 敏感电子器件保存在受控包装中；电池与易燃物存放在制造 EHS 规则指定的
+   存储区域。
+4. 普通零件使用 FIFO，有保质期限制的材料使用 FEFO。
+5. 只有在项目 Owner 批准数量后，才保留一套维修件与一套破坏性测试件。未经批准
+   的缺料会触发采购风险，而不是无记录的替换。
+6. 不合格批次保持物理隔离，并通过 QA MRB 工作流处置。库存记录必须引用缺陷 ID。

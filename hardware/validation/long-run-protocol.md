@@ -1,17 +1,13 @@
-# 48-hour reliability protocol
+# 48 小时可靠性协议
 
-The 48-hour run starts only after the QA and safety owners approve the unit and
-the first-batch acceptance gate is closed. Use the production candidate
-configuration, a synchronized monotonic clock, and an append-only event log.
+48 小时运行只有在 QA 和安全 Owner 批准设备、且首批验收闸门关闭之后才能
+开始。使用量产候选配置、同步的单调时钟和仅追加的事件日志。
 
-Record heartbeat, CAN error counters, rail voltage/current, temperatures,
-E-stop state, watchdog resets, operator interventions, and every stop reason at
-one-minute intervals or on event. Stop immediately for safety violation,
-over-temperature, uncontrolled motion, isolation failure, repeated watchdog
-reset, or data loss. A stopped run is a failure sample, not a successful partial
-run.
+以一分钟间隔或事件触发方式记录心跳、CAN 错误计数、电源轨电压/电流、
+温度、E-stop 状态、看门狗复位、操作员干预和每一次停止原因。遇到安全
+违规、过温、不受控运动、绝缘失效、反复看门狗复位或数据丢失立即停止。
+一次停止的运行是失败样本，而不是成功的部分运行。
 
-Acceptance requires 48 continuous hours, no unclassified safety or power fault,
-all interventions classified, and a signed report containing raw logs, summary
-statistics, and the final configuration hash. The repository currently contains
-the protocol only; no 48-hour result is claimed.
+验收要求连续 48 小时、无未分类的安全或电源故障、所有干预均已分类，以及
+一份包含原始日志、汇总统计和最终配置哈希的签署报告。仓库目前仅包含该
+协议；不声称存在任何 48 小时结果。

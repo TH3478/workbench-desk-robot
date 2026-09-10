@@ -1,4 +1,4 @@
-"""Validate field-validation templates and reject fabricated results."""
+"""校验现场验证模板，并拒绝伪造的结果。"""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 try:
     from evidence import EvidenceError, validate_register
-except ModuleNotFoundError:  # imported by the repository test loader
+except ModuleNotFoundError:  # 由仓库测试加载器导入
     from hardware.validation.tools.evidence import EvidenceError, validate_register
 
 ROOT = Path(__file__).resolve().parents[3]

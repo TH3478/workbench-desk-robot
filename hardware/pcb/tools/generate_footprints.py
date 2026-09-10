@@ -110,7 +110,7 @@ def pad_bounds(footprint) -> list[tuple[float, float, float, float]]:
 
 
 def add_silk_body_outline(footprint, width: float, height: float, clearance: float = 0.25):
-    """Draw the component body, clipping each edge around solder-mask openings."""
+    """绘制元器件本体，在阻焊开窗周围裁剪各边。"""
     left, right = -width / 2, width / 2
     top, bottom = -height / 2, height / 2
     bounds = pad_bounds(footprint)
@@ -205,7 +205,7 @@ def sense_3637():
 
 
 def isolated_power_tbd():
-    """Nine-pin THT placeholder; not for production until an exact MPN is approved."""
+    """九引脚 THT 占位封装；在批准精确 MPN 之前不可用于量产。"""
     footprint = new_footprint("Isolated_48V_12V_240W_TBD", 38.0, 25.0, attribute=pcbnew.FP_THROUGH_HOLE)
     footprint.SetLibDescription(
         "PLACEHOLDER - NOT FOR PRODUCTION. Replace with the approved 36-60 V input, "
@@ -243,7 +243,7 @@ def tps26633():
 
 
 def iso1042_dw16_hv():
-    """TI DW-16 HV/isolation land pattern with 8.1 mm copper clearance."""
+    """带 8.1 mm 铜间距的 TI DW-16 高压/隔离焊盘图案。"""
     footprint = new_footprint("ISO1042_DW16_HV", 7.5, 10.3, attribute=pcbnew.FP_SMD)
     for index in range(8):
         y = -4.445 + index * 1.27

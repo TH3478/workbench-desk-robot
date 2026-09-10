@@ -288,7 +288,7 @@ def add_mounting_hole(board, reference: str, x: float, y: float):
 
 
 def add_mounting_keepout(board, x: float, y: float, diameter: float = 8.0):
-    """Reserve washer/tool clearance from copper, routing, vias and pours."""
+    """为垫圈/工具预留与铜箔、布线、过孔和敷铜之间的间隙。"""
     keepout = pcbnew.ZONE(board)
     keepout.SetIsRuleArea(True)
     keepout.SetLayerSet(pcbnew.LSET.AllCuMask())
@@ -390,7 +390,7 @@ def add_board_markings(board):
     add_silk_text(board, "DO NOT ORDER WITHOUT RELEASE APPROVAL", 80, 127, 0.8)
     add_fab_text(board, "FAB: U3 HDI 9x 0.45/0.15 FILL/CAP/PLANARIZE", 80, 63, 0.7)
     add_fab_text(board, "FAB: ENIG | THK 1.60 +/- 0.16 MM (MASK EXCL)", 80, 66, 0.7)
-    # Keep the barrier warning vertical so its silk does not cross the copper gap.
+    # 保持隔离警示文字竖直，使其丝印不跨越铜箔间隙。
     barrier = pcbnew.PCB_TEXT(board)
     barrier.SetText("PRIMARY | SECONDARY")
     barrier.SetPosition(point(51, 64))
@@ -402,10 +402,10 @@ def add_board_markings(board):
 
 
 def configure_routing_classes(board):
-    """Declare fabrication-current net classes before exporting a DSN.
+    """在导出 DSN 之前声明符合制板电流的网络类。
 
-    Freerouting otherwise falls back to its 0.20 mm default for every net,
-    which can produce a DRC-clean but thermally undersized power route.
+    否则 Freerouting 会对每个网络回退到 0.20 mm 的默认值，
+    这可能产生 DRC 干净但热容量不足的电源布线。
     """
     settings = board.GetDesignSettings()
     net_settings = settings.m_NetSettings
@@ -661,7 +661,7 @@ def remove_segment(
 
 
 def replace_local_oscillator_routing(board, nets: dict[str, object], footprints: dict[str, object]):
-    """Keep the crystal loop on F.Cu while giving its load capacitors direct returns."""
+    """将晶振环路保留在 F.Cu，同时为其负载电容提供直接回流。"""
     remove_net_tracks(board, {"OSC_IN", "OSC_OUT"})
 
     for net_name, first, second in (
@@ -740,7 +740,7 @@ def replace_local_oscillator_routing(board, nets: dict[str, object], footprints:
 
 
 def replace_field_can_routing(board, nets: dict[str, object], footprints: dict[str, object]):
-    """Rebuild the field bus as a zero-via, same-layer branched pair."""
+    """将现场总线重建为无过孔、同层的分支线对。"""
     removed_tracks = remove_net_tracks(board, {"CANH", "CANL", "CAN_TERM"})
     for reference, x, y, rotation in (
         ("R58", 143.0, 84.0, 0.0),
@@ -871,7 +871,7 @@ def replace_field_can_routing(board, nets: dict[str, object], footprints: dict[s
 
 
 def add_post_route_supplements(board, nets: dict[str, object], footprints: dict[str, object]):
-    """Complete fine-pitch power-controller escapes after SES import."""
+    """在 SES 导入后补全细间距电源控制器的引出线。"""
     u1_fused = pad_by_number(footprints, "U1", "5").GetPosition()
     fused_escape = point(mm(u1_fused.x), 30.0)
     fused_anchor = point(32.8658, 30.5828)
@@ -919,7 +919,7 @@ def add_isolated_power_via_arrays(board, nets: dict[str, object], footprints: di
 
 
 def replace_u3_output_transfer(board, nets: dict[str, object]):
-    """Give the 5 A eFuse output a short fanout and four layer-transfer vias."""
+    """为 5 A eFuse 输出提供短扇出与四个换层过孔。"""
     segment_specs = [
         ("JETSON_FAULT_N", pcbnew.In2_Cu, (115.327, 9.4636), (113.3314, 7.468)),
         ("JETSON_FAULT_N", pcbnew.In2_Cu, (113.3314, 7.468), (93.043, 7.468)),
@@ -967,11 +967,11 @@ def replace_u3_output_transfer(board, nets: dict[str, object]):
 
 
 def add_u3_exposed_pad_thermal_vias(board, nets: dict[str, object], footprints: dict[str, object]):
-    """Connect the TPS26633 exposed pad to its adjacent ground reference."""
+    """将 TPS26633 裸露焊盘连接到其相邻的接地参考。"""
     exposed_pad = pad_by_number(footprints, "U3", "25")
     center = exposed_pad.GetPosition()
-    # Shift the array away from the existing In1.Cu PGTH route while keeping
-    # all nine laser microvias inside the 2.5 mm exposed-pad land.
+    # 将阵列移离现有 In1.Cu PGTH 布线，同时保持九个激光微孔
+    # 全部位于 2.5 mm 裸露焊盘区域内。
     for dx in (-0.65, -0.25, 0.15):
         for dy in (-0.4, 0.0, 0.4):
             via = pcbnew.PCB_VIA(board)
@@ -1010,7 +1010,7 @@ def add_copper_zone(
 
 
 def remove_single_layer_signal_vias(board):
-    """Drop autorouter escape vias that never actually change layers."""
+    """删除从未真正换层的自动布线器引出过孔。"""
     tracks = [item for item in board.GetTracks() if not isinstance(item, pcbnew.PCB_VIA)]
     for via in [item for item in board.GetTracks() if isinstance(item, pcbnew.PCB_VIA)]:
         if via.GetNetname() in PLANE_NETS:
@@ -1292,10 +1292,9 @@ def add_plane_zones(board, nets: dict[str, object]):
     secondary_ground = [(56.0, 1.5), (138.0, 1.5), (138.0, 128.5), (56.0, 128.5)]
     isolated_12v = [(56.0, 1.5), (123.0, 1.5), (123.0, 83.0), (56.0, 83.0)]
     isolated_can_power = [(140.0, 1.5), (158.5, 1.5), (158.5, 45.0), (140.0, 45.0)]
-    # Keep the generated pours on the two outer copper layers.  The six
-    # internal layers remain available to the controlled router; moving a
-    # filled zone onto a routed inner layer would make the SES-dependent
-    # release non-deterministic because Specctra does not carry KiCad zones.
+    # 将生成的敷铜保持在两个外层铜箔上。六个内层留给受控布线器使用；
+    # 把填充区域移到已布线的内层会使依赖 SES 的发布变得不确定，
+    # 因为 Specctra 不携带 KiCad 区域。
     for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
         if layer == pcbnew.F_Cu:
             add_copper_zone(board, nets["VBAT_RAW"], layer, raw_input, priority=6)
@@ -1311,9 +1310,8 @@ def add_plane_zones(board, nets: dict[str, object]):
         add_copper_zone(board, nets["GND_CAN_ISO"], layer, isolated_can_ground)
     add_copper_zone(board, nets["GND_PWR"], pcbnew.In1_Cu, primary_ground)
     add_copper_zone(board, nets["GND"], pcbnew.In1_Cu, secondary_ground)
-    # Give the isolated CAN F.Cu corridor an explicit adjacent In1.Cu return
-    # plane.  This is a controlled reference declaration; field-solve and
-    # continuity checks remain supplier/manual release gates.
+    # 为隔离的 CAN F.Cu 通道提供显式的相邻 In1.Cu 回流平面。
+    # 这是受控的参考声明；场求解与连续性检查仍属于供应商/人工发布闸门。
     add_copper_zone(board, nets["GND_CAN_ISO"], pcbnew.In1_Cu, isolated_can_ground)
     add_copper_zone(board, nets["12V_ISO"], pcbnew.In2_Cu, isolated_12v)
     add_copper_zone(board, nets["JETSON_12V"], pcbnew.In3_Cu, jetson_power)

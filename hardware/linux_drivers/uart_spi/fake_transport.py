@@ -1,4 +1,4 @@
-"""Deterministic bounded fake UART/SPI transport for contract tests."""
+"""用于契约测试的确定性受限模拟 UART/SPI 传输。"""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from .contract import TransportBackpressure, TransportClosed, TransportIOError
 
 
 class FakeTransport:
-    """Loopback transport with bounded queues and injectable failures."""
+    """带受限队列与可注入故障的回环传输。"""
 
     def __init__(self, *, capacity: int = 4, max_write_bytes: int | None = None) -> None:
         if type(capacity) is not int or not 1 <= capacity <= 64:

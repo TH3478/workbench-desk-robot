@@ -1,4 +1,4 @@
-"""Bounded UART/SPI framing contract for software adapter tests."""
+"""用于软件适配器测试的受限 UART/SPI 成帧契约。"""
 
 from __future__ import annotations
 
@@ -18,31 +18,31 @@ MAX_FRAME_BYTES = HEADER.size + MAX_PAYLOAD_BYTES + CRC.size
 
 
 class FrameError(ValueError):
-    """Base class for malformed or unsupported frames."""
+    """格式错误或不受支持的帧的基类。"""
 
 
 class FrameFormatError(FrameError):
-    """The frame shape, header or bounds are invalid."""
+    """帧结构、帧头或边界无效。"""
 
 
 class FrameCrcError(FrameError):
-    """The frame payload was corrupted in transit."""
+    """帧载荷在传输中损坏。"""
 
 
 class SequenceError(FrameError):
-    """An inbound frame is duplicate, stale or ambiguous."""
+    """入站帧重复、过期或语义不明。"""
 
 
 class TransportClosed(ConnectionError):
-    """The transport is not open."""
+    """传输未打开。"""
 
 
 class TransportBackpressure(TimeoutError):
-    """The bounded transport queue is full."""
+    """受限传输队列已满。"""
 
 
 class TransportIOError(ConnectionError):
-    """The fake transport injected an I/O failure."""
+    """模拟传输注入了 I/O 故障。"""
 
 
 class TransportKind(IntEnum):
@@ -51,7 +51,7 @@ class TransportKind(IntEnum):
 
 
 def crc16_ccitt(data: bytes, initial: int = 0xFFFF) -> int:
-    """Return CRC-16/CCITT-FALSE for one bounded frame."""
+    """返回单个受限帧的 CRC-16/CCITT-FALSE。"""
     crc = initial
     for byte in data:
         crc ^= byte << 8
@@ -62,7 +62,7 @@ def crc16_ccitt(data: bytes, initial: int = 0xFFFF) -> int:
 
 @dataclass(frozen=True, slots=True)
 class UartSpiFrame:
-    """A complete framed payload owned by one UART or SPI endpoint."""
+    """归属于单个 UART 或 SPI 端点的完整成帧载荷。"""
 
     transport: TransportKind
     sequence: int
@@ -132,7 +132,7 @@ def _is_newer(sequence: int, previous: int) -> bool:
 
 
 class UartSpiSession:
-    """Bounded framed I/O session over an injected UART/SPI transport."""
+    """在注入的 UART/SPI 传输之上的受限成帧 I/O 会话。"""
 
     def __init__(
         self,

@@ -1,4 +1,4 @@
-"""Software-only UART/SPI framing contract and deterministic fake transport."""
+"""纯软件的 UART/SPI 成帧契约与确定性模拟传输。"""
 
 from .contract import (
     MAX_PAYLOAD_BYTES,

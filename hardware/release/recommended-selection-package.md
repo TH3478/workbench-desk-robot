@@ -1,43 +1,47 @@
-# Recommended Hardware Selection Package - Revision D
+# 推荐硬件选型包 - Revision D
 
-Status: engineering recommendation for the Revision D four-module holonomic
-robot. This document does not represent AVL approval, a supplier quote, or
-physical validation. Earlier two-wheel/four-caster Rev B/Rev C assumptions are
-obsolete and must not be used for purchasing or mechanical interfaces.
+状态：面向 Revision D 四模块全向机器人的工程建议。本文档不代表 AVL 批准、供应商
+报价或实物验证。早期两轮/四脚轮的 Rev B/Rev C 假设已经过时，不得用于采购或机械
+接口。
 
-## Frozen geometry assumptions
+## 已冻结的几何假设
 
-- 540 x 520 mm navigation base, 1100 mm stowed height, and 1450 mm raised height.
-- Four independent steer-drive modules, each with a 140 mm wheel, absolute
-  steering encoder, drive encoder, normally-closed brake, and 30 mm suspension.
-- Four deployable stabilizers form an 820 x 820 mm analytical support polygon
-  for stationary manipulation; physical fit, load and stability tests remain open.
-- Four guides and two synchronized screws provide 350 mm lift travel with two
-  brakes, two lock pins, dual encoders, hard limits, and pinch detection.
-- Two seven-axis arm envelopes follow the 720 mm design reach and pose-dependent
-  payload limits in `hardware/mechanical/design-spec.json`.
+- 540 x 520 mm 导航底座、1100 mm 收起高度与 1450 mm 升起高度。
+- 四个独立的转向驱动模块，每个都有 140 mm 车轮、绝对转向编码器、驱动编码器、
+  常闭制动器与 30 mm 悬架。
+- 四个可展开的稳定支脚为静止操作构成一个 820 x 820 mm 的分析支撑多边形；实物
+  适配、负载与稳定性测试仍未完成。
+- 四根导轨与两根同步丝杠提供 350 mm 升降行程，配两个制动器、两个锁销、双编码
+  器、硬限位与夹挤检测。
+- 两条七轴机械臂包络遵循 `hardware/mechanical/design-spec.json` 中的 720 mm 设计
+  臂展与随位姿变化的负载限值。
 
-## Recommended configuration
+## 推荐配置
 
-| Function | Recommended candidate | Quantity | Why this is the baseline | Must close before order |
+| 功能 | 推荐候选 | 数量 | 作为基线的理由 | 下单前必须关闭 |
 |---|---|---:|---|---|
-| Collaborative arm | Exact seven-axis collaborative arm TBD | 2 | Must satisfy the controlled 720 mm reach envelope, internal cable routing, reaction-load limits and independent safety interface | Exact revision, mass, base drawing, reaction loads, controller power, safety I/O and payload/reach curves |
-| Lift mechanism | Dual-screw synchronized lift, exact actuators TBD | 1 system | Matches the Revision D four-guide/two-screw architecture without inventing a four-column supplier configuration | Actuator and screw ordering codes, synchronization, brake/lock design, limits, proof load and skew test |
-| Steer-drive module | 48 V independent steer-and-drive module, exact motor/gearbox/brake/wheel stack TBD | 4 | Required by the four-module holonomic geometry and 140 mm wheel envelope | Drive and steering curves, shaft/bearing drawings, brake torque, 30 mm suspension, thermal duty and loaded floor test |
-| Drive/steering controller | Dual-STO-capable servo controller or paired drives, exact variant TBD | 4 modules | Must coordinate one steering and one drive axis per corner and handle regeneration without relying on controller J2 | Motor matching, STO timing, brake control, regeneration clamp, CAN/fieldbus, EMC and thermal evidence |
-| Battery | 16S LiFePO4 2 kWh pack with service disconnect | 1 | Lower fire risk than NMC while meeting the 48 V / 80 A continuous design target | Cell/BMS MPN, contactor/precharge, fuse, enclosure, charger and transport documents |
-| BMS | Orion BMS 2, 16S configuration | 1 | CAN telemetry, current/temperature limits, contactor and precharge control | Exact harness, sensor set, fault matrix and pack supplier integration |
-| Safety controller | Pilz PNOZmulti 2 PNOZ m B0 class | 1 | Clear separation of E-stop, lift locks, drive STO, brake and mode interlocks | PLr/SIL allocation, I/O schedule, reset behavior and signed safety analysis |
-| 48 V to 12 V | Murata UWE-12/20-Q48N-C class | 1 | Isolated 240 W rail for Jetson and auxiliaries without putting traction current on controller J2 | Lifecycle, land pattern, derating, cooling and load test |
-| CAN isolation | TI ISO1042DWR + isolated 5 V module | 2 buses | Reinforced CAN isolation and known automotive EMC patterns | Creepage, termination, surge/ESD and loaded isolation supply test |
+| 协作机械臂 | 确切的七轴协作机械臂 TBD | 2 | 必须满足受控的 720 mm 臂展包络、内部走线、反作用力限值与独立安全接口 | 确切版本、质量、底座图纸、反作用力、控制器功率、安全 I/O 与负载/臂展曲线 |
+| 升降机构 | 双丝杠同步升降，确切执行器 TBD | 1 套 | 匹配 Revision D 四导轨/双丝杠架构，无需虚构四立柱供应商配置 | 执行器与丝杠订货代码、同步、制动/锁设计、限位、验证载荷与偏斜测试 |
+| 转向驱动模块 | 48 V 独立转向驱动模块，确切电机/减速箱/制动器/车轮组合 TBD | 4 | 四模块全向几何与 140 mm 车轮包络所必需 | 驱动与转向曲线、轴/轴承图纸、制动扭矩、30 mm 悬架、热负载与带载地面测试 |
+| 驱动/转向控制器 | 支持双 STO 的伺服控制器或成对驱动器，确切型号 TBD | 4 个模块 | 必须协调每个角位的一个转向轴与一个驱动轴，并在不依赖控制器 J2 的情况下处理再生 | 电机匹配、STO 时序、制动控制、再生钳位、CAN/现场总线、EMC 与热证据 |
+| 电池 | 带维修断开装置的 16S LiFePO4 2 kWh 电池组 | 1 | 在满足 48 V / 80 A 连续设计目标的同时，火灾风险低于 NMC | 电芯/BMS MPN、接触器/预充、保险丝、外壳、充电器与运输文档 |
+| BMS | Orion BMS 2，16S 配置 | 1 | CAN 遥测、电流/温度限制、接触器与预充控制 | 确切线束、传感器组、故障矩阵与电池组供应商集成 |
+| 安全控制器 | Pilz PNOZmulti 2 PNOZ m B0 系列 | 1 | 急停、升降锁、驱动 STO、制动与模式互锁的清晰分离 | PLr/SIL 分配、I/O 清单、复位行为与已签署的安全分析 |
+| 48 V 转 12 V | Murata UWE-12/20-Q48N-C 系列 | 1 | 用于 Jetson 与辅助设备的隔离 240 W 电源轨，无需让牵引电流经过控制器 J2 | 生命周期、焊盘图形、降额、散热与负载测试 |
+| CAN 隔离 | TI ISO1042DWR + 隔离 5 V 模块 | 2 条总线 | 增强型 CAN 隔离与已知的汽车 EMC 模式 | 爬电、终端、浪涌/ESD 与带载隔离电源测试 |
 
-## Cost controls
+## 成本控制
 
-- Keep the 32,000 USD EVT ceiling and 17,200 USD 100-unit BOM target as planning targets, not claims; both are unquoted.
-- Request three dated quotes for each high-cost item: arm, lift column, drive motor/drive, battery pack and safety controller.
-- Prefer one arm supplier, one lift supplier and one steer-drive supplier for EVT to reduce integration risk; qualify alternates only after interface freeze.
-- Do not substitute the compact DRV8962 childboard for the full-system servo drives.
+- 将 32,000 USD 的 EVT 上限与 17,200 USD 的百台 BOM 目标作为计划目标而非承诺；
+  两者均未报价。
+- 对每个高成本物料索取三份带日期的报价：机械臂、升降柱、驱动电机/驱动器、电池
+  组与安全控制器。
+- EVT 阶段优先各选一家机械臂供应商、一家升降供应商与一家转向驱动供应商，以降低
+  集成风险；只有在接口冻结后才认证备选。
+- 不要用紧凑的 DRV8962 子板替代全系统伺服驱动器。
 
-## Release gates
+## 发布闸门
 
-This recommendation is still blocked by exact MPN/AVL approval, supplier drawings/DFM, safety-owner approval, harness release, physical stability/brake/thermal/EMC testing and guarded EVT bring-up. The fixed shape is not evidence that those gates are closed.
+本建议仍被以下事项阻塞：确切 MPN/AVL 批准、供应商图纸/DFM、Safety Owner 批准、
+线束发布、实物稳定性/制动/热/EMC 测试与防护型 EVT 启动调试。固定的外形并不是
+这些闸门已关闭的证据。

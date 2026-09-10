@@ -312,7 +312,7 @@ def validate_interface_topology(
 
 
 def validate_placement_direction(rows: list[dict[str, str]], layout: dict[str, Any]) -> dict[str, bool]:
-    """Check that the functional placement honors the declared rear connector datum."""
+    """检查功能布局符合声明的后部连接器基准。"""
     by_id = {row.get("block_id", ""): row for row in rows}
     board_height = float(layout["board_height_mm"])
     rear_ids = {"J_SAFE", "J_CAN", "J_ML", "J_MR"}

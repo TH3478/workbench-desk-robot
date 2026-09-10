@@ -1,29 +1,27 @@
-# Hardware test standard
+# 硬件测试标准
 
-## General rules
+## 通用规则
 
-- Every result identifies unit serial, firmware/config revision, instrument ID,
-  calibration due date, operator, UTC start/end time, and raw evidence path.
-- A safety or power-limit failure is an automatic lot hold. Do not average away
-  a failed unit.
-- A result is `PASS` only when the measured value and acceptance limit are both
-  recorded. `NOT_EXECUTED` and `UNKNOWN` never count as pass.
+- 每个结果都要标明设备序列号、固件/配置版本、仪器 ID、校准到期日、操作员、UTC
+  起止时间与原始证据路径。
+- 安全或功率限值失败自动整批搁置。不得用平均值抹掉失败设备。
+- 只有在实测值与验收限值都已记录时，结果才为 `PASS`。`NOT_EXECUTED` 与 `UNKNOWN`
+  绝不视为通过。
 
-## Release gates
+## 发布闸门
 
-| Gate | Scope | Minimum evidence |
+| 闸门 | 范围 | 最低证据 |
 |---|---|---|
-| QG-01 | incoming identity and visual inspection | receiving record + photos |
-| QG-02 | PCB solder, polarity, connector keying | AOI/X-ray/inspection record |
-| QG-03 | rails, ripple, current limit, power-up sequence | scope captures + meter log |
-| QG-04 | CAN isolation and communication | isolation test + CAN trace |
-| QG-05 | emergency stop and safe enable | timed trip record on both channels |
-| QG-06 | harness continuity and pull test | continuity file + pull-test result |
-| QG-07 | actuator/sensor functional test | serialized functional log |
-| QG-08 | thermal and vibration screening | chamber/shaker report |
-| QG-09 | packaging and transport inspection | transport test report |
-| QG-10 | final configuration and traceability | signed traveller |
+| QG-01 | 来料身份与目检 | 收货记录 + 照片 |
+| QG-02 | PCB 焊接、极性、连接器防呆 | AOI/X 光/检验记录 |
+| QG-03 | 电源轨、纹波、限流、上电时序 | 示波器捕获 + 仪表记录 |
+| QG-04 | CAN 隔离与通信 | 隔离测试 + CAN 报文记录 |
+| QG-05 | 急停与安全使能 | 双通道计时跳闸记录 |
+| QG-06 | 线束导通与拉拔测试 | 导通文件 + 拉拔测试结果 |
+| QG-07 | 执行器/传感器功能测试 | 序列化功能日志 |
+| QG-08 | 热与振动筛选 | 温箱/振动台报告 |
+| QG-09 | 包装与运输检验 | 运输测试报告 |
+| QG-10 | 最终配置与可追溯性 | 已签署随工单 |
 
-The existing manufacturing `QG-01` through `QG-14` traveller remains the
-execution record; this document defines the quality acceptance semantics around
-it.
+现有制造的 `QG-01` 至 `QG-14` 随工单仍是执行记录；本文档定义围绕它的质量验收
+语义。

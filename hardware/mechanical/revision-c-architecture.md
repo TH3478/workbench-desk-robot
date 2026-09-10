@@ -1,21 +1,34 @@
-# Revision C mobile manipulator architecture
+# Revision C 移动操作机器人架构
 
-Revision C is a household utility robot concept, not the earlier tabletop enclosure. The lower platform carries the battery, drive, ballast, brakes, and deployable stabilizers. A dual-guide, dual-screw lift raises the complete upper body and arm while normally-closed brakes and mechanical lock pins prevent uncontrolled descent.
+Revision C 是家用实用机器人概念，而不是早期的桌面外壳。下层平台承载电池、驱动、
+配重、制动器与可展开的稳定支脚。双导轨、双丝杠升降机构升起整个上体与机械臂，
+常闭制动器与机械锁销防止失控下降。
 
-## Seven-axis arm
+## 七轴机械臂
 
-The arm has seven revolute axes excluding the gripper: base yaw, shoulder pitch, shoulder roll, elbow pitch, forearm roll, wrist pitch, and tool roll. The redundant axis supports reaching around counters and doors without forcing the wrist into poor orientations. Joint torque values in `design-spec.json` are planning classes, not certified continuous ratings.
+机械臂除夹爪外共有七个旋转轴：基座偏航、肩部俯仰、肩部横滚、肘部俯仰、前臂
+横滚、腕部俯仰与工具横滚。冗余轴支持绕过台面与门进行够取，而不必迫使腕部处于
+不佳姿态。`design-spec.json` 中的关节扭矩值是规划类别，不是经认证的连续额定值。
 
-The target payload envelope is deliberately pose-dependent: 2 kg continuously at 650 mm reach, or 3 kg at 400 mm under reduced speed. The quick-change wrist carries an adaptive gripper, compliant cleaning head, or a removable food-contact tool. Cables remain inside the structural links; exposed spiral harnesses are not part of the consumer design.
+目标负载包络刻意与位姿相关：650 mm 臂展下连续 2 kg，或降速下 400 mm 处 3 kg。
+快换腕部携带自适应夹爪、柔顺清洁头或可拆卸的食品接触工具。线缆保持在结构连杆
+内部；外露的螺旋线束不属于消费级设计。
 
-## Lift and stability
+## 升降与稳定性
 
-The 250 mm lift uses two synchronized screws and four guides. Both encoders, upper/lower hard limits, motor-current pinch detection, normally-closed brakes, and mechanical lock pins are required. Raising the body or extending the arm reduces drive speed. Manipulation beyond the low-speed envelope requires wheel brakes and deployed stabilizers.
+250 mm 升降机构使用两根同步丝杠与四根导轨。双编码器、上/下硬限位、电机电流
+夹挤检测、常闭制动器与机械锁销均为必需。升起机身或伸展机械臂会降低行驶速度。
+超出低速包络的操作需要车轮制动与展开的稳定支脚。
 
-The driving footprint fits an indoor doorway; the larger stabilization polygon is only deployed while stationary. Analytical tip margin is a design screen. Release still requires maximum-reach pull testing, lift synchronization tests, emergency-stop tests, and floor-friction trials with a serialized prototype.
+行驶占地轮廓可穿过室内门洞；更大的稳定多边形仅在静止时展开。分析倾覆裕量只是
+设计筛选。发布仍需要用序列化原型进行最大臂展拉拔测试、升降同步测试、急停测试
+与地面摩擦试验。
 
-## Domestic task boundary
+## 家务任务边界
 
-Parcel handling covers indoor pickup from a reachable shelf or doorstep and delivery to the onboard bay. It does not include stairs, uncontrolled elevators, locked doors, or public-road operation. Cleaning uses force-limited removable tools. Cooking assistance is restricted to supervised induction work with 316L stainless/PEEK tools, a thermal wrist barrier, washable covers, spill detection, and no open flame. The robot does not carry people, boiling liquid, or an unrestrained hot pan.
+快递处理涵盖从可触及的置物架或门口进行室内收取并送至车载货舱。它不包括楼梯、
+无管控电梯、上锁的门或公共道路运行。清洁使用力受限的可拆卸工具。烹饪辅助仅限
+于有人监督的电磁加热作业，使用 316L 不锈钢/PEEK 工具，并配热隔离腕部屏障、可
+清洗护罩与溢出检测，且无明火。机器人不载人、不搬运沸液或未固定的热锅。
 
-Status: `CONCEPT_PHYSICAL_VALIDATION_REQUIRED`.
+状态：`CONCEPT_PHYSICAL_VALIDATION_REQUIRED`。

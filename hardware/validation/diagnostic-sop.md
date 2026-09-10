@@ -1,29 +1,26 @@
-# Field hardware diagnostic SOP
+# 现场硬件诊断 SOP
 
-## Safety first
+## 安全优先
 
-1. Stop motion, remove the enable request, and verify both E-stop channels are
-   open before probing. Never defeat a guard or safety interlock.
-2. Record serial, hardware revision, firmware/config hash, battery voltage,
-   ambient temperature, and the exact symptom before changing anything.
-3. Use current-limited power for board-level diagnosis. Escalate smoke, heat,
-   exposed conductors, repeated over-current, or failed isolation to the Safety
-   Owner and quarantine the unit.
+1. 停止运动、撤除使能请求，并在探测前确认两个 E-stop 通道均已断开。
+   绝不解除防护装置或安全联锁。
+2. 在改动任何东西之前，记录序列号、硬件修订版本、固件/配置哈希、电池
+   电压、环境温度和确切症状。
+3. 板级诊断使用限流电源。遇到冒烟、发热、裸露导体、反复过流或绝缘失效，
+   上报 Safety Owner 并隔离该设备。
 
-## Decision tree
+## 决策树
 
-- **No power:** inspect connector keying and fuse, measure input at the board,
-  then verify 12 V, 3.3 V and Jetson rails in order. Do not bypass protection.
-- **CAN offline:** capture bus activity, check termination and isolated supply,
-  then run the controlled loopback. Replace the harness only after pinout and
-  continuity are recorded.
-- **One joint/sensor missing:** stop, identify the channel, inspect connector
-  retention, capture sensor supply and signal, and apply the degraded-mode rule.
-- **Unexpected enable or E-stop failure:** remove power, quarantine the unit,
-  and execute the dual-channel truth-table test. This is a safety failure, not a
-  software retry.
-- **Thermal rise:** stop at the first limit breach, capture current and surface
-  temperature, inspect airflow/thermal interfaces, and open a QA defect.
+- **无电源：** 检查连接器防呆和保险丝，测量板端输入，然后依次确认 12 V、
+  3.3 V 和 Jetson 电源轨。不得绕过保护。
+- **CAN 离线：** 抓取总线活动，检查终端电阻和隔离电源，然后运行受控回环
+  测试。只有在记录针脚定义和导通性之后才能更换线束。
+- **单个关节/传感器缺失：** 停止、识别通道、检查连接器保持力、抓取传感器
+  电源和信号，并应用降级模式规则。
+- **意外使能或 E-stop 失效：** 断开电源、隔离设备，并执行双通道真值表
+  测试。这是安全失效，不是软件重试。
+- **温升：** 在第一次越过限值时停止，抓取电流和表面温度，检查风道/热界面，
+  并开立 QA 缺陷。
 
-Every branch ends with a diagnostic record, disposition (`REPAIR`, `RETEST`,
-`SCRAP`, or `ESCALATE`) and linked evidence path.
+每个分支都以诊断记录、处置（`REPAIR`、`RETEST`、`SCRAP` 或 `ESCALATE`）和
+关联的证据路径结束。

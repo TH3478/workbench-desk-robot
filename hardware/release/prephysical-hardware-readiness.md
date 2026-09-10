@@ -1,45 +1,32 @@
-# Pre-physical hardware readiness
+# 实物硬件之前的就绪度
 
-This package controls every system-level decision that can be prepared before
-serialized hardware exists. A candidate is not an approved AVL line, and no
-supplier configuration, safety decision, FEA result, or measured performance is
-inferred from a candidate name.
+本工程包控制在序列化硬件存在之前可以准备的每个系统级决策。候选不是经批准的
+AVL 行，任何供应商配置、安全决策、FEA 结果或实测性能都不能从候选名称推断出来。
 
-## Power boundaries
+## 功率边界
 
-The main 48 V battery reservation is at least 2 kWh, 80 A continuous and 120 A
-peak. High-power modes are mutually exclusive:
+主 48 V 电池预留至少 2 kWh、80 A 连续与 120 A 峰值。高功率模式互斥：
 
-- `ARM_OPERATION`: arm controllers only; outriggers loaded, lift locked and
-  drive brakes applied.
-- `TRANSPORT`: four steer-drive modules only; deck low, arms stowed/disabled and
-  outriggers retracted.
-- `LIFT`: dual-screw lift only; arms disabled and drive brakes applied.
+- `ARM_OPERATION`：仅机械臂控制器；支腿承力、升降锁定且行驶制动施加。
+- `TRANSPORT`：仅四个转向驱动模块；平台低位、机械臂收起/禁用且支腿收回。
+- `LIFT`：仅双丝杠升降机构；机械臂禁用且行驶制动施加。
 
-The controller PCB U2 240 W isolated rail powers Jetson, logic and low-power
-auxiliaries only. It never powers the seven-axis arms, full-system traction or
-lifting columns. Arm power is a separate branch and remains conditional on the
-purchased controller input: native DC when supported, otherwise a reviewed
-isolated inverter.
+控制器 PCB 上 U2 的 240 W 隔离电源轨只给 Jetson、逻辑与低功率辅助供电。它绝不
+给七轴机械臂、全系统牵引或升降柱供电。机械臂电源是独立分支，并取决于所购控制
+器的输入：支持原生直流时使用原生直流，否则使用经评审的隔离逆变器。
 
-## Freeze sequence
+## 冻结顺序
 
-1. Select the purchased seven-axis arm revision and collect base, load, power,
-   safety and controller documents.
-2. Freeze the dual-screw lift actuator ordering codes, four-guide interfaces and
-   independent mechanical locks.
-3. Match all four 48 V steer-drive motor, gearbox, brake, wheel, bearing,
-   suspension and controller curves.
-4. Select battery, BMS, contactors, fuse, precharge, disconnect and charger as
-   one coordinated protection system.
-5. Execute the controller U2 ECO only after its exact module drawing and thermal
-   design are accepted.
-6. Complete childboard schematic, regeneration, safety gates, layout and thermal
-   design before promoting any candidate to an approved MPN.
-7. Release harness drawings only after every mating connector and crimp tooling
-   is confirmed against the purchased equipment.
+1. 选定所购七轴机械臂版本，并收集底座、负载、功率、安全与控制器文档。
+2. 冻结双丝杠升降执行器的订货代码、四导轨接口与独立机械锁。
+3. 匹配全部四个 48 V 转向驱动的电机、减速箱、制动器、车轮、轴承、悬架与控制器
+   曲线。
+4. 将电池、BMS、接触器、保险丝、预充、断开装置与充电器作为一个协调的保护系统
+   统一选型。
+5. 只有在 U2 的确切模块图纸与热设计被接受之后，才执行控制器 U2 ECO。
+6. 在将任何候选提升为经批准的 MPN 之前，完成子板原理图、再生、安全闸门、布局
+   与热设计。
+7. 只有在每个对插连接器与压接模具都对照所购设备确认之后，才发布线束图纸。
 
-The next physical stage supplies measured mass/CG, proof load, stability,
-thermal, power transient, insulation, safety timing, harness pull/continuity,
-collision, braking and endurance evidence. Until then the release status stays
-blocked by design.
+下一实物阶段将提供实测质量/重心、验证载荷、稳定性、热、功率瞬态、绝缘、安全
+时序、线束拉拔/导通、碰撞、制动与耐久证据。在此之前，发布状态按设计保持阻塞。

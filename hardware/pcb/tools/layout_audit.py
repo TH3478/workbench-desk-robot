@@ -22,8 +22,8 @@ HIGH_CURRENT_WIDTHS = {
     "JETSON_12V": 1.5,
 }
 
-# Fine-pitch power-controller pads and Kelvin connections need a bounded escape
-# before the route reaches its nominal current-carrying width.
+# 细间距电源控制器焊盘与 Kelvin 连接在布线达到标称载流宽度之前，
+# 需要一段受限的引出线。
 NECKDOWN_RULES = {
     "VBAT_FUSED": {
         "min_width_mm": 0.2,
@@ -124,7 +124,7 @@ NUMBER = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 
 
 def blocks(text: str, token: str) -> list[str]:
-    """Return balanced S-expression blocks beginning with ``token``."""
+    """返回以 ``token`` 开头的平衡 S 表达式块。"""
     result: list[str] = []
     cursor = 0
     while (start := text.find(token, cursor)) >= 0:
@@ -840,7 +840,7 @@ def _u3_output_via_check(pads: list[dict[str, Any]], vias: list[dict[str, Any]])
 def _can_testpoint_stub_check(
     pads: list[dict[str, Any]], segments: list[dict[str, Any]]
 ) -> tuple[bool, dict[str, Any]]:
-    """Check that CAN probe pads use short, paired, same-layer branches."""
+    """检查 CAN 探针焊盘使用短、成对、同层的分支走线。"""
     targets = (("TP6", "CANH"), ("TP7", "CANL"))
     target_references = {reference for reference, _ in targets}
     details: dict[str, Any] = {

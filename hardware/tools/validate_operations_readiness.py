@@ -21,7 +21,7 @@ def read_csv(relative: str) -> list[dict[str, str]]:
 
 
 def validate_bms_state_machine() -> dict[str, Any]:
-    """Run the power-package validator through the existing readiness gate."""
+    """通过现有就绪闸门运行电源包验证器。"""
     spec = importlib.util.spec_from_file_location("workbench_bms_state_machine_validator", BMS_VALIDATOR)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load BMS validator: {BMS_VALIDATOR}")

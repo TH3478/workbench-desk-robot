@@ -1,24 +1,22 @@
-# cameras
+# 相机
 
-Camera integrations that feed validated `observation.schema.json` producers.
+相机集成，为经过验证的 `observation.schema.json` 生产者提供数据。
 
-Selected prototype baseline:
-- one head-mounted Intel RealSense D435 over USB 3;
-- Linux `uvcvideo`/V4L2 kernel boundary;
-- `librealsense2` userspace depth processing;
-- ROS 2 `realsense2_camera` device node;
-- exact serial, stream modes, JetPack-compatible package versions and physical
-  calibration remain `NOT_EXECUTED` until hardware is available.
+已选原型基线：
+- 一个头部安装的 Intel RealSense D435，经 USB 3 连接；
+- Linux `uvcvideo`/V4L2 内核边界；
+- `librealsense2` 用户空间深度处理；
+- ROS 2 `realsense2_camera` 设备节点；
+- 确切的序列号、码流模式、兼容 JetPack 的包版本和物理标定在硬件到位前
+  保持 `NOT_EXECUTED`。
 
-Other integrations:
-- USB camera (V4L2 / OpenCV)
-- event camera (stub for future)
+其他集成：
+- USB 相机（V4L2 / OpenCV）
+- 事件相机（为将来预留的桩）
 
-**What to implement**: a ROS 2 node that reads from the device and publishes
-`/observations` with the same `observation.schema.json` contract used in
-Gazebo simulation.
+**待实现**：一个 ROS 2 节点，从设备读取数据，并以与 Gazebo 仿真相同的
+`observation.schema.json` 契约发布 `/observations`。
 
-Calibration files go in `cameras/calibration/`. Gazebo intrinsics and frame
-geometry are not valid physical calibration. The BSP selection and gates are
-defined in `bsp/sensors/camera-head.yaml` and
-`docs/architecture/robot-bsp-camera-v0.1.md`.
+标定文件放在 `cameras/calibration/`。Gazebo 的内参与坐标系几何不是有效的
+物理标定。BSP 选型和闸门定义于 `bsp/sensors/camera-head.yaml` 和
+`docs/architecture/robot-bsp-camera-v0.1.md`。

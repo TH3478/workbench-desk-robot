@@ -1,45 +1,42 @@
-# Fixtures, layout, and quality plan
+# 固定装置、布局与质量计划
 
-## Fixture list
+## 固定装置清单
 
-| ID | Fixture | Capability / acceptance | Calibration |
+| ID | 固定装置 | 能力 / 验收 | 校准 |
 |---|---|---|---|
-| FX-01 | Datum and motor alignment nest | motor axes +/-0.25 mm, chassis flatness 0.30 mm | annual + daily check piece |
-| FX-02 | PCBA guarded power jig | 0-60 V/10 A current limit, Kelvin rail measurement, emergency disconnect | annual; daily self-test |
-| FX-03 | CAN loop fixture | selectable dual 120 ohm termination, CAN FD error counters, shield check | annual; golden board daily |
-| FX-04 | Isolation/ground-bond fixture | barrier resistance and 4-wire bond below 0.10 ohm | annual; zero before shift |
-| FX-05 | E-stop exerciser | trip latency capture, latch/reset proof, dry-contact fault injection | six months; daily golden unit |
-| FX-06 | Harness continuity bed | pin-to-pin, shorts, keying, 500 V insulation where approved | annual; check harness daily |
-| FX-07 | Final functional cart | restrained wheels, thermal probes, camera, barcode, fixture controller | annual; golden unit daily |
-| FX-08 | Packaging drop setup | ISTA-style corner/edge/face sequence with dummy instrumented unit | before validation campaign |
+| FX-01 | 基准与电机对位定位巢 | 电机轴 +/-0.25 mm，机箱平面度 0.30 mm | 年度 + 每日检具 |
+| FX-02 | PCBA 防护型供电夹具 | 0-60 V/10 A 限流、开尔文电源轨测量、急停断开 | 年度；每日自检 |
+| FX-03 | CAN 环回固定装置 | 可选择的双 120 欧姆终端、CAN FD 错误计数器、屏蔽检查 | 年度；每日黄金板 |
+| FX-04 | 隔离/接地连通固定装置 | 屏障电阻与四线接地连通低于 0.10 欧姆 | 年度；每班次前归零 |
+| FX-05 | 急停动作器 | 跳闸延迟捕获、闭锁/复位验证、干接点故障注入 | 每六个月；每日黄金样机 |
+| FX-06 | 线束导通测试台 | 引脚对引脚、短路、防呆、经批准处的 500 V 绝缘 | 年度；每日检查线束 |
+| FX-07 | 终检功能台车 | 受约束车轮、温度探头、相机、条码、固定装置控制器 | 年度；每日黄金样机 |
+| FX-08 | 包装跌落装置 | 使用带传感器假机的 ISTA 式角/棱/面跌落序列 | 验证活动开始前 |
 
-Fixture software must record its version and reject an unknown product revision.
-Measurement uncertainty must be no more than 25% of the applicable tolerance.
+固定装置软件必须记录自身版本，并拒绝未知的产品版本。测量不确定度不得超过
+适用公差的 25%。
 
-## Quality gates
+## 质量闸门
 
-| Gate | Required checks | Reaction on failure |
+| 闸门 | 必检项目 | 失败处置 |
 |---|---|---|
-| QG-01/02 | supplier lot, revision, quantity, damage, kit completeness | quarantine lot / correct kit |
-| QG-03/04 | paste coverage, placement, oven profile | stop SMT, clean/reprint or MRB |
-| QG-05 | AOI plus polarity and isolation barrier | defect code, controlled rework, re-AOI |
-| QG-06 | shorts, rail accuracy/ripple, input current, CAN, isolation | guarded power-off, MRB, full retest |
-| QG-07/08 | alignment, torque, board clearance, protective bond | disassemble/rework, repeat gate |
-| QG-09/10 | continuity, latch, strain relief, routing, gaps, vents | harness/shell rework, repeat inspection |
-| QG-11 | E-stop trip, latch and deliberate reset | line stop and safety-owner escalation |
-| QG-12 | interfaces, interlocks, 30-minute thermal soak | defect isolation, repair, full test restart |
-| QG-13/14 | traveller closure, labels, cosmetics, pack contents | correct before release |
+| QG-01/02 | 供应商批次、版本、数量、损伤、配料完整性 | 隔离批次 / 修正配料 |
+| QG-03/04 | 锡膏覆盖率、贴装、回流炉温度曲线 | 停 SMT，清洗/重印或转 MRB |
+| QG-05 | AOI 加极性与隔离屏障 | 记录缺陷代码、受控返工、重新 AOI |
+| QG-06 | 短路、电源轨精度/纹波、输入电流、CAN、隔离 | 防护断电、转 MRB、全面复测 |
+| QG-07/08 | 对位、扭矩、板卡净空、保护接地 | 拆解/返工，重复该闸门 |
+| QG-09/10 | 导通、锁扣、应力消除、布线走向、间隙、散热孔 | 线束/外壳返工，重复检验 |
+| QG-11 | 急停跳闸、闭锁与有意复位 | 停线并上报 Safety Owner |
+| QG-12 | 接口、互锁、30 分钟热浸泡 | 缺陷隔离、维修、完整测试重启 |
+| QG-13/14 | 随工单闭合、标签、外观、包装内容 | 发布前修正 |
 
-## Line layout
+## 产线布局
 
-Material flows one way in a U-shaped cell: receiving supermarket -> ESD SMT/PCBA
-area -> guarded electrical test -> mechanical benches -> safety/functional enclosure
--> final inspection -> clean packing. MRB/quarantine is physically fenced beside
-inspection and never lies on the forward material path. Battery charging and storage
-use a fire-rated cabinet away from exits. Minimum aisle is 1.2 m; the E-stop and
-disconnect at powered test remain reachable without entering the guarded zone.
+物料在 U 型单元内单向流动：收货超市 -> ESD SMT/PCBA 区 -> 防护型电气测试 ->
+机械装配台 -> 安全/功能罩区 -> 终检 -> 洁净包装。MRB/隔离区以物理围栏设在
+检验区旁，绝不位于物料正向流动路径上。电池充电与存放使用远离出口的防火柜。
+通道最小宽度 1.2 m；通电测试处的急停与断开装置无需进入防护区即可触及。
 
-At the 10-minute bottleneck the theoretical output is 48 units/shift. Pilot planning
-uses 70% availability and 85% first-pass yield: 28.6 good units/shift before learning
-curve and material losses. Actual labour and yield replace these planning assumptions
-after the 20-unit pilot.
+在 10 分钟瓶颈工序下，理论产能为 48 台/班次。试产计划采用 70% 设备可用率与
+85% 直通率：在学习曲线与物料损耗之前为 28.6 台良品/班次。20 台试产完成后，
+实际工时与良率将取代这些计划假设。

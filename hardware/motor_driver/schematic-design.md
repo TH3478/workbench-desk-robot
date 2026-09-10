@@ -1,91 +1,70 @@
-# Traction childboard candidate schematic contract
+# 牵引子板候选原理图契约
 
-**Status: ARCHITECTURE-ONLY / DO_NOT_ORDER**
+**状态：ARCHITECTURE-ONLY / DO_NOT_ORDER**
 
-This document is the controlled bridge from the functional architecture to a
-future component-level KiCad schematic. It is deliberately a wiring contract,
-not evidence that an orderable schematic exists. `net-topology.csv` and
-`safety-gate-connectivity.csv` are the machine-readable sources of truth for
-the candidate connections. Every MPN, package, land pattern, rating and value
-remains pending in `bom.csv` and `component-approval-register.csv`.
+本文档是从功能架构通往未来元件级 KiCad 原理图的受控桥梁。它刻意只是一份接线
+契约，而不是存在可下单原理图的证据。`net-topology.csv` 与
+`safety-gate-connectivity.csv` 是候选连接的机器可读真实来源。每个 MPN、封装、
+焊盘图形、额定值与参数都仍在 `bom.csv` 与 `component-approval-register.csv` 中
+待定。
 
-## Power and return topology
+## 电源与回流拓扑
 
-1. `J_PWR.1/.2` receive the controller J2 12 V auxiliary pair. Both conductors
-   enter `F1` before any protected copper expands. `Q1` is a candidate
-   reverse-polarity/reverse-current blocker; its output is `VM_PROTECTED`.
-2. `VM_PROTECTED` feeds the four `U1` VM pins, the local bulk bank, the
-   candidate clamp/brake network and the candidate `U6` logic regulator. The
-   source must never be used as a regenerative sink until the energy review
-   closes `MTR-REGEN`.
-3. `J_PWR.3/.4` are the high-current `GND_MOTOR` return. `PGND1..4`, motor
-   commutation capacitors and the bulk-bank negative return to one low-
-   impedance `STAR_GND_01` near the power entry. No motor-current return may
-   use a logic or CAN-isolated trace.
-4. `U6` is a functional candidate for the local regulated `VCC_LOGIC` rail.
-   `U1.VCC`, the local MCU, both safety gates and the primary side of the CAN
-   interface return to `GND_LOGIC`. `GND_LOGIC` joins `GND_MOTOR` exactly once
-   at `STAR_GND_01`; an open star must remove logic permission rather than
-   create a floating enable.
-5. `U1.DVDD` is decoupled by `C3` as `DVDD_5V` and has no external load until
-   the approved driver datasheet review confirms its voltage, current and
-   startup behavior. Encoder supplies use a separately current-limited
-   `VCC_LOGIC` branch; their voltage and short-circuit behavior remain
-   candidate-only.
-6. `U7` is a functional candidate for isolated CAN-side power. Its secondary
-   `VCC_CAN_ISO/GND_CAN_ISO` island feeds only the isolated side of `U3`, CAN
-   protection and `J_CAN.3`. There is no DC, shield, capacitor or test-point
-   connection to `GND_MOTOR` or `GND_LOGIC` without an approved EMC/isolation
-   design.
-7. `U1.OUT1/OUT2` close only to `J_ML.1/.2`, and `U1.OUT3/OUT4` close only to
-   `J_MR.1/.2`. Each output is a separate wide switching path; there is no
-   shared motor terminal or logic-domain return.
-8. `J_ENC_L/J_ENC_R` receive separately protected `ENC_*_VCC` branches and
-   explicit `ENC_*_GND` returns to `GND_LOGIC`. All four quadrature channels
-   remain separate through the controller inputs and local protection.
-9. `U1.IPROPI1..4` route to four independent ADC inputs. They must not be wired
-   together or collapsed into a single `ADC_CURRENT` net. The selected scaling,
-   filtering, ADC protection and hardware current limit remain part of
-   `MTR-CURRENT` closure.
+1. `J_PWR.1/.2` 接收控制器 J2 的 12 V 辅助线对。两根导线在受保护铜面扩展之前先
+   进入 `F1`。`Q1` 是候选的反接/反向电流阻断器；其输出为 `VM_PROTECTED`。
+2. `VM_PROTECTED` 为四个 `U1` VM 引脚、本地储能电容组、候选钳位/制动网络与候选
+   `U6` 逻辑稳压器供电。在能量评审关闭 `MTR-REGEN` 之前，该电源绝不可用作再生
+   泄放。
+3. `J_PWR.3/.4` 是大电流的 `GND_MOTOR` 回流。`PGND1..4`、电机换相电容与储能电容
+   组的负极都回流到电源入口附近的一个低阻抗 `STAR_GND_01`。任何电机电流回流都
+   不得使用逻辑或 CAN 隔离走线。
+4. `U6` 是本地稳压 `VCC_LOGIC` 电源轨的功能候选。`U1.VCC`、本地 MCU、两个安全
+   闸门与 CAN 接口的一次侧都回流到 `GND_LOGIC`。`GND_LOGIC` 只在 `STAR_GND_01`
+   处与 `GND_MOTOR` 相接一次；星点断开时必须移除逻辑许可，而不是产生浮空的使能。
+5. `U1.DVDD` 由 `C3` 去耦为 `DVDD_5V`，在经批准的驱动器数据手册评审确认其电压、
+   电流与启动行为之前不接外部负载。编码器供电使用单独限流的 `VCC_LOGIC` 分支；
+   其电压与短路行为仍仅是候选。
+6. `U7` 是隔离 CAN 侧电源的功能候选。其二次侧 `VCC_CAN_ISO/GND_CAN_ISO` 岛只给
+   `U3` 的隔离侧、CAN 保护与 `J_CAN.3` 供电。在没有经批准的 EMC/隔离设计的情况
+   下，不得与 `GND_MOTOR` 或 `GND_LOGIC` 存在任何直流、屏蔽、电容或测试点连接。
+7. `U1.OUT1/OUT2` 只闭合到 `J_ML.1/.2`，`U1.OUT3/OUT4` 只闭合到 `J_MR.1/.2`。
+   每个输出都是一条独立的宽开关路径；不存在共享的电机端子或逻辑域回流。
+8. `J_ENC_L/J_ENC_R` 接收分别保护的 `ENC_*_VCC` 分支与显式的 `ENC_*_GND` 回流至
+   `GND_LOGIC`。全部四个正交通道经过控制器输入与本地保护后仍保持分离。
+9. `U1.IPROPI1..4` 接到四个独立的 ADC 输入。它们不得并接或合并为单一
+   `ADC_CURRENT` 网络。所选的比例缩放、滤波、ADC 保护与硬件限流仍是
+   `MTR-CURRENT` 关闭的一部分。
 
-## Safety and fault topology
+## 安全与故障拓扑
 
-* `J_SAFE` is an **ECO endpoint** from the J10/K1/K2 dual-channel safety chain,
-  not a claim that the current controller J11 is compatible.
-  `SAFE_ENABLE_A/SAFE_RETURN_A` enter independent candidate gate
-  `U4`; its only bridge-permission output is `NSLEEP_SAFE_A` to `U1.25`.
-* `SAFE_ENABLE_B/SAFE_RETURN_B` enter independent candidate gate `U5`; its
-  outputs separately gate all four `U1.ENx` pins (`U1.30..33`). There is no
-  shared permissive net, MCU GPIO, CAN command or reset shortcut between the
-  channels.
-* `U1.nFAULT` (`U1.41`) is an open-drain diagnostic **and** a hardware inhibit
-  source. It has two separately biased/guarded fan-outs: one into `U4` and one
-  into `U5`. A low fault, missing driver supply, missing gate supply, broken
-  return or undefined fan-out defaults both gate outputs low and latches until
-  the upstream manual-reset sequence is complete. The MCU may observe the
-  fault, but it cannot clear or recreate either safety permission.
-  A pull-up-only diagnostic wire is insufficient: the selected interface must
-  detect an open or shorted `nFAULT` conductor and map either condition to the
-  same inhibit state (`open_or_short_inhibits` in the path table).
-* `POWER_GOOD_LOCAL` is checked independently by both candidate safety gates;
-  brownout therefore cannot leave a stale high `nSLEEP` or `ENx` condition.
-  The exact gate silicon, pull-up/pull-down values, timing, diagnostic
-  coverage and reset circuitry are release blockers, not inferred here.
+* `J_SAFE` 是来自 J10/K1/K2 双通道安全链的 **ECO 端点**，并不声称当前控制器
+  J11 兼容。`SAFE_ENABLE_A/SAFE_RETURN_A` 进入独立候选闸门 `U4`；其唯一的桥许可
+  输出是通往 `U1.25` 的 `NSLEEP_SAFE_A`。
+* `SAFE_ENABLE_B/SAFE_RETURN_B` 进入独立候选闸门 `U5`；其输出分别闸控全部四个
+  `U1.ENx` 引脚（`U1.30..33`）。两个通道之间没有共享的许可网络、MCU GPIO、CAN
+  命令或复位捷径。
+* `U1.nFAULT`（`U1.41`）是开漏诊断源，**同时**是硬件抑制源。它有两个分别偏置/
+  防护的扇出：一个进入 `U4`，一个进入 `U5`。低电平故障、驱动器供电缺失、闸门
+  供电缺失、回流断开或未定义的扇出都会使两个闸门输出默认低电平并闭锁，直到
+  上游手动复位序列完成。MCU 可以观测故障，但不能清除或重建任一安全许可。
+  仅上拉的诊断线是不够的：所选接口必须能检测 `nFAULT` 导线的开路或短路，并把
+  两种情况都映射到同一抑制状态（路径表中的 `open_or_short_inhibits`）。
+* `POWER_GOOD_LOCAL` 由两个候选安全闸门独立检查；因此掉电不会留下陈旧的高电平
+  `nSLEEP` 或 `ENx` 状态。确切的闸门芯片、上拉/下拉值、时序、诊断覆盖率与复位
+  电路是发布阻塞项，不在此推断。
 
-## Detailed schematic entry criteria
+## 详细原理图进入标准
 
-Before `MTR-SCHEMATIC` can close, the owner must replace this candidate contract
-with a KiCad component-level schematic that has:
+在 `MTR-SCHEMATIC` 可以关闭之前，Owner 必须用一份 KiCad 元件级原理图替换本候选
+契约，该原理图应具备：
 
-* approved symbols and footprints for `U1`, `U2`, `U3`, `U4/U5`, `U6/U7`, all
-  protection, bypass, current-sense and connector parts;
-* explicit net labels matching both CSV files, including the single
-  `STAR_GND_01` join and the isolated CAN barrier;
-* independent A/B `nFAULT` inhibit paths shown through the selected safety
-  gates, with default-state calculations and a manual-reset latch;
-* power, creepage, return-current, thermal-pad and regenerative clamp notes;
-* ERC/DRC/netlist evidence generated from the same revision.
+* 针对 `U1`、`U2`、`U3`、`U4/U5`、`U6/U7`、所有保护、旁路、电流检测与连接器
+  零件，已批准的符号与封装；
+* 与两份 CSV 文件匹配的显式网络标签，包括单一的 `STAR_GND_01` 汇接点与隔离 CAN
+  屏障；
+* 经过所选安全闸门的独立 A/B `nFAULT` 抑制路径，附默认状态计算与手动复位闭锁；
+* 电源、爬电、回流电流、散热焊盘与再生钳位说明；
+* 从同一版本生成的 ERC/DRC/网表证据。
 
-Until those artifacts and external approvals exist, this package remains
-`ORDER_RELEASE_BLOCKED`; passing the deterministic validator only proves that
-the candidate contract is internally consistent.
+在这些工件与外部批准存在之前，本工程包保持 `ORDER_RELEASE_BLOCKED`；通过确定性
+校验器只能证明候选契约内部一致。

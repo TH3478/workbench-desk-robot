@@ -1,71 +1,62 @@
-# Field support operating model
+# 现场支持运营模型
 
-Issue 27 defines support from site acceptance through return, repair, and fleet
-learning. It assumes remote-first diagnosis but never asks a customer to bypass a
-guard, defeat an interlock, open a live enclosure, or handle a damaged battery.
+Issue 27 定义了从现场验收到返修、维修和机群学习的支持流程。它假设远程
+优先诊断，但绝不要求客户绕过防护、解除联锁、打开带电机柜或处理损坏的
+电池。
 
-## Intake record
+## 受理记录
 
-Capture case ID, customer/site, contact, unit serial, hardware revision, software
-and configuration hashes, deployment date, operating hours, symptoms, time first
-seen, frequency, recent changes, environment, safety impact, photos/video, logs,
-and actions already attempted. Preserve original timestamps and redact credentials
-or personal data before attaching evidence to the engineering system.
+记录案例 ID、客户/现场、联系人、设备序列号、硬件修订版本、软件和配置
+哈希、部署日期、运行小时数、症状、首次发现时间、频次、近期变更、环境、
+安全影响、照片/视频、日志和已尝试过的操作。在把证据附加到工程系统之前，
+保留原始时间戳，并对凭据或个人数据做脱敏处理。
 
-## Severity and response
+## 严重级别与响应
 
-| Severity | Definition | Acknowledge | Action |
+| 严重级别 | 定义 | 确认时限 | 动作 |
 |---|---|---:|---|
-| S0 | injury, smoke/fire, battery damage, uncontrolled motion, safety defeat | 15 min | stop use, isolate area if safe, emergency escalation |
-| S1 | safety function unavailable or fleet-stopping defect | 1 h | contain affected units, incident lead, daily update |
-| S2 | major function unavailable with safe workaround | 4 business h | diagnose, plan restore, track workaround |
-| S3 | minor defect, question, cosmetic/documentation issue | 1 business day | normal queue and planned correction |
+| S0 | 伤害、冒烟/起火、电池损坏、不受控运动、安全防护失效 | 15 分钟 | 停止使用，安全时隔离区域，紧急上报 |
+| S1 | 安全功能不可用或导致机群停运的缺陷 | 1 小时 | 遏制受影响设备，指定事件负责人，每日更新 |
+| S2 | 主要功能不可用但有安全的临时方案 | 4 个营业小时 | 诊断、计划恢复、跟踪临时方案 |
+| S3 | 轻微缺陷、疑问、外观/文档问题 | 1 个营业日 | 常规队列和计划性修正 |
 
-Targets are operating commitments only after staffing and contracts approve them.
-For S0/S1, Support does not wait for full root cause before issuing containment.
-Battery swelling, heat, odor, leakage, impact, or water ingress requires stop-use
-and the supplier/emergency procedure; do not ship a damaged battery by normal courier.
+这些时限只有在人员配备和合同批准后才成为运营承诺。对 S0/S1，支持团队
+不必等完整根因再发布遏制措施。电池鼓包、发热、异味、泄漏、撞击或进水
+要求停止使用并执行供应商/应急程序；不得用普通快递寄送损坏的电池。
 
-## Diagnostic ladder
+## 诊断阶梯
 
-1. Confirm safety, identity, revision, power state, and reproducibility.
-2. Export the supported diagnostic bundle and validate its checksum/time range.
-3. Compare alarms, BMS state, power rails, temperatures, network, CAN, and services.
-4. Reproduce with the same released configuration in a safe bench or simulation.
-5. Apply only approved reversible recovery steps; record before/after evidence.
-6. Escalate with a concise timeline, suspected subsystem, logs, and tested hypotheses.
-7. Replace modules or authorize return only through serial-controlled procedures.
+1. 确认安全、身份、修订版本、电源状态和可复现性。
+2. 导出受支持的诊断包，并校验其校验和/时间范围。
+3. 对比告警、BMS 状态、电源轨、温度、网络、CAN 和服务。
+4. 在安全台架或仿真中用相同的发布配置复现。
+5. 只应用经批准的可逆恢复步骤；记录前后证据。
+6. 上报时附简明时间线、疑似子系统、日志和已测试的假设。
+7. 更换模块或批准返修必须走序列号受控流程。
 
-Remote access requires customer authorization, least privilege, session logging,
-time-bounded credentials, and revocation at case closure. Support never requests
-passwords in tickets. Logs and returned storage follow retention and privacy policy.
+远程访问需要客户授权、最小权限、会话日志、限时凭据和案例关闭时撤销。
+支持团队绝不在工单中索要密码。日志和退回的存储介质遵循保留与隐私政策。
 
-## Recovery, rollback, and return
+## 恢复、回滚与返修
 
-Use an approved release artifact and verify signature/hash before update. Back up
-configuration, record current versions, define success/abort criteria, keep stable
-power, and never update during an unresolved power or thermal fault. Rollback is a
-controlled release action, not an arbitrary package downgrade. After recovery,
-repeat the affected acceptance tests and observe long enough to catch recurrence.
+使用经批准的发布产物，更新前验证签名/哈希。备份配置、记录当前版本、
+定义成功/中止标准、保持供电稳定，绝不在未解决的电源或热故障期间更新。
+回滚是受控的发布动作，不是随意的软件包降级。恢复后，重复受影响的验收
+测试并观察足够长的时间以发现复发。
 
-RMA authorization records unit and module serials, battery status, decontamination,
-packaging, carrier restrictions, accessories, chain of custody, incoming inspection,
-failure analysis, disposition, repair parts, outgoing test, and returned configuration.
-No-fault-found units require improved diagnostics or reproduction evidence rather
-than silent closure.
+RMA 授权要记录设备和模块序列号、电池状态、去污、包装、承运商限制、
+附件、保管链、入厂检验、失效分析、处置、维修部件、出厂测试和退回配置。
+对于未发现故障的设备，需要改进诊断或提供复现证据，而不是无声结案。
 
-## Fleet learning and spares
+## 机群学习与备件
 
-Maintain critical spares for battery/power modules, compute, sensors, harnesses,
-E-stops, and arm controllers based on installed base, lead time, observed failure,
-and repair turnaround. Quarantine suspect lots. Weekly review groups cases by
-confirmed root cause, revision, supplier lot, site, and hours; it feeds FMEA,
-incoming inspection, test coverage, manuals, training, and release decisions.
+根据装机量、交付周期、已观测失效和维修周转，为电池/电源模块、计算、
+传感器、线束、E-stop 和机械臂控制器维持关键备件。隔离可疑批次。每周
+评审按已确认根因、修订版本、供应商批次、现场和运行小时数对案例分组；
+评审结果反馈到 FMEA、入厂检验、测试覆盖、手册、培训和发布决策。
 
-Status: `PROCESS_DEFINED_STAFFING_REQUIRED`. Named on-call roles, contact channels,
-spares quantities, site training, diagnostic tooling, privacy controls, and drill
-evidence must be completed before production deployment.
+状态：`PROCESS_DEFINED_STAFFING_REQUIRED`。在生产部署之前，必须完成具名的
+值班角色、联系渠道、备件数量、现场培训、诊断工具、隐私控制和演练证据。
 
-Use `case-template.csv` for the minimum evidence record and
-`escalation-matrix.csv` for response/containment ownership. The templates do not
-contain customer data or claim staffing is already in place.
+用 `case-template.csv` 记录最低限度的证据，用 `escalation-matrix.csv` 记录
+响应/遏制归属。这些模板不包含客户数据，也不声称人员配备已经到位。

@@ -1,4 +1,4 @@
-"""Validate staged hardware release governance without inferring external evidence."""
+"""校验已暂存的硬件发布治理，且不推断外部证据。"""
 
 from __future__ import annotations
 
@@ -109,7 +109,7 @@ def read_csv(name: str) -> list[dict[str, str]]:
 
 
 def resolve_repo_ref(reference: str) -> Path | None:
-    """Resolve a repository-relative evidence path without allowing path escape."""
+    """解析仓库相对证据路径，且不允许路径逃逸。"""
     if not reference or Path(reference).is_absolute():
         return None
     candidate = (ROOT / reference).resolve()
@@ -130,7 +130,7 @@ def load_report(path: str) -> dict[str, Any]:
 
 
 def validate_mechanical_evidence() -> dict[str, object]:
-    """Require bound directional analytical evidence without treating it as physical proof."""
+    """要求绑定的定向分析证据，而不将其当作物理证明。"""
     report = load_report(MECHANICAL_REPORT)
     mass_model = report.get("mass_model")
     stability = report.get("stability")
@@ -195,7 +195,7 @@ def _status_is_ready(status: str) -> bool:
 
 
 def _stage_ready(report: dict[str, Any], stage: str) -> bool:
-    """Read a staged readiness flag, falling back only for legacy reports."""
+    """读取暂存的就绪标志，仅对旧版报告做回退。"""
     stage_report = report.get(stage)
     if isinstance(stage_report, dict) and isinstance(stage_report.get("ready"), bool):
         return stage_report["ready"]
@@ -206,7 +206,7 @@ def _stage_ready(report: dict[str, Any], stage: str) -> bool:
 
 
 def _engineering_pass(report: dict[str, Any]) -> bool:
-    """Return the report's engineering result, never its staged release status."""
+    """返回报告的工程结果，绝不返回其暂存发布状态。"""
     for field in ("engineering_package_pass", "engineering_pass"):
         value = report.get(field)
         if isinstance(value, bool):
@@ -219,7 +219,7 @@ def _engineering_pass(report: dict[str, Any]) -> bool:
 
 
 def _binding_observed_ready(binding: str, report: dict[str, Any]) -> bool:
-    """Evaluate one explicit evidence binding against a JSON report."""
+    """对照 JSON 报告评估一条显式证据绑定。"""
     if binding == "ENGINEERING_PASS":
         return _engineering_pass(report)
     if binding == "STATUS_READY":
@@ -237,7 +237,7 @@ def _binding_observed_ready(binding: str, report: dict[str, Any]) -> bool:
 def validate_evidence_bindings(
     rows: list[dict[str, str]], id_field: str, expected_bindings: dict[str, str] | None = None
 ) -> dict[str, object]:
-    """Cross-check PASS/non-PASS rows against the declared JSON evidence binding."""
+    """对照声明的 JSON 证据绑定交叉检查 PASS/非 PASS 行。"""
     mismatches: list[dict[str, str]] = []
     invalid_bindings: list[str] = []
     binding_contract_mismatches: list[str] = []
@@ -293,7 +293,7 @@ def binding_mismatches(
     stage_flag: str | None = None,
     expected_bindings: dict[str, str] | None = None,
 ) -> list[str]:
-    """Return rows whose bound report disagrees with their declared PASS state."""
+    """返回其绑定报告与声明的 PASS 状态不符的行。"""
     scoped_rows = rows if stage_flag is None else [row for row in rows if row.get(stage_flag) == "yes"]
     report = validate_evidence_bindings(scoped_rows, id_field, expected_bindings)
     return sorted(

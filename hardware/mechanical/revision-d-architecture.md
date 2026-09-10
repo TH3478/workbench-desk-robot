@@ -1,11 +1,33 @@
-# Revision D bimanual mobile architecture
+# Revision D 双臂移动架构
 
-Revision D is a holonomic household mobile manipulator with two seven-axis arms, a liftable torso, and a perception/interaction head. Four independent 140 mm steer-drive modules support forward, lateral, diagonal, and rotate-in-place self-motion without relying on passive casters. The authoritative generated pose uses ground Z=0, base-top Z=140 mm, a 350 mm lift delta, a 1100 mm stowed head-top, and a 1450 mm raised head-top. The architecture is informed by public systems including [Mobile ALOHA](https://mobile-aloha.github.io/) and [PAL Robotics TIAGo](https://pal-robotics.com/robot/tiago/): useful household work needs bimanual whole-body coordination, a mobile base, a vertically adjustable manipulation frame, and explicit shared-workspace control.
+Revision D 是具备两条七轴机械臂、可升降躯干与感知/交互头部的全向家用移动操作
+机器人。四个独立的 140 mm 转向驱动模块支持前进、横向、斜向与原地旋转的自运动，
+不依赖被动脚轮。权威生成位姿采用地面 Z=0、底座顶面 Z=140 mm、升降行程差 350
+mm、收起头部顶面 1100 mm、升起头部顶面 1450 mm。该架构借鉴了包括
+[Mobile ALOHA](https://mobile-aloha.github.io/) 与
+[PAL Robotics TIAGo](https://pal-robotics.com/robot/tiago/) 在内的公开系统：有用的
+家务工作需要双臂全身协调、一个移动底座、一个高度可调的操作框架，以及显式的
+共享工作空间控制。
 
-Each arm has seven revolute axes excluding the gripper. The structural shoulder yokes sit in the upper torso side walls and attach to the lift-supported metal spine, not the cosmetic shell. Each shoulder presents a recessed three-axis cartridge rather than a cluster of intersecting tubes. Tapered rounded-rectangle fairings cover the upper arm and forearm, while graphite bearing cartridges, a forearm roll cuff, uniform motion gaps, and a compact pitch/tool-roll wrist make the assembly and service order legible. The head is carried by a dedicated neck mount: a broad pedestal flows into a shoulder plate, a keyed register locates the head, four hidden M6 fasteners clamp it from below, two dowel pins prevent rotation, and a 32 mm centre passage carries the harness. The head is never supported by either arm and can be lifted vertically off the register during service. Its wide smoked-glass expression window follows the head volume with generous corner radii, preserving a large, readable face without introducing sharp domestic-product geometry. The left and right arms each have an exclusive workspace, a shared bimanual volume in front of the parcel bay, and forbidden volumes around the opposite shoulder, head, lift column, and tool dock. Entry into the shared volume requires one coordinator and reduced speed.
+每条臂除夹爪外共有七个旋转轴。结构肩轭位于躯干上部的侧壁中，并连接到由升降
+机构支撑的金属脊柱上，而不是装饰外壳。每个肩部呈现一个内凹的三轴模块，而不是
+一簇相交的管件。渐缩的圆角矩形整流罩覆盖上臂与前臂，而石墨轴承模块、前臂横滚
+环、均匀的运动间隙与紧凑的俯仰/工具横滚腕部使装配与维护顺序清晰可读。头部由
+专用的颈部支架承载：宽阔的底座过渡到肩板，防呆定位座定位头部，四个隐藏 M6
+紧固件从下方夹紧，两个定位销防止旋转，一条 32 mm 中央通道容纳线束。头部从不被
+任何一条臂支撑，维护时可垂直抬离定位座。其宽大的烟熏玻璃表情窗口顺应头部体积，
+采用宽松的圆角半径，在不引入尖锐家用产品几何的前提下保留大而清晰的面部。左臂
+与右臂各有一个独占工作空间，快递舱前方有一个共享的双臂体积，对侧肩部、头部、
+升降柱与工具坞周围为禁入体积。进入共享体积需要一个协调器并降低速度。
 
-The 350 mm lift moves both shoulders, head, and tool frame between low navigation and raised counter-work poses. The battery, drive, steering modules, and ballast remain in the base. Stabilizers stay retracted for autonomous navigation; manipulation outside the navigation envelope requires all four normally-closed wheel brakes and deployed stabilizers. Mechanical readiness does not claim finished localization, mapping, planning, or obstacle avoidance software. Maximum-height, dual-payload, emergency-stop, slope, floor-friction, steering synchronization, and wheel-lift cases remain physical validation gates.
+350 mm 升降机构带动双肩、头部与工具框架在低位导航位姿与升起的台面作业位姿之间
+移动。电池、驱动、转向模块与配重保留在底座内。自主导航时稳定支脚保持收起；超出
+导航包络的操作需要全部四个常闭车轮制动器与展开的稳定支脚。机械就绪并不声称定位、
+建图、规划或避障软件已经完成。最大高度、双负载、急停、坡道、地面摩擦、转向同步
+与抬轮工况仍是实物验证闸门。
 
-Target household tasks are bimanual parcel pickup/carry, cabinet and container handling, cleaning-tool changes, and supervised induction-cooking assistance. The robot may hold a vessel or fixture with one arm while stirring or turning with the other. Open flame, hot-pan transport, boiling-liquid carry, stairs, person lifting, and unattended hot work remain prohibited.
+目标家务任务为双臂快递收取/搬运、橱柜与容器取放、清洁工具更换，以及有人监督的
+电磁烹饪辅助。机器人可以用一条臂扶住容器或工件，同时用另一条臂搅拌或翻动。明火、
+热锅移动、沸液搬运、楼梯、载人与无人看管的加热作业仍然被禁止。
 
-Status: `CONCEPT_PHYSICAL_VALIDATION_REQUIRED`.
+状态：`CONCEPT_PHYSICAL_VALIDATION_REQUIRED`。

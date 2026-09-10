@@ -1,44 +1,43 @@
-# Pilot build and production release
+# 试产构建与生产发布
 
-## Twenty-unit pilot log template
+## 二十台试产日志模板
 
-Create one row per physical serial; leave results blank until measured.
+每个物理序列号一行；在测量之前结果留空。
 
-| Serial | Build date | Touch min | QG first failure | Defect code | Rework cycles | Final result | Evidence URI |
+| 序列号 | 构建日期 | 工触分钟 | QG 首次失败 | 缺陷代码 | 返工循环次数 | 最终结果 | 证据 URI |
 |---|---|---:|---|---|---:|---|---|
 | WB1-EVT-001 through WB1-EVT-020 | | | | | | NOT BUILT | |
 
-Pilot report metrics are first-pass yield, rolled throughput yield, defects per unit,
-touch time by station, rework time, scrap cost, bottleneck utilization, safety failures,
-and top defect Pareto. No placeholder row counts as a built unit.
+试产报告指标包括直通率、滚动良率、单台缺陷数、分工位工触时间、返工时间、
+报废成本、瓶颈利用率、安全失败次数与主要缺陷帕累托分析。任何占位行都不计为
+已构建设备。
 
-## Unit cost model
+## 单台成本模型
 
 `Unit cost = direct material + touch_hours * burdened_rate + test_time * fixture_rate
 + expected_rework + yield_loss + packaging + inbound/outbound freight + warranty reserve.`
 
-Use actual purchase orders, clocked route data, and pilot yield. The current route
-totals 103 touch-minutes; it is a planning baseline, not a quoted labour cost.
+使用实际采购订单、计时流程数据与试产良率。当前流程总计 103 工触分钟；它是
+计划基线，不是报价的人工成本。
 
-## Process ECN content
+## 工艺 ECN 内容
 
-Every improvement records reason, affected product/process revisions, before/after
-method, risk assessment, retraining, fixture/software impact, validation sample size,
-effective serial/lot, rollback, and approvals. Safety or interface changes also require
-the owning engineer; operators do not release an ECN.
+每项改进都要记录原因、受影响的产品/工艺版本、变更前后方法、风险评估、再培训、
+固定装置/软件影响、验证样本量、生效序列号/批次、回滚方案与批准。安全或接口
+变更还需要归属工程师批准；操作员不得发布 ECN。
 
-## GO / NO-GO review
+## GO / NO-GO 评审
 
-Production is **NO-GO** until all conditions below have objective evidence:
+在下列全部条件均具备客观证据之前，生产状态为 **NO-GO**：
 
-- released drawings, PCB data, BOM/AVL, firmware/configuration and packaging revision;
-- no open safety, regulatory, isolation, thermal, or structural high-risk item;
-- 20/20 pilot units accounted for and all safety tests passed;
-- first-pass yield at least 90%, no repeated uncontrolled defect, corrective actions closed;
-- calibrated fixtures pass MSA and production software/configuration is access-controlled;
-- suppliers and incoming controls approved, critical component traceability demonstrated;
-- operator training, work instructions, EHS review, capacity and spares plan complete;
-- transport validation passes and field containment/recall traceability is rehearsed.
+- 已发布图纸、PCB 数据、BOM/AVL、固件/配置与包装版本；
+- 无未关闭的安全、法规、隔离、热或结构高风险项；
+- 20/20 台试产设备均有记录且全部安全测试通过；
+- 直通率不低于 90%，无重复出现的失控缺陷，纠正措施已关闭；
+- 已校准固定装置通过 MSA，生产软件/配置受访问控制；
+- 供应商与来料控制已批准，关键元件可追溯性已演示；
+- 操作员培训、作业指导书、EHS 评审、产能与备件计划完成；
+- 运输验证通过，且现场遏制/召回可追溯性已演练。
 
-The manufacturing engineer prepares the evidence pack. Quality, safety, design owners,
-and the human product owner make and sign the GO/NO-GO decision.
+制造工程师准备证据包。质量、安全、设计 Owner 与人类产品 Owner 共同做出并签署
+GO/NO-GO 决定。

@@ -1,32 +1,31 @@
-# Mechanical verification matrix — Revision D
+# 机械验证矩阵 — Revision D
 
-| Task | Evidence | Status / gate |
+| 任务 | 证据 | 状态 / 闸门 |
 |---|---|---|
-| MECH1 | Revision D SCAD, raised stabilized assembly STEP, lowered navigation STEP, and measured 1100/1450 mm envelopes | ENGINEERING COMPLETE; PHYSICAL DATUM INSPECTION REQUIRED |
-| MECH2 | `generated/bom.csv`, lift locks, brake and tool-datum parts | COMPLETE |
-| MECH3 | 260 x 105 x 128 mm smoked-glass head, 228 x 92 rounded display, keyed neck register | COMPLETE |
-| MECH4 | four steer-drive modules, guarded base skirt, retracted/deployed 820 x 820 mm support states and 350 mm lift | ENGINEERING COMPLETE; PHYSICAL FIT AND DRIVE TEST REQUIRED |
-| MECH5 | `drawings/thermal-flow.svg`, isolated electronics and food-tool heat zone | ENGINEERING COMPLETE; thermal test external |
-| MECH6 | analysis and drop-screening JSON, 28 mm absorber, 20 g screen | SCREEN COMPLETE; nonlinear FEA/drop external |
-| MECH7 | two sets of seven joint IDs/limits, shared workspace and exploded STEP | DIGITAL CHECK COMPLETE; guarded motion external |
-| MECH8 | ten D revision part STEP files, SCAD source and BOM, including the neck mount | READY FOR PROTOTYPE QUOTE |
-| MECH9 | quick-change tool interface, force/slip/tool-ID requirements | DIGITAL CHECK COMPLETE; tool tests external |
-| MECH10 | CG, drive/stabilized tip screens and arm moment in `analysis.json` | ANALYTICAL PASS; not release evidence |
-| MECH11 | lift dual encoders, brakes, lock pins, hard limits and pinch sensors | DESIGN COMPLETE; synchronization test required |
-| MECH12 | parcel, cleaning and supervised induction task boundary | CONCEPT ONLY; physical validation required |
-| MECH13 | CMF and concealed parting strategy in design spec | DESIGN COMPLETE; DFM and finish sample required |
-| MECH14 | four steer-drive wheel/fork/bearing stacks in mobile-base STEP and visible all-angle render | DIGITAL CHECK COMPLETE; autonomous navigation software and physical drive tests required |
-| MECH15 | `REV-D-MASS-001`, stable component IDs, source/hash binding, legacy 55 kg migration, and owner approval register | ANALYTICAL CHECK COMPLETE; four owner approvals and serialized weighing required |
-| MECH16 | +X/-X/+Y/-Y tip screens for stowed, raised, payload, shared-workspace, emergency-stop, and stabilizer-deployed poses | ANALYTICAL SCREEN COMPLETE; pull, slope, brake-hold, emergency-stop, and stabilizer physical tests required |
+| MECH1 | Revision D SCAD、升起稳定装配 STEP、降低导航 STEP，以及实测 1100/1450 mm 包络 | ENGINEERING COMPLETE；需要实物基准检验 |
+| MECH2 | `generated/bom.csv`、升降锁、制动与工具基准零件 | COMPLETE |
+| MECH3 | 260 x 105 x 128 mm 烟熏玻璃头部、228 x 92 圆角显示屏、防呆颈部定位座 | COMPLETE |
+| MECH4 | 四个转向驱动模块、防护底座裙边、收起/展开的 820 x 820 mm 支撑状态与 350 mm 升降 | ENGINEERING COMPLETE；需要实物适配与驱动测试 |
+| MECH5 | `drawings/thermal-flow.svg`、隔离电子器件与食品工具热区 | ENGINEERING COMPLETE；热测试属外部事项 |
+| MECH6 | 分析与跌落筛选 JSON、28 mm 吸能层、20 g 筛选 | SCREEN COMPLETE；非线性 FEA/跌落属外部事项 |
+| MECH7 | 两组七个关节 ID/限位、共享工作空间与爆炸 STEP | DIGITAL CHECK COMPLETE；防护型运动属外部事项 |
+| MECH8 | 十个 D 版零件 STEP 文件、SCAD 源与 BOM，包括颈部支架 | READY FOR PROTOTYPE QUOTE |
+| MECH9 | 快换工具接口、力/滑动/工具 ID 要求 | DIGITAL CHECK COMPLETE；工具测试属外部事项 |
+| MECH10 | `analysis.json` 中的重心、行驶/稳定防倾筛选与机械臂力矩 | ANALYTICAL PASS；不是发布证据 |
+| MECH11 | 升降双编码器、制动器、锁销、硬限位与夹挤传感器 | DESIGN COMPLETE；需要同步测试 |
+| MECH12 | 快递、清洁与受监督电磁烹饪任务边界 | CONCEPT ONLY；需要实物验证 |
+| MECH13 | 设计规格中的 CMF 与隐藏分模策略 | DESIGN COMPLETE；需要 DFM 与表面处理样件 |
+| MECH14 | 移动底座 STEP 与全角度可见渲染中的四个转向驱动轮/叉/轴承组件 | DIGITAL CHECK COMPLETE；需要自主导航软件与实物驱动测试 |
+| MECH15 | `REV-D-MASS-001`、稳定组件 ID、来源/哈希绑定、遗留 55 kg 迁移与 Owner 批准登记册 | ANALYTICAL CHECK COMPLETE；需要四位 Owner 批准与序列化称重 |
+| MECH16 | 收起、升起、负载、共享工作空间、急停与稳定支脚展开位姿的 +X/-X/+Y/-Y 防倾筛选 | ANALYTICAL SCREEN COMPLETE；需要拉拔、坡道、制动保持、急停与稳定支脚实物测试 |
 
-## Assembly and tolerance datums
+## 装配与公差基准
 
-- Datum A: mobile-base top frame; flatness 0.30 mm.
-- Datum B: lift-column centre plane; guide parallelism within 0.20 mm over travel.
-- Datum C: left/right shoulder mounting plates; symmetry and arm-base position tolerance 0.30 mm to B.
-- General prototype tolerance: ISO 2768-m; printed parts +/-0.30 mm.
-- Lift guide/lock clearance, brake hold, synchronization error, pinch detection and
-  emergency stop must be tested before powered payload work.
-- Both primary arm sets use internal cables and controlled 4–6 mm shadow gaps. Tool
-  surfaces use removable 316L/PEEK/silicone parts; open flame and hot-liquid carry
-  remain prohibited.
+- 基准 A：移动底座顶框；平面度 0.30 mm。
+- 基准 B：升降柱中心平面；导轨平行度在行程范围内不超过 0.20 mm。
+- 基准 C：左/右肩部安装板；对称度与臂基座位置相对 B 的公差为 0.30 mm。
+- 原型通用公差：ISO 2768-m；打印件 +/-0.30 mm。
+- 在通电负载作业之前，必须测试升降导轨/锁间隙、制动保持、同步误差、夹挤检测
+  与急停。
+- 两条主臂组均使用内部线缆与受控的 4–6 mm 阴影间隙。工具表面使用可拆卸的
+  316L/PEEK/硅胶零件；明火与热液搬运仍然被禁止。

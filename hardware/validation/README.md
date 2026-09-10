@@ -1,25 +1,23 @@
-# Hardware field-validation package
+# 硬件现场验证包
 
-This package is the handoff from simulation/engineering evidence to a real
-machine. It does not claim that a robot, lab, or 48-hour run exists. Every
-measurement template starts as `NOT_EXECUTED` and can only become `PASS` or
-`FAIL` when a signed evidence record is attached.
+本包是仿真/工程证据到真实机器的交接。它不声称存在机器人、实验室或
+48 小时运行。每个测量模板初始为 `NOT_EXECUTED`，只有在附上签署的证据记录
+后才能变为 `PASS` 或 `FAIL`。
 
-- `sim2real-matrix.csv` defines the comparison dimensions and acceptance bands.
-- `diagnostic-sop.md` is the operator decision tree for CAN, power, sensors,
-  temperature and safe-stop faults.
-- `fault-scenarios.csv` contains 20 fault-injection scenarios with recovery and
-  evidence requirements.
-- `first-batch-acceptance.csv` is the ten-unit acceptance template.
-- `long-run-protocol.md` defines the 48-hour reliability run and stop rules.
+- `sim2real-matrix.csv` 定义对比维度和验收带宽。
+- `diagnostic-sop.md` 是面向操作员的 CAN、电源、传感器、温度和安全停止
+  故障决策树。
+- `fault-scenarios.csv` 包含 20 个带恢复和证据要求的故障注入场景。
+- `first-batch-acceptance.csv` 是十台设备的验收模板。
+- `long-run-protocol.md` 定义 48 小时可靠性运行和停止规则。
 
-Run `python hardware/validation/tools/validate_validation.py` to regenerate the
-deterministic report.
+运行 `python hardware/validation/tools/validate_validation.py` 重新生成
+确定性报告。
 
-## Evidence registration
+## 证据注册
 
-First assign a real `hardware_revision` and 64-character configuration/firmware
-hash to the unit in `first-batch-acceptance.csv`. Then register raw evidence:
+先为 `first-batch-acceptance.csv` 中的设备分配真实的 `hardware_revision`
+和 64 字符的配置/固件哈希。然后注册原始证据：
 
 ```bash
 python hardware/validation/tools/register_evidence.py \
@@ -29,7 +27,6 @@ python hardware/validation/tools/register_evidence.py \
   --calibration-ref CAL-2026-001 --raw-file runs/hardware/val5-01.log --result PASS
 ```
 
-The command stores SHA-256 hashes in `evidence-register.jsonl`. Validation fails
-closed if a scenario or unit is unknown, a revision differs from the controlled
-unit row, a file is missing or changed, or an evidence ID is reused. Editing a
-summary CSV cannot promote a scenario to `PASS`.
+该命令把 SHA-256 哈希存入 `evidence-register.jsonl`。当场景或设备未知、
+修订版本与受控设备行不一致、文件缺失或被修改、或证据 ID 被重用时，验证
+采取失败即拒绝。编辑汇总 CSV 不能把场景提升为 `PASS`。

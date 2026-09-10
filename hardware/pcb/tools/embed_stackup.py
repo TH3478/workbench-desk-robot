@@ -248,8 +248,8 @@ def _render_stackup(spec: BoardStackupSpec, newline: str) -> str:
                     "\t\t\t)",
                 )
             )
-    # KiCad includes explicit solder-mask thickness in the overall board
-    # thickness. Leave it unset until the supplier closes the finished build.
+    # KiCad 在整板厚度中包含显式的阻焊层厚度。在供应商确定最终制板
+    # 之前保持该项未设置。
     lines.extend(
         (
             '\t\t\t(layer "B.Mask"',

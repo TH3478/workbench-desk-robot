@@ -1,4 +1,4 @@
-"""Validate the procurement package without inventing commercial evidence."""
+"""在不虚构商业证据的前提下校验采购包。"""
 
 from __future__ import annotations
 

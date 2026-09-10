@@ -80,7 +80,7 @@ ALLOWED_SELECTION_STATUSES = {
 
 
 def _motor_power_budget() -> tuple[float, float, bool]:
-    """Return candidate dual-stall current, J2 ceiling, and fail-closed status."""
+    """返回候选的双轴堵转电流、J2 上限与失败即拒绝状态。"""
     with MOTOR_SPEC.open(encoding="utf-8") as handle:
         spec = json.load(handle)
     candidate = spec["motor_candidates"][0]
@@ -91,7 +91,7 @@ def _motor_power_budget() -> tuple[float, float, bool]:
 
 
 def calculate_row(row: dict[str, str]) -> dict[str, object]:
-    """Calculate electrical and service checks for one controlled harness row."""
+    """为单个受控线束行计算电气与服务检查。"""
     length_m = float(row["length_m"])
     voltage_v = float(row["voltage_v"])
     current_a = float(row["max_current_a"])
@@ -128,7 +128,7 @@ def calculate_row(row: dict[str, str]) -> dict[str, object]:
 
 
 def _integration_semantics_checks(rows: list[dict[str, str]]) -> dict[str, bool]:
-    """Validate endpoint, pin-map, active-level and shield semantics for the traction path."""
+    """校验牵引路径的端点、引脚映射、有效电平与屏蔽语义。"""
     by_id = {row.get("harness_id", ""): row for row in rows}
     required_fields = {
         "source_endpoint",

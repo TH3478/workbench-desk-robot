@@ -1,60 +1,51 @@
-# Quality and early-life reliability gates
+# 质量与早期寿命可靠性闸门
 
-Issue 24 supplements the existing test standard, inspection plan, and FMEA.
-Physical results remain `NOT_EXECUTED` until linked to serialized units and raw data.
+Issue 24 是对现有测试标准、检验计划与 FMEA 的补充。实物结果在关联到序列化设备
+与原始数据之前保持 `NOT_EXECUTED`。
 
-## Test specification
+## 测试规范
 
-Every production unit receives identity/configuration audit, visual/workmanship
-inspection, protective-bond and isolation checks as applicable, current-limited
-power-up, rail checks, BMS/safety-chain test, E-stop fault injection, interface
-exercise, dual-arm interlock test, thermal soak, final inspection, and traveller
-closure. Acceptance limits come from controlled drawings and component ratings.
-Test equipment ID, calibration expiry, software version, operator, timestamp,
-ambient conditions, result, defect code, and raw evidence path are mandatory.
+每台生产设备都要接受身份/配置审计、目检/工艺检验、适用的保护接地与隔离检查、
+限流上电、电源轨检查、BMS/安全链测试、急停故障注入、接口演练、双臂互锁测试、
+热浸泡、终检与随工单闭合。验收限值来自受控图纸与元件额定值。测试设备 ID、校准
+有效期、软件版本、操作员、时间戳、环境条件、结果、缺陷代码与原始证据路径均为
+必填。
 
-Sampling may reduce non-critical incoming or cosmetic checks only under the AQL
-plan. Safety, identity, configuration, and protective-function checks are 100%.
-Missing or corrupt evidence is a failure, not an assumed pass. Reworked units repeat
-the affected gate and all downstream gates whose validity could have changed.
+只有按照 AQL 计划，抽样才可以减少非关键的来料或外观检查。安全、身份、配置与
+保护功能检查为 100%。证据缺失或损坏即失败，而不是默认通过。返工设备重复受影响
+的闸门与所有可能因此失效的下游闸门。
 
-## FMEA action rule
+## FMEA 行动规则
 
-RPN is severity times occurrence times detection. Any RPN above 100 requires a
-named action, owner, due date, containment, and verification before release.
-Severity 9 or 10 cannot be accepted solely because occurrence is estimated low;
-the Safety/Quality owners must review the control independently. After action,
-record revised factors with evidence rather than overwriting the original score.
+RPN 为严重度乘以发生度乘以探测度。任何 RPN 高于 100 的项在发布前都需要有署名的
+行动、Owner、到期日、遏制与验证。严重度为 9 或 10 的项不能仅仅因为发生度估计低
+就被接受；Safety/Quality Owner 必须独立评审该控制措施。采取行动后，用证据记录
+修正后的因子，而不是覆盖原始评分。
 
-The current FMEA intentionally contains open rows above 100. These are action
-signals and release blockers, not proof that mitigations have been completed.
-New pilot and field defects feed back into occurrence and detection ratings.
+当前 FMEA 刻意包含 RPN 高于 100 的未关闭行。这些是行动信号与发布阻塞项，而不是
+缓解措施已完成的证明。新的试产与现场缺陷会反馈到发生度与探测度评分中。
 
-## Early failure rate
+## 早期失效率
 
-The early window is the first 30 calendar days or 100 operating hours after site
-acceptance, whichever occurs first. Rate is `unique units with a confirmed product
-failure / deployed units that completed the observation window * 100`. Report
-right-censored units separately. Operator training, shipping damage, no-fault-found,
-and supplier defects remain classified and visible; exclusions need Quality approval.
+早期窗口为现场验收后的前 30 个自然日或 100 个运行小时，以先到者为准。失效率为
+`unique units with a confirmed product failure / deployed units that completed the observation window * 100`。
+右删失设备单独报告。操作员培训、运输损坏、未发现故障与供应商缺陷保持分类且
+可见；剔除需要质量部门批准。
 
-Release target is early failure rate <= 5%. Exceeding 5%, any serious safety event,
-or two matching critical failures triggers stop-ship, containment, field notification,
-root-cause analysis, corrective action, and effectiveness verification. A small
-sample must include the count and confidence interval; zero observed failures is
-not represented as zero risk.
+发布目标为早期失效率 <= 5%。超过 5%、任何严重安全事件或两次相同的严重失效都会
+触发停发、遏制、现场通知、根因分析、纠正措施与有效性验证。小样本必须包含计数
+与置信区间；零观测失效不能被表述为零风险。
 
-## Evidence and review
+## 证据与评审
 
-- Link failures to serial, hardware revision, software/configuration hash, site, and hours.
-- Preserve original logs, photos, measurements, replaced parts, and return-material chain.
-- Use a controlled defect taxonomy and distinguish symptom, root cause, and correction.
-- Review FPY, escapes, rework, returns, early failures, and open FMEA actions weekly in pilot.
-- Close release only when high-RPN actions and critical corrective actions are verified.
+- 将失效关联到序列号、硬件版本、软件/配置哈希、现场与运行小时。
+- 保留原始日志、照片、测量数据、更换的零件与退料链条。
+- 使用受控缺陷分类，并区分症状、根因与纠正。
+- 试产期间每周评审 FPY、逃逸、返工、退货、早期失效与未关闭的 FMEA 行动。
+- 只有高 RPN 行动与关键纠正措施得到验证后，才关闭发布。
 
-Status: `EXECUTION_REQUIRED`. The specification is ready; pilot, reliability,
-FMEA-action, and early-life evidence must be collected on real units.
+状态：`EXECUTION_REQUIRED`。规范已就绪；试产、可靠性、FMEA 行动与早期寿命证据
+必须在真实设备上收集。
 
-`fmea-action-register.csv` keeps high-RPN actions visible, while
-`early-failure-log.csv` is a deliberately empty execution template rather than
-a fabricated reliability result.
+`fmea-action-register.csv` 保持高 RPN 行动可见，而 `early-failure-log.csv` 是刻意
+留空的执行模板，不是编造的可靠性结果。

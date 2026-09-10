@@ -1,59 +1,52 @@
-# Hardware interface control document
+# 硬件接口控制文档
 
-Baseline: `WB1-HW-ICD-REV-A`, reviewed 2026-08-07. The machine-readable
-source and assumption ledger is `source-baseline.json`. This document controls
-the EVT envelope; it does not substitute for supplier drawings or physical test.
+基线：`WB1-HW-ICD-REV-A`，评审日期 2026-08-07。机器可读的来源与假设台账是
+`source-baseline.json`。本文档控制 EVT 包络；它不能替代供应商图纸或实物测试。
 
-## System partition
+## 系统划分
 
-The PCB is a companion controller and protected power-distribution board for a
-Jetson Orin Nano developer kit. It is not a raw Jetson module carrier and does
-not implement the 260-pin module connector. J3 supplies a protected 12 V branch
-to the developer-kit DC input through a keyed harness. J4 is the populated
-20-pin, 3.3 V Jetson-to-MCU control backplane.
+该 PCB 是 Jetson Orin Nano 开发者套件的配套控制器与受保护配电板。它不是裸
+Jetson 模组载板，也不实现 260 针模组连接器。J3 通过防呆线束向开发者套件直流
+输入提供受保护的 12 V 分支。J4 是已贴装的 20 针、3.3 V Jetson 到 MCU 控制背板。
 
-## Controlled interfaces
+## 受控接口
 
-| Interface | Controlled envelope | State before EVT order |
+| 接口 | 受控包络 | EVT 下单前状态 |
 |---|---|---|
-| Battery / J1 | 36-60 VDC, 8 A continuous, 10 A fuse; keyed 4-pin | Owner must confirm battery, fuse interrupt rating, mating connector and wire gauge |
-| Motor auxiliary / J2 | 12 V, 120 W maximum aggregate (10 A controlled system limit; connector contacts are 16 A nominal) | Motion owner must supply driver inrush, regeneration and fault-current limits, plus an approved external branch fuse |
-| Jetson power / J3 | Protected 12 V, 5 A continuous; no 5 V back-powering | Verify harness polarity and developer-kit input compatibility against the purchased revision |
-| Jetson control / J4 | 3.3 V SPI, I2C, UART, `JETSON_ENABLE_REQ` into the MCU on pin 8, six chip selects, E-stop sense and MCU reset | Freeze Jetson header mapping and CH32V307 pin mux; `JETSON_ENABLE_REQ` must remain distinct from the MCU-generated `MOTOR_ENABLE_REQ` safety-chain input |
-| CAN / J5, J6 | ISO1042 class, CAN FD, distinct 5V_CAN_ISO/GND_CAN_ISO domain, 120 ohm switchable termination | Confirm connector, TVS, choke and U7 isolated-power MPN |
-| E-stop / J10 | Common protected 12 V source on pins 1/3 with independent channel A/B returns on pins 2/4 | Safety owner must approve circuit, diagnostic coverage and measured disable time |
-| Manual reset / J12 | Independent channel A/B reset returns feeding K1/K2 coil paths | Approve monitored-reset behavior, reset device, harness and welded-contact response |
-| Safety output / J11 | `MOTOR_ENABLE_SAFE`, E-stop sense, GND and 3.3 V; software request is a separate net | Freeze mating motor-driver safety interface and prove MCU cannot bypass K1/K2 |
-| Traction childboard / H02 + H09-H14 | H02 maps controller J2 pins 1-4 one-for-one to childboard `J_PWR`; H09 maps the future `J10/K1/K2` safety ECO to `J_SAFE`; H10 isolated CAN to `J_CAN`; H11/H12 motor outputs to external M1/M2; H13/H14 encoder I/O to external M1/M2 encoders | `J_SAFE` is an ECO endpoint, not current J11; freeze external motor/encoder MPNs, connector pin maps, shield/drain terminations and harness evidence |
-| J7-J9 | Downstream harness/daughterboard endpoint definitions only | Not populated on this companion-board revision |
-| PCB / tray | 160 x 130 x 1.6 mm; 152 x 122 mm M3 pattern; 220 x 170 mm tray | 60 x 40 mm total planar margin; verify connector bend radii and 32 mm vertical clearance |
-| Display | 150 x 72 mm opening only | Select display and freeze outline, keep-outs, data and power before tooling |
+| 电池 / J1 | 36-60 VDC，8 A 连续，10 A 保险丝；防呆 4 针 | Owner 必须确认电池、保险丝分断额定值、对插连接器与线规 |
+| 电机辅助 / J2 | 12 V，最大总量 120 W（受控系统限值 10 A；连接器触点为 16 A 标称） | Motion Owner 必须提供驱动器浪涌、再生与故障电流限值，以及经批准的外部分支保险丝 |
+| Jetson 电源 / J3 | 受保护 12 V，5 A 连续；禁止 5 V 反哺 | 对照所购版本核验线束极性与开发者套件输入兼容性 |
+| Jetson 控制 / J4 | 3.3 V SPI、I2C、UART、引脚 8 上进入 MCU 的 `JETSON_ENABLE_REQ`、六个片选、急停检测与 MCU 复位 | 冻结 Jetson 排针映射与 CH32V307 引脚复用；`JETSON_ENABLE_REQ` 必须与 MCU 生成的 `MOTOR_ENABLE_REQ` 安全链输入保持区分 |
+| CAN / J5、J6 | ISO1042 等级，CAN FD，独立的 5V_CAN_ISO/GND_CAN_ISO 域，120 欧姆可切换终端 | 确认连接器、TVS、扼流圈与 U7 隔离电源 MPN |
+| 急停 / J10 | 引脚 1/3 为公共受保护 12 V 源，引脚 2/4 为独立的 A/B 通道回流 | Safety Owner 必须批准电路、诊断覆盖率与实测禁用时间 |
+| 手动复位 / J12 | 独立的 A/B 通道复位回流，馈入 K1/K2 线圈回路 | 批准受监控复位行为、复位器件、线束与触点熔焊响应 |
+| 安全输出 / J11 | `MOTOR_ENABLE_SAFE`、急停检测、GND 与 3.3 V；软件请求是独立的网络 | 冻结对插的电机驱动器安全接口，并证明 MCU 无法绕过 K1/K2 |
+| 牵引子板 / H02 + H09-H14 | H02 将控制器 J2 引脚 1-4 一对一映射到子板 `J_PWR`；H09 将未来的 `J10/K1/K2` 安全 ECO 映射到 `J_SAFE`；H10 将隔离 CAN 映射到 `J_CAN`；H11/H12 将电机输出映射到外部 M1/M2；H13/H14 将编码器 I/O 映射到外部 M1/M2 编码器 | `J_SAFE` 是 ECO 端点，不是当前的 J11；冻结外部电机/编码器 MPN、连接器引脚映射、屏蔽/泄放线端接与线束证据 |
+| J7-J9 | 仅为下游线束/子板端点定义 | 本配套板版本不贴装 |
+| PCB / 托盘 | 160 x 130 x 1.6 mm；152 x 122 mm M3 安装图；220 x 170 mm 托盘 | 60 x 40 mm 总平面余量；核验连接器弯曲半径与 32 mm 垂直净空 |
+| 显示屏 | 仅为 150 x 72 mm 开孔 | 在开模之前选定显示屏并冻结外形、禁布区、数据与电源 |
 
-The required logical behavior of U8 is controlled by
-`safety-gate-truth-table.csv`. It is a functional requirement, not a claim that
-the current carrier has achieved a safety integrity level.
+U8 所需的逻辑行为由 `safety-gate-truth-table.csv` 控制。它是功能要求，并不声称
+当前载板已达到某个安全完整性等级。
 
-## Power cases
+## 电源工况
 
-Electrical checks evaluate Jetson loads at 15 W, 25 W and a conservative 40 W
-MAXN envelope at battery inputs of 36 V, 48 V and 60 V. The 12 V isolated source
-also carries the 120 W motor-auxiliary envelope and the converted logic load.
-All computed rails require at least 20 percent continuous-power headroom.
+电气检查在 36 V、48 V 与 60 V 电池输入下，评估 15 W、25 W 与保守的 40 W MAXN
+包络下的 Jetson 负载。12 V 隔离电源还承载 120 W 电机辅助包络与转换后的逻辑
+负载。所有计算出的电源轨都要求至少 20% 的连续功率余量。
 
-## Release gates
+## 发布闸门
 
-1. Electrical and procurement owners select orderable MPNs and approved alternates.
-2. Detailed schematic review freezes connector pin numbers, MCU pin mux and safety logic.
-3. Harness drawing freezes wire gauge, color, shielding, mating parts and labels.
-4. Supplier confirms stackup, impedance, creepage, copper current capacity and panel rules.
-5. EVT units pass bring-up, thermal, E-stop, inrush, CAN, EMC pre-scan and enclosure fit checks.
+1. 电气与采购 Owner 选定可下单的 MPN 与经批准的替代料。
+2. 详细原理图评审冻结连接器引脚编号、MCU 引脚复用与安全逻辑。
+3. 线束图纸冻结线规、颜色、屏蔽、对插件与标签。
+4. 供应商确认叠层、阻抗、爬电、铜载流能力与拼板规则。
+5. EVT 样机通过启动调试、热、急停、浪涌、CAN、EMC 预扫描与机箱适配检查。
 
-Until all five gates close, the package is EVT-reviewable and supplier-RFQ-ready,
-but it is not a production release and does not claim physical validation.
+在全部五个闸门关闭之前，本工程包可供 EVT 评审、可发出供应商询价（RFQ），但
+不是生产发布，也不声称已完成实物验证。
 
-The current J11 provides only one `MOTOR_ENABLE_SAFE` output plus `ESTOP_SENSE`;
-it cannot be split into the two independent childboard channels. The controlled
-traction safety harness therefore terminates at the future `J10/K1/K2` ECO
-endpoint (`J_SAFE`) and must not be wired to J11. H02 remains the only shared
-power path from controller J2 to the childboard and its four pins are mapped
-one-for-one in `hardware/manufacturing/harness-spec.csv`.
+当前的 J11 只提供一个 `MOTOR_ENABLE_SAFE` 输出加 `ESTOP_SENSE`；它无法拆分为
+两个独立的子板通道。因此受控的牵引安全线束端接于未来的 `J10/K1/K2` ECO 端点
+（`J_SAFE`），不得连接到 J11。H02 仍是从控制器 J2 到子板的唯一共享电源路径，
+其四个引脚在 `hardware/manufacturing/harness-spec.csv` 中一对一映射。

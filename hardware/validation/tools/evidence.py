@@ -1,4 +1,4 @@
-"""Register and verify hardware-validation evidence."""
+"""登记并核验硬件验证证据。"""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ EVIDENCE_KINDS = {"simulation", "bench", "physical"}
 
 
 class EvidenceError(ValueError):
-    """Raised when evidence cannot be trusted."""
+    """当证据不可信时抛出。"""
 
 
 def sha256(path: Path) -> str:

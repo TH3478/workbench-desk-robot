@@ -1,29 +1,34 @@
-# Connection Safety Baseline
+# 连接安全基线
 
-Status: fail-closed wiring contract for the Revision D mechanical baseline. This
-is an integration control document, not evidence that a harness has been built
-or tested.
+状态：面向 Revision D 机械基线的失败即拒绝接线契约。这是一份集成控制文档，
+并不代表某条线束已经制造或测试完成。
 
-## Two power domains
+## 两个电源域
 
-The repository contains two deliberately separate motor paths:
+仓库中包含两条刻意分离的电机路径：
 
-1. **Revision D mobile robot:** 48 V battery -> protected traction branch -> four
-   independent steer-drive modules. Each corner has a drive axis, steering axis,
-   normally-closed brake and local feedback. This is the only current full-system
-   traction architecture.
-2. **Compact test chassis:** controller J2 12 V auxiliary -> traction childboard J_PWR -> candidate low-voltage brushed motors. This path is bench/test-only and is not allowed to drive the full-size chassis.
+1. **Revision D 移动机器人：**48 V 电池 -> 受保护牵引分支 -> 四个独立的转向驱动
+   模块。每个角位都有一条驱动轴、一条转向轴、一个常闭制动器与本地反馈。这是
+   目前唯一的全系统牵引架构。
+2. **紧凑型测试底盘：**控制器 J2 12 V 辅助 -> 牵引子板 J_PWR -> 候选低压有刷
+   电机。该路径仅限台架/测试使用，不得用于驱动全尺寸底盘。
 
-Never connect J2 to a 48 V motor, a full-system servo drive, or a battery branch. The current candidate dual-stall demand is 11 A while J2 is limited to 10 A; H02 therefore remains blocked and must not be used as a production power harness.
+绝不要将 J2 连接到 48 V 电机、全系统伺服驱动器或电池分支。当前候选方案的双
+堵转需求为 11 A，而 J2 被限制为 10 A；因此 H02 保持阻塞，不得用作生产电源线束。
 
-## Safety and diagnostics
+## 安全与诊断
 
-- H07/H09 are dual-channel safety circuits only. They require independent channel continuity and cross-fault validation.
-- H08/J11 is diagnostic-only. It must never be plugged into `J_SAFE`, bridged to a safety permissive, or used as a motor-enable source.
-- H04/J4 remains blocked until a keyed shroud or connector ECO provides polarization and strain relief.
-- H13/H14 remain blocked until the selected encoder voltage/output standard is recorded on the motor drawing and pinout.
-- CAN shield drains terminate at the designated controller chassis entry only; do not bond isolated CAN signal return to chassis elsewhere.
+- H07/H09 仅作双通道安全电路使用。它们需要独立的通道导通性与交叉故障验证。
+- H08/J11 仅作诊断用途。它绝不可插入 `J_SAFE`、桥接到安全许可信号，或用作
+  电机使能来源。
+- H04/J4 保持阻塞，直到通过防呆护罩或连接器 ECO 提供极性与应力消除。
+- H13/H14 保持阻塞，直到所选编码器的电压/输出标准被记录在电机图纸与引脚
+  定义上。
+- CAN 屏蔽泄放线只端接于指定的控制器机箱入口；不得在其他位置将隔离 CAN 信号
+  回流连接到机箱。
 
-## Energization gate
+## 通电闸门
 
-No battery, motor, lift, or arm energization is permitted until the exact mating parts are AVL-approved, the harness drawings are released, and serialized continuity, insulation, pull-force, installed-length, chafe, polarity, and emergency-stop tests are attached to the release evidence register.
+在精确的对插件获得 AVL 批准、线束图纸发布、并且序列化的导通、绝缘、拉拔力、
+安装长度、磨损、极性以及急停测试均已附入发布证据登记册之前，禁止对任何电池、
+电机、升降机构或机械臂通电。

@@ -1,59 +1,54 @@
-# Six-station production line
+# 六工位生产线
 
-Issue 23 maps the existing fourteen routing operations into a six-station pilot
-cell. The design target is first-pass yield (FPY) at or above 85% and total fixture
-capital at or below USD 4,000. Neither target is a claim about unbuilt units.
+Issue 23 将现有的十四道流程工序映射为一个六工位试产单元。设计目标为直通率
+（FPY）不低于 85%、固定装置总投入不超过 USD 4,000。两个目标都不是对尚未制造
+设备的断言。
 
-| Station | Scope | Quality exit | Fixture allocation (USD) |
+| 工位 | 范围 | 质量出口 | 固定装置投入 (USD) |
 |---|---|---|---:|
-| S1 receiving and kitting | lot ID, incoming inspection, serialized kit | QG-01/02 complete | 300 |
-| S2 PCBA build and inspection | print, place, reflow, AOI/manual | QG-03/05 complete | 650 |
-| S3 electrical and harness | rail/isolation test, harness continuity | QG-06/09 complete | 1,200 |
-| S4 mechanical assembly | chassis, arms, battery, controller, covers | QG-07/10 complete | 650 |
-| S5 safety and functional | E-stop, interlocks, interfaces, soak | QG-11/12 complete | 900 |
-| S6 final inspection and pack | traveller, labels, cosmetics, pack | QG-13/14 complete | 300 |
-| **Total** | | | **4,000** |
+| S1 收货与配料 | 批次 ID、来料检验、序列化配料 | QG-01/02 完成 | 300 |
+| S2 PCBA 构建与检验 | 印刷、贴装、回流焊、AOI/人工 | QG-03/05 完成 | 650 |
+| S3 电气与线束 | 电源轨/隔离测试、线束导通 | QG-06/09 完成 | 1,200 |
+| S4 机械组装 | 机箱、机械臂、电池、控制器、盖板 | QG-07/10 完成 | 650 |
+| S5 安全与功能 | 急停、互锁、接口、浸泡 | QG-11/12 完成 | 900 |
+| S6 终检与包装 | 随工单、标签、外观、包装 | QG-13/14 完成 | 300 |
+| **合计** | | | **4,000** |
 
-Fixture allocation is a planning cap excluding already-owned calibrated lab
-equipment. Purchase requests need quotations and calibration/service costs.
-Fixtures fail closed on unknown product revision, missing calibration, failed
-self-test, duplicate serial, or unavailable evidence storage. Safety fixtures
-use guarded energy, current limiting, emergency disconnect, and documented LOTO.
+固定装置投入是计划上限，不含已自有的已校准实验室设备。采购申请需要报价与
+校准/服务成本。固定装置在遇到未知产品版本、缺少校准、自检失败、序列号重复或
+证据存储不可用时失败即拒绝。安全类固定装置使用防护能量、限流、急停断开与
+成文的 LOTO。
 
-## Flow and takt
+## 物流与节拍
 
-Material flows S1 to S6 with physically separate quarantine/MRB. No failed unit
-moves forward on the normal route. The line balance uses observed station cycle
-times from serialized travellers; planning times are not silently substituted.
-The bottleneck, staffing, changeover, availability, and rework loop determine
-capacity. Work instructions display revision at point of use and expired copies
-are removed at shift start.
+物料从 S1 流向 S6，隔离区/MRB 在物理上分离。任何失败设备都不得沿正常路线继续
+向前。线平衡采用序列化随工单中观测到的工位节拍；不会悄悄用计划时间替代。瓶颈、
+人员配置、换型、可用率与返工回路共同决定产能。作业指导书在使用点显示版本，
+过期副本在班次开始时撤除。
 
-## FPY gate
+## FPY 闸门
 
-FPY is `units passing every required gate without repair or repeat / units entering
-the route * 100`. Re-test after operator error, fixture error, component replacement,
-or adjustment counts as not first-pass. Report numerator, denominator, defect code,
-station, shift, product revision, and confidence limits. Pilot release requires
-FPY >= 85% and zero escaped critical safety defects. Yield exclusions require
-Quality approval and remain visible in the raw data.
+FPY 定义为 `units passing every required gate without repair or repeat / units entering
+the route * 100`。因操作员失误、固定装置错误、元件更换或调整后的复测不计为一次
+通过。报告分子、分母、缺陷代码、工位、班次、产品版本与置信限。试产发布要求
+FPY >= 85% 且零关键安全缺陷逃逸。良率剔除需要质量部门批准，并保留在原始数据中
+可见。
 
-If FPY is below 85%, stop ramp, contain affected lots, Pareto defects, assign
-corrective actions, verify the top causes, and repeat a controlled pilot. Averages
-cannot hide a station, supplier lot, or shift below threshold. Final release also
-requires fixture GR&R/measurement-system evidence where the result is quantitative.
+如果 FPY 低于 85%，停止爬坡、封存受影响批次、对缺陷做帕累托分析、分配纠正措施、
+验证首要原因，并重复一次受控试产。平均值不能掩盖低于阈值的某个工位、供应商
+批次或班次。定量结果的最终发布还需要固定装置的 GR&R/测量系统证据。
 
-## Workstation release
+## 工位放行
 
-- S1: barcode/lot traceability, ESD control, and quarantine are operational.
-- S2: process profile, stencil, inspection program, and workmanship criteria match revision.
-- S3: guarded power, continuity, isolation, and raw data capture pass golden-unit checks.
-- S4: calibrated torque tools, datum fixture, lift aids, and ergonomic review are complete.
-- S5: restrained motion zone, safety test authority, and emergency response are approved.
-- S6: label templates, pack drawing, accessories, traveller audit, and release authority match.
+- S1：条码/批次可追溯、ESD 控制与隔离区均已就绪。
+- S2：工艺温度曲线、钢网、检验程序与工艺标准与版本一致。
+- S3：防护供电、导通、隔离与原始数据采集通过黄金样机检查。
+- S4：已校准扭矩工具、基准固定装置、起吊辅助与人机工效评审完成。
+- S5：受约束运动区域、安全测试授权与应急响应已批准。
+- S6：标签模板、包装图纸、附件、随工单审计与放行权限一致。
 
-Status: `PILOT_EXECUTION_REQUIRED`. Release needs 20 serialized travellers,
-measured FPY, defect closure, fixture acceptance, training records, and owner sign-off.
+状态：`PILOT_EXECUTION_REQUIRED`。发布需要 20 份序列化随工单、实测 FPY、缺陷
+关闭、固定装置验收、培训记录与 Owner 签核。
 
-The six-station mapping is controlled in `station-map.csv`; `fixture-budget.csv`
-is the USD 4,000 planning cap and excludes unpriced calibration services.
+六工位映射由 `station-map.csv` 控制；`fixture-budget.csv` 是 USD 4,000 的计划
+上限，不含未定价的校准服务。

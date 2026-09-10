@@ -45,7 +45,7 @@ Linux 子系统核心
 
 每个硬件模块都应按以下顺序实现和审查：
 
-1. `probe`：验证设备树/ACPI 资源、时钟、复位和中断；任何资源缺失都失败关闭。
+1. `probe`：验证设备树/ACPI 资源、时钟、复位和中断；任何资源缺失都失败即拒绝。
 2. `register`：CAN 驱动完成 `alloc_candev` 后调用 `register_candev`；TTY 和 SPI
    驱动分别调用 `tty_register_driver` 和 `spi_register_driver` 等标准注册 API，
    注册成功前不对外发布可用设备。

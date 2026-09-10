@@ -92,7 +92,7 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
 
 
 def _has_recorded_approval_data(rows: list[dict[str, str]]) -> bool:
-    """Return true when a register contains a decision or any signed evidence."""
+    """当登记表包含决定或任何已签署证据时返回 true。"""
     return any(
         row.get("decision", "PENDING") != "PENDING"
         or any(row.get(field, "").strip() for field in APPROVAL_DATA_FIELDS[1:])
@@ -103,7 +103,7 @@ def _has_recorded_approval_data(rows: list[dict[str, str]]) -> bool:
 def initialize_approval_register(
     rows: list[dict[str, str]], approval_path: Path = APPROVALS, signature_path: Path = SIGNATURES
 ) -> bool:
-    """Create a pristine register without ever replacing human-owned decisions."""
+    """创建一份全新的登记表，绝不覆盖人工持有的决定。"""
     if approval_path.exists():
         with approval_path.open(newline="", encoding="utf-8") as handle:
             existing = list(csv.DictReader(handle))

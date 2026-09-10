@@ -1,29 +1,22 @@
-# Dual-axis traction childboard engineering package
+# 双轴牵引子板工程包
 
-This package defines a reviewable, independently replaceable controller for two
-chassis traction motors. It does not control the six UR5e joints or the Robotiq
-gripper; those remain on their vendor controllers.
+本工程包为两个底盘牵引电机定义一个可评审、可独立更换的控制器。它不控制六个
+UR5e 关节或 Robotiq 夹爪；这些仍由各自的厂商控制器管理。
 
-The engineering baseline keeps the traction power stage off the main controller
-PCB. The controller board supplies the bounded J2 auxiliary branch, two-channel
-safety ECO and isolated CAN interface; switching bridges, regenerative-energy
-handling and motor/encoder connectors remain on this replaceable childboard.
-The two motors are external chassis assemblies, not PCB-mounted parts. This
-partition prevents motor heat, commutation current and clamp pulses from sharing
-the Jetson controller layout while keeping the childboard serviceable.
+工程基线将牵引功率级移出主控制器 PCB。控制器板提供受限的 J2 辅助分支、双通道
+安全 ECO 与隔离 CAN 接口；开关桥、再生能量处理与电机/编码器连接器保留在这块
+可更换的子板上。两个电机是外部底盘组件，不是板上安装的零件。这种划分避免电机
+热量、换相电流与钳位脉冲进入 Jetson 控制器布局，同时保持子板可维护。
 
-The selected review baseline is two 12 V brushed-DC gearmotors powered from the
-controller PCB's J2 auxiliary output. One `DRV8962DDVR` is the driver candidate,
-not an approved part. Pololu item 4753 is now a traceable motor candidate (12 V,
-50:1 gearbox, 64 CPR encoder); it is not an approved AVL selection. Its
-datasheet-reported/extrapolated 5.5 A stall current would be about 11 A for two
-motors, above J2's 10 A aggregate ceiling. A bounded current-limit, stall and
-motion-profile policy is therefore required before this candidate can proceed.
-The production motor MPN, final winding envelope, wheel load and thermal duty
-remain open. Consequently this package is `DO_NOT_ORDER` even when its
-deterministic engineering checks pass.
+所选定的评审基线是两台由控制器 PCB 的 J2 辅助输出供电的 12 V 有刷直流减速电机。
+一颗 `DRV8962DDVR` 是驱动器候选，不是已批准的零件。Pololu 型号 4753 现在是
+可追溯的电机候选（12 V、50:1 减速箱、64 CPR 编码器）；它不是经批准的 AVL 选型。
+其数据手册标注/外推的 5.5 A 堵转电流在双电机下约为 11 A，超过 J2 的 10 A 总量
+上限。因此在该候选方案继续推进之前，必须先制定受限的电流限制、堵转与运动轮廓
+策略。量产电机 MPN、最终绕组包络、轮载与热负载仍然未定。因此即使其确定性工程
+检查全部通过，本工程包也保持 `DO_NOT_ORDER`。
 
-## Partition and power path
+## 划分与功率路径
 
 ```text
 controller J2, 12 V / 120 W aggregate maximum
@@ -40,93 +33,74 @@ isolated CAN field bus -> isolated CAN interface -> local traction controller
 dual hardwired safety channels -> independent nSLEEP and EN gating
 ```
 
-J2's 120 W limit is a shared input ceiling, not a per-axis rating. At 12 V it is
-10 A aggregate before harness drop, conversion loss, transient margin and
-temperature derating. The DRV8962 datasheet's 10 A-per-output DDV capability is
-also an IC limit, not a board, connector, motor or simultaneous two-axis rating.
+J2 的 120 W 限值是共享的输入上限，不是单轴额定值。在 12 V 下，考虑线束压降、
+转换损耗、瞬态裕量与温度降额之前即为 10 A 总量。DRV8962 数据手册中每输出 10 A
+的 DDV 能力同样是 IC 限值，不是板级、连接器、电机或双轴同时工作的额定值。
 
-The isolated 12 V converter is not assumed to absorb regenerative current. A
-motor can raise the local bus during deceleration or back-driving, so an approved
-combination of blocking, bulk capacitance, clamp/brake switch and energy sink is
-required before a schematic may be released. The protected 48 V traction bus is
-retained as an alternative in `architecture-options.csv`; it remains blocked on
-the battery maximum, surge/regen envelope, motor selection and a suitable power
-stage.
+隔离 12 V 转换器不被假定为可吸收再生电流。电机在减速或反拖时可能抬高本地母线
+电压，因此在原理图可以发布之前，需要一套经批准的阻断、储能电容、钳位/制动开关
+与能量泄放组合。受保护的 48 V 牵引母线作为备选方案保留在 `architecture-options.csv`
+中；它仍被电池最大电压、浪涌/再生包络、电机选型与合适的功率级所阻塞。
 
-The childboard must not join `GND_CAN_ISO` to `GND_MOTOR`. Its CAN interface
-therefore requires an isolated CAN FD transceiver and isolated-side power; J_CAN
-pin 4 remains `NC`, matching controller J5/J6. Cable shield termination is a
-separate chassis/EMC decision and is not assigned to that reserved pin.
+子板不得将 `GND_CAN_ISO` 与 `GND_MOTOR` 相连。因此其 CAN 接口需要隔离 CAN FD
+收发器与隔离侧电源；J_CAN 引脚 4 保持 `NC`，与控制器 J5/J6 一致。电缆屏蔽端接
+是独立的机箱/EMC 决策，不分配到该保留引脚。
 
-The candidate return topology is controlled in `net-topology.csv`. `GND_MOTOR`
-is the high-current J2/PGND return; `GND_LOGIC` serves the MCU, driver logic and
-safety gates and joins the motor return exactly once at `STAR_GND_01`. The logic
-regulator (`U6`) and isolated CAN converter (`U7`) are functional placeholders
-only; both remain `TBD_BLOCKING` and have no approved MPN.
+候选回流拓扑由 `net-topology.csv` 控制。`GND_MOTOR` 是大电流的 J2/PGND 回流；
+`GND_LOGIC` 服务于 MCU、驱动器逻辑与安全闸门，并只在 `STAR_GND_01` 处与电机
+回流相接一次。逻辑稳压器（`U6`）与隔离 CAN 转换器（`U7`）仅是功能占位符；两者
+都保持 `TBD_BLOCKING`，没有经批准的 MPN。
 
-The same topology table closes each motor terminal to one named DRV8962 output,
-each encoder supply and return to the logic domain, and each quadrature channel
-to its own controller input. The four `IPROPI` outputs also remain four distinct
-ADC paths; tying them together would hide half-bridge faults and is rejected by
-the validator. The driver VM pins use `VM_PROTECTED`, after `F1` and `Q1`, rather
-than a separate or bypassed motor-supply net.
+同一拓扑表将每个电机端子闭合到指定的一个 DRV8962 输出、每个编码器电源与回流
+接到逻辑域、每个正交通道接到各自的控制器输入。四个 `IPROPI` 输出也保持为四条
+独立的 ADC 路径；把它们并接会掩盖半桥故障，校验器会予以拒绝。驱动器的 VM 引脚
+在 `F1` 与 `Q1` 之后使用 `VM_PROTECTED`，而不是单独的或被旁路的电机供电网络。
 
-Each regulator path is represented by separate input and output rows. `U6`
-therefore has `VCC_LOGIC_INPUT -> U6.IN` followed by `U6.OUT -> VCC_LOGIC`,
-while `U7` has a primary-side `VCC_CAN_ISO_INPUT` row and a secondary-side
-`VCC_CAN_ISO`/`GND_CAN_ISO` island. The validator rejects a row that mixes a
-regulator input with its output or places a local ground endpoint across the
-`U7` isolation barrier.
+每条稳压路径都用独立的输入行与输出行表示。因此 `U6` 有 `VCC_LOGIC_INPUT ->
+U6.IN`，随后是 `U6.OUT -> VCC_LOGIC`；而 `U7` 有一次侧 `VCC_CAN_ISO_INPUT` 行与
+二次侧 `VCC_CAN_ISO`/`GND_CAN_ISO` 岛。校验器会拒绝把稳压器输入与其输出混在
+同一行、或把本地接地端点跨过 `U7` 隔离屏障的行。
 
-## Safety invariant
+## 安全不变量
 
-Software may request torque but cannot create safety permission. Channel A must
-hardware-gate `nSLEEP`; channel B must independently gate all four `ENx` paths.
-Opening either channel disables both bridges and latches the discrepancy until
-the upstream manual-reset sequence is complete. `MOTOR_ENABLE_REQ`, CAN traffic,
-MCU GPIO and a watchdog cannot bypass either gate.
+软件可以请求扭矩，但不能创造安全许可。通道 A 必须硬件闸控 `nSLEEP`；通道 B
+必须独立地闸控全部四条 `ENx` 路径。任一通道断开都会禁用两个桥，并将不一致状态
+闭锁，直到上游手动复位序列完成。`MOTOR_ENABLE_REQ`、CAN 报文、MCU GPIO 与看门狗
+都无法绕过任一闸门。
 
-`U1.nFAULT` is also a hardware input to both independent safety gates, not only
-an MCU diagnostic. `safety-gate-connectivity.csv` records separate A/B guarded
-fan-outs, power-good inhibits and default-low states. A driver fault, missing
-local logic rail, broken safety return or cross-fault therefore leaves both
-bridges inhibited and latched. The selected gate circuitry, bias values and
-timing still require an approved detailed schematic and physical fault tests.
+`U1.nFAULT` 同时是两个独立安全闸门的硬件输入，而不仅仅是 MCU 诊断。
+`safety-gate-connectivity.csv` 记录分离的 A/B 防护扇出、电源正常抑制与默认低电平
+状态。因此驱动器故障、本地逻辑电源轨缺失、安全回流断开或交叉故障都会使两个桥
+保持禁用并闭锁。所选闸门电路、偏置值与时序仍需要经批准的详细原理图与实物故障
+测试。
 
-The current controller J11 exposes one `MOTOR_ENABLE_SAFE` output plus the
-diagnostic `ESTOP_SENSE`. Splitting the one safe signal, or treating
-`ESTOP_SENSE` as the second channel, is forbidden. An owner-approved controller
-and harness ECO providing two independent safety outputs is therefore a release
-blocker.
+当前控制器 J11 只提供一个 `MOTOR_ENABLE_SAFE` 输出加诊断用 `ESTOP_SENSE`。拆分
+这个单一安全信号、或把 `ESTOP_SENSE` 当作第二通道，都是被禁止的。因此，一个经
+Owner 批准的、提供两个独立安全输出的控制器与线束 ECO 是发布阻塞项。
 
-`J_SAFE` is consequently an ECO endpoint from the controller J10/K1/K2 safety
-chain and must not be wired directly to the current four-pin J11. The candidate component-level wiring contract is in
-`schematic-design.md`; it is not a finished KiCad schematic and does not change
-the `DO_NOT_ORDER` status.
+因此 `J_SAFE` 是控制器 J10/K1/K2 安全链的一个 ECO 端点，不得直接连接到当前的
+四针 J11。候选的元件级接线契约见 `schematic-design.md`；它不是一份完成的 KiCad
+原理图，也不改变 `DO_NOT_ORDER` 状态。
 
-## Layout concept
+## 布局概念
 
-`placement-plan.csv` is a functional-block placement, not a land-pattern
-definition. Run the deterministic renderer to update the review drawing:
+`placement-plan.csv` 是功能块布局，不是焊盘图形定义。运行确定性渲染器以更新
+评审图纸：
 
 ```bash
 python hardware/motor_driver/tools/generate_layout_review.py
 ```
 
-The concept keeps the input protection and energy-management loop at the power
-connector, the driver central, motor connectors at the opposite edge, and the
-CAN/control and safety blocks away from the switching-current loop. Exact board
-dimensions, copper weight, driver land pattern, heatsink attachment, creepage,
-connector footprints and mounting pattern remain blocking inputs.
+该概念将输入保护与能量管理回路放在电源连接器处、驱动器居中、电机连接器在对侧
+边缘，CAN/控制与安全模块远离开关电流回路。确切的板卡尺寸、铜厚、驱动器焊盘
+图形、散热器安装、爬电、连接器封装与安装孔位仍是阻塞性输入。
 
-The placement datum is now explicit: `+Y_REAR` is the connector edge for
-`J_SAFE`, `J_CAN`, `J_ML` and `J_MR`; encoder connectors remain on `-Y_FRONT`,
-and `J_PWR` remains on the `-X_POWER` edge. `validate_motor_driver.py` checks
-the edge coordinates against the 118 x 82 mm outline so a later layout cannot
-silently rotate the harness interface. The SVG review is regenerated from the
-same placement table.
+布局基准现在是明确的：`+Y_REAR` 是 `J_SAFE`、`J_CAN`、`J_ML` 与 `J_MR` 的连接器
+边；编码器连接器保持在 `-Y_FRONT`，`J_PWR` 保持在 `-X_POWER` 边。
+`validate_motor_driver.py` 会对照 118 x 82 mm 外形检查边坐标，使后续布局无法
+悄悄旋转线束接口。SVG 评审图从同一布局表重新生成。
 
-## Reproduce checks
+## 复现检查
 
 ```bash
 python hardware/motor_driver/tools/validate_motor_driver.py
@@ -134,6 +108,5 @@ python hardware/manufacturing/tools/validate_harnesses.py
 python -m pytest tests/hardware/test_motor_driver_package.py -v
 ```
 
-Passing these checks means the package is internally consistent and fail-closed.
-It never substitutes for a clean detailed ERC/DRC, approved AVL, supplier DFM,
-safety review, calibrated waveforms, dyno data or physical thermal validation.
+通过这些检查意味着本工程包内部一致且失败即拒绝。它绝不能替代干净的详细 ERC/DRC、
+经批准的 AVL、供应商 DFM、安全评审、标定波形、测功机数据或实物热验证。
