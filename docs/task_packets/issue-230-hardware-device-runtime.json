@@ -1,7 +1,7 @@
 {
   "issue": 230,
   "human_owner": "TH3478",
-  "objective": "Document a transport-neutral, bounded hardware DeviceRuntime boundary with ROS 2 and Fast DDS deployment guidance without claiming physical implementation.",
+  "objective": "编写一个传输无关的、有界的硬件 DeviceRuntime 边界文档，并附 ROS 2 与 Fast DDS 部署指引，而不声称任何物理实现。",
   "allowed_paths": [
     "docs/decisions/ADR-0005-hardware-device-runtime.md",
     "docs/architecture/system.md",
@@ -22,12 +22,12 @@
     "services/**"
   ],
   "acceptance": [
-    "the ADR describes adapter, runtime, ROS 2, RMW/Fast DDS, validation and read-only exposure boundaries",
-    "the ADR defines bounded worker and queue lifecycle, cancellation, backpressure and shutdown semantics",
-    "the ADR keeps E-stop, watchdog, safe-enable and direct motion authority outside DDS",
-    "the ADR distinguishes simulation or loopback evidence from physical and hard-real-time evidence",
-    "the system architecture names the proposed hardware runtime as planned rather than implemented",
-    "no public schema, firmware, robot-control, hardware adapter or service implementation changes are made"
+    "ADR 描述适配器、运行时、ROS 2、RMW/Fast DDS、校验与只读暴露边界。",
+    "ADR 定义受限的工作线程与队列生命周期、取消、背压与关停语义。",
+    "ADR 将急停、看门狗、安全使能与直接运动权限保持在 DDS 之外。",
+    "ADR 区分仿真或回环证据与物理及硬实时证据。",
+    "系统架构将拟议的硬件运行时标注为「已规划」而非「已实现」。",
+    "不得修改任何公开 schema、固件、robot-control、硬件适配器或服务实现。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-230-hardware-device-runtime.json --base origin/main",
@@ -35,15 +35,15 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "validated Task Packet output",
-    "strict MkDocs build output",
-    "clean whitespace diff",
-    "owner review of ADR open decisions and protected boundaries"
+    "已校验的任务包输出。",
+    "严格 MkDocs 构建输出。",
+    "干净的空白 diff。",
+    "Owner 对 ADR 未决事项与受保护边界的评审。"
   ],
   "stop_conditions": [
-    "a public schema or ROS interface change is required before the design is reviewed",
-    "Fast DDS is treated as the only transport or safety channel",
-    "an unbounded worker, queue or callback is proposed",
-    "physical or hard-real-time evidence would be inferred from documentation or loopback"
+    "在设计评审之前就需要修改公开 schema 或 ROS 接口。",
+    "Fast DDS 被当作唯一的传输或安全通道。",
+    "拟议无界的工作线程、队列或回调。",
+    "物理或硬实时证据将从文档或回环中被推断出来。"
   ]
 }

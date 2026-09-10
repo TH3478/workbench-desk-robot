@@ -1,7 +1,7 @@
 {
   "issue": "LINUX1",
   "human_owner": "Quchaosheng",
-  "objective": "Publish the Linux driver-layer architecture and a reviewable boundary for SocketCAN, IRQ, DMA and recovery work.",
+  "objective": "发布 Linux 驱动层架构，并为 SocketCAN、IRQ、DMA 与恢复工作提供可评审的边界。",
   "allowed_paths": [
     "hardware/linux_drivers/**",
     "docs/architecture/linux-drivers.md",
@@ -22,10 +22,10 @@
     "kernel/wbcan/**"
   ],
   "acceptance": [
-    "the architecture identifies Linux subsystem boundaries and driver lifecycle rollback",
-    "SocketCAN, IRQ, DMA, locking and buffer ownership rules are explicit",
-    "the document distinguishes the wbcan software test device from physical hardware evidence",
-    "future CAN FD, UART/SPI, GPIO, DMA and interrupt work has stated prerequisites and stop conditions"
+    "架构明确 Linux 子系统边界与驱动生命周期回滚",
+    "SocketCAN、IRQ、DMA、加锁与缓冲区所有权规则显式化",
+    "文档区分 wbcan 软件测试设备与物理硬件证据",
+    "未来 CAN FD、UART/SPI、GPIO、DMA 与中断工作有明确的前置条件与停止条件"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/linux-driver-framework.json",
@@ -37,14 +37,14 @@
     "git diff --check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "strict MkDocs build output",
-    "repository gate output",
-    "git diff --check output"
+    "任务包校验输出",
+    "严格 MkDocs 构建输出",
+    "仓库闸门输出",
+    "`git diff --check` 输出"
   ],
   "stop_conditions": [
-    "a physical controller model or register contract is required",
-    "the change would require firmware, interface or robot-control writes",
-    "a planning value would be presented as hardware performance evidence"
+    "需要物理控制器模型或寄存器契约",
+    "该变更需要写入固件、接口或机器人控制",
+    "规划值会被冒充为硬件性能证据"
   ]
 }

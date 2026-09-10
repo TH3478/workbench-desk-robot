@@ -1,7 +1,7 @@
 {
   "issue": 49,
   "human_owner": "kukuboring",
-  "objective": "Preflight and deterministically reduce one non-empty run's WorldEvent stream, folding only content-identical duplicates and rejecting mixed-run or ambiguous event identities and sequence numbers before applying any event.",
+  "objective": "预检并确定性地化简一次非空运行的 WorldEvent 流，只折叠内容完全相同的重复项，并在应用任何事件之前拒绝混合运行或歧义的事件身份与序列号。",
   "allowed_paths": [
     "services/world_model/workbench_world_model/reducer.py",
     "tests/unit/test_world_model.py",
@@ -43,17 +43,17 @@
     "docs/task_packets/issue-122-world-model-mocks.json"
   ],
   "acceptance": [
-    "reduce_events rejects an empty requested run_id with ValueError before applying any event.",
-    "Every event must match the requested run_id; a mixed-run stream raises ValueError before applying any event.",
-    "Content-distinct events in one run cannot share sequence_no; the stream raises ValueError before applying any event.",
-    "Reusing an event_id with different complete model-dumped JSON content raises ValueError before applying any event.",
-    "Separate WorldEvent instances with equal complete model-dumped JSON content are treated as one idempotent event.",
-    "JSON object key insertion order alone does not make otherwise equal event content different.",
-    "After exact duplicates are folded, accepted events are applied exactly once in ascending sequence_no order.",
-    "Every permutation of the same accepted stream produces an identical WorldState model dump, evidence order and applied_event_ids order.",
-    "The complete stream is validated before the first apply_event call, so rejection cannot expose or return a partial state.",
-    "A valid non-empty run_id with an empty event list returns an empty WorldState for that run.",
-    "The reduce_events public signature, WorldState model, JSON Schemas and package-root exports remain unchanged."
+    "reduce_events 在应用任何事件之前，以 ValueError 拒绝空的请求 run_id。",
+    "每个事件都必须匹配请求的 run_id；混合运行的流在应用任何事件之前抛出 ValueError。",
+    "同一次运行中内容不同的事件不得共享 sequence_no；该流在应用任何事件之前抛出 ValueError。",
+    "以不同的完整模型导出 JSON 内容复用 event_id，在应用任何事件之前抛出 ValueError。",
+    "完整模型导出 JSON 内容相等的多个独立 WorldEvent 实例被视为同一条幂等事件。",
+    "仅 JSON 对象键的插入顺序不同，不得使原本相等的事件内容变得不同。",
+    "完全重复项被折叠后，被接受的事件按 sequence_no 升序恰好应用一次。",
+    "同一条被接受流的每种排列都产生相同的 WorldState 模型导出、证据顺序与 applied_event_ids 顺序。",
+    "完整流在第一次 apply_event 调用之前即被校验，因此拒绝不会暴露或返回部分状态。",
+    "有效的非空 run_id 配空事件列表，为该运行返回空的 WorldState。",
+    "reduce_events 公开签名、WorldState 模型、JSON Schema 与包根导出保持不变。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_world_model.py -v",
@@ -67,27 +67,27 @@
     "make check"
   ],
   "evidence": [
-    "Pre-implementation targeted test output showing the new tests fail for the expected missing validation and nondeterminism reasons.",
-    "Cause-specific ValueError assertions for empty run_id, mixed runs, duplicate sequence_no and conflicting duplicate event_id.",
-    "A spy assertion proving invalid streams are rejected before apply_event is called.",
-    "State assertions proving a content-identical duplicate is applied once without duplicate evidence.",
-    "All six permutations of a three-event accepted stream produce the same WorldState model dump and ordered applied_event_ids.",
-    "Targeted unit and existing integration test outputs.",
-    "Task Packet validation and all required repository check outputs with exit codes and test counts.",
-    "Final git status, git diff --name-only and git diff --check output proving only allowed paths changed."
+    "实现前的针对性测试输出，显示新测试因预期的缺失校验与非确定性原因而失败。",
+    "针对空 run_id、混合运行、重复 sequence_no 与冲突重复 event_id 的按原因 ValueError 断言。",
+    "间谍断言，证明无效流在 apply_event 被调用之前即被拒绝。",
+    "状态断言，证明内容完全相同的重复项只应用一次，且不产生重复证据。",
+    "三事件被接受流的全部六种排列都产生相同的 WorldState 模型导出与有序 applied_event_ids。",
+    "针对性单元测试与既有集成测试输出。",
+    "任务包校验与所有必需仓库检查输出，含退出码与测试计数。",
+    "最终 `git status`、`git diff --name-only` 与 `git diff --check` 输出，证明只有允许的路径发生变化。"
   ],
   "stop_conditions": [
-    "Implementation requires changing interfaces/** or libs/contracts/**.",
-    "Implementation requires changing event_store.py, verifier.py, package-root exports or another runtime module.",
-    "A public exception type or reduce_events signature change is required.",
-    "Implementation requires resolving the pre-existing WorldState Pydantic and JSON Schema drift.",
-    "Content-identical duplicate semantics cannot be implemented from the existing WorldEvent model-dumped content.",
-    "Implementation requires robot, firmware, simulation, control or security configuration changes.",
-    "A new test does not fail for the expected reason before implementation.",
-    "Invalid-stream rejection cannot be proven to occur before the first apply_event call.",
-    "The working branch contains Issue #46 or another Issue's commits.",
-    "Pre-existing user changes overlap an allowed path and cannot be preserved safely.",
-    "Any required modification falls outside allowed_paths.",
-    "An interface, safety or cross-module conflict is discovered."
+    "实现需要修改 `interfaces/**` 或 `libs/contracts/**`。",
+    "实现需要修改 `event_store.py`、`verifier.py`、包根导出或另一个运行时模块。",
+    "需要修改公开的异常类型或 reduce_events 签名。",
+    "实现需要解决既有的 WorldState Pydantic 与 JSON Schema 漂移。",
+    "内容完全相同的重复语义无法基于既有 WorldEvent 的模型导出内容实现。",
+    "实现需要修改机器人、固件、仿真、控制或安全配置。",
+    "新增测试未在实现前因预期原因而失败。",
+    "无法证明无效流拒绝发生在第一次 apply_event 调用之前。",
+    "工作分支包含 Issue #46 或其他 Issue 的提交。",
+    "既有用户改动与某个允许路径重叠，且无法安全保留。",
+    "任何所需修改落在 allowed_paths 之外。",
+    "发现接口、安全或跨模块冲突。"
   ]
 }

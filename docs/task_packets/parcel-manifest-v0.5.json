@@ -1,7 +1,7 @@
 {
   "issue": "PARCEL-MANIFEST-v0.5",
   "human_owner": "Quchaosheng",
-  "objective": "Reconcile observed parcels against an inbound manifest and reject normalized identities reused across supported fields.",
+  "objective": "将观测到的包裹与入站清单进行对账，并拒绝在受支持字段间复用的规范化身份。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "services/world_model/**",
@@ -17,11 +17,11 @@
   "read_only_paths": ["interfaces/**", "libs/contracts/**"],
   "forbidden": ["robot/control/**", "firmware/**", "hardware/safety/**"],
   "acceptance": [
-    "identity comparison normalizes case, compatibility characters, whitespace, and hyphens",
-    "the same identity reused across tracking_id, barcode, or parcel_uid fails closed",
-    "an optional inbound manifest rejects missing, unexpected, or mismatched parcels before manipulation",
-    "the independent verifier distinguishes missing manifest evidence from a manifest mismatch",
-    "place actions and dashboard replay expose manifest and identity guard outcomes without storing recipient data"
+    "身份比较归一化大小写、兼容字符、空白与连字符",
+    "同一身份在 tracking_id、barcode 或 parcel_uid 间复用即失败即拒绝",
+    "可选的入站清单在操作之前拒绝缺失、意外或不匹配的包裹",
+    "独立验证器区分缺失清单证据与清单不匹配",
+    "放置动作与看板回放展示清单与身份守卫的结果，而不存储收件人数据"
   ],
   "commands": [
     "python -m ruff check .",
@@ -33,15 +33,15 @@
     "docker compose up -d --build"
   ],
   "evidence": [
-    "planner tests for cross-field duplicates and manifest mismatch",
-    "world-model tests for missing and contradictory manifest evidence",
-    "scripted parcel log with manifest guard metadata",
-    "desktop and mobile dashboard screenshots"
+    "针对跨字段重复与清单不匹配的规划器测试",
+    "针对缺失与矛盾清单证据的世界模型测试",
+    "带清单守卫元数据的脚本化包裹日志",
+    "桌面与移动看板截图"
   ],
   "stop_conditions": [
-    "a manifest contains recipient names, addresses, or other unnecessary personal data",
-    "conditional execution would require a new contract",
-    "mobile navigation or parcel-locker access is requested",
-    "scripted observations would be presented as physical sensor evidence"
+    "清单包含收件人姓名、地址或其他不必要的个人数据",
+    "条件执行将需要新契约",
+    "要求移动导航或包裹柜访问",
+    "脚本化观测将被当作物理传感器证据呈现"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": 155,
   "human_owner": "TH3478",
-  "objective": "Measure virtual wbcan latency and CPU/throughput evidence with concurrent debugfs status readers using the same bounded probe as the idle baseline.",
+  "objective": "使用与空闲基线相同的受限探针，在并发 debugfs 状态读取器下测量虚拟 wbcan 延迟与 CPU/吞吐量证据。",
   "allowed_paths": [
     "kernel/wbcan/test_latency.py",
     "kernel/wbcan/wbcan.c",
@@ -13,23 +13,23 @@
   "read_only_paths": ["AGENTS.md"],
   "forbidden": ["interfaces/**", "firmware/**", "robot/control/**"],
   "acceptance": [
-    "idle and status-reader profiles use the same warm-up, sample count, CAN ID and hosted kernel environment",
-    "status-reader load records a positive bounded read count and propagates reader failures",
-    "debugfs status snapshots do not acquire the netdev TX lock or perform formatting under the private IRQ-safe lock",
-    "state and queue telemetry may describe adjacent instants and cannot make control decisions",
-    "both profiles record wall time, process CPU time, throughput and complete latency distributions",
-    "CI uploads both raw JSON reports and neither profile claims physical or PREEMPT_RT behavior",
-    "no pass/fail performance threshold is invented from one hosted runner"
+    "空闲与 status-reader 两种配置使用相同的预热、采样次数、CAN ID 与托管内核环境",
+    "status-reader 负载记录正的受限读取次数，并传播读取器故障",
+    "debugfs 状态快照不在私有 IRQ 安全锁内获取 netdev TX 锁或执行格式化",
+    "状态与队列遥测可以描述相邻时刻，但不能用于控制决策",
+    "两种配置都记录墙上时间、进程 CPU 时间、吞吐量与完整延迟分布",
+    "CI 上传两份原始 JSON 报告，且两种配置均不声称物理或 PREEMPT_RT 行为",
+    "不从单个托管运行器杜撰任何通过/失败性能阈值"
   ],
   "commands": [
     "python -m pytest tests/unit/test_linux_driver_tests.py -v",
     "python tools/scripts/check_task_packet.py docs/task_packets/linux-wbcan-status-reader-latency.json",
     "git diff --check origin/main...HEAD"
   ],
-  "evidence": ["idle latency JSON", "status-reader latency JSON", "kernel job output"],
+  "evidence": ["idle 延迟 JSON", "status-reader 延迟 JSON", "内核作业输出"],
   "stop_conditions": [
-    "debugfs status reads cannot be bounded or stopped",
-    "physical or PREEMPT_RT performance would be inferred",
-    "driver synchronization semantics must change before measurement"
+    "debugfs 状态读取无法受限或停止",
+    "将推断出物理或 PREEMPT_RT 性能",
+    "测量前必须修改驱动同步语义"
   ]
 }

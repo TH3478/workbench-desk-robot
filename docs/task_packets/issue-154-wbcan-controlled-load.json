@@ -1,7 +1,7 @@
 {
   "issue": 154,
   "human_owner": "TH3478",
-  "objective": "Complete the virtual wbcan latency baseline with bounded CPU and I/O load, repeated same-environment runs, and strict observational comparison evidence.",
+  "objective": "通过受限的 CPU 与 I/O 负载、同环境重复运行和严格的观测比较证据，完成虚拟 wbcan 延迟基线。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "docs/task_packets/issue-154-wbcan-controlled-load.json",
@@ -23,15 +23,15 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "idle and controlled-load profiles use identical bounded warm-up, sample, repetition, CAN ID and hosted-kernel settings",
-    "controlled load performs observed CPU hashing and fixed-size write-plus-fsync I/O without unbounded file growth",
-    "every load worker completes setup before the common timed gate, stops within a bounded timeout, and any cooperative timeout, forced termination, non-zero exit, or unverified shutdown makes the report fail closed",
-    "strict per-profile JSON preserves complete per-run latency, delivery, CPU, throughput and load-activity evidence",
-    "strict campaign JSON requires at least three complete same-environment repetitions for idle and controlled load",
-    "campaign aggregation preserves per-run outliers and reports an observational envelope without a latency pass threshold",
-    "CI validates and uploads idle, controlled-load, status-reader and campaign JSON and reports PASS, FAIL or NOT_EXECUTED",
-    "the privileged hosted kernel-module job is the runtime authority when local matching headers, module loading or debugfs access are unavailable",
-    "evidence remains virtual-wbcan-userspace and makes no physical CAN, MCU, actuator, PREEMPT_RT or hard-real-time claim"
+    "idle 与 controlled-load 两种配置使用相同的受限预热、采样、重复次数、CAN ID 与托管内核设置",
+    "受控负载执行可观测的 CPU 哈希与固定大小的写入加 fsync I/O，不产生无界文件增长",
+    "每个负载工作进程都在公共计时闸门之前完成启动，并在受限超时内停止；任何协作超时、强制终止、非零退出或未经验证的关闭都会使报告失败即拒绝",
+    "严格的逐配置 JSON 保留每次运行的完整延迟、送达、CPU、吞吐量与负载活动证据",
+    "严格的测量活动 JSON 要求 idle 与受控负载各至少三次完整的同环境重复运行",
+    "测量活动聚合保留每次运行的离群值，并报告观测包络，而不设延迟通过阈值",
+    "CI 校验并上传 idle、controlled-load、status-reader 与 campaign JSON，并报告 PASS、FAIL 或 NOT_EXECUTED",
+    "当本地匹配头文件、模块加载或 debugfs 访问不可用时，特权托管内核模块作业是运行时权威",
+    "证据保持为虚拟 wbcan 用户态，不作出任何物理 CAN、MCU、执行器、PREEMPT_RT 或硬实时声明"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_linux_driver_tests.py -v",
@@ -49,16 +49,16 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "portable latency and campaign contract test output",
-    "idle and controlled-load repeated-run JSON",
-    "strict observational campaign JSON",
-    "privileged hosted-kernel job output and uploaded raw artifacts",
-    "repository validation output"
+    "可移植延迟与测量活动契约测试输出",
+    "idle 与受控负载的重复运行 JSON",
+    "严格的观测性测量活动 JSON",
+    "特权托管内核作业输出与上传的原始制品",
+    "仓库校验输出"
   ],
   "stop_conditions": [
-    "physical CAN or PREEMPT_RT timing is required",
-    "a latency SLA or pass threshold would be inferred from hosted-runner observations",
-    "a benchmark framework or unbounded load generator is required",
-    "kernel driver synchronization semantics must change"
+    "需要物理 CAN 或 PREEMPT_RT 时序",
+    "将从托管运行器的观测中推断出延迟 SLA 或通过阈值",
+    "需要基准测试框架或无界负载生成器",
+    "必须修改内核驱动同步语义"
   ]
 }

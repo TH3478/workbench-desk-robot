@@ -1,7 +1,7 @@
 {
   "issue": 185,
   "human_owner": "TH3478",
-  "objective": "Make the expanded-URDF motor configuration parser reject dangling, unsupported, duplicate, blank, or otherwise ambiguous transmission joint references before publishing motor configuration.",
+  "objective": "让展开后 URDF 的电机配置解析器在发布电机配置之前，拒绝悬空、不受支持、重复、空白或其他歧义的传动关节引用。",
   "allowed_paths": [
     "libs/hardware/workbench/hardware/urdf_parser.py",
     "tests/unit/test_hardware_urdf.py",
@@ -21,12 +21,12 @@
     "libs/hardware/workbench/hardware/can_driver_safe.py"
   ],
   "acceptance": [
-    "Every transmission joint references exactly one declared continuous or revolute joint in the expanded URDF.",
-    "Dangling, blank, fixed, unsupported, duplicate, and structurally ambiguous transmission references fail with UrdfMotorConfigError that identifies the transmission and relevant joint reference.",
-    "A valid transmission for a supported actuated joint outside the requested joint_names selection remains valid.",
-    "An expanded URDF with no transmissions remains valid and reports mechanical_reduction as unknown.",
-    "Selected joints retain validated finite positive mechanical reductions from valid transmissions.",
-    "Focused tests cover the dangling-reference reproduction, invalid reference classes, unselected valid transmissions, no-transmission input, and valid multi-joint reductions."
+    "每个传动关节在展开后的 URDF 中恰好引用一个已声明的连续或旋转关节。",
+    "悬空、空白、固定、不受支持、重复以及结构上歧义的传动引用，以 UrdfMotorConfigError 失败，并指明该传动与相关关节引用。",
+    "针对受支持驱动关节的有效传动，即使位于所请求 joint_names 选择之外，也保持有效。",
+    "不含传动的展开后 URDF 保持有效，并把 mechanical_reduction 报告为 unknown。",
+    "所选关节保留来自有效传动的、已校验的有限正机械减速比。",
+    "聚焦测试覆盖悬空引用复现、无效引用类别、未选中的有效传动、无传动输入以及有效的多关节减速比。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_hardware_urdf.py -v",
@@ -38,16 +38,16 @@
     "make context-check"
   ],
   "evidence": [
-    "Focused URDF parser regression output covering invalid and valid transmission references.",
-    "Task Packet validation and changed-path boundary output.",
-    "Full repository test, contract, scenario, and context-check output.",
-    "Final git diff --check and changed-path review."
+    "聚焦的 URDF 解析器回归输出，覆盖无效与有效的传动引用。",
+    "任务包校验与变更路径边界输出。",
+    "完整仓库 test、contract、scenario 与 context-check 输出。",
+    "最终的 `git diff --check` 与变更路径复核。"
   ],
   "stop_conditions": [
-    "The fix requires a general URDF or Xacro evaluator.",
-    "The fix requires changing interfaces, firmware, robot control, CAN transport, or motion safety behavior.",
-    "A transmission reference would need to be guessed or normalized instead of validated against the expanded URDF.",
-    "A write outside the allowed paths is required.",
-    "The existing valid official UR5e extraction can no longer be represented without inventing hardware data."
+    "修复需要通用的 URDF 或 Xacro 求值器。",
+    "修复需要修改 interfaces、固件、机器人控制、CAN 传输或运动安全行为。",
+    "传动引用将需要被猜测或规范化，而不是依据展开后的 URDF 进行校验。",
+    "需要在 allowed_paths 之外写入。",
+    "既有的有效官方 UR5e 提取数据若不虚构硬件数据便无法再表示。"
   ]
 }

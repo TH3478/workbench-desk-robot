@@ -1,7 +1,7 @@
 {
   "issue": 153,
   "human_owner": "Quchaosheng",
-  "objective": "Define and enforce one Linux netdev/CAN-core ownership model for wbcan controller state across TX, bus-off, restart, link lifecycle, debugfs observation, and concurrent fault reconfiguration.",
+  "objective": "为 wbcan 控制器状态定义并强制实施一套 Linux netdev/CAN-core 所有权模型，覆盖 TX、总线关闭（bus-off）、重启、链路生命周期、`debugfs` 观测与并发故障重配置。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -21,18 +21,18 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "the private fault lock no longer acts as an incomplete controller-state lock",
-    "TX, bus-off, restart, open, stop, and debugfs observation follow a documented Linux netdev and CAN-core ownership model",
-    "link stop disables and drains the TX path before returning and publishes CAN_STATE_STOPPED before cancelling restart work",
-    "restart can only commit from CAN_STATE_BUS_OFF and cannot overwrite a newer stopped state",
-    "the restart-stop test observes an entered restart callback before stopping the link instead of relying on timer probability",
-    "the default-off restart and stop delay controls are bounded and restored after every probe",
-    "TX fails closed if invoked in bus-off, stopped, or sleeping state",
-    "terminal state snapshots never report an awake TX queue",
-    "the private spinlock is not held across CAN-core or netif calls",
-    "parallel TX, state reads, fault reconfiguration, bus-off, restart, and link cycling complete within bounded test limits",
-    "the seven existing fault modes retain their observable behavior",
-    "the work does not add a second controller state machine beside the CAN core"
+    "私有故障锁不再充当不完整的控制器状态锁",
+    "TX、总线关闭（bus-off）、重启、打开、停止与 debugfs 观测遵循文档化的 Linux netdev 与 CAN-core 所有权模型",
+    "链路停止在返回前禁用并排空 TX 路径，并在取消重启工作前发布 CAN_STATE_STOPPED",
+    "重启只能从 CAN_STATE_BUS_OFF 提交，且不能覆盖更新的停止状态",
+    "重启-停止测试在停止链路之前观测到已进入的重启回调，而不是依赖定时器概率",
+    "默认关闭的重启与停止延迟控制是受限的，并在每次探针之后恢复",
+    "TX 在总线关闭、停止或睡眠状态下被调用时失败即拒绝",
+    "终态快照从不报告处于唤醒状态的 TX 队列",
+    "私有自旋锁不会跨越 CAN-core 或 netif 调用持有",
+    "并行 TX、状态读取、故障重配置、总线关闭、重启与链路循环在受限的测试时限内完成",
+    "现有的七种故障模式保留其可观测行为",
+    "该工作不在 CAN core 之外增加第二个控制器状态机"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -43,17 +43,17 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "kernel module build output",
-    "checkpatch output",
-    "existing seven-mode privileged fault-suite output",
-    "bounded concurrent state, queue, entered-restart, link-stop drain, link-cycle, and debugfs probe output",
-    "clean readable marker-delimited dmesg segment without lockdep, hung-task, refcount, or soft-lockup warnings",
-    "KCSAN or PREEMPT_RT coverage is reported only when the tested kernel enables it"
+    "内核模块构建输出",
+    "checkpatch 输出",
+    "现有七模式特权故障套件输出",
+    "受限的并发状态、队列、已进入重启、链路停止排空、链路循环与 debugfs 探针输出",
+    "干净可读、以标记分隔的 dmesg 片段，不含 lockdep、hung-task、refcount 或 soft-lockup 警告",
+    "KCSAN 或 PREEMPT_RT 覆盖仅在所测内核启用时才报告"
   ],
   "stop_conditions": [
-    "the CAN core API contract must change",
-    "a private controller state machine is required",
-    "firmware, interfaces, or physical CAN claims are required",
-    "the hosted runner cannot load, restart, or unload the module"
+    "必须变更 CAN core API 契约",
+    "需要引入私有的控制器状态机",
+    "需要涉及固件、接口或物理 CAN 主张",
+    "托管 runner 无法加载、重启或卸载该模块"
   ]
 }

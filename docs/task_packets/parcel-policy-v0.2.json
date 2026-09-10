@@ -1,7 +1,7 @@
 {
   "issue": "PARCEL-POLICY-v0.2",
   "human_owner": "Quchaosheng",
-  "objective": "Upgrade tabletop parcel intake from fixed routes to evidence-derived batch policy with explainable decisions.",
+  "objective": "将桌面包裹收取从固定路由升级为证据驱动的分批策略，并提供可解释的决策。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "services/world_model/**",
@@ -17,11 +17,11 @@
   "read_only_paths": ["interfaces/**", "libs/contracts/**"],
   "forbidden": ["robot/control/**", "firmware/**", "hardware/safety/**"],
   "acceptance": [
-    "planner accepts any non-empty parcel batch and scans the complete batch before grasping",
-    "only verified intact parcels route to pickup while every observed exception routes to quarantine",
-    "quarantine work is ordered before pickup and all single-arm manipulation is serialized",
-    "world-model verification independently derives destinations from observed attributes",
-    "dashboard explains label, condition, expected route, and actual routing outcome per parcel"
+    "规划器接受任意非空包裹批次，并在抓取之前扫描完整批次",
+    "仅已验证完好的包裹路由到取件，所有观测到的异常都路由到隔离",
+    "隔离工作排在取件之前，且所有单机械臂操作串行化",
+    "世界模型验证独立地从观测属性推导目的地",
+    "看板为每个包裹解释标签、状态、预期路由与实际路由结果"
   ],
   "commands": [
     "python -m ruff check .",
@@ -31,14 +31,14 @@
     "docker compose up -d --build"
   ],
   "evidence": [
-    "planner ordering and arbitrary-batch tests",
-    "policy-verifier adversarial routing tests",
-    "108-run scripted evaluation metrics",
-    "desktop and mobile parcel-decision dashboard screenshots"
+    "规划器排序与任意批次测试",
+    "策略-验证器对抗性路由测试",
+    "108 次运行的脚本化评估指标",
+    "桌面与移动包裹决策看板截图"
   ],
   "stop_conditions": [
-    "conditional execution would require a new contract",
-    "mobile navigation or parcel-locker access is requested",
-    "scripted observations would be presented as physical sensor evidence"
+    "条件执行将需要新契约",
+    "要求移动导航或包裹柜访问",
+    "脚本化观测将被当作物理传感器证据呈现"
   ]
 }

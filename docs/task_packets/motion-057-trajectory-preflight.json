@@ -1,7 +1,7 @@
 {
   "issue": 57,
   "human_owner": "cyathea152-bit",
-  "objective": "On top of merged PR #149, implement the ROS-free, fail-closed and deterministic trajectory preflight required by #57 while preserving the Phase-2 validator and evidence compatibility.",
+  "objective": "在已合并的 PR #149 之上，实现 #57 所要求的无 ROS、失败即拒绝且确定性的轨迹预检，同时保持阶段 2 验证器与证据兼容性。",
   "allowed_paths": [
     "robot/control/ISSUE57.md",
     "robot/control/README.md",
@@ -32,22 +32,22 @@
     "physical or Gazebo execution claims"
   ],
   "acceptance": [
-    "The implementation is based on current origin/main commit 1044c843, which contains merged PR #149 commit d283bb9; the old da7c97c/#117 worktree is not used as the implementation base.",
-    "preflight_trajectory(traj, current_joint_positions, *, context) is the single validator implementation and returns immutable AcceptedTrajectory on success or Violation on failure; it imports no ROS, has no dispatcher/callback, does not mutate, clamp, reorder, repair, emit events or execute.",
-    "check_trajectory keeps the PR #149 signature and positional/keyword behavior, remains a thin Violation-or-None wrapper, preserves the six dataclass/asdict fields kind/message/joint/value/bound/point_index, and retains its supplied limits and limit_epsilon precedence rules.",
-    "build_preflight_context accepts keyword-only optional policy, expected_joint_names, hard_limits and override_limits; None loads controlled files and an explicit value wholly replaces that source. Expected joints and effective limits must match exactly and all stored mappings are converted to immutable tuples.",
-    "The policy file robot/control/workbench_motion/config/trajectory_preflight.yaml freezes version=1, limit_epsilon=0.000001, max_duration_s=30.0 and max_start_state_delta_rad=0.05. Epsilon is inward-only; duration and start delta are positive finite values; malformed policy fails closed with invalid_policy.",
-    "The stable trajectory ReasonCode set contains legacy codes joint_names/current_state/points/array_length/non_finite/time/current_position/position/velocity/effort/initial_position/segment_velocity plus joint_order_mismatch/timestamp_malformed/duration_exceeded/start_state_discontinuity. Codes are machine values, may only be added, and message text is non-contractual. Configuration errors are invalid_policy or invalid_limits and are not trajectory Violations.",
-    "The expected joint tuple is sourced from robot/control/workbench_motion/config/arm.yaml. Empty, duplicate, missing, unknown and partial names return joint_names; a same-set permutation returns joint_order_mismatch; no automatic sorting or repair is allowed.",
-    "Time parsing is nanosecond-exact: mapping/object durations require integer non-bool sec and nanosec with -2147483648 <= sec <= 2147483647 and 0 <= nanosec < 1000000000; scalar seconds reject bool, non-finite and sub-nanosecond values; -0.0 normalizes to 0 ns; malformed shape is timestamp_malformed and representable negative/non-increasing time keeps legacy time.",
-    "Validation rejects malformed arrays, NaN/Infinity, negative/non-increasing time, duration greater than 30.0 seconds, position/velocity/effort values outside inward epsilon limits, start-state delta greater than 0.05 rad, and mean segment velocity violations in the fixed validation order documented by ISSUE57.md.",
-    "A first point at t=0 is accepted only as a current-state anchor within limit_epsilon and is not treated as a motion segment; no point insertion, deletion, shifting or timestamp repair occurs.",
-    "AcceptedTrajectory has no public construction path, contains a deeply immutable normalized snapshot, canonical UTF-8 compact JSON bytes, trajectory_sha256='sha256:' plus lowercase SHA-256, policy_version, effective_limits_sha256 and context_sha256. Canonicalization uses exact joint order, integer nanoseconds, [] for absent optional arrays and finite float.hex() strings.",
-    "Equivalent mapping and ROS-like inputs produce byte-identical canonical output; changing any joint value, point, timestamp or optional array changes trajectory_sha256; changing policy, expected joints or effective limits changes the corresponding context evidence without changing the meaning of trajectory_sha256.",
-    "phase2_probe explicitly serializes exactly the legacy six validator_violation keys and tests assert their key set and string values; no new top-level code field is added to that evidence schema.",
-    "Tests cover every configured joint around position/velocity boundaries, every non-identity joint permutation, all timestamp representations and edges, duration/start-delta boundaries, configuration failures, input immutability, post-validation mutation isolation, canonicalization determinism and hash mutation sensitivity without ROS/Gazebo/network dependencies.",
-    "README and robot/control/ISSUE57.md state that #52 must accept only AcceptedTrajectory, while runtime state/scene TOCTOU recheck, controller materialization, zero-dispatch proof, #59 failed-dispatch mapping and C3b sampled collision gating remain downstream and are not claimed by #57.",
-    "Task Packet validation, Motion tests and root make test, make contract, make scenario-check, make context-check and make demo-scripted pass with no forbidden-path changes."
+    "实现基于当前 origin/main 的提交 1044c843，该提交包含已合并的 PR #149 提交 d283bb9；旧的 da7c97c/#117 工作树不作为实现基线。",
+    "`preflight_trajectory(traj, current_joint_positions, *, context)` 是唯一的验证器实现，成功时返回不可变的 AcceptedTrajectory，失败时返回 Violation；它不导入 ROS，没有派发器/回调，不修改、截断、重排、修复输入，不发布事件，也不执行。",
+    "`check_trajectory` 保持 PR #149 的签名与位置/关键字行为，仍是薄薄的 Violation 或 None 包装器，保留六个 dataclass/asdict 字段 kind/message/joint/value/bound/point_index，并维持其传入 limits 与 limit_epsilon 的优先级规则。",
+    "`build_preflight_context` 接受仅关键字可选参数 policy、expected_joint_names、hard_limits 与 override_limits；None 加载受控文件，显式值整体替换该来源。期望关节与生效限位必须完全匹配，且所有存储的映射都转换为不可变元组。",
+    "策略文件 `robot/control/workbench_motion/config/trajectory_preflight.yaml` 冻结 version=1、limit_epsilon=0.000001、max_duration_s=30.0 与 max_start_state_delta_rad=0.05。Epsilon 仅向内收紧；时长与起始差值必须为正的有限值；格式错误的策略以 invalid_policy 失败即拒绝。",
+    "稳定的轨迹 ReasonCode 集合包含既有代码 joint_names/current_state/points/array_length/non_finite/time/current_position/position/velocity/effort/initial_position/segment_velocity，外加 joint_order_mismatch/timestamp_malformed/duration_exceeded/start_state_discontinuity。代码是机器值，只可新增，消息文本不构成契约。配置错误是 invalid_policy 或 invalid_limits，不属于轨迹 Violation。",
+    "期望关节元组来源于 `robot/control/workbench_motion/config/arm.yaml`。空、重复、缺失、未知与部分名称返回 joint_names；同集合的置换返回 joint_order_mismatch；不允许自动排序或修复。",
+    "时间解析精确到纳秒：映射/对象时长要求非布尔整数 sec 与 nanosec，满足 -2147483648 <= sec <= 2147483647 且 0 <= nanosec < 1000000000；标量秒拒绝布尔、非有限与亚纳秒值；-0.0 归一化为 0 ns；形状错误为 timestamp_malformed，可表示的负时间/非递增时间保持既有 time。",
+    "验证拒绝格式错误的数组、NaN/Infinity、负时间/非递增时间、超过 30.0 秒的时长、超出向内 epsilon 限位的位置/速度/作用力值、超过 0.05 rad 的起始状态差值，以及平均分段速度违规，并遵循 ISSUE57.md 所记录的固定验证顺序。",
+    "位于 t=0 的首个点仅在 limit_epsilon 范围内作为当前状态锚点被接受，且不视为运动段；不发生点的插入、删除、平移或时间戳修复。",
+    "AcceptedTrajectory 没有公开构造路径，包含深度不可变的规范化快照、规范的 UTF-8 紧凑 JSON 字节、trajectory_sha256='sha256:' 加小写 SHA-256、policy_version、effective_limits_sha256 与 context_sha256。规范化使用精确的关节顺序、整数纳秒、以 [] 表示缺失的可选数组，以及有限的 float.hex() 字符串。",
+    "等价的 mapping 与类 ROS 输入产生逐字节相同的规范输出；修改任何关节值、点、时间戳或可选数组都会改变 trajectory_sha256；修改策略、期望关节或生效限位会改变相应的上下文证据，而不改变 trajectory_sha256 的含义。",
+    "`phase2_probe` 显式序列化恰好六个既有 validator_violation 键，测试断言其键集与字符串值；该证据 schema 不新增任何顶层 code 字段。",
+    "测试覆盖每个已配置关节的位置/速度边界、每种非恒等关节置换、所有时间戳表示与边界情形、时长/起始差值边界、配置失败、输入不可变性、验证后修改隔离、规范化确定性与哈希修改敏感性，且不依赖 ROS/Gazebo/网络。",
+    "README 与 `robot/control/ISSUE57.md` 声明 #52 必须只接受 AcceptedTrajectory，而运行时状态/场景 TOCTOU 复查、控制器实体化、零派发证明、#59 失败派发映射与 C3b 采样碰撞闸门仍属下游工作，#57 不声称完成。",
+    "任务包校验、Motion 测试以及根级 `make test`、`make contract`、`make scenario-check`、`make context-check` 与 `make demo-scripted` 全部通过，且不涉及禁止路径变更。"
   ],
   "commands": [
     "make task-check PACKET=docs/task_packets/motion-057-trajectory-preflight.json",
@@ -60,18 +60,18 @@
     "make demo-scripted"
   ],
   "evidence": [
-    "Task Packet validation output and independent branch base commit 1044c843",
-    "Motion unit-test output covering legacy compatibility, frozen ReasonCode/configuration codes, every-joint boundaries, exact timing, immutable AcceptedTrajectory isolation and canonical/context/trajectory hashes",
-    "phase2_probe validator_violation JSON key-set regression output",
-    "root make test, contract, scenario-check, context-check and demo-scripted output",
-    "reviewable trajectory_preflight.yaml values and recorded policy/effective-limits/context hashes"
+    "任务包校验输出与独立分支基线提交 1044c843",
+    "Motion 单元测试输出，覆盖既有兼容性、冻结的 ReasonCode/配置代码、全关节边界、精确时序、不可变 AcceptedTrajectory 隔离与 canonical/context/trajectory 哈希",
+    "`phase2_probe` validator_violation JSON 键集回归输出",
+    "根级 `make test`、contract、scenario-check、context-check 与 demo-scripted 输出",
+    "可评审的 `trajectory_preflight.yaml` 取值与记录的 policy/effective-limits/context 哈希"
   ],
   "stop_conditions": [
-    "origin/main or PR #149 changes incompatibly before implementation is rebased; re-verify the clean base before continuing",
-    "the task requires any forbidden path, public interface/schema change, ROS/controller dispatch, ActionResult, EvidenceSink, Agent Runtime, WorldState, firmware or physical claim",
-    "expected joints or vendor-derived limits cannot be loaded from arm.yaml and controlled vendor configuration; do not add hard-coded fallback limits",
-    "Motion Owner has not approved the exact policy values, ReasonCode table, canonicalization rules or AcceptedTrajectory/context-hash execution boundary",
-    "a proposed implementation creates a second validator, silently clips/reorders/repairs input, re-reads mutable raw input after acceptance, or permits a raw trajectory to cross the execution boundary",
-    "required checks fail and the failure cannot be explained by an unrelated pre-existing dirty-worktree condition"
+    "`origin/main` 或 PR #149 在实现变基前发生不兼容变更；继续前须重新验证干净的基线",
+    "任务需要任何禁止路径、公共接口/schema 变更、ROS/控制器派发、ActionResult、EvidenceSink、Agent Runtime、WorldState、固件或物理主张",
+    "无法从 `arm.yaml` 及受控供应商配置加载期望关节或供应商衍生限位；不得添加硬编码的回退限位",
+    "Motion Owner 尚未批准确切的策略值、ReasonCode 表、规范化规则或 AcceptedTrajectory/上下文哈希执行边界",
+    "提议的实现创建第二个验证器、静默截断/重排/修复输入、在验收后重新读取可变原始输入，或允许原始轨迹越过执行边界",
+    "必做检查失败，且该失败无法用无关的既有脏工作树状况解释"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": 208,
   "human_owner": "Quchaosheng",
-  "objective": "Reject non-string serialized message keys through the kernel integrity-error boundary.",
+  "objective": "通过内核完整性错误边界拒绝非字符串的序列化消息键。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/communication.py",
     "tests/unit/test_kernel_envelope_lifecycle.py",
@@ -21,9 +21,9 @@
     "interfaces/examples/action-result-place-confirmed.json"
   ],
   "acceptance": [
-    "non-string serialized message keys raise MessageIntegrityError",
-    "string-only reserved-field operations never receive a non-string key",
-    "valid round trips, reserved-field rejection, and checksum tamper detection remain unchanged"
+    "非字符串的序列化消息键抛出 MessageIntegrityError",
+    "仅字符串的保留字段操作绝不会收到非字符串键",
+    "有效的往返、保留字段拒绝与校验和篡改检测保持不变"
   ],
   "commands": [
     "python -m pytest tests/unit/test_kernel_envelope_lifecycle.py -q",
@@ -33,14 +33,14 @@
     "make contract"
   ],
   "evidence": [
-    "focused kernel envelope regression output",
-    "Ruff output",
-    "Task Packet boundary check",
-    "contract and context validation output"
+    "聚焦的内核信封回归输出",
+    "Ruff 输出",
+    "任务包边界检查",
+    "契约与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface or contract change is required",
-    "broker or lifecycle semantics must change",
-    "robot control or firmware behavior is affected"
+    "需要修改接口或契约",
+    "必须修改 broker 或生命周期语义",
+    "机器人控制或固件行为受到影响"
   ]
 }

@@ -2,7 +2,7 @@
   "issue": "19,22,23,24,28-release",
   "issues": [19, 22, 23, 24, 28],
   "human_owner": "Quchaosheng",
-  "objective": "Unify the hardware engineering, procurement, quality, manufacturing, and field-validation evidence into a deterministic release-readiness gate.",
+  "objective": "将硬件工程、采购、质量、制造与现场验证证据统一为确定性的发布就绪闸门。",
   "allowed_paths": [
     "hardware/release/**",
     "hardware/README.md",
@@ -29,11 +29,11 @@
   "evidence": [
     "hardware/release/generated/release_readiness_report.json",
     "hardware/release/evidence-register.csv",
-    "hardware package unit-test output"
+    "硬件包单元测试输出"
   ],
   "stop_conditions": [
-    "physical, supplier, lab, or certification evidence is unavailable",
-    "a gate would require changing a producer-owned path",
-    "an external record is missing a serial, revision, date, operator, or raw evidence reference"
+    "物理、供应商、实验室或认证证据不可用",
+    "某个闸门将需要修改生产者所有的路径",
+    "外部记录缺少序列号、版本、日期、操作员或原始证据引用"
   ]
 }

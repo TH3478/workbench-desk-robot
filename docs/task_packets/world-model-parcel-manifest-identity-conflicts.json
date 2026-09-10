@@ -1,7 +1,7 @@
 {
   "issue": 205,
   "human_owner": "Quchaosheng",
-  "objective": "Refute contradictory parcel identity fields during independent World Model verification.",
+  "objective": "在独立的 World Model 验证期间证伪相互矛盾的包裹身份字段。",
   "allowed_paths": [
     "services/world_model/workbench_world_model/verifier.py",
     "tests/unit/test_world_model.py",
@@ -24,10 +24,10 @@
     "evaluation/golden-set-parcel-v0.1.json"
   ],
   "acceptance": [
-    "every identity key present in both WorldState attributes and manifest normalizes to the same value",
-    "a conflicting shared identity produces a refuted goal-not-satisfied result",
-    "at least one normalized identity match remains required",
-    "cross-field identity fallback and missing-evidence outcomes remain compatible"
+    "同时出现在 WorldState 属性与清单中的每个身份键归一化为相同值",
+    "冲突的共享身份产生 refuted 的 goal-not-satisfied 结果",
+    "仍要求至少一个归一化身份匹配",
+    "跨字段身份回退与证据缺失结果保持兼容"
   ],
   "commands": [
     "python -m pytest tests/unit/test_world_model.py -q",
@@ -37,14 +37,14 @@
     "make contract"
   ],
   "evidence": [
-    "focused verifier regression test output",
-    "Ruff output",
-    "Task Packet boundary check",
-    "contract and context validation output"
+    "聚焦的验证器回归测试输出",
+    "Ruff 输出",
+    "任务包边界检查",
+    "契约与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface or contract change is required",
-    "agent planner behavior must change in the same pull request",
-    "motion, firmware, or physical hardware behavior is affected"
+    "需要变更接口或契约",
+    "必须在同一 pull request 中变更 agent 规划器行为",
+    "影响运动、固件或物理硬件行为"
   ]
 }

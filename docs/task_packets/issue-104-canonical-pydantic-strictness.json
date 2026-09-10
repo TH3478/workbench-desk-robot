@@ -1,8 +1,8 @@
 {
   "issue": 104,
   "human_owner": "TH3478",
-  "objective": "Make canonical runtime Pydantic contracts reject unknown fields and implicit Python coercion while preserving strict JSON ingress for valid repository fixtures.",
-  "decision_supported": "Can runtime producers and consumers rely on canonical contracts to fail closed without changing public JSON Schemas or the MCU Wire V1 contract?",
+  "objective": "让规范运行时 Pydantic 契约拒绝未知字段与隐式 Python 强制转换，同时为有效的仓库固定装置保留严格的 JSON 入口。",
+  "decision_supported": "运行时生产者与消费者能否依赖规范契约失败即拒绝，而无需修改公开 JSON Schema 或 MCU Wire V1 契约？",
   "allowed_paths": [
     "libs/contracts/workbench_contracts/models.py",
     "services/world_model/workbench_world_model/event_payloads.py",
@@ -88,15 +88,15 @@
     "docs/task_packets/issue-104-canonical-pydantic-strictness.json"
   ],
   "acceptance": [
-    "Canonical runtime models share strict Python validation and forbid undeclared fields at top-level and nested boundaries.",
-    "Boolean-as-integer and string-to-number coercion are rejected without requiring callers to pass strict=True.",
-    "TaskGraph steps and Observation hamming enforce the existing repository JSON Schema collection and numeric constraints.",
-    "Valid repository JSON fixtures continue to parse through model_validate_json and serialize deterministically.",
-    "SQLite WorldEvent replay uses one JSON-aware strict parser and rejects coercive or unknown persisted fields.",
-    "The World Model ActionResult payload adapter permits only explicit JSON string-to-enum conversion and then revalidates through canonical ActionResult.",
-    "The simulation CLI isolates its reviewed scene_variant extension while strictly validating the canonical ScenarioManifest projection.",
-    "The scripted demo constructs canonical ActionResult values with explicit enum instances and remains executable under strict contracts.",
-    "No interfaces, MCU Wire V1 models, firmware, robot control, schema coverage policy or database schema is changed."
+    "规范运行时模型共享严格的 Python 校验，并在顶层与嵌套边界拒绝未声明字段。",
+    "布尔转整数与字符串转数字的强制转换被拒绝，且不要求调用方传入 `strict=True`。",
+    "TaskGraph 步骤与 Observation hamming 强制实施现有仓库 JSON Schema 集合与数值约束。",
+    "有效的仓库 JSON 固定装置继续通过 `model_validate_json` 解析，并确定性序列化。",
+    "SQLite WorldEvent 回放使用同一个 JSON 感知的严格解析器，并拒绝强制转换或未知的已持久化字段。",
+    "World Model 的 ActionResult 负载适配器只允许显式的 JSON 字符串到枚举转换，随后通过规范 ActionResult 再次校验。",
+    "仿真 CLI 隔离其已评审的 `scene_variant` 扩展，同时严格校验规范的 ScenarioManifest 投影。",
+    "脚本化演示用显式的枚举实例构造规范 ActionResult 值，并在严格契约下保持可执行。",
+    "不得修改任何 interfaces、MCU Wire V1 模型、固件、机器人控制、schema 覆盖策略或数据库 schema。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-104-canonical-pydantic-strictness.json --base origin/main --head HEAD",
@@ -111,22 +111,22 @@
     "git diff --check"
   ],
   "evidence": [
-    "Focused strictness regression output covering extra fields, coercion, booleans, empty collections, valid JSON round trips and targeted schema/model parity.",
-    "World Model payload and SQLite replay output proving valid JSON enums remain compatible and malformed stored rows fail closed.",
-    "Issue-specified Agent Runtime, World Model and evaluation regression output.",
-    "Task Packet boundary, Ruff, full test, contract, scenario, context and whitespace validation output."
+    "聚焦的严格性回归输出，覆盖多余字段、强制转换、布尔值、空集合、有效 JSON 往返以及针对性的 schema/模型一致性。",
+    "World Model 负载与 SQLite 回放输出，证明有效的 JSON 枚举保持兼容，畸形的已存储行失败即拒绝。",
+    "Issue 指定的 Agent Runtime、World Model 与评估回归输出。",
+    "任务包边界、Ruff、完整测试、契约、场景、上下文与空白校验输出。"
   ],
   "stop_conditions": [
-    "Implementation requires changing interfaces/**, MCU Wire V1 models, firmware or robot control.",
-    "A valid repository JSON fixture cannot be accepted without broad non-enum coercion.",
-    "A required modification falls outside allowed_paths.",
-    "Existing user changes overlap an allowed path and cannot be preserved safely.",
-    "Task Packet validation reports a changed path outside allowed_paths."
+    "实现需要修改 `interfaces/**`、MCU Wire V1 模型、固件或机器人控制。",
+    "有效的仓库 JSON 固定装置若不借助宽泛的非枚举强制转换便无法被接受。",
+    "所需修改落在 allowed_paths 之外。",
+    "现有用户改动与某个允许路径重叠，且无法安全保留。",
+    "任务包校验报告某个变更路径位于 allowed_paths 之外。"
   ],
   "max_iterations": 3,
   "risks_and_fallbacks": [
-    "Python callers that pass raw enum strings must switch to enum instances or an explicit JSON boundary; broad compatibility coercion will not be restored.",
-    "Full schema-to-model coverage and unrelated required-field drift remain assigned to Issue #84.",
-    "Existing persisted rows containing coercive values or undeclared WorldEvent fields will fail closed and require reviewed repair rather than silent migration."
+    "传入原始枚举字符串的 Python 调用方必须改用枚举实例或显式的 JSON 边界；宽泛的兼容性强制转换不会恢复。",
+    "完整的 schema 到模型覆盖与无关的必填字段漂移仍归属 Issue #84。",
+    "含有强制转换值或未声明 WorldEvent 字段的既有持久化行将失败即拒绝，并需要经过评审的修复而非静默迁移。"
   ]
 }

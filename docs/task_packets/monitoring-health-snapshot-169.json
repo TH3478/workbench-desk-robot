@@ -1,7 +1,7 @@
 {
   "issue": 169,
   "human_owner": "zhangjia-1111",
-  "objective": "Collect a bounded in-process robot health snapshot from fixed, injectable metric sources.",
+  "objective": "从固定的、可注入的指标来源采集受限的进程内机器人健康快照。",
   "allowed_paths": [
     "Dockerfile",
     "libs/application/workbench/application/monitoring.py",
@@ -22,17 +22,17 @@
   ],
   "forbidden": [],
   "acceptance": [
-    "fixed metric names define type, unit, domain, freshness and criticality",
-    "unknown metrics, invalid values, incompatible clocks and unapproved labels fail closed",
-    "gauges/counters are thread-safe and bounded",
-    "histograms use fixed bucket aggregates and do not retain every sample",
-    "missing, stale and faulted critical inputs produce unknown or fault health",
-    "a complete fresh fixture produces a serializable healthy snapshot",
-    "collector and snapshot updates are safe under concurrent access",
-    "fixed sources, timestamp ordering and equal-time conflicts fail closed",
-    "Linux and component or ROS-diagnostic readers are injectable",
-    "local CPU, RSS, scheduler, thread and output-size evidence is reproducible",
-    "target-hardware and physical-source evidence remains NOT_EXECUTED when unavailable"
+    "固定的指标名称定义类型、单位、域、新鲜度与关键性",
+    "未知指标、无效值、不兼容时钟与未批准标签失败即拒绝",
+    "gauge/计数器是线程安全且受限的",
+    "直方图使用固定的桶聚合，且不保留每个样本",
+    "缺失、过期与故障的关键输入产生 unknown 或 fault 健康状态",
+    "完整的全新固定装置产生可序列化的健康快照",
+    "采集器与快照更新在并发访问下是安全的",
+    "固定来源、时间戳排序与等时间冲突失败即拒绝",
+    "Linux 与组件或 ROS 诊断读取器是可注入的",
+    "本地 CPU、RSS、调度器、线程与输出大小证据是可复现的",
+    "目标硬件与物理来源证据在不可用时保持 NOT_EXECUTED"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/monitoring-health-snapshot-169.json",
@@ -46,20 +46,20 @@
     "make context-check"
   ],
   "evidence": [
-    "focused monitoring test output",
-    "full repository test output",
-    "fixed registry and bounded histogram assertions",
-    "healthy, missing, stale and fault snapshot projections",
-    "docs/performance/monitoring-local-2026-08-19.md with target and physical evidence marked NOT_EXECUTED"
+    "聚焦的监控测试输出",
+    "完整仓库测试输出",
+    "固定注册表与受限直方图断言",
+    "健康、缺失、过期与故障快照投影",
+    "docs/performance/monitoring-local-2026-08-19.md，其中目标与物理证据标记为 NOT_EXECUTED"
   ],
   "stop_conditions": [
-    "interface schema change is required",
-    "a component needs a new control or safety authority",
-    "a source cannot provide a monotonic timestamp",
-    "a production design requires an unbounded buffer or external service",
-    "physical sensor or E-stop evidence is requested without a connected bench",
-    "a Prometheus server Grafana OpenTelemetry collector or time-series database is required",
-    "cloud telemetry or a background monitoring daemon is required",
-    "raw image or model-prompt metrics are required"
+    "需要变更接口 schema",
+    "某组件需要新的控制或安全权限",
+    "某来源无法提供单调时间戳",
+    "生产设计需要无界缓冲区或外部服务",
+    "在未连接实验台的情况下要求物理传感器或急停证据",
+    "需要 Prometheus 服务器、Grafana、OpenTelemetry 采集器或时序数据库",
+    "需要云遥测或后台监控守护进程",
+    "需要原始图像或模型提示词指标"
   ]
 }

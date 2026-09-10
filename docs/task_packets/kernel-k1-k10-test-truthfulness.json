@@ -1,7 +1,7 @@
 {
   "issue": 30,
   "human_owner": "Quchaosheng",
-  "objective": "Restore main CI by aligning the added K1-K10 tests with the kernel's real public APIs and removing the duplicate backup file.",
+  "objective": "通过让新增的 K1-K10 测试对齐内核真实公开 API，并移除重复的备份文件，恢复 main CI。",
   "allowed_paths": [
     "libs/kernel/tests/test_k1_k10.py",
     "libs/kernel/tests/test_k1_k10.py.bak",
@@ -22,10 +22,10 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "the added tests call only APIs implemented by the current kernel modules",
-    "version registry tests prove persistence and coexistence without claiming automatic compatibility",
-    "the duplicate tracked backup file is removed",
-    "Ruff, the focused K1-K10 suite, the repository test suite, contract checks, scenario checks, context checks and offline demos pass"
+    "新增测试只调用当前内核模块实现的 API",
+    "版本登记表测试证明持久化与共存，且不声称自动兼容",
+    "移除重复的已跟踪备份文件",
+    "Ruff、聚焦 K1-K10 套件、仓库测试套件、契约检查、场景检查、上下文检查与离线演示全部通过"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/kernel-k1-k10-test-truthfulness.json",
@@ -41,13 +41,13 @@
     "python tools/scripts/local_runner.py --goal \"Place the red block in the tray\""
   ],
   "evidence": [
-    "focused K1-K10 test output",
-    "full repository test and validation output",
-    "GitHub Actions result on the pull request and merged main commit"
+    "聚焦 K1-K10 测试输出",
+    "完整仓库测试与校验输出",
+    "拉取请求与已合并 main 提交上的 GitHub Actions 结果"
   ],
   "stop_conditions": [
-    "the fix requires production kernel behavior changes",
-    "the fix requires public schema changes",
-    "a test can pass only by skipping an unsupported behavior"
+    "修复需要变更生产内核行为",
+    "修复需要修改公开 schema",
+    "某测试只有跳过不支持的行为才能通过"
   ]
 }

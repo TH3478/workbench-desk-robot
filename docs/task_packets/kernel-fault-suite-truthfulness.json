@@ -1,7 +1,7 @@
 {
   "issue": "73",
   "human_owner": "Quchaosheng",
-  "objective": "Make the privileged kernel fault-suite result explicit and prevent skipped execution from passing CI.",
+  "objective": "让特权内核故障套件的结果显式化，并防止被跳过的执行通过 CI。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "tests/unit/test_release_workflow.py",
@@ -17,10 +17,10 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "the runtime fault result is exactly PASS, NOT_EXECUTED, or FAIL",
-    "module insertion and fault-suite outcomes appear in the job summary",
-    "only an executed and successful fault suite satisfies the kernel CI gate",
-    "a regression test prevents skipped runtime verification from appearing green"
+    "运行时故障结果恰好是 PASS、NOT_EXECUTED 或 FAIL",
+    "模块插入与故障套件结果出现在任务摘要中",
+    "只有已执行且成功的故障套件才能满足内核 CI 闸门",
+    "回归测试防止被跳过的运行时验证显示为通过"
   ],
   "commands": [
     "python -m pytest tests/unit/test_release_workflow.py -v",
@@ -28,13 +28,13 @@
     "git diff --check"
   ],
   "evidence": [
-    "release workflow unit-test output",
-    "Task Packet validation output",
-    "kernel-module GitHub Actions job summary"
+    "发布工作流单元测试输出",
+    "任务包校验输出",
+    "内核模块 GitHub Actions 任务摘要"
   ],
   "stop_conditions": [
-    "the hosted runner cannot execute privileged kernel module tests",
-    "firmware or interface changes are required",
-    "a release gate outside the repository must be changed"
+    "托管运行器无法执行特权内核模块测试",
+    "需要修改固件或接口",
+    "必须修改仓库之外的发布闸门"
   ]
 }

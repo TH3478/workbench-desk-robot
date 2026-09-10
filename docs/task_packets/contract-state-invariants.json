@@ -1,7 +1,7 @@
 {
   "issue": 196,
   "human_owner": "Quchaosheng",
-  "objective": "Reject canonical ActionResult and VerificationResult values whose cross-field states contradict their completion claim.",
+  "objective": "拒绝跨字段状态与其完成声明相矛盾的规范 ActionResult 与 VerificationResult 值。",
   "allowed_paths": [
     "libs/contracts/workbench_contracts/models.py",
     "tests/unit/test_contract_state_invariants.py",
@@ -34,14 +34,14 @@
     "make context-check"
   ],
   "evidence": [
-    "focused contradictory-state regression output",
-    "World Model verifier regression output",
-    "contract validation output",
-    "Task Packet and context validation output"
+    "聚焦的矛盾状态回归输出",
+    "World Model 验证器回归输出",
+    "契约校验输出",
+    "任务包与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface enum or JSON Schema change is required",
-    "a valid existing verifier output is rejected",
-    "a write outside allowed_paths is required"
+    "需要修改接口枚举或 JSON Schema",
+    "有效的现有验证器输出被拒绝",
+    "需要在 allowed_paths 之外写入"
   ]
 }

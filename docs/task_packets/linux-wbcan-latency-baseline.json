@@ -1,7 +1,7 @@
 {
   "issue": 154,
   "human_owner": "TH3478",
-  "objective": "Produce bounded, machine-readable userspace-observed TX-to-RX latency evidence for virtual wbcan without implying physical or hard-real-time timing.",
+  "objective": "为虚拟 wbcan 生成有界的、机器可读的用户态观测 TX 到 RX 时延证据，且不暗示物理或硬实时时序。",
   "allowed_paths": [
     "kernel/wbcan/test_latency.py",
     "kernel/wbcan/Makefile",
@@ -12,12 +12,12 @@
   "read_only_paths": ["kernel/wbcan/wbcan.c", "AGENTS.md"],
   "forbidden": ["interfaces/**", "firmware/**", "robot/control/**"],
   "acceptance": [
-    "the probe uses native SocketCAN and monotonic_ns with bounded warm-up and sample counts",
-    "strict JSON records commit, kernel, config hash availability, CPU affinity, preemption model, load profile and clock",
-    "P50, P95, P99, max, population-standard-deviation jitter and optional deadline misses are recorded",
-    "partial, duplicate, unexpected, invalid or clock-regressing samples fail visibly",
-    "deterministic synthetic unit tests validate percentile, jitter and report integrity",
-    "evidence scope remains virtual-wbcan-userspace and makes no physical CAN, MCU, actuator or hard-real-time claim"
+    "探针使用原生 SocketCAN 与 `monotonic_ns`，并具有受限的预热与采样次数",
+    "严格的 JSON 记录 commit、内核、配置哈希可用性、CPU 亲和性、抢占模型、负载画像与时钟",
+    "记录 P50、P95、P99、最大值、总体标准差抖动与可选的截止期错过",
+    "部分、重复、意外、无效或时钟倒退的样本会显式失败",
+    "确定性的合成单元测试验证百分位数、抖动与报告完整性",
+    "证据范围保持为 virtual-wbcan-userspace，且不作出任何物理 CAN、MCU、执行器或硬实时主张"
   ],
   "commands": [
     "make -C kernel/wbcan latency",
@@ -26,10 +26,10 @@
     "python tools/scripts/check_task_packet.py docs/task_packets/linux-wbcan-latency-baseline.json",
     "git diff --check origin/main...HEAD"
   ],
-  "evidence": ["versioned latency JSON", "portable unit test output", "kernel job output"],
+  "evidence": ["带版本的时延 JSON", "可移植的单元测试输出", "内核作业输出"],
   "stop_conditions": [
-    "physical CAN timing is required",
-    "a percentile threshold would be invented from one hosted runner",
-    "a benchmark framework dependency is required"
+    "需要物理 CAN 时序",
+    "会基于单个托管 runner 臆造出分位数阈值",
+    "需要引入基准测试框架依赖"
   ]
 }

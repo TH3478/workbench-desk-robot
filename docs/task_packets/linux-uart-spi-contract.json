@@ -1,7 +1,7 @@
 {
   "issue": "LINUX3",
   "human_owner": "Quchaosheng",
-  "objective": "Define and test a bounded software UART/SPI framing contract with an injectable fake transport while leaving physical controller, pinmux and device-tree choices to the hardware owners.",
+  "objective": "定义并测试受限的软件 UART/SPI 组帧契约与可注入的假传输，同时把物理控制器、pinmux 与设备树选择留给硬件 Owner。",
   "allowed_paths": [
     "hardware/linux_drivers/uart_spi/**",
     "hardware/linux_drivers/README.md",
@@ -26,12 +26,12 @@
     "hardware/pcb/**"
   ],
   "acceptance": [
-    "UART and SPI frames have bounded magic, version, transport, sequence, payload-length and CRC validation",
-    "partial reads and writes are reassembled without changing frame ownership",
-    "duplicate, stale and ambiguous sequence numbers fail closed, including the 16-bit wrap boundary",
-    "fake transport queue capacity, closed state, transient write failure and retry budget are observable",
-    "tests cover both UART and SPI while no frozen interface schema or physical hardware ABI is changed",
-    "documentation marks baud rate, SPI clock, pinmux, DMA, IRQ and device-tree resources as owner-gated prerequisites"
+    "UART 与 SPI 帧具备受限的 magic、版本、传输、序列、载荷长度与 CRC 校验",
+    "部分读取与写入在不改变帧所有权的情况下重组",
+    "重复、过期与歧义的序列号失败即拒绝，包括 16 位回绕边界",
+    "假传输的队列容量、关闭状态、瞬时写入失败与重试预算均可观测",
+    "测试同时覆盖 UART 与 SPI，且不修改任何冻结的接口 schema 或物理硬件 ABI",
+    "文档将波特率、SPI 时钟、pinmux、DMA、IRQ 与设备树资源标记为 Owner 把关的前置条件"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/linux-uart-spi-contract.json",
@@ -44,15 +44,15 @@
     "git diff --check"
   ],
   "evidence": [
-    "focused UART/SPI contract test output",
-    "fake transport partial-I/O, CRC, sequence, backpressure and retry assertions",
-    "repository gate output",
-    "software-only scope and owner-gated hardware prerequisites"
+    "聚焦的 UART/SPI 契约测试输出",
+    "假传输的部分 I/O、CRC、序列、背压与重试断言",
+    "仓库闸门输出",
+    "仅软件的边界与 Owner 把关的硬件前置条件"
   ],
   "stop_conditions": [
-    "a production UART/SPI ABI or frozen interface schema change is required",
-    "a physical controller, pinmux, device-tree, DMA or IRQ choice is required",
-    "MCU firmware changes are required to define frame semantics",
-    "software fake evidence would be presented as line-rate, signal-integrity or hard-real-time hardware evidence"
+    "需要修改生产 UART/SPI ABI 或冻结的接口 schema",
+    "需要确定物理控制器、pinmux、设备树、DMA 或 IRQ 选型",
+    "需要修改 MCU 固件来定义帧语义",
+    "软件假证据会被冒充为线速、信号完整性或硬实时硬件证据"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": 53,
   "human_owner": "TH3478",
-  "objective": "Implement the platform-independent C safety state machine for the MCU, with deterministic fail-closed transitions and the same transition suite running on Host and QEMU.",
+  "objective": "为 MCU 实现平台无关的 C 语言安全状态机，具备确定性的失败即拒绝转换，同一套转换测试在 Host 与 QEMU 上运行。",
   "allowed_paths": [
     "firmware/mcu/core/state_machine.h",
     "firmware/mcu/core/state_machine.c",
@@ -33,15 +33,15 @@
     "services/**"
   ],
   "acceptance": [
-    "The C core exposes IDLE, EXECUTING, SAFE_STOP and FAULT states with deterministic results.",
-    "STOP is processed from every state, is idempotent, and never permits motion to continue.",
-    "WATCHDOG_EXPIRED enters a latched FAULT state with the frozen watchdog fault meaning.",
-    "SAFE_STOP and FAULT cannot resume execution through ordinary events or an unauthorized reset.",
-    "A trusted reset requires an explicit authorization and cleared-cause gate, then enters IDLE only.",
-    "Invalid events and invalid event arguments return a rejection and fail closed without heap allocation.",
-    "The core includes no vendor or platform headers, dynamic allocation, floating point, or hardware register access.",
-    "The shared transition tests cover every state and event boundary and run against the same core source on Host and QEMU.",
-    "The C core and shared C transition suite are authoritative; firmware/virtual_mcu is retired as a safety reference and parity oracle, remaining only as a legacy compatibility stub."
+    "C 核心暴露 IDLE、EXECUTING、SAFE_STOP 与 FAULT 状态，且结果确定。",
+    "STOP 可从任意状态处理，具备幂等性，且绝不允许运动继续。",
+    "WATCHDOG_EXPIRED 进入锁存的 FAULT 状态，并保持冻结的看门狗故障含义。",
+    "SAFE_STOP 与 FAULT 不能通过普通事件或未授权重置恢复执行。",
+    "受信的重置需要显式授权与清除原因的闸门，且随后只能进入 IDLE。",
+    "无效事件与无效事件参数返回拒绝，并在不进行堆分配的情况下失败即拒绝。",
+    "核心不包含厂商或平台头文件、动态分配、浮点运算或硬件寄存器访问。",
+    "共享的转换测试覆盖每个状态与事件边界，并在 Host 与 QEMU 上针对同一份核心源码运行。",
+    "C 核心与共享 C 转换套件是权威来源；firmware/virtual_mcu 不再作为安全参考与一致性基准，仅保留为遗留兼容桩。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-53-mcu-safety-state-machine.json",
@@ -55,18 +55,18 @@
     "make context-check"
   ],
   "evidence": [
-    "Host transition-suite output with assertion and failure counts",
-    "QEMU transition-suite output from the shared C test source",
-    "verify-no-fp output proving no floating-point instructions or allocator symbols",
-    "MCU binary size-check output",
-    "repository test, contract, scenario and context-check output"
+    "Host 转换套件输出，含断言数与失败数",
+    "来自共享 C 测试源码的 QEMU 转换套件输出",
+    "verify-no-fp 输出，证明无浮点指令或分配器符号",
+    "MCU 二进制 size-check 输出",
+    "仓库 test、contract、scenario 与 context-check 输出"
   ],
   "stop_conditions": [
-    "The implementation requires changing the frozen JSON Schema, Pydantic models or protocol documentation.",
-    "A reset opcode or reset frame would be added to protocol v1.0.",
-    "The implementation needs CAN layout, frame decoding, retry deduplication or watchdog timer scheduling from #54, #61 or #60.",
-    "The implementation needs vendor headers, board registers, motor control, PID or physical hardware claims.",
-    "The C state machine cannot run unchanged in both Host and QEMU targets.",
-    "The Python VirtualMcu would need behavior changes or a parity claim outside this Task Packet; handle that separately, especially unknown-command handling from #63."
+    "实现需要修改冻结的 JSON Schema、Pydantic 模型或协议文档。",
+    "需要向协议 v1.0 添加 reset 操作码或 reset 帧。",
+    "实现需要 #54、#61 或 #60 的 CAN 布局、帧解码、重试去重或看门狗定时器调度。",
+    "实现需要厂商头文件、板级寄存器、电机控制、PID 或物理硬件声明。",
+    "C 状态机无法在 Host 与 QEMU 两个目标上原样运行。",
+    "Python VirtualMcu 需要行为变更或本任务包之外的一致性声明；应另行处理，尤其是 #63 的未知命令处理。"
   ]
 }

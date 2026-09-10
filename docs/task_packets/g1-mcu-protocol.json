@@ -1,7 +1,7 @@
 {
   "issue": 44,
   "human_owner": "TH3478",
-  "objective": "Freeze the versioned MCU logical-frame contract, telemetry semantics, fault-code meanings, correlation/timing behavior and reset authority without claiming that the binary CAN payload encoding or physical hardware behavior has been validated.",
+  "objective": "冻结带版本的 MCU 逻辑帧契约、遥测语义、故障码含义、关联/时序行为与复位权限，同时不声称二进制 CAN 载荷编码或物理硬件行为已经过验证。",
   "allowed_paths": [
     "docs/architecture/mcu-protocol-v1.md",
     "docs/task_packets/g1-mcu-protocol.json",
@@ -47,16 +47,16 @@
     "make context-check"
   ],
   "evidence": [
-    "tests/unit/test_mcu_protocol_contract.py valid and invalid frame corpus",
-    "tests/unit/test_mcu_protocol_contract.py Schema Compiler compatibility check",
-    "interfaces/examples/mcu-frame-stop-ack.json round-trip through Draft 2020-12 JSON Schema and Pydantic",
-    "docs/architecture/mcu-protocol-v1.md fault-code and frame-shape tables",
-    "make test and make contract output"
+    "`tests/unit/test_mcu_protocol_contract.py` 的有效与无效帧语料",
+    "`tests/unit/test_mcu_protocol_contract.py` 的 Schema Compiler 兼容性检查",
+    "`interfaces/examples/mcu-frame-stop-ack.json` 经 Draft 2020-12 JSON Schema 与 Pydantic 的往返验证",
+    "`docs/architecture/mcu-protocol-v1.md` 的故障码与帧形状表",
+    "`make test` 与 `make contract` 输出"
   ],
   "stop_conditions": [
-    "a binary CAN payload layout would have to be invented rather than derived from an approved firmware protocol",
-    "the change would require writing firmware or robot/control code",
-    "a frame cannot be represented consistently in Draft 2020-12 JSON Schema and Pydantic",
-    "a fault meaning would permit an unacknowledged stop to be treated as confirmed"
+    "二进制 CAN 载荷布局将不得不凭空发明，而非源自已批准的固件协议",
+    "该改动需要编写 `firmware` 或 `robot/control` 代码",
+    "某个帧无法在 Draft 2020-12 JSON Schema 与 Pydantic 中一致表示",
+    "某个故障含义会允许将未确认的停止当作已确认"
   ]
 }

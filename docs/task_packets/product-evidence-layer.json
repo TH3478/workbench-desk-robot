@@ -2,8 +2,8 @@
   "issue": "product-evidence-layer",
   "issues": [310, 311, 314],
   "human_owner": "Quchaosheng",
-  "objective": "Adopt a privacy-preserving product evidence layer that connects user problems and Design Partner tasks to the existing scenario and engineering evidence contracts.",
-  "decision_supported": "Whether Workbench should adopt the product-management and Design Partner operating model as repository documentation.",
+  "objective": "采用一个保护隐私的产品证据层，将用户问题与 Design Partner 任务连接到现有场景与工程证据契约。",
+  "decision_supported": "Workbench 是否应把产品管理与 Design Partner 运营模式采纳为仓库文档。",
   "allowed_paths": [
     "docs/product/**",
     "docs/task_packets/product-evidence-layer.json",
@@ -21,11 +21,11 @@
     "tasks/**"
   ],
   "acceptance": [
-    "User evidence is separated from engineering evidence and physical evidence.",
-    "Private participant data is referenced only by opaque identifiers.",
-    "Product documents cannot grant motion, MCU, emergency-stop, release, or completion authority.",
-    "Scripted fixture status remains release_eligible=false unless a release gate explicitly changes it.",
-    "No interfaces/ or public JSON schema changes are made."
+    "用户证据与工程证据、物理证据分离。",
+    "私有参与者数据仅通过不透明标识符引用。",
+    "产品文档不得授予运动、MCU、急停、发布或完成权限。",
+    "脚本化固定装置状态保持 release_eligible=false，除非发布闸门显式修改它。",
+    "不进行任何 interfaces/ 或公共 JSON schema 变更。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/product-evidence-layer.json",
@@ -50,15 +50,15 @@
     "docs/product/metrics-and-decision-log.md"
   ],
   "stop_conditions": [
-    "A requested change requires identifiable customer data in the repository.",
-    "A requested change modifies interfaces/ without matching Pydantic models and approvals.",
-    "A document would claim a physical or Gazebo result without an eligible artifact."
+    "所请求的变更需要在仓库中保存可识别的客户数据。",
+    "所请求的变更在没有匹配的 Pydantic 模型与批准的情况下修改 `interfaces/`。",
+    "某文档会在没有合格产物的情况下声称物理或 Gazebo 结果。"
   ],
   "risks_and_fallbacks": [
-    "If product evidence conflicts with engineering evidence, preserve both and keep the decision UNKNOWN until reviewed.",
-    "If privacy handling is unclear, keep the source in private storage and commit only an opaque reference.",
-    "If MkDocs strict validation is unavailable on a contributor machine, run it in CI before merge."
+    "如果产品证据与工程证据冲突，两者都保留，并在评审前将决策保持为 UNKNOWN。",
+    "如果隐私处理方式不明确，将源数据保存在私有存储中，仅提交不透明引用。",
+    "如果贡献者机器上无法进行 MkDocs 严格校验，则在合并前于 CI 中运行。"
   ],
-  "data_classification": "Repository documentation is public; participant source data is private and must not be committed.",
-  "model_policy": "No model, product document, or Design Partner may grant runtime, motion, MCU, emergency-stop, release, or completion authority."
+  "data_classification": "仓库文档是公开的；参与者源数据是私密的，不得提交。",
+  "model_policy": "任何模型、产品文档或 Design Partner 都不得授予运行时、运动、MCU、急停、发布或完成权限。"
 }

@@ -1,7 +1,7 @@
 {
   "issue": 184,
   "human_owner": "TH3478",
-  "objective": "Preserve standard SocketCAN software TX timestamp semantics for every frame accepted by wbcan without timestamping rejected or retried SKBs.",
+  "objective": "为 wbcan 接受的每一帧保留标准 SocketCAN 软件 TX 时间戳语义，且不为被拒绝或重试的 SKB 打时间戳。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -19,13 +19,13 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "every normal, dropped, or injected-error SKB accepted by wbcan requests exactly one standard software TX timestamp",
-    "NETDEV_TX_BUSY and invalid frames produce no timestamp before a successful retry or acceptance",
-    "loopback, own-message, drop, error, counter, ownership, and fault semantics remain unchanged",
-    "ethtool reports software TX and RX timestamping with no PHC or hardware timestamp capability",
-    "a bounded CAN_RAW SO_TIMESTAMPING and MSG_ERRQUEUE probe compares wbcan with vcan",
-    "the timestamp probe closes every socket and removes its temporary vcan interface",
-    "all evidence is labelled as host software enqueue timing rather than wire, MCU, actuator, or hard-real-time timing"
+    "wbcan 接受的每个正常、丢弃或注入错误的 SKB 都恰好请求一次标准软件 TX 时间戳",
+    "NETDEV_TX_BUSY 与无效帧在成功重试或接受之前不产生时间戳",
+    "回环、自身消息、丢弃、错误、计数器、所有权与故障语义保持不变",
+    "`ethtool` 报告软件 TX 与 RX 时间戳能力，且无 PHC 或硬件时间戳能力",
+    "一个受限的 CAN_RAW SO_TIMESTAMPING 与 MSG_ERRQUEUE 探针将 wbcan 与 vcan 进行对比",
+    "时间戳探针关闭每个套接字并移除其临时 vcan 接口",
+    "所有证据均标注为主机软件入队时序，而非线上、MCU、执行器或硬实时时序"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -36,17 +36,17 @@
     "git diff --check origin/fix/153-wbcan-state-serialization...HEAD"
   ],
   "evidence": [
-    "kernel module build and checkpatch output",
-    "vcan comparison and wbcan MSG_ERRQUEUE timestamp counts",
-    "software-only ethtool capability assertion",
-    "normal, loopback-disabled, own-message, drop, injected-error, TX-full retry, and invalid-frame results",
-    "existing privileged wbcan fault and concurrency suite output",
-    "clean readable marker-delimited kernel diagnostics"
+    "内核模块构建与 checkpatch 输出",
+    "vcan 对比与 wbcan MSG_ERRQUEUE 时间戳计数",
+    "仅软件的 ethtool 能力断言",
+    "正常、禁用回环、自身消息、丢弃、注入错误、TX 满重试与无效帧的结果",
+    "现有特权 wbcan 故障与并发套件输出",
+    "干净可读、以标记分隔的内核诊断信息"
   ],
   "stop_conditions": [
-    "the #153 state-serialization base changes incompatibly",
-    "the target kernel lacks standard skb_tx_timestamp or ethtool timestamp helpers",
-    "firmware, interfaces, hardware timestamp emulation, or physical CAN claims are required",
-    "the privileged runner cannot load wbcan, create vcan, or read MSG_ERRQUEUE"
+    "#153 状态串行化基线发生不兼容变更",
+    "目标内核缺少标准的 `skb_tx_timestamp` 或 `ethtool` 时间戳辅助函数",
+    "需要涉及固件、接口、硬件时间戳仿真或物理 CAN 主张",
+    "特权 runner 无法加载 wbcan、创建 vcan 或读取 `MSG_ERRQUEUE`"
   ]
 }

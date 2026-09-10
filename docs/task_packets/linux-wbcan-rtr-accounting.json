@@ -1,7 +1,7 @@
 {
   "issue": "139",
   "human_owner": "Quchaosheng",
-  "objective": "Keep RTR byte accounting and bit-flip evidence aligned with actual CAN payload changes.",
+  "objective": "使 RTR 字节计量与位翻转证据同实际 CAN 载荷变化保持一致。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -10,11 +10,11 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "RTR frames contribute zero TX and RX payload bytes",
-    "zero-length, short, and RTR frames cannot consume an ineligible bit-flip shot",
-    "no-op bit flips do not increment injected evidence",
-    "the next eligible full payload consumes and records the shot",
-    "standard CAN payload helpers define byte accounting"
+    "RTR 帧计入的 TX 与 RX 载荷字节为零",
+    "零长度、短帧与 RTR 帧不能消耗不符合资格的位翻转机会",
+    "无效果的位翻转不会增加注入证据计数",
+    "下一个符合资格的完整载荷消耗并记录该次机会",
+    "标准 CAN 载荷辅助函数定义字节计量"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -22,10 +22,10 @@
     "sudo make -C kernel/wbcan reload",
     "sudo make -C kernel/wbcan test"
   ],
-  "evidence": ["module build output", "checkpatch output", "RTR and bit-flip runtime assertions"],
+  "evidence": ["模块构建输出", "checkpatch 输出", "RTR 与位翻转运行时断言"],
   "stop_conditions": [
-    "CAN FD or CAN XL support is required",
-    "firmware or interface changes are required",
-    "physical bus timing must be modelled"
+    "需要支持 CAN FD 或 CAN XL",
+    "需要改动固件或接口",
+    "必须对物理总线时序建模"
   ]
 }

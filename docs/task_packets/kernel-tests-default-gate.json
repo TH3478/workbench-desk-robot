@@ -1,7 +1,7 @@
 {
   "issue": 29,
   "human_owner": "Quchaosheng",
-  "objective": "Include the maintained K1-K10 kernel suites in default pytest discovery and the repository test gate.",
+  "objective": "把维护中的 K1-K10 内核套件纳入默认 pytest 发现与仓库测试闸门。",
   "allowed_paths": [
     "pyproject.toml",
     "Makefile",
@@ -19,10 +19,10 @@
     "hardware/**"
   ],
   "acceptance": [
-    "default pytest discovery includes tests and libs/kernel/tests",
-    "the Makefile test gate uses default pytest discovery",
-    "the K1-K10 suites pass without production or test rewrites",
-    "repository lint and full checks pass"
+    "默认 pytest 发现包含 tests 与 libs/kernel/tests",
+    "Makefile 测试闸门使用默认 pytest 发现",
+    "K1-K10 套件无需重写生产或测试代码即可通过",
+    "仓库 lint 与完整检查通过"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/kernel-tests-default-gate.json",
@@ -31,13 +31,13 @@
     "make check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "default pytest collection output containing libs/kernel/tests",
-    "repository test and check output"
+    "任务包校验输出",
+    "包含 libs/kernel/tests 的默认 pytest 收集输出",
+    "仓库测试与检查输出"
   ],
   "stop_conditions": [
-    "a production kernel or test rewrite is required",
-    "default discovery collects generated or unsupported test trees",
-    "robot control firmware interface or hardware changes are required"
+    "需要重写生产内核或测试代码",
+    "默认发现收集了生成或不支持的测试树",
+    "需要修改机器人控制、固件、接口或硬件"
   ]
 }

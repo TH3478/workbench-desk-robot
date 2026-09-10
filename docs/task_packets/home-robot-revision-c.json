@@ -1,7 +1,7 @@
 {
   "issue": "home-robot-revision-c",
   "human_owner": "Quchaosheng",
-  "objective": "Replace the tabletop two-link visual concept with a truthful mobile domestic manipulator architecture: one seven-axis collaborative arm, a braked lifting platform, stabilized mobile base, tool changing, and bounded parcel, cleaning, and induction-cooking assistance.",
+  "objective": "用真实可信的移动式家用机械臂架构取代桌面双连杆视觉概念：一条七轴协作机械臂、带制动的升降平台、稳定的移动底盘、工具快换，以及受限的包裹、清洁与电磁炉烹饪辅助。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "hardware/mechanical/system-integration.md",
@@ -37,9 +37,9 @@
     "docs/assets/workbench-home-robot-premium.png"
   ],
   "stop_conditions": [
-    "a change requires robot control, firmware, interfaces, or PCB ownership",
-    "a visual implies autonomous open-flame cooking, stair traversal, person lifting, or proven physical performance",
-    "motion or thermal safety evidence would need to be invented",
-    "the generated CAD cannot preserve declared lift, arm, tool, or support datums"
+    "某项改动需要 `robot/control`、`firmware`、`interfaces` 或 PCB 的归属",
+    "视觉效果暗示自主明火烹饪、爬楼梯、载人或已证实的物理性能",
+    "运动或热安全证据将需要被虚构",
+    "生成的 CAD 无法保留声明的升降、机械臂、工具或支撑基准"
   ]
 }

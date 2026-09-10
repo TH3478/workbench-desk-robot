@@ -1,7 +1,7 @@
 {
   "issue": 22,
   "human_owner": "Quchaosheng",
-  "objective": "Create an evidence-backed PMO baseline for the P1/P2/P3 program without converting templates or scripted fixtures into delivery evidence.",
+  "objective": "为 P1/P2/P3 项目创建有证据支撑的 PMO 基线，且不把模板或脚本化固定装置转化为交付证据。",
   "allowed_paths": [
     "docs/project-management/**",
     "docs/task_packets/pmo-project-baseline.json",
@@ -25,11 +25,11 @@
     "firmware/**"
   ],
   "acceptance": [
-    "all twelve PMO tasks map to maintained repository artifacts",
-    "the plan exposes phase gates dependencies and a dated baseline",
-    "every risk has an owner trigger mitigation contingency review date and evidence reference",
-    "status and metrics preserve unknown blocked and not-executed states",
-    "the baseline is linked from the documentation navigation and has deterministic tests"
+    "全部十二项 PMO 任务都映射到仓库中持续维护的制品",
+    "计划暴露阶段闸门、依赖关系与带日期的基线",
+    "每项风险都有负责人、触发条件、缓解措施、应急预案、评审日期与证据引用",
+    "状态与指标保留 unknown、blocked 与 not-executed 状态",
+    "基线可从文档导航链接到，并具备确定性测试"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/pmo-project-baseline.json",
@@ -38,14 +38,14 @@
     "make check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "PMO baseline test output",
-    "strict documentation build output",
-    "full repository check output"
+    "任务包校验输出",
+    "PMO 基线测试输出",
+    "严格文档构建输出",
+    "完整仓库检查输出"
   ],
   "stop_conditions": [
-    "a physical result external participant record or human decision would need to be inferred",
-    "an interface safety or release setting change is required",
-    "the plan would label a template or scripted fixture as release evidence"
+    "需要推断物理结果、外部参与者记录或人类决策",
+    "需要修改接口、安全或发布设置",
+    "计划会把模板或脚本化固定装置标注为发布证据"
   ]
 }

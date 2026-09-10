@@ -2,7 +2,7 @@
   "issue": "22,24,28",
   "issues": [22, 24, 28],
   "human_owner": "Quchaosheng",
-  "objective": "Create reproducible procurement, quality, and hardware field-validation packages around the existing PCB and manufacturing engineering release.",
+  "objective": "围绕现有 PCB 与制造工程发布，生成可复现的采购、质量与硬件现场验证包。",
   "allowed_paths": [
     "hardware/procurement/**",
     "hardware/qa/**",
@@ -28,11 +28,11 @@
     "hardware/procurement/generated/procurement_report.json",
     "hardware/qa/generated/qa_report.json",
     "hardware/validation/generated/validation_report.json",
-    "hardware package unit-test output"
+    "硬件包单元测试输出"
   ],
   "stop_conditions": [
-    "supplier quotations, purchase orders, physical samples, lab certification, or real-machine measurements are external evidence and must remain blocked until supplied",
-    "any candidate component lacks an approved AVL owner",
-    "a validation result would require claiming a test was executed without a signed evidence record"
+    "供应商报价、采购订单、实物样品、实验室认证或真机测量属于外部证据，在获得之前必须保持阻断",
+    "任一候选元器件缺少已批准的 AVL Owner",
+    "验证结果将需要声称某项测试已在没有签名证据记录的情况下执行"
   ]
 }

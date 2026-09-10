@@ -1,7 +1,7 @@
 {
   "issue": "140",
   "human_owner": "Quchaosheng",
-  "objective": "Advertise and verify the module-load singleton lifecycle that wbcan actually implements.",
+  "objective": "对外声明并验证 wbcan 实际实现的模块加载单例生命周期。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/Makefile",
@@ -13,12 +13,12 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "module load creates one documented wbcan device",
-    "the module no longer advertises an unimplemented RTNL link kind",
-    "ip link add type wbcan is rejected without creating a second device",
-    "module unload removes the singleton device and debugfs tree",
-    "the fixed wbcan0 name makes collision and duplicate module insertion fail without partial state",
-    "CI verifies cleanup after the runtime suite"
+    "模块加载创建一台已文档化的 wbcan 设备",
+    "模块不再声明未实现的 RTNL 链路类型",
+    "`ip link add type wbcan` 被拒绝，且不会创建第二台设备",
+    "模块卸载移除单例设备与 debugfs 树",
+    "固定的 wbcan0 名称使命名冲突与重复模块插入失败，且不留下部分状态",
+    "CI 在运行时套件之后验证清理"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -28,14 +28,14 @@
     "sudo make -C kernel/wbcan test"
   ],
   "evidence": [
-    "module build output",
-    "checkpatch output",
-    "RTNL rejection assertion",
-    "post-unload device and debugfs assertions"
+    "模块构建输出",
+    "checkpatch 输出",
+    "RTNL 拒绝断言",
+    "卸载后设备与 debugfs 断言"
   ],
   "stop_conditions": [
-    "multiple devices or network namespaces become a requirement",
-    "firmware or interface changes are required",
-    "the hosted runner cannot unload the module"
+    "多设备或网络命名空间成为需求",
+    "需要改动固件或接口",
+    "托管 runner 无法卸载该模块"
   ]
 }

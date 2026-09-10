@@ -1,7 +1,7 @@
 {
   "issue": 3,
   "human_owner": "cyathea152-bit",
-  "objective": "Motion phase 0: scaffold the workbench_motion ROS 2 package (package.xml/setup, source dir, launch/, test/), uv environment, unified logging_setup, and the evidence.py EvidenceSink interface + FakeEvidenceSink. No arm, no MoveIt, no grasp logic yet.",
+  "objective": "运动阶段 0：搭建 workbench_motion ROS 2 包（`package.xml`/setup、源码目录、`launch/`、`test/`）、uv 环境、统一的 logging_setup，以及 `evidence.py` 中的 EvidenceSink 接口 + FakeEvidenceSink。暂不包含机械臂、MoveIt 与抓取逻辑。",
   "allowed_paths": [
     "robot/control/**",
     "docs/task_packets/motion-000-phase0-scaffold.json"
@@ -18,10 +18,10 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "colcon build --packages-select workbench_motion passes and ros2 pkg list shows the package",
-    "minimal node logs with unified format carrying run_id and uses no print",
-    "EvidenceSink interface defined with FakeEvidenceSink; unit test proves append() returns a stable unique reference and Motion holds no persistence impl",
-    "minimal launch brings up an empty-world self test without external bringup"
+    "`colcon build --packages-select workbench_motion` 通过，且 `ros2 pkg list` 显示该包",
+    "最小节点使用统一格式记录日志并携带 run_id，且不使用 print",
+    "定义 EvidenceSink 接口与 FakeEvidenceSink；单元测试证明 `append()` 返回稳定唯一引用，且 Motion 不持有任何持久化实现",
+    "最小 launch 在不依赖外部启动调试的情况下启动空世界自测"
   ],
   "commands": [
     "uv sync",
@@ -30,14 +30,14 @@
     "make task-check PACKET=docs/task_packets/motion-000-phase0-scaffold.json"
   ],
   "evidence": [
-    "colcon build output",
-    "ros2 pkg list output showing workbench_motion",
-    "unit test output for FakeEvidenceSink stable-reference behavior"
+    "colcon 构建输出",
+    "显示 workbench_motion 的 `ros2 pkg list` 输出",
+    "FakeEvidenceSink 稳定引用行为的单元测试输出"
   ],
   "stop_conditions": [
-    "root-level uv.lock decision not yet approved by Linux/Integration Owner",
-    "production EvidenceSink adapter ownership (World Model side) unresolved",
-    "ROS Jazzy apt rclpy not visible inside the uv venv",
-    "any change would require touching a forbidden path or interfaces/"
+    "根级 `uv.lock` 决策尚未获得 Linux/集成 Owner 批准",
+    "生产级 EvidenceSink 适配器的归属（World Model 侧）尚未确定",
+    "ROS Jazzy apt 的 rclpy 在 uv venv 内不可见",
+    "任何变更都将需要触碰禁止路径或 `interfaces/`"
   ]
 }

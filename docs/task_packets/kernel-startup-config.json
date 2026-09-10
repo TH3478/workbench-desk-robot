@@ -1,7 +1,7 @@
 {
   "issue": "96",
   "human_owner": "Quchaosheng",
-  "objective": "Make production startup fail closed when readiness checks are absent, partial or unmeasured.",
+  "objective": "当就绪检查缺失、不完整或未测量时，让生产启动失败即拒绝。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/startup.py",
     "libs/kernel/tests/test_k1_k10.py",
@@ -18,12 +18,12 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "missing bootstrap.json fails production startup",
-    "offline defaults require an explicit constructor flag and offline mode",
-    "production configuration requires every named boolean check",
-    "valid configured failed checks block bootstrap",
-    "malformed, incomplete, and unknown-check configurations fail closed",
-    "repository lint and tests pass"
+    "缺少 bootstrap.json 时生产启动失败",
+    "离线默认值需要显式构造函数标志与离线模式",
+    "生产配置要求每项具名布尔检查",
+    "配置有效但失败的检查会阻止 bootstrap",
+    "格式错误、不完整与未知检查的配置失败即拒绝",
+    "仓库 lint 与测试通过"
   ],
   "commands": [
     "python libs/kernel/tests/test_k1_k10.py",
@@ -32,14 +32,14 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "default and configured bootstrap assertions",
-    "malformed configuration failure assertions",
-    "K1-K10 integration test output",
-    "repository test output"
+    "默认与已配置 bootstrap 的断言",
+    "格式错误配置的失败断言",
+    "K1-K10 集成测试输出",
+    "仓库测试输出"
   ],
   "stop_conditions": [
-    "runtime-specific disk, memory, node, or dependency probes are required",
-    "interface schema changes are required",
-    "robot-control or firmware changes are required"
+    "需要运行时特定的磁盘、内存、节点或依赖探针",
+    "需要修改接口 schema",
+    "需要修改机器人控制或固件"
   ]
 }

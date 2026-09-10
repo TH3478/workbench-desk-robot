@@ -1,7 +1,7 @@
 {
   "issue": "100",
   "human_owner": "Quchaosheng",
-  "objective": "Preserve supported JSON Schema validation constraints in generated Python models and TypeScript metadata.",
+  "objective": "在生成的 Python 模型与 TypeScript 元数据中保留受支持的 JSON Schema 校验约束。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/schema_compiler.py",
     "libs/kernel/tests/test_k1_k10.py",
@@ -18,13 +18,13 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "schema suffixes do not leak into generated identifiers",
-    "generated Python compiles and produces an instantiable Pydantic model",
-    "generated TypeScript has a valid interface declaration and typed fields",
-    "numeric bounds, minItems, patterns and supported conditionals are enforced by generated Pydantic models",
-    "explicit additionalProperties false rejects extra fields",
-    "unsupported schema keywords fail compilation with field context",
-    "repository lint and tests pass"
+    "schema 后缀不会泄漏到生成的标识符中",
+    "生成的 Python 可以编译，并产出可实例化的 Pydantic 模型",
+    "生成的 TypeScript 具有有效的接口声明与类型化字段",
+    "数值边界、`minItems`、`patterns` 与受支持的条件约束由生成的 Pydantic 模型强制执行",
+    "显式的 `additionalProperties` false 拒绝多余字段",
+    "不支持的 schema 关键字使编译失败，并附字段上下文",
+    "仓库 lint 与测试通过"
   ],
   "commands": [
     "python libs/kernel/tests/test_k1_k10.py",
@@ -32,13 +32,13 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "generated-model compile and instantiation assertions",
-    "K1-K10 integration test output",
-    "repository test output"
+    "生成模型编译与实例化断言",
+    "K1-K10 集成测试输出",
+    "仓库测试输出"
   ],
   "stop_conditions": [
-    "interface schema changes are required",
-    "generated models would replace the canonical contracts package",
-    "robot-control or firmware changes are required"
+    "需要修改接口 schema",
+    "生成模型将取代规范契约包",
+    "需要修改机器人控制或固件"
   ]
 }

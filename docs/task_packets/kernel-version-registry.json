@@ -1,7 +1,7 @@
 {
   "issue": "97",
   "human_owner": "Quchaosheng",
-  "objective": "Prevent stale registry instances and concurrent writers from losing or replacing published schema versions.",
+  "objective": "防止过期的登记表实例与并发写入者丢失或替换已发布的 schema 版本。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/version_registry.py",
     "libs/kernel/tests/test_k1_k10.py",
@@ -18,15 +18,15 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "registered versions survive a new registry instance",
-    "schema names and versions are validated",
-    "malformed registry content fails closed",
-    "failed persistence does not update in-memory state",
-    "identical registration is idempotent and does not rewrite the registry",
-    "conflicting content for an existing schema version is rejected before persistence",
-    "stale instances preserve unrelated versions and recheck conflicts against disk",
-    "concurrent writers serialize read-modify-write and use unique temporary files",
-    "repository lint and tests pass"
+    "已注册版本在新登记表实例中得以保留",
+    "schema 名称与版本均被校验",
+    "格式错误的登记表内容失败即拒绝",
+    "持久化失败不会更新内存状态",
+    "相同注册是幂等的，且不会重写登记表",
+    "现有 schema 版本的冲突内容在持久化之前被拒绝",
+    "过期实例保留无关版本，并针对磁盘重新检查冲突",
+    "并发写入者串行化读-改-写操作，并使用唯一的临时文件",
+    "仓库 lint 与测试通过"
   ],
   "commands": [
     "python libs/kernel/tests/test_k1_k10.py",
@@ -35,16 +35,16 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "registry reopen regression assertions",
-    "malformed and failed-write assertions",
-    "idempotent and conflicting registration assertions",
-    "stale-instance and concurrent-writer regression assertions",
-    "K1-K10 integration test output",
-    "repository test output"
+    "登记表重新打开回归断言",
+    "格式错误与写入失败断言",
+    "幂等与冲突注册断言",
+    "过期实例与并发写入者回归断言",
+    "K1-K10 集成测试输出",
+    "仓库测试输出"
   ],
   "stop_conditions": [
-    "version registry format conflicts with an external consumer",
-    "interface schema changes are required",
-    "robot-control or firmware changes are required"
+    "版本登记表格式与外部消费者冲突",
+    "需要修改接口 schema",
+    "需要修改机器人控制或固件"
   ]
 }

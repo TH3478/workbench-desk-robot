@@ -1,8 +1,8 @@
 {
   "issue": 59,
   "human_owner": "zhangjia-1111",
-  "objective": "Implement the Agent Runtime-owned fail-closed sequential execution controller on top of Issue #58: preflight an entire typed TaskGraph through the injected PolicyValidator, revalidate every SemanticAction immediately before dispatch through an injected typed adapter, record deterministic execution states, and stop later dispatch after terminal outcomes without modifying shared contracts, Motion, World Model, firmware, integration fixtures, or safety configuration.",
-  "decision_supported": "Can Agent Runtime deterministically and fail-closed orchestrate already-typed semantic actions through an injected adapter while preserving policy, execution, Motion, and World Model ownership boundaries?",
+  "objective": "在 Issue #58 之上实现归 Agent Runtime 所有的失败即拒绝顺序执行控制器：通过注入的 PolicyValidator 预检整个类型化 TaskGraph，在派发前立即通过注入的类型化适配器重新校验每个 SemanticAction，记录确定性的执行状态，并在终态结果之后停止后续派发，而不修改共享契约、Motion、World Model、固件、集成固定装置或安全配置。",
+  "decision_supported": "Agent Runtime 能否通过注入的适配器确定性地、失败即拒绝地编排已类型化的语义动作，同时保持策略、执行、Motion 与 World Model 的所有权边界？",
   "allowed_paths": [
     "docs/task_packets/issue-59-fail-closed-execution-controller.json",
     "services/agent_runtime/workbench_agent_runtime/execution_controller.py",
@@ -73,16 +73,16 @@
     "tests/integration/test_observe_plan_act.py"
   ],
   "acceptance": [
-    "ExecutionController accepts a typed TaskGraph plus explicitly injected PolicyValidator and typed ActionAdapter. A non-TaskGraph input, duplicate step_id or action_id, missing, self, forward, or cyclic dependency, or a non-allow full-graph policy report produces a typed fail-closed execution report before the first adapter call. Tests: test_policy_rejection_prevents_first_dispatch and test_graph_structure_errors_prevent_first_dispatch.",
-    "For a valid graph whose adapter returns contract-valid completed ActionResults, the controller dispatches actions strictly in graph step order and records deterministic pending, dispatched, and succeeded transitions for each step. Test: test_valid_graph_dispatches_strictly_in_order_and_records_transitions.",
-    "Immediately before each adapter call, the controller rechecks that step through the same injected PolicyValidator and the same exact-action confirmation collection used for preflight. A later action mutated after preflight is denied before reaching the adapter. Test: test_action_is_revalidated_immediately_before_dispatch.",
-    "Existing ActionResult outcomes map deterministically to controller states: completed to succeeded, failed to failed, timeout to timed_out, canceled to cancelled, and safe_stop to stopped. Any failed, timed_out, cancelled, or stopped step prevents all later ordinary actions from being dispatched. Test: test_terminal_action_result_stops_later_steps.",
-    "TimeoutError becomes a typed timed_out controller record; any other adapter exception becomes a typed failed controller record. A non-ActionResult return or an ActionResult whose action_id differs from the dispatched action fails closed and prevents later dispatch. Tests: test_adapter_exceptions_become_typed_terminal_records and test_invalid_adapter_result_fails_closed.",
-    "At each controller dispatch boundary, a contract-valid STOP SemanticAction takes priority over every not-yet-dispatched ordinary action, uses the existing ToolRegistry and PolicyValidator rules, is dispatched at most once, and prevents every remaining pending ordinary action from being dispatched. Repeating the same STOP action_id is idempotent. Cancellation of an already-active Motion goal remains Issue #52. Test: test_stop_request_preempts_remaining_steps_and_is_idempotent.",
-    "Repeated delivery of the same action_id to the same running controller cannot cause another adapter call after that action_id has been dispatched. The duplicate result is deterministic. Restart-persistent and cross-process deduplication remain Issue #64. Test: test_duplicate_execute_request_never_redispatches_action_ids.",
-    "The controller never mutates the supplied TaskGraph, TaskStep, SemanticAction, parameters, PolicyReport, or ActionResult. Model dumps before and after execution remain equal. Test: test_controller_does_not_mutate_task_graph_or_actions.",
-    "Controller output is execution-orchestration evidence only. It does not write WorldState or WorldEvent, create VerificationResult, set verified_complete, claim task completion, or claim Motion, MCU, simulation, or physical execution beyond the injected fake adapter result. Test: test_controller_report_is_orchestration_only.",
-    "The package exposes only the minimum controller types required by Agent Runtime consumers, all focused and repository-required checks pass, and the Git-visible diff relative to fixed stacked base ed3aa21233040ef19239206d18721f13eb23d621 contains only the four allowed paths. Test: test_execution_controller_public_exports_are_available."
+    "ExecutionController 接受类型化的 TaskGraph，外加显式注入的 PolicyValidator 与类型化 ActionAdapter。非 TaskGraph 输入、重复的 step_id 或 action_id、缺失/自引用/前向/循环依赖，或非 allow 的全图策略报告，都会在第一次适配器调用之前产生类型化的失败即拒绝执行报告。测试：test_policy_rejection_prevents_first_dispatch 与 test_graph_structure_errors_prevent_first_dispatch。",
+    "对于适配器返回契约有效 completed ActionResult 的有效图，控制器严格按图步骤顺序派发动作，并为每个步骤记录确定性的 pending、dispatched 与 succeeded 迁移。测试：test_valid_graph_dispatches_strictly_in_order_and_records_transitions。",
+    "在每次适配器调用之前，控制器立即通过同一个注入的 PolicyValidator 与预检所用同一份逐动作确认集合重新检查该步骤。预检后发生变更的后续动作在到达适配器之前即被拒绝。测试：test_action_is_revalidated_immediately_before_dispatch。",
+    "既有 ActionResult 结果确定性地映射到控制器状态：completed 到 succeeded、failed 到 failed、timeout 到 timed_out、canceled 到 cancelled、safe_stop 到 stopped。任何 failed、timed_out、cancelled 或 stopped 步骤都阻止派发其后所有普通动作。测试：test_terminal_action_result_stops_later_steps。",
+    "TimeoutError 变成类型化的 timed_out 控制器记录；其他任何适配器异常变成类型化的 failed 控制器记录。非 ActionResult 返回值、或 action_id 与被派发动作不一致的 ActionResult 失败即拒绝，并阻止后续派发。测试：test_adapter_exceptions_become_typed_terminal_records 与 test_invalid_adapter_result_fails_closed。",
+    "在每个控制器派发边界，契约有效的 STOP SemanticAction 优先于所有尚未派发的普通动作，使用既有的 ToolRegistry 与 PolicyValidator 规则，最多派发一次，并阻止派发所有剩余挂起的普通动作。重复同一个 STOP action_id 是幂等的。取消已激活的 Motion 目标仍归属 Issue #52。测试：test_stop_request_preempts_remaining_steps_and_is_idempotent。",
+    "向同一运行中的控制器重复投递同一 action_id，在该 action_id 已派发后不得再引起适配器调用。重复的结果是确定性的。跨重启持久与跨进程去重仍归属 Issue #64。测试：test_duplicate_execute_request_never_redispatches_action_ids。",
+    "控制器绝不改变所提供的 TaskGraph、TaskStep、SemanticAction、参数、PolicyReport 或 ActionResult。执行前后的模型导出保持相等。测试：test_controller_does_not_mutate_task_graph_or_actions。",
+    "控制器输出只是执行编排证据。它不写 WorldState 或 WorldEvent、不创建 VerificationResult、不设置 verified_complete、不声称任务完成，也不在注入的假适配器结果之外声称 Motion、MCU、仿真或物理执行。测试：test_controller_report_is_orchestration_only。",
+    "包只暴露 Agent Runtime 消费者所需的最小控制器类型，所有聚焦与仓库必需的检查通过，且相对固定堆叠基 ed3aa21233040ef19239206d18721f13eb23d621 的 Git 可见 diff 只包含四个允许的路径。测试：test_execution_controller_public_exports_are_available。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_execution_controller.py -v",
@@ -98,35 +98,35 @@
     "git diff --check"
   ],
   "evidence": [
-    "Pre-implementation baseline output showing 129 existing Agent Runtime, PolicyValidator, ToolRegistry, and observe-plan-act tests pass while no execution_controller module, controller Task Packet, controller test, implementation PR, or controller branch exists.",
-    "Focused red-test output showing the new execution-controller tests fail before implementation because the controller, typed adapter port, transition records, dispatch-time revalidation, STOP preemption, and duplicate suppression do not exist.",
-    "Focused green-test output for every normal, boundary, and failure behavior named in acceptance.",
-    "Fake-adapter call history proving strict action order and zero calls for malformed graphs, policy denial, confirmation_required, invalid adapter results, and all steps after a terminal result.",
-    "Policy spy and mutated-second-step regression proving one full-graph preflight plus immediate per-step revalidation through the same Issue #58 PolicyValidator.",
-    "Deterministic transition evidence covering pending, dispatched, succeeded, failed, timed_out, cancelled, and stopped.",
-    "STOP call history proving STOP is dispatched once before remaining pending ordinary actions and an identical repeated STOP request does not redispatch.",
-    "Duplicate-request call-count evidence proving a previously dispatched action_id is not dispatched twice within the same running controller.",
-    "Before-and-after TaskGraph, SemanticAction, parameters, PolicyReport, and ActionResult dumps proving controller input immutability.",
-    "Type and attribute assertions proving the execution report is not VerificationResult, contains no WorldState write or verified_complete flag, and makes no Motion, MCU, simulation, physical-execution, or task-completion claim.",
-    "Full make test, contract, scenario, context, demo-scripted, and make check output.",
-    "Task Packet validation and Git boundary output proving the final diff contains only execution_controller.py, its unit test, the minimal package export, and this Task Packet relative to ed3aa21233040ef19239206d18721f13eb23d621."
+    "实现前基线输出显示：129 个既有 Agent Runtime、PolicyValidator、ToolRegistry 与 observe-plan-act 测试通过，而 execution_controller 模块、控制器任务包、控制器测试、实现 PR 或控制器分支均不存在。",
+    "聚焦红测试输出，显示新执行控制器测试在实现前失败，因为控制器、类型化适配器端口、迁移记录、派发时重新校验、STOP 抢占与重复抑制尚不存在。",
+    "聚焦绿测试输出，覆盖验收中列出的每个正常、边界与失败行为。",
+    "假适配器调用历史，证明严格的动作顺序，以及畸形图、策略拒绝、confirmation_required、无效适配器结果与终态结果之后所有步骤的零调用。",
+    "策略间谍与「第二步被变更」回归，证明通过同一个 Issue #58 PolicyValidator 进行一次全图预检加立即的逐步骤重新校验。",
+    "确定性迁移证据，覆盖 pending、dispatched、succeeded、failed、timed_out、cancelled 与 stopped。",
+    "STOP 调用历史，证明 STOP 在剩余挂起普通动作之前派发一次，且完全相同的重复 STOP 请求不会重新派发。",
+    "重复请求调用计数证据，证明此前已派发的 action_id 在同一运行中的控制器内不会被派发两次。",
+    "变更前后的 TaskGraph、SemanticAction、参数、PolicyReport 与 ActionResult 导出，证明控制器输入的不可变性。",
+    "类型与属性断言，证明执行报告不是 VerificationResult，不含任何 WorldState 写入或 verified_complete 标志，且不作任何 Motion、MCU、仿真、物理执行或任务完成声称。",
+    "完整输出：`make test`、`make contract`、`make scenario-check`、`make context-check`、`make demo-scripted` 与 `make check`。",
+    "任务包校验与 Git 边界输出，证明相对 ed3aa21233040ef19239206d18721f13eb23d621 的最终 diff 只包含 `execution_controller.py`、其单元测试、最小包导出与本任务包。"
   ],
   "stop_conditions": [
-    "Issue #58 commit ed3aa21233040ef19239206d18721f13eb23d621 is rejected, changed, unavailable to the implementation owner, or no longer approved as the stacked boundary.",
-    "Implementation requires changing PolicyValidator, ToolRegistry, tool_schemas, planner, local_model, another Agent Runtime module beyond the minimal package export, or any path outside allowed_paths.",
-    "Implementation requires adding a second action, parameter, confirmation, or policy allow-list instead of consuming the Issue #58 PolicyValidator.",
-    "Implementing invalid-graph rejection requires changing TaskGraph, SemanticAction, ActionResult, ActionStatus, DispatchState, DeviceState, or any interfaces or libs/contracts definition.",
-    "STOP is required to interrupt an already-blocking adapter call, cancel an active Motion goal, introduce concurrency, threading, asynchronous scheduling, or define a cross-module cancellation contract.",
-    "A real Motion adapter, robot/control write, firmware behavior, MCU transport, hardware behavior, or safety-configuration change becomes necessary.",
-    "Duplicate suppression is required to survive process restart or coordinate across processes, or requires an append-only correlation ledger; that belongs to Issue #64.",
-    "The controller must fabricate, persist, or rewrite ActionResult, generate clock or identifier evidence, write WorldEvent or WorldState, emit VerificationResult, or claim task completion.",
-    "Implementation requires modifying tests/integration, demo_scripted, deployment, CI, Backend, Perception, World Model, simulation, hardware, or another module without separate Owner approval and a revised Task Packet.",
-    "The fixed stacked base changes, the worktree contains overlapping user modifications, Owner delegation is withdrawn or disputed, or a required command fails for a reason that cannot be fixed within allowed_paths."
+    "Issue #58 提交 ed3aa21233040ef19239206d18721f13eb23d621 被拒绝、被改动、对实现 Owner 不可用，或不再被批准为堆叠边界。",
+    "实现需要修改 PolicyValidator、ToolRegistry、tool_schemas、planner、local_model、最小包导出之外的另一个 Agent Runtime 模块，或 allowed_paths 之外的任何路径。",
+    "实现需要新增第二个动作、参数、确认或策略允许清单，而不是消费 Issue #58 的 PolicyValidator。",
+    "实现无效图拒绝需要修改 TaskGraph、SemanticAction、ActionResult、ActionStatus、DispatchState、DeviceState 或任何 interfaces 与 libs/contracts 定义。",
+    "要求 STOP 打断已阻塞的适配器调用、取消激活中的 Motion 目标、引入并发、线程、异步调度，或定义跨模块取消契约。",
+    "真实 Motion 适配器、robot/control 写入、固件行为、MCU 传输、硬件行为或安全配置改动变得必要。",
+    "要求重复抑制在进程重启后仍然有效、或跨进程协调，或需要仅追加的相关性台账；这归属 Issue #64。",
+    "控制器必须伪造、持久化或改写 ActionResult，生成时钟或标识符证据，写 WorldEvent 或 WorldState，产出 VerificationResult，或声称任务完成。",
+    "实现需要在未经单独 Owner 批准与修订任务包的情况下修改 tests/integration、demo_scripted、部署、CI、Backend、Perception、World Model、仿真、硬件或其他模块。",
+    "固定堆叠基发生变化，工作树包含重叠的用户修改，Owner 委托被撤回或存在争议，或某个必需命令因无法在 allowed_paths 内修复的原因而失败。"
   ],
   "risks_and_fallbacks": [
-    "Idempotency is limited to the same running ExecutionController. If restart-persistent or cross-process exactly-once behavior is required, stop and defer to Issue #64.",
-    "STOP preempts not-yet-dispatched actions at a deterministic controller boundary. If active-call interruption is required, stop and coordinate with Issue #52 and the Motion Owner.",
-    "Fake-adapter success proves controller sequencing and error handling only. It is not Motion, MCU, simulation, physical-execution, or completion evidence.",
-    "No controller-owned wall-clock timeout is added. Timeout state is derived only from a typed adapter result or TimeoutError; a runtime deadline scheduler requires a separately approved design."
+    "幂等性限于同一运行中的 ExecutionController。若需要跨重启持久或跨进程的恰好一次行为，应停止并移交 Issue #64。",
+    "STOP 在确定性控制器边界抢占尚未派发的动作。若需要打断激活中的调用，应停止并与 Issue #52 及 Motion Owner 协调。",
+    "假适配器成功只证明控制器的排序与错误处理。它不是 Motion、MCU、仿真、物理执行或完成证据。",
+    "不添加控制器自有的墙上时钟超时。超时状态只从类型化适配器结果或 TimeoutError 导出；运行时截止时间调度器需要单独批准的设计。"
   ]
 }

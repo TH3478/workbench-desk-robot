@@ -1,7 +1,7 @@
 {
   "issue": "94",
   "human_owner": "Quchaosheng",
-  "objective": "Make kernel message envelopes immutable and verify serialized checksums before ingress.",
+  "objective": "让内核消息信封不可变，并在入口之前校验序列化校验和。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/communication.py",
     "tests/unit/test_kernel_envelope_lifecycle.py",
@@ -17,10 +17,10 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "message payloads are deeply immutable and detached from caller-owned containers",
-    "serialized messages round trip through checksum verification",
-    "tampered, malformed, non-JSON and unknown-reserved-field envelopes fail closed",
-    "repository lint and tests pass"
+    "消息载荷深度不可变，并与调用方拥有的容器分离",
+    "序列化消息经由校验和验证完成往返",
+    "被篡改、格式错误、非 JSON 与含未知保留字段的信封均失败即拒绝",
+    "仓库 lint 与测试通过"
   ],
   "commands": [
     "python -m pytest tests/unit/test_kernel_envelope_lifecycle.py libs/kernel/tests/test_k1_k10.py -q",
@@ -28,14 +28,14 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "envelope identity regression assertions",
-    "tamper and deep-immutability regression assertions",
-    "K1-K10 integration test output",
-    "repository test output"
+    "信封身份回归断言",
+    "篡改与深度不可变回归断言",
+    "K1-K10 集成测试输出",
+    "仓库测试输出"
   ],
   "stop_conditions": [
-    "interface schema changes are required",
-    "ROS 2 lifecycle integration is required",
-    "robot-control or firmware changes are required"
+    "需要修改接口 schema",
+    "需要 ROS 2 生命周期集成",
+    "需要修改机器人控制或固件"
   ]
 }

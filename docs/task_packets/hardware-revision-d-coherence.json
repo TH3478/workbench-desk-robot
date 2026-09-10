@@ -1,7 +1,7 @@
 {
   "issue": "hardware-revision-d-coherence",
   "human_owner": "Quchaosheng",
-  "objective": "Align current hardware release, manufacturing, safety, selection, and operations-readiness documents with the authoritative Revision D four-module holonomic robot without selecting unapproved supplier parts or claiming physical evidence.",
+  "objective": "在不选定未经批准的供应商部件、也不声称物理证据的前提下，使当前硬件发布、制造、安全、选型与运维就绪文档与权威的四模块全向 Revision D 机器人保持一致。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "hardware/release/**",
@@ -54,11 +54,11 @@
     "hardware/release/selection-closure-register.csv",
     "hardware/release/hardware-optimization-register.csv",
     "hardware/generated/operations_readiness_report.json",
-    "hardware package test output"
+    "硬件包测试输出"
   ],
   "stop_conditions": [
-    "a change requires selecting a final MPN or supplier AVL",
-    "a change would promote physical, EMC, safety, DFM, or certification evidence to complete",
-    "a change requires modifying PCB, motor-driver, firmware, robot-control, services, or interfaces ownership"
+    "某项改动需要选定最终 MPN 或供应商 AVL",
+    "某项改动会把物理、EMC、安全、DFM 或认证证据提升为已完成",
+    "某项改动需要修改 PCB、电机驱动、`firmware`、`robot/control`、`services` 或 `interfaces` 的归属"
   ]
 }

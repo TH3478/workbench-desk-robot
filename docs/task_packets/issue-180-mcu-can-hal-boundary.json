@@ -1,7 +1,7 @@
 {
   "issue": 180,
   "human_owner": "TH3478",
-  "objective": "Implement the bounded platform-independent MCU HAL/Wire V1 bridge: distinguish 11-bit arbitration IDs from payload command IDs, reject invalid raw envelopes before safety dispatch, route STOP before ordinary deduplication, and provide shared logic plus Host fake-HAL evidence without claiming a physical target.",
+  "objective": "实现有界的、平台无关的 MCU HAL/Wire V1 桥接：区分 11 位仲裁 ID 与负载命令 ID，在安全派发前拒绝无效的原始信封，在普通去重之前路由 STOP，并提供共享逻辑与 Host 假 HAL 证据，而不声称任何物理目标。",
   "allowed_paths": [
     "firmware/mcu/core/hal.h",
     "firmware/mcu/core/can_bridge.h",
@@ -48,16 +48,16 @@
     ".github/**"
   ],
   "acceptance": [
-    "The HAL names the standard 11-bit arbitration_id separately from the logical 16-bit command_id carried in Wire V1 payload bytes 1..2.",
-    "Raw extended-ID, RTR, error, CAN FD, unknown-flag, out-of-range-ID and wrong-DLC envelopes are rejected before codec publication or safety-state mutation.",
-    "The bridge uses mcu_frame_encode and mcu_frame_decode as its only frame-kind, arbitration-ID and payload mapping authority.",
-    "All five valid Wire V1 kinds round-trip through the HAL conversion, while unknown IDs, bad versions, nonzero reserved bytes and invalid cross-field payloads fail closed with unchanged decode output.",
-    "MCU ingress accepts only STOP and ordinary COMMAND directions; ACK, STOP_ACK and telemetry ingress cannot reach the state machine.",
-    "STOP arbitration ID 0x080 retains priority while its payload command ID remains at least 0x8000, and STOP bypasses the closed ordinary session gate plus a missing, corrupt or full replay window.",
-    "A successful STOP_ACK HAL handoff confirms the bounded watchdog slot; a failed handoff leaves it pending for the existing retry/timeout policy.",
-    "The fixed-capacity Host fake covers send and receive paths, all five frame kinds, malformed input, bounded send failure and STOP-before-command arbitration without allocation.",
-    "Shared bridge logic runs unchanged on Host and QEMU; QEMU and physical target CAN transport remain explicitly NOT_EXECUTED.",
-    "The documentation records that frozen Wire V1 has no six-domain node address and forbids inventing a multi-node mapping without a separately approved versioned decision."
+    "HAL 将标准 11 位 arbitration_id 与 Wire V1 负载字节 1..2 中承载的逻辑 16 位 command_id 分别命名。",
+    "原始扩展 ID、RTR、错误、CAN FD、未知标志、ID 越界与 DLC 错误的信封，在编解码器发布或安全状态变更之前即被拒绝。",
+    "桥接以 mcu_frame_encode 与 mcu_frame_decode 作为其唯一的帧类型、仲裁 ID 与负载映射权威。",
+    "全部五种有效 Wire V1 类型通过 HAL 转换往返成功，而未知 ID、错误版本、非零保留字节与无效跨字段负载失败即拒绝，且解码输出保持不变。",
+    "MCU 入口只接受 STOP 与普通 COMMAND 方向；ACK、STOP_ACK 与遥测入口不得进入状态机。",
+    "STOP 仲裁 ID 0x080 保持优先级，其负载命令 ID 至少保持 0x8000，且 STOP 绕过封闭的普通会话闸门以及缺失、损坏或已满的回放窗口。",
+    "成功的 STOP_ACK HAL 交接确认受限的看门狗时隙；失败的交接使其保持挂起，交由既有的重试/超时策略处理。",
+    "固定容量的 Host 假实现覆盖发送与接收路径、全部五种帧类型、畸形输入、受限的发送失败以及 STOP 先于命令的仲裁，且不进行分配。",
+    "共享桥接逻辑在 Host 与 QEMU 上原样运行；QEMU 与物理目标 CAN 传输保持显式的 NOT_EXECUTED。",
+    "文档记录：冻结的 Wire V1 没有六域节点地址，并且禁止在未经单独批准的版本化决策之前虚构多节点映射。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-180-mcu-can-hal-boundary.json",
@@ -72,21 +72,21 @@
     "make context-check"
   ],
   "evidence": [
-    "Issue #180 Task Packet validation output and final changed-path audit.",
-    "Host shared bridge and fake-HAL assertion counts covering every Wire V1 kind, malformed envelopes and STOP priority.",
-    "ASan/UBSan output for the complete shared and Host fake MCU corpus.",
-    "QEMU shared bridge output together with its explicit CAN transport NOT_EXECUTED marker.",
-    "verify-no-fp and size-check output for the freestanding image.",
-    "Repository test, contract, scenario and context-check output.",
-    "Target evidence matrix and six-domain compatibility gate in docs/architecture/mcu-can-hal-boundary-v1.md."
+    "Issue #180 任务包校验输出与最终变更路径审计。",
+    "Host 共享桥接与假 HAL 断言计数，覆盖每种 Wire V1 类型、畸形信封与 STOP 优先级。",
+    "完整共享与 Host 假 MCU 语料的 ASan/UBSan 输出。",
+    "QEMU 共享桥接输出，连同其显式的 CAN 传输 NOT_EXECUTED 标记。",
+    "独立运行镜像的 verify-no-fp 与 size-check 输出。",
+    "仓库 test、contract、scenario 与 context-check 输出。",
+    "docs/architecture/mcu-can-hal-boundary-v1.md 中的目标证据矩阵与六域兼容闸门。"
   ],
   "stop_conditions": [
-    "The implementation requires changing frozen Wire V1 IDs, payload bytes, JSON Schema, Pydantic models or logical protocol semantics.",
-    "A six-domain mapping would require inventing an unapproved arbitration layout, node field or collision policy.",
-    "A real STM32 or legacy CH32 target would require unapproved pin, clock, transceiver, filter, IRQ, linker, startup or vendor-register data.",
-    "STOP would need to wait behind or consume the ordinary replay window.",
-    "The same platform-independent bridge and test source cannot compile unchanged for Host and QEMU.",
-    "Host/QEMU or fake evidence would be presented as physical controller, CAN bus, actuator, E-stop or hard-real-time proof.",
-    "The implementation requires modifying .gitignore or unrelated local changes."
+    "实现需要修改冻结的 Wire V1 ID、负载字节、JSON Schema、Pydantic 模型或逻辑协议语义。",
+    "六域映射将需要虚构未经批准的仲裁布局、节点字段或冲突策略。",
+    "真实 STM32 或遗留 CH32 目标将需要未经批准的引脚、时钟、收发器、滤波器、IRQ、链接器、启动或厂商寄存器数据。",
+    "STOP 将需要排在普通回放窗口之后等待，或消耗该窗口。",
+    "同一份平台无关的桥接与测试源码无法为 Host 与 QEMU 原样编译。",
+    "Host/QEMU 或假证据将被当作物理控制器、CAN 总线、执行器、急停或硬实时证明。",
+    "实现需要修改 `.gitignore` 或进行无关的本地改动。"
   ]
 }

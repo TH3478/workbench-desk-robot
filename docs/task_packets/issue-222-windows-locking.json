@@ -1,7 +1,7 @@
 {
   "issue": 222,
   "human_owner": "TH3478",
-  "objective": "Make schema-registry and hardware-evidence writer locking portable across Windows and POSIX without weakening conflict, atomicity, or rollback guarantees.",
+  "objective": "让 schema 注册表与硬件证据写入器的文件锁在 Windows 与 POSIX 之间可移植，同时不削弱冲突、原子性或回滚保证。",
   "allowed_paths": [
     "Dockerfile",
     "docs/deployment/container.md",
@@ -29,14 +29,14 @@
     "services/**"
   ],
   "acceptance": [
-    "version registry and evidence modules import without an unconditional fcntl dependency",
-    "one standard-library lock adapter serializes threads and processes on Windows and POSIX",
-    "Windows locking uses a dedicated one-byte lock file and waits for conflicting writers",
-    "registry atomic persistence, idempotency, and conflict rejection remain unchanged",
-    "evidence duplicate detection, append durability, and short-write rollback remain unchanged",
-    "the runtime container copies every configured package source before installing the checkout",
-    "multiprocessing regressions use a context supported by Windows and POSIX",
-    "the Windows runbook installs the current checkout in an isolated environment and executes the complete pytest suite"
+    "版本注册表与证据模块在导入时不依赖无条件的 fcntl。",
+    "同一个标准库锁适配器在 Windows 与 POSIX 上串行化线程与进程。",
+    "Windows 锁定使用专用的单字节锁文件，并等待冲突的写入者。",
+    "注册表的原子持久化、幂等性与冲突拒绝保持不变。",
+    "证据的重复检测、追加持久性与短写回滚保持不变。",
+    "运行时容器在安装检出内容之前，复制每个已配置的包源。",
+    "多进程回归测试使用 Windows 与 POSIX 都支持的上下文。",
+    "Windows 运行手册在隔离环境中安装当前检出内容，并执行完整的 pytest 套件。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-222-windows-locking.json",
@@ -54,18 +54,18 @@
     "git diff --check"
   ],
   "evidence": [
-    "simulated Windows-backend import and byte-range locking regression output",
-    "portable registry and evidence multiprocessing regression output",
-    "failure-release and append-rollback regression output",
-    "container package-copy regression and smoke-build output",
-    "repository lint, test, contract, scenario, and context validation output",
-    "Task Packet validation and clean diff output"
+    "模拟 Windows 后端的导入与字节区间锁定回归输出。",
+    "可移植注册表与证据的多进程回归输出。",
+    "失败释放与追加回滚回归输出。",
+    "容器包复制回归与冒烟构建输出。",
+    "仓库 lint、test、contract、scenario 与 context 校验输出。",
+    "任务包校验与干净 diff 输出。"
   ],
   "stop_conditions": [
-    "a third-party runtime locking dependency is required",
-    "a Windows CI workflow change is required",
-    "an interface schema change is required",
-    "a write outside the allowed paths is required",
-    "robot-control or firmware changes are required"
+    "需要第三方运行时锁依赖。",
+    "需要修改 Windows CI 工作流。",
+    "需要修改接口 schema。",
+    "需要在 allowed_paths 之外写入。",
+    "需要修改 robot-control 或固件。"
   ]
 }

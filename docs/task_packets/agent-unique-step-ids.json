@@ -1,7 +1,7 @@
 {
   "issue": 188,
   "human_owner": "Quchaosheng",
-  "objective": "Keep generated kitting and inspection TaskGraph step IDs unique after readable entity-ID normalization.",
+  "objective": "在可读实体 ID 归一化之后，保持生成的套件组装与检查 TaskGraph 步骤 ID 唯一。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/planner.py",
     "tests/unit/test_agent_runtime.py",
@@ -18,10 +18,10 @@
     "services/backend/**"
   ],
   "acceptance": [
-    "distinct accepted entity IDs always produce unique step IDs",
-    "normalization collisions receive deterministic readable suffixes",
-    "dependencies reference the generated step IDs",
-    "ordinary existing entity IDs retain their current step IDs"
+    "不同且被接受的实体 ID 总是产生唯一的步骤 ID",
+    "归一化冲突会获得确定性的可读后缀",
+    "依赖引用生成的步骤 ID",
+    "普通的现有实体 ID 保留其当前步骤 ID"
   ],
   "commands": [
     "python -m pytest tests/unit/test_agent_runtime.py -v",
@@ -31,14 +31,14 @@
     "make context-check"
   ],
   "evidence": [
-    "focused collision regression output",
-    "Agent Runtime unit-test output",
-    "Task Packet boundary validation",
-    "contract and context validation output"
+    "聚焦的冲突回归输出",
+    "智能体运行时单元测试输出",
+    "任务包边界校验",
+    "契约与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface or canonical contract change is required",
-    "a write outside allowed_paths is required",
-    "generated plans no longer pass the existing tool registry"
+    "需要修改接口或规范契约",
+    "需要在 allowed_paths 之外写入",
+    "生成的计划无法再通过现有工具登记表"
   ]
 }

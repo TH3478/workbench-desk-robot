@@ -1,7 +1,7 @@
 {
   "issue": "D4-D7/E5-E8/F1-F6",
   "human_owner": "Quchaosheng",
-  "objective": "Deliver the reproducible evaluation, offline deployment, and read-only dashboard P1 paths without changing frozen contracts.",
+  "objective": "在不改动冻结契约的前提下，交付可复现评估、离线部署与只读 dashboard 的 P1 路径。",
   "allowed_paths": [
     "apps/dashboard/**",
     "services/backend/**",
@@ -45,15 +45,15 @@
     "make demo-offline"
   ],
   "evidence": [
-    "unit and API test output",
-    "scenario materialization hashes",
-    "36-run scripted pipeline summary marked non-release",
-    "desktop and mobile dashboard screenshots"
+    "单元测试与 API 测试输出",
+    "场景物化哈希",
+    "标记为非发布的 36 轮脚本化流水线摘要",
+    "桌面端与移动端 dashboard 截图"
   ],
   "stop_conditions": [
-    "frozen interface change is required",
-    "dashboard would need to publish a ROS or hardware control command",
-    "scripted data could be mistaken for physical evaluation evidence",
-    "release credentials or human usability participants are required"
+    "需要修改冻结的接口",
+    "dashboard 将需要发布 ROS 或硬件控制命令",
+    "脚本化数据可能被误当作物理评估证据",
+    "需要发布凭据或人类可用性测试参与者"
   ]
 }

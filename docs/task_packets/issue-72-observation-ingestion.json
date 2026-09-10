@@ -1,8 +1,8 @@
 {
   "issue": 72,
   "human_owner": "zhangjia-1111",
-  "objective": "Add a fail-closed perception-to-World-Model adapter that validates, calibrates and freshness-gates Observation records before emitting WorldEvents.",
-  "decision_supported": "Whether a raw camera observation is trustworthy enough to enter the canonical World Model event stream.",
+  "objective": "新增一个失败即拒绝的感知到世界模型适配器，在发出 WorldEvents 之前对 Observation 记录进行校验、标定与新鲜度闸门把关。",
+  "decision_supported": "原始相机观测是否足够可信，能够进入规范的世界模型事件流。",
   "allowed_paths": [
     "services/perception/README.md",
     "services/perception/workbench_perception/__init__.py",
@@ -28,18 +28,18 @@
     "interfaces/examples/observation-red-block.json"
   ],
   "outputs": [
-    "fail-closed Observation ingestion adapter",
-    "deterministic calibration and freshness fixtures",
-    "accepted Observation WorldEvents consumable by the World Model reducer"
+    "失败即拒绝的 Observation 摄取适配器",
+    "确定性的标定与新鲜度固定装置",
+    "世界模型化简器可消费的已接受 Observation WorldEvents"
   ],
   "acceptance": [
-    "only contract-valid Observation records are accepted",
-    "camera ID calibration revision frame pose units confidence timestamp clock and evidence references are validated",
-    "stale future-skewed duplicate and coordinate-frame-mismatched observations are rejected",
-    "frame conversion requires a declared calibration revision",
-    "raw observation provenance is preserved without caller mutation",
-    "deterministic tests cover dropout malformed pose low confidence stale frames and calibration mismatch",
-    "the World Model sink receives only accepted observations"
+    "只接受契约有效的 Observation 记录",
+    "相机 ID、标定修订、帧、位姿、单位、置信度、时间戳、时钟与证据引用均被校验",
+    "过期、未来偏移、重复与坐标帧不匹配的观测被拒绝",
+    "帧转换必须声明标定修订",
+    "原始观测的来源得以保留，且不改变调用方数据",
+    "确定性测试覆盖丢帧、格式错误位姿、低置信度、过期帧与标定不匹配",
+    "世界模型汇点只收到已接受的观测"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-72-observation-ingestion.json",
@@ -52,24 +52,24 @@
     "make context-check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "focused observation unit and integration test output",
-    "full repository test output",
-    "contract scenario and context validation output"
+    "任务包校验输出",
+    "聚焦的观测单元与集成测试输出",
+    "全仓库测试输出",
+    "契约、场景与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface or Pydantic contract change is required",
-    "a write outside the allowed paths is required",
-    "a simulator oracle or raw image payload is required",
-    "a calibration cannot identify source and target frames",
-    "physical sensor evidence is requested without a connected bench"
+    "需要修改接口或 Pydantic 契约",
+    "需要在允许路径之外写入",
+    "需要模拟器预言机或原始图像载荷",
+    "标定无法识别源帧与目标帧",
+    "在没有连接测试台的情况下要求物理传感器证据"
   ],
   "max_iterations": 5,
-  "data_classification": "local synthetic observation fixtures only; no raw images or personal data",
-  "model_policy": "deterministic typed validation and rigid transforms only; no model inference",
+  "data_classification": "仅限本地合成观测固定装置；不含原始图像或个人数据",
+  "model_policy": "仅限确定性类型化校验与刚性变换；不涉及模型推理",
   "risks_and_fallbacks": [
-    "reject observations when their clock domain cannot be compared to an injected deterministic clock",
-    "reject unknown calibration revisions or frames instead of guessing a transform",
-    "preserve the current interfaces and open a separately approved contract issue if new fields are required"
+    "当观测的时钟域无法与注入的确定性时钟比较时，拒绝该观测",
+    "拒绝未知的标定修订或帧，而不是猜测变换",
+    "保持当前接口不变，若需要新字段则另行提出获得批准的契约 Issue"
   ]
 }

@@ -1,12 +1,12 @@
 {
   "issue": 2,
   "human_owner": "Quchaosheng",
-  "objective": "Add an optional, read/search and run-summary export adapter for a separately hosted OmniLink instance.",
+  "objective": "为独立托管的 OmniLink 实例添加一个可选的读取/搜索与运行摘要导出适配器。",
   "allowed_paths": ["integrations/omnilink/**", "tests/integration/test_omnilink_client.py", "docs/task_packets/omnilink-integration.json"],
   "read_only_paths": ["interfaces/**", "services/world_model/**", "robot/control/**", "firmware/**"],
   "forbidden": ["TaskGraph generation", "SemanticAction execution", "raw event export", "shared SQLite database"],
-  "acceptance": ["bounded HTTP client", "response schema checks", "safe one-way run summary export", "offline failures remain isolated"],
+  "acceptance": ["受限的 HTTP 客户端", "响应 schema 检查", "安全的单向运行摘要导出", "离线故障保持隔离"],
   "commands": ["python -m pytest tests/integration/test_omnilink_client.py", "python -m ruff check integrations tests/integration/test_omnilink_client.py"],
-  "evidence": ["mock HTTP test output"],
-  "stop_conditions": ["license or security review failure", "interface conflict", "safety implication"]
+  "evidence": ["mock HTTP 测试输出"],
+  "stop_conditions": ["许可证或安全评审失败", "接口冲突", "涉及安全影响"]
 }

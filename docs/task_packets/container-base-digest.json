@@ -1,7 +1,7 @@
 {
   "issue": "container-base-digest",
   "human_owner": "Quchaosheng",
-  "objective": "Pin runtime and development container Ubuntu bases to the verified multi-architecture 24.04 manifest digest.",
+  "objective": "将运行时与开发容器的 Ubuntu 基础镜像固定到经过验证的多架构 24.04 清单摘要。",
   "allowed_paths": [
     "Dockerfile",
     ".devcontainer/Dockerfile",
@@ -28,13 +28,13 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "Dockerfile baseline assertion output",
-    "repository test output",
-    "Ruff output"
+    "Dockerfile 基线断言输出",
+    "仓库测试输出",
+    "Ruff 输出"
   ],
   "stop_conditions": [
-    "the official multi-architecture manifest cannot be resolved",
-    "container build requires a different architecture-specific base",
-    "robot-control or firmware changes are required"
+    "无法解析官方多架构清单",
+    "容器构建需要不同的架构专用基础镜像",
+    "需要修改 `robot/control` 或 `firmware`"
   ]
 }

@@ -1,8 +1,8 @@
 {
   "issue": 88,
   "human_owner": "TH3478",
-  "objective": "Turn the controlled BMS state and transition CSV baseline into an executable fail-closed validator and deterministic engineering report without claiming physical battery safety evidence.",
-  "decision_supported": "Can CI reject missing, duplicated, reordered, or illegal BMS protection paths while preserving DESIGN_BASELINE_ONLY and NOT_EXECUTED release truth?",
+  "objective": "把受控的 BMS 状态与转换 CSV 基线转化为可执行的失败即拒绝验证器与确定性工程报告，同时不声称具有物理电池安全证据。",
+  "decision_supported": "CI 能否在保留 DESIGN_BASELINE_ONLY 与 NOT_EXECUTED 发布真实性的同时，拒绝缺失、重复、乱序或非法的 BMS 保护路径？",
   "allowed_paths": [
     "hardware/power/README.md",
     "hardware/power/tools/validate_bms_state_machine.py",
@@ -53,14 +53,14 @@
     "docs/task_packets/issue-88-bms-state-machine-validator.json"
   ],
   "acceptance": [
-    "The parser rejects duplicate state names and duplicate source-state/event keys, and accepts only the declared CSV headers and fields.",
-    "Every source and target is a known state; contactor actions, latch values, reset authorities, and guards are controlled and non-empty.",
-    "Every state has an explicit fault/default behavior and the complete controlled state policy is checked.",
-    "The legal transition graph is complete and deterministic; deleting any required safety transition or adding an illegal edge fails validation.",
-    "FAULT_LATCHED can recover only through an explicit guarded local_reset to SELF_TEST; automatic recovery and unsafe RUN entry are rejected.",
-    "The generated report includes a deterministic transition-table SHA-256 and preserves DESIGN_BASELINE_ONLY, NOT_EXECUTED, release_ready=false, and physical_results=NOT_EXECUTED.",
-    "The existing operations-readiness validator consumes the strict BMS report while retaining the broader EXTERNAL_EVIDENCE_REQUIRED status.",
-    "No firmware, robot-control, MCU protocol, public interface, supplier, certification, or physical HIL claim is added."
+    "解析器拒绝重复的状态名与重复的源状态/事件键，只接受已声明的 CSV 表头与字段。",
+    "每个源与目标都是已知状态；接触器动作、锁存值、复位权限与守卫均受控且非空。",
+    "每个状态都有显式的故障/默认行为，且完整的受控状态策略都经过检查。",
+    "合法转换图完整且确定；删除任何必需的安全转换或添加非法边都会使校验失败。",
+    "FAULT_LATCHED 只能通过显式受保护的 local_reset 恢复到 SELF_TEST；自动恢复与不安全的 RUN 进入均被拒绝。",
+    "生成的报告包含确定性的转换表 SHA-256，并保留 DESIGN_BASELINE_ONLY、NOT_EXECUTED、release_ready=false 与 physical_results=NOT_EXECUTED。",
+    "现有运行就绪验证器消费严格的 BMS 报告，同时保留更宽的 EXTERNAL_EVIDENCE_REQUIRED 状态。",
+    "不新增任何固件、机器人控制、MCU 协议、公开接口、供应商、认证或物理 HIL 声明。"
   ],
   "commands": [
     "python hardware/power/tools/validate_bms_state_machine.py",
@@ -74,21 +74,21 @@
     "git diff --check"
   ],
   "evidence": [
-    "Generated BMS report with structural checks, stable state/transition hashes, and explicit release blockers.",
-    "Focused hardware tests covering malformed tables, illegal edges, deleted transitions, fault-latch recovery, deterministic ordering, and status truthfulness.",
-    "Operations-readiness, full test, contract, scenario, context, and whitespace-check output."
+    "生成的 BMS 报告，包含结构检查、稳定的状态/转换哈希与显式的发布阻塞项。",
+    "聚焦的硬件测试，覆盖格式错误表格、非法边、删除转换、故障锁存恢复、确定性排序与状态真实性。",
+    "运行就绪、完整测试、契约、场景、上下文与空白检查的输出。"
   ],
   "stop_conditions": [
-    "A firmware, MCU, robot-control, public interface, or safety-authority behavior change is required.",
-    "Supplier thresholds, pack identity, certification, or physical HIL evidence would need to be invented.",
-    "The controlled CSV baseline itself needs semantic changes rather than executable validation.",
-    "A generated result would promote NOT_EXECUTED or DESIGN_BASELINE_ONLY to a physical or production PASS.",
-    "Task Packet validation reports a changed path outside allowed_paths."
+    "需要修改固件、MCU、机器人控制、公开接口或安全权威行为。",
+    "需要凭空捏造供应商阈值、电池包身份、认证或物理 HIL 证据。",
+    "受控的 CSV 基线本身需要语义变更，而不是可执行校验。",
+    "生成的结果会把 NOT_EXECUTED 或 DESIGN_BASELINE_ONLY 拔高为物理或生产 PASS。",
+    "任务包校验报告某变更路径超出 allowed_paths。"
   ],
   "max_iterations": 3,
   "risks_and_fallbacks": [
-    "The validator intentionally encodes the current reviewed baseline; any future transition change requires an explicit owner-reviewed update to the validator and its mutation tests.",
-    "A structural pass proves table integrity only. Electrical/Safety Owner approval, supplier data, calibrated measurements, and physical fault injection remain release gates.",
-    "If privileged hardware evidence is unavailable, retain NOT_EXECUTED and ship only the repository-side report."
+    "验证器有意编码当前已评审的基线；未来任何转换变更都要求对验证器及其变异测试进行明确的 Owner 评审更新。",
+    "结构检查通过只证明表格完整性。电气/安全 Owner 批准、供应商数据、标定测量与物理故障注入仍是发布闸门。",
+    "若特权硬件证据不可用，保留 NOT_EXECUTED 并只交付仓库侧报告。"
   ]
 }

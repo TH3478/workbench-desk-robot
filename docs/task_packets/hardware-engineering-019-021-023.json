@@ -2,7 +2,7 @@
   "issue": "19,21,23",
   "issues": [19, 21, 23],
   "human_owner": "Quchaosheng",
-  "objective": "Create a reproducible mechanical, PCB, and manufacturing engineering package for the desk robot.",
+  "objective": "为桌面机器人生成可复现的机械、PCB 与制造工程包。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "hardware/pcb/**",
@@ -38,11 +38,11 @@
     "hardware/pcb/interface-control.md",
     "hardware/pcb/testpoint-coverage.csv",
     "hardware/manufacturing/generated/harness_report.json",
-    "unit test output"
+    "单元测试输出"
   ],
   "stop_conditions": [
-    "physical prototype measurements are required",
-    "certification laboratory evidence is required",
-    "a selected component differs from the system-owned approved vendor list"
+    "需要物理样机测量",
+    "需要认证实验室证据",
+    "所选元器件与系统所有的已批准供应商清单不一致"
   ]
 }

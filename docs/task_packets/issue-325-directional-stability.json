@@ -1,7 +1,7 @@
 {
   "issue": 325,
   "human_owner": "Quchaosheng",
-  "objective": "Make Revision D stability analysis directional, auditable, and fail closed when evidence is incomplete.",
+  "objective": "让 Revision D 稳定性分析具有方向性、可审计，并在证据不完整时失败即拒绝。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "hardware/release/**",
@@ -11,10 +11,10 @@
   "read_only_paths": ["interfaces/**", "robot/control/**", "firmware/**"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "publish +X, -X, +Y, and -Y margins and tip angles for every required pose",
-    "drive and stabilized gates use the minimum directional result and limiting support edge",
-    "missing directions, inconsistent mass/CG, and non-finite values fail closed",
-    "analytical status remains CONCEPT_PHYSICAL_VALIDATION_REQUIRED and physical release evidence remains required"
+    "为每个必需位姿发布 +X、-X、+Y 与 -Y 方向的裕量与倾翻角。",
+    "驱动与稳定闸门使用最小方向性结果与限制性支撑边缘。",
+    "缺失方向、不一致的质量/重心与非有限值失败即拒绝。",
+    "分析状态保持 CONCEPT_PHYSICAL_VALIDATION_REQUIRED，物理发布证据仍为必需。"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -31,8 +31,8 @@
     "tests/hardware/test_mechanical_issue_325_326.py"
   ],
   "stop_conditions": [
-    "physical stability or emergency-stop evidence would need to be invented",
-    "a change requires robot control, firmware, interfaces, or PCB ownership",
-    "the generated report cannot be validated against its schema"
+    "将需要虚构物理稳定性或急停证据。",
+    "某项改动需要 robot control、固件、interfaces 或 PCB 所有权。",
+    "生成的报告无法依据其 schema 校验。"
   ]
 }

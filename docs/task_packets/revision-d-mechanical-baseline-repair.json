@@ -1,7 +1,7 @@
 {
   "issue": "revision-d-mechanical-baseline-repair",
   "human_owner": "Quchaosheng",
-  "objective": "Make the Revision D mechanical specification, SCAD, CadQuery STEP exports, analytical load cases, and mechanical verification evidence share one coordinate system and fail when generated geometry diverges from the controlled raised and stowed heights.",
+  "objective": "让 Revision D 机械规范、SCAD、CadQuery STEP 导出、分析负载工况与机械验证证据共享同一坐标系，并在生成几何偏离受控升起与收纳高度时失败。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "tests/hardware/test_engineering_packages.py",
@@ -20,12 +20,12 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "ground, base-top, stowed-height, lift-travel, torso, arm, neck, and head datums are explicit",
-    "the generated raised assembly STEP top matches the 1450 mm controlled height within tolerance",
-    "navigation and stabilized manipulation use separate center-of-gravity and support-polygon load cases",
-    "SCAD and CadQuery use the same Revision D lift and body datums",
-    "all physical fit, collision, stability, thermal, braking, and drop evidence remains explicitly NOT_EXECUTED or PHYSICAL_VALIDATION_REQUIRED",
-    "mechanical package tests, Ruff, and Task Packet validation pass"
+    "ground、base-top、stowed-height、lift-travel、torso、arm、neck 与 head 各基准均已明确",
+    "生成的升起装配体 STEP 顶部在公差范围内匹配受控高度 1450 mm",
+    "导航与稳定操作使用各自独立的重心与支撑多边形负载工况",
+    "SCAD 与 CadQuery 使用相同的 Revision D 升降与机身基准",
+    "所有物理配合、碰撞、稳定性、热、制动与跌落证据保持显式 NOT_EXECUTED 或 PHYSICAL_VALIDATION_REQUIRED",
+    "机械包测试、Ruff 与任务包校验通过"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -39,11 +39,11 @@
     "hardware/mechanical/tools/generate_artifacts.py",
     "hardware/mechanical/generated/analysis.json",
     "hardware/mechanical/generated/desk_robot_assembly.step",
-    "mechanical package test output"
+    "机械包测试输出"
   ],
   "stop_conditions": [
-    "the repair requires selecting supplier components or claiming physical test evidence",
-    "the repair requires changing robot control, firmware, interfaces, PCB, or safety ownership",
-    "the generated STEP cannot be measured with the available deterministic CAD runtime"
+    "修复需要选定供应商部件或声称物理测试证据",
+    "修复需要修改机器人控制、固件、interfaces、PCB 或安全归属",
+    "生成的 STEP 无法用可用的确定性 CAD 运行时测量"
   ]
 }

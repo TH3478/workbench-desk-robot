@@ -1,7 +1,7 @@
 {
   "issue": "bsp-public-candidate-selection",
   "human_owner": "Quchaosheng",
-  "objective": "Record publicly sourced candidates for the Linux BSP, arm/tool controllers, isolated power and third-party integration boundaries without inventing approval or physical evidence.",
+  "objective": "为 Linux BSP、机械臂/工具控制器、隔离电源与第三方集成边界记录公开来源的候选方案，且不虚构批准或物理证据。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "bsp/README.md",
@@ -42,8 +42,8 @@
     "THIRD_PARTY_REVIEW.md"
   ],
   "stop_conditions": [
-    "a candidate would be promoted to an approved MPN without owner evidence",
-    "a private invitation or proprietary protocol is assumed from a public page",
-    "a physical bring-up result is inferred from a simulator or CI run"
+    "候选方案将在没有 Owner 证据的情况下被提升为已批准的 MPN",
+    "从公开页面臆断私有邀请或专有协议",
+    "从模拟器或 CI 运行推断物理启动调试结果"
   ]
 }

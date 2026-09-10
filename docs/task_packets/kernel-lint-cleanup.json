@@ -1,7 +1,7 @@
 {
   "issue": "kernel-lint-followup",
   "human_owner": "Quchaosheng",
-  "objective": "Make the newly merged libs/kernel K1-K10 layer pass the repository Ruff gate without changing its behavior.",
+  "objective": "让新合并的 libs/kernel K1-K10 层在不改变行为的前提下通过仓库 Ruff 闸门。",
   "allowed_paths": [
     "libs/kernel/**",
     "docs/task_packets/kernel-lint-cleanup.json"
@@ -9,14 +9,14 @@
   "read_only_paths": ["interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "services/**", "hardware/**"],
   "acceptance": [
-    "ruff check passes for libs/kernel",
-    "libs/kernel/tests/test_k1_k10.py passes",
-    "public kernel behavior remains unchanged"
+    "libs/kernel 通过 ruff check",
+    "libs/kernel/tests/test_k1_k10.py 通过",
+    "公开内核行为保持不变"
   ],
   "commands": [
     "python -m ruff check libs/kernel",
     "python libs/kernel/tests/test_k1_k10.py"
   ],
-  "evidence": ["Ruff output", "K1-K10 integration test output"],
-  "stop_conditions": ["behavioral test changes are required", "interface schema changes are required"]
+  "evidence": ["Ruff 输出", "K1-K10 集成测试输出"],
+  "stop_conditions": ["需要修改行为测试", "需要修改接口 schema"]
 }

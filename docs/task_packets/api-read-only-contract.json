@@ -1,7 +1,7 @@
 {
   "issue": 80,
   "human_owner": "Quchaosheng",
-  "objective": "Publish and test a versioned read-only Dashboard API contract for source-tree, installed, and split-host clients.",
+  "objective": "为源码树、已安装与分主机客户端发布并测试一个带版本的只读 Dashboard API 契约。",
   "allowed_paths": [
     "services/backend/**",
     "pyproject.toml",
@@ -26,6 +26,6 @@
     "python3 -m pip wheel . --no-deps --wheel-dir dist",
     "python3 -m mkdocs build --strict"
   ],
-  "evidence": ["OpenAPI fixture and package-data assertions", "isolated wheel HTTP output", "strict docs build"],
-  "stop_conditions": ["schema changes are required", "a write/control operation is requested"]
+  "evidence": ["OpenAPI 固定装置与包数据断言", "隔离 wheel 的 HTTP 输出", "严格文档构建输出"],
+  "stop_conditions": ["需要修改 schema", "被要求进行写操作或控制操作"]
 }

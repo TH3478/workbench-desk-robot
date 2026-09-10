@@ -1,7 +1,7 @@
 {
   "issue": 215,
   "human_owner": "Quchaosheng",
-  "objective": "Preserve wbcan error effects when optional CAN error SKB allocation fails.",
+  "objective": "当可选的 CAN 错误 SKB 分配失败时，保留 wbcan 错误效果。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -17,11 +17,11 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "arbitration loss increments its CAN statistic even when the optional error SKB allocation fails",
-    "stuff error increments its CAN statistic and enters warning even when the optional error SKB allocation fails",
-    "successful allocation retains the existing error frame and transmission behavior",
-    "the privileged regression restores allocation behavior before exit",
-    "the change does not alter CAN state synchronization owned by issue 153"
+    "即使可选的错误 SKB 分配失败，仲裁丢失仍递增其 CAN 统计",
+    "即使可选的错误 SKB 分配失败，填充错误仍递增其 CAN 统计并进入警告状态",
+    "分配成功时保留现有错误帧与传输行为",
+    "特权回归测试在退出之前恢复分配行为",
+    "该变更不改变 issue 153 负责的 CAN 状态同步"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -32,14 +32,14 @@
     "git diff --check origin/main...HEAD"
   ],
   "evidence": [
-    "kernel module build output",
-    "checkpatch output",
-    "privileged allocation-pressure simulation counter and state assertions; missing error frames are not physical CAN evidence",
-    "existing seven-mode fault-suite output"
+    "内核模块构建输出",
+    "checkpatch 输出",
+    "特权分配压力模拟计数器与状态断言；缺失的错误帧不是物理 CAN 证据",
+    "现有七模式故障套件输出"
   ],
   "stop_conditions": [
-    "CAN core APIs must change",
-    "state transition serialization from issue 153 must change",
-    "firmware interfaces or physical CAN claims are required"
+    "必须修改 CAN 核心 API",
+    "必须修改 issue 153 的状态转换串行化",
+    "需要固件接口或物理 CAN 声明"
   ]
 }

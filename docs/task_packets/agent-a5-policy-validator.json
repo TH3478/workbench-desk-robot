@@ -1,7 +1,7 @@
 {
   "issue": 118,
   "human_owner": "zhangjia-1111",
-  "objective": "Build a language-layer PolicyValidator that enforces exact field-set equality against the A1 ToolRegistry whitelist, fail-closed.",
+  "objective": "构建一个语言层 PolicyValidator，以失败即拒绝的方式对照 A1 ToolRegistry 白名单强制精确的字段集合相等校验。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/policy_validator.py",
     "tests/unit/test_policy_validator.py",
@@ -47,17 +47,17 @@
     "make demo-offline"
   ],
   "evidence": [
-    "test_policy_validator.py output (25+ assertions)",
-    "make lint output",
-    "make test full suite output",
-    "make contract output",
-    "make demo-scripted output"
+    "`test_policy_validator.py` 输出（25+ 断言）",
+    "`make lint` 输出",
+    "`make test` 全套件输出",
+    "`make contract` 输出",
+    "`make demo-scripted` 输出"
   ],
   "stop_conditions": [
-    "ToolRegistry interface not merged to main",
-    "adding a new ActionType enum value",
-    "modifying interfaces/ or libs/contracts/",
-    "validator emitting VerificationResult or claiming task completion",
-    "make demo-scripted regression"
+    "ToolRegistry 接口尚未合并到 main",
+    "新增 ActionType 枚举值",
+    "修改 `interfaces/` 或 `libs/contracts/`",
+    "验证器发出 VerificationResult 或声称任务已完成",
+    "`make demo-scripted` 出现回归"
   ]
 }

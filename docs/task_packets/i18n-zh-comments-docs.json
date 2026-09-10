@@ -40,7 +40,8 @@
     "hardware/**",
     ".github/**",
     ".devcontainer/**",
-    "docs/task_packets/i18n-zh-comments-docs.json"
+    "docs/task_packets/i18n-zh-comments-docs.json",
+    "requirements-mujoco.txt"
   ],
   "read_only_paths": [
     "evaluation/**"

@@ -1,7 +1,7 @@
 {
   "issue": "E7-E8/E12-E13/E16-E17/J1-J2/J4-J5",
   "human_owner": "Quchaosheng",
-  "objective": "Automate local-model execution, split-host deployment, release evidence, and reproducible performance measurement without weakening the robot safety boundary or fabricating human and hardware evidence.",
+  "objective": "自动化本地模型执行、分主机部署、发布证据与可复现的性能测量，同时不削弱机器人安全边界，也不虚构人工与硬件证据。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "services/backend/**",
@@ -52,17 +52,17 @@
     "python tools/scripts/benchmark_resources.py --url http://127.0.0.1:8080 --output runs/performance/resources.json"
   ],
   "evidence": [
-    "unit and integration test output",
-    "local model response metadata and validated semantic TaskGraph",
-    "startup phase and resource JSON reports",
-    "simulation and hardware telemetry analysis reports",
-    "container health checks and split-host deployment smoke test",
-    "release manifest, image digest, SPDX SBOM and cold-start participant records"
+    "单元测试与集成测试输出",
+    "本地模型响应元数据与已验证的语义 TaskGraph",
+    "启动阶段与资源 JSON 报告",
+    "仿真与硬件遥测分析报告",
+    "容器健康检查与分主机部署冒烟测试",
+    "发布清单、镜像摘要、SPDX SBOM 与冷启动参与者记录"
   ],
   "stop_conditions": [
-    "a frozen interface or contract change is required",
-    "the model output would gain access to joint, velocity, firmware or emergency-stop commands",
-    "release credentials, a human merge decision or an external participant is required",
-    "physical hardware evidence would need to be inferred or fabricated"
+    "需要修改冻结的接口或契约",
+    "模型输出将获得对关节、速度、固件或急停命令的访问",
+    "需要发布凭据、人工合并决策或外部参与者",
+    "物理硬件证据将需要被推断或虚构"
   ]
 }

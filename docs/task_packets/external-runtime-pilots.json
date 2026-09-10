@@ -1,7 +1,7 @@
 {
   "issue": "user-request-2026-09-03-external-runtime-pilots",
   "human_owner": "Quchaosheng",
-  "objective": "Add isolated RLSOK Shadow and OmniSim World Harness pilots without changing Workbench control, safety, simulator, or frozen interface boundaries.",
+  "objective": "在不改动 Workbench 控制、安全、模拟器或冻结接口边界的前提下，新增隔离的 RLSOK Shadow 与 OmniSim World Harness 试点。",
   "allowed_paths": [
     "integrations/rlsok/**",
     "integrations/omnisim/**",
@@ -40,18 +40,18 @@
     "python tools/scripts/check_task_packet.py docs/task_packets/external-runtime-pilots.json"
   ],
   "evidence": [
-    "focused and complete integration pytest output",
-    "Ruff output",
-    "validated RLSOK Shadow EvidenceBundle with hardwareSignalSent false",
-    "checksummed OmniSim mock-harness pilot artifact"
+    "聚焦且完整的集成 pytest 输出",
+    "Ruff 输出",
+    "已验证的 RLSOK Shadow EvidenceBundle（hardwareSignalSent 为 false）",
+    "带校验和的 OmniSim 模拟试验台试点产物"
   ],
   "stop_conditions": [
-    "RLSOK reports a hardware signal",
-    "RLSOK evidence verification fails",
-    "OmniSim protocol major mismatches",
-    "Newton physics is absent, degraded, or unverified",
-    "OmniSim supervisor is disconnected",
-    "integration requires a frozen interface change",
-    "real hardware becomes reachable"
+    "RLSOK 报告硬件信号",
+    "RLSOK 证据验证失败",
+    "OmniSim 协议主版本不匹配",
+    "Newton 物理缺失、降级或未经验证",
+    "OmniSim 监督器断开连接",
+    "集成需要修改冻结的接口",
+    "真实硬件变得可访问"
   ]
 }

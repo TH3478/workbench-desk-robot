@@ -1,8 +1,8 @@
 {
   "issue": 84,
   "human_owner": "TH3478",
-  "objective": "Require executable Pydantic coverage for every committed JSON Schema with a runtime producer or consumer, including bidirectional fixture validation and reviewed exemption metadata.",
-  "decision_supported": "Can the repository fail CI when a runtime-consumed JSON Schema lacks a typed Pydantic model, an example, or a reviewed exemption, while preserving existing public contract semantics?",
+  "objective": "要求每个已提交且存在运行时生产者或消费者的 JSON Schema 都具备可执行的 Pydantic 覆盖，包括双向固定装置校验与已评审的豁免元数据。",
+  "decision_supported": "当运行时消费的 JSON Schema 缺少类型化 Pydantic 模型、示例或已评审豁免时，仓库能否令 CI 失败，同时保持现有公开契约语义？",
   "allowed_paths": [
     "interfaces/examples/pose-tabletop.json",
     "interfaces/examples/task-graph-place.json",
@@ -98,15 +98,15 @@
     "docs/task_packets/issue-84-pydantic-schema-coverage.json"
   ],
   "acceptance": [
-    "Every committed JSON Schema has exactly one executable coverage entry with a checked-in example and a typed Pydantic model, or an exemption that names an owner, reason and replacement validation.",
-    "EmotionIntent and public Schema-shaped WorldState models are available from workbench_contracts without replacing the World Model reducer's internal state representation.",
-    "Pose, TaskGraph and WorldEvent have committed examples and are validated through their canonical Pydantic models.",
-    "WorldEvent model vocabulary covers every event_type value declared by world_event.schema.json, while existing reducer behavior remains unchanged.",
-    "WorldEvent accepts the schema's optional recorded_at and clock_id fields, and schema-required source, payload, model_route, fault_type and oracle_allowed fields can no longer be omitted through Pydantic defaults.",
-    "The MCU legacy sent_at schema-only field has named owner, reason and replacement validation metadata, and both JSON Schema and McuFrame reject it in the executable invalid-frame corpus.",
-    "Each covered fixture is validated against JSON Schema before Pydantic parsing and the canonical Pydantic JSON serialization is validated against the same Schema.",
-    "A newly committed schema without a coverage entry fails the contract validator and a coverage regression test demonstrates that failure.",
-    "No interfaces JSON Schema definition, World Model reducer state, firmware, robot control or public MCU Wire V1 encoding is changed."
+    "每个已提交的 JSON Schema 都恰好有一条可执行覆盖条目，配有已入库示例与类型化 Pydantic 模型；或者具备写明负责人、理由与替代校验方式的豁免。",
+    "EmotionIntent 与公开的 Schema 形态 WorldState 模型均可从 workbench_contracts 获得，且不替换世界模型化简器的内部状态表示。",
+    "Pose、TaskGraph 与 WorldEvent 有已提交的示例，并通过各自的规范 Pydantic 模型进行校验。",
+    "WorldEvent 模型词汇覆盖 world_event.schema.json 声明的每个 event_type 值，同时现有化简器行为保持不变。",
+    "WorldEvent 接受 schema 的可选 recorded_at 与 clock_id 字段，而 schema 必需的 source、payload、model_route、fault_type 与 oracle_allowed 字段不再能通过 Pydantic 默认值被省略。",
+    "MCU 遗留的仅存在于 schema 的 sent_at 字段拥有写明负责人、理由与替代校验方式的元数据，且 JSON Schema 与 McuFrame 都在可执行的无效帧语料中拒绝它。",
+    "每个被覆盖的固定装置都先经 JSON Schema 校验再做 Pydantic 解析，规范 Pydantic 的 JSON 序列化结果也经同一 Schema 校验。",
+    "新提交且没有覆盖条目的 schema 会使契约验证器失败，并有覆盖回归测试演示该失败。",
+    "不修改任何 interfaces JSON Schema 定义、世界模型化简器状态、固件、机器人控制或公开的 MCU Wire V1 编码。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-84-pydantic-schema-coverage.json --base origin/main --head HEAD",
@@ -121,21 +121,21 @@
     "git diff --check"
   ],
   "evidence": [
-    "Coverage registry output showing all on-disk schemas mapped to examples and typed models with no unreviewed gaps.",
-    "Focused coverage tests proving schema-to-model and model-to-schema round trips plus fail-closed detection of an unregistered schema.",
-    "Contract validator, contract-focused tests, full test, scenario, context, Ruff and whitespace-check output."
+    "覆盖登记表输出，显示磁盘上所有 schema 均映射到示例与类型化模型，无未评审缺口。",
+    "聚焦覆盖测试，证明 schema 到模型与模型到 schema 的双向往返，以及未注册 schema 的失败即拒绝检测。",
+    "契约验证器、契约聚焦测试、完整测试、场景、上下文、Ruff 与空白检查的输出。"
   ],
   "stop_conditions": [
-    "A schema semantic or public field change is required rather than a coverage/model mapping change.",
-    "The internal World Model state would need to be replaced by the public WorldState JSON shape.",
-    "MCU Wire V1 encoding, firmware, robot control or a protected runtime boundary must change.",
-    "A required modification falls outside allowed_paths.",
-    "Task Packet validation reports a changed path outside allowed_paths."
+    "需要修改 schema 语义或公开字段，而非仅修改覆盖/模型映射。",
+    "内部世界模型状态需要被公开的 WorldState JSON 形态替换。",
+    "必须修改 MCU Wire V1 编码、固件、机器人控制或受保护的运行时边界。",
+    "所需的修改超出 allowed_paths。",
+    "任务包校验报告某处变更路径超出 allowed_paths。"
   ],
   "max_iterations": 3,
   "risks_and_fallbacks": [
-    "The public schemas intentionally remain broader than some strict runtime models; canonical fixture serialization is the compatibility direction and any broader schema vocabulary must be represented by the typed model or an explicit exemption.",
-    "The reducer's internal WorldState remains structurally different from the public schema and is not silently substituted for the public contract model.",
-    "Required Runtime, World Model and Integration approvals remain a merge condition for contract-facing changes."
+    "公开 schema 有意比某些严格的运行时模型更宽泛；规范固定装置序列化是兼容性方向，任何更宽泛的 schema 词汇都必须由类型化模型或显式豁免来表示。",
+    "化简器的内部 WorldState 在结构上仍与公开 schema 不同，不会被悄悄替换为公开契约模型。",
+    "所需的运行时、世界模型与集成批准仍是契约相关变更的合并条件。"
   ]
 }

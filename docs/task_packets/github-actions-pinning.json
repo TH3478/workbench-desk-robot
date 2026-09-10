@@ -1,7 +1,7 @@
 {
   "issue": "github-actions-pinning",
   "human_owner": "Quchaosheng",
-  "objective": "Pin every third-party GitHub Action used by repository workflows to an immutable commit SHA while retaining a human-readable release comment.",
+  "objective": "将仓库工作流使用的每一个第三方 GitHub Action 固定到不可变的提交 SHA，同时保留人类可读的发布注释。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     ".github/workflows/nightly-regression.yml",
@@ -29,14 +29,14 @@
     "python -m ruff format --check ."
   ],
   "evidence": [
-    "workflow reference audit output",
-    "repository test output",
-    "Ruff output"
+    "工作流引用审计输出",
+    "仓库测试输出",
+    "Ruff 输出"
   ],
   "stop_conditions": [
-    "an action tag cannot be resolved to a commit",
-    "workflow behavior changes are required",
-    "robot-control or firmware changes are required",
-    "a workflow outside the listed files must change"
+    "某个 Action 标签无法解析为提交",
+    "需要改变工作流行为",
+    "需要修改 `robot/control` 或 `firmware`",
+    "必须改动所列文件之外的工作流"
   ]
 }

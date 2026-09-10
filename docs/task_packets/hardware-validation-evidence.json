@@ -1,7 +1,7 @@
 {
   "issue": 87,
   "human_owner": "Quchaosheng",
-  "objective": "Atomically bind physical fault-validation results to immutable raw evidence and keep release status fail closed.",
+  "objective": "将物理故障验证结果原子性地绑定到不可变的原始证据，并让发布状态保持失败即拒绝。",
   "allowed_paths": [
     "hardware/validation/**",
     "tests/hardware/**",
@@ -35,11 +35,11 @@
   ],
   "evidence": [
     "hardware/validation/generated/validation_report.json",
-    "hardware validation test output including process, thread, and short-write regressions"
+    "硬件验证测试输出，包括进程、线程与短写回归"
   ],
   "stop_conditions": [
-    "physical execution would be claimed without a valid evidence record",
-    "robot-control or firmware changes are required",
-    "a safety result lacks owner review"
+    "在没有有效证据记录的情况下声称物理执行",
+    "需要修改 `robot/control` 或 `firmware`",
+    "某项安全结果缺少 Owner 评审"
   ]
 }

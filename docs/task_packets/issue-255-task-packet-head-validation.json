@@ -1,7 +1,7 @@
 {
   "issue": 255,
   "human_owner": "TH3478",
-  "objective": "Make CI Task Packet changed-path validation compare the pull request head instead of a synthetic merge commit.",
+  "objective": "让 CI 的任务包变更路径校验比对 pull request head，而非合成的合并提交。",
   "allowed_paths": [
     ".github/workflows/ci.yml",
     "docs/task_packets/issue-255-task-packet-head-validation.json",
@@ -20,11 +20,11 @@
     "services/**"
   ],
   "acceptance": [
-    "CI keeps foundation tests on the pull request merge result",
-    "Task Packet boundary validation can compare the base revision with an explicit pull request head",
-    "main-only changes present in a synthetic merge commit are excluded from the pull request changed-path set",
-    "the explicit-head path remains commit-only and does not include local untracked files",
-    "the packet authorizes no MCU, protocol, hardware, or runtime source changes"
+    "CI 在 pull request 合并结果上保留基础测试。",
+    "任务包边界校验可以把基版本与显式的 pull request head 进行比较。",
+    "仅存在于合成合并提交中的 main 改动被排除在 pull request 变更路径集合之外。",
+    "显式 head 路径仍只针对提交，且不包含本地未跟踪文件。",
+    "本任务包不授权任何 MCU、协议、硬件或运行时源码改动。"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py --all",
@@ -36,14 +36,14 @@
     "git diff --check"
   ],
   "evidence": [
-    "explicit-head changed-path regression output",
-    "Task Packet validation output",
-    "repository test and contract output",
-    "clean diff check"
+    "显式 head 变更路径回归输出。",
+    "任务包校验输出。",
+    "仓库 test 与 contract 输出。",
+    "干净的 diff 检查。"
   ],
   "stop_conditions": [
-    "the fix requires changing protocol schemas or MCU safety behavior",
-    "a workflow outside .github/workflows/ci.yml must change",
-    "the PR head revision cannot be resolved in the CI checkout"
+    "修复需要修改协议 schema 或 MCU 安全行为。",
+    "必须修改 `.github/workflows/ci.yml` 之外的工作流。",
+    "PR head 版本无法在 CI 检出中解析。"
   ]
 }

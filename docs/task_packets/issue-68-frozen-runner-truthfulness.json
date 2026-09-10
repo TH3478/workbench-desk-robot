@@ -1,7 +1,7 @@
 {
   "issue": 68,
   "human_owner": "Quchaosheng",
-  "objective": "Replace the frozen-scenario placeholder pass with a fail-closed simulation control surface that exposes doctor, list, and run workflows, preserves bounded runner evidence, and never presents scripted fixtures or missing Gazebo execution as release-eligible simulation success.",
+  "objective": "用失败即拒绝的仿真控制面取代冻结场景的占位通过，暴露 `doctor`、`list` 与 `run` 工作流，保留受限的运行器证据，绝不把脚本化固定装置或缺失的 Gazebo 执行冒充为具备发布资格的仿真成功。",
   "allowed_paths": [
     "tools/scripts/sim_cli.py",
     "tests/regression/run_frozen_scenarios.py",
@@ -26,14 +26,14 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "the frozen regression command has no placeholder success or hard-coded VTCR and exits non-zero when Gazebo or its runner is unavailable",
-    "doctor and list expose simulator readiness, scenario identity, task, fault, timeout, and deterministic scene hash without starting motion",
-    "scripted run output is explicitly marked SCRIPTED_FIXTURE and release_eligible false while remaining usable in the read-only dashboard",
-    "external execution uses each manifest timeout, captures stdout and stderr, records exit and timeout metadata, and terminates the whole launched process tree on timeout or interruption",
-    "each run preserves the source manifest, materialized scene, validated event log, metadata, and SHA-256 checksums using an atomic run directory publication",
-    "missing executables and zero executed scenarios are reported as NOT_EXECUTED and can never satisfy a regression threshold",
-    "same manifest and seed materialize to the same scene hash without claiming deterministic Gazebo event ordering",
-    "no interface, Motion, firmware, hardware safety, or dashboard write boundary changes are introduced"
+    "冻结的回归命令没有占位成功或硬编码的 VTCR，并在 Gazebo 或其运行器不可用时以非零码退出",
+    "`doctor` 与 `list` 暴露模拟器就绪状态、场景身份、任务、故障、超时与确定性的场景哈希，而不启动运动",
+    "脚本化运行输出被显式标记为 SCRIPTED_FIXTURE 且 release_eligible 为 false，同时仍可在只读看板中使用",
+    "外部执行使用每个清单的超时值，捕获 stdout 与 stderr，记录退出与超时元数据，并在超时或中断时终止整个已启动的进程树",
+    "每次运行都通过原子化的运行目录发布，保留源清单、物化场景、经校验的事件日志、元数据与 SHA-256 校验和",
+    "缺失的可执行文件与零个已执行场景被报告为 NOT_EXECUTED，且绝不能满足回归阈值",
+    "相同的清单与种子物化出相同的场景哈希，且不声称 Gazebo 事件顺序具有确定性",
+    "不引入任何接口、运动、固件、硬件安全或看板写入边界的变更"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-68-frozen-runner-truthfulness.json",
@@ -47,17 +47,17 @@
     "python tests/regression/run_frozen_scenarios.py --version v0.1 --runner gazebo"
   ],
   "evidence": [
-    "unit tests covering missing runner, timeout cleanup, non-zero exit, malformed output, deterministic scripted artifacts, and zero-execution regression behavior",
-    "doctor and scenario catalog console output",
-    "a scripted fixture run directory with manifest, materialized scene, events, metadata, logs, and checksums",
-    "a Gazebo-unavailable regression summary showing NOT_EXECUTED and a non-zero command exit",
-    "scenario validation and focused Ruff output"
+    "覆盖缺失运行器、超时清理、非零退出、格式错误输出、确定性脚本化产物与零执行回归行为的单元测试",
+    "`doctor` 与场景目录的控制台输出",
+    "一个脚本化固定装置运行目录，包含清单、物化场景、事件、元数据、日志与校验和",
+    "Gazebo 不可用时的回归摘要，显示 NOT_EXECUTED 与非零命令退出码",
+    "场景校验与聚焦的 Ruff 输出"
   ],
   "stop_conditions": [
-    "a truthful runner requires changing interfaces or contract models",
-    "a real Gazebo task requires unfinished semantic Motion, canonical WorldState, trajectory, or correlation dependencies",
-    "the implementation would need to publish robot, ROS, MCU, or emergency-stop commands from the dashboard",
-    "scripted fixtures or generic external runner output would be promoted to release-eligible evidence",
-    "the process tree cannot be bounded and terminated on timeout or interruption"
+    "真实的运行器需要修改 interfaces 或契约模型",
+    "真实的 Gazebo 任务需要尚未完成的语义运动、规范的 WorldState、轨迹或相关性依赖",
+    "实现需要从看板发布 robot、ROS、MCU 或急停命令",
+    "脚本化固定装置或通用的外部运行器输出会被拔高为具备发布资格的证据",
+    "进程树无法在超时或中断时受限并终止"
   ]
 }

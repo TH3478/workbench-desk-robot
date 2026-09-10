@@ -1,7 +1,7 @@
 {
   "issue": 5,
   "human_owner": "cyathea152-bit",
-  "objective": "Motion phase 1: select the arm (UR5e + Robotiq 2F-85) and compose it into the workbench world. Deliver an ADR, arm_on_workbench.urdf.xacro (fixed joint from arm base_link to the workbench world link), a config-only swap surface (arm.yaml), a hand-authored MoveIt config, and a batch reachability check (>=20 poses each over the block and tray regions, >=95% IK success). No ros2_control/controller wiring (phase 2), no grasp/attach logic (phase 5), no ActionResult/interfaces changes.",
+  "objective": "运动阶段 1：选定机械臂（UR5e + Robotiq 2F-85）并将其组合进工作台世界。交付一份 ADR、`arm_on_workbench.urdf.xacro`（从机械臂 base_link 到工作台世界连杆的固定关节）、仅配置的替换面（`arm.yaml`）、手写 MoveIt 配置，以及批量可达性检查（方块区与托盘区各 >=20 个位姿，IK 成功率 >=95%）。不含 ros2_control/控制器接线（阶段 2）、抓取/附着逻辑（阶段 5），不改 ActionResult/interfaces。",
   "allowed_paths": [
     "robot/control/**",
     "docs/task_packets/motion-001-arm-selection.json",
@@ -22,11 +22,11 @@
     "robot/description/**"
   ],
   "acceptance": [
-    "xacro <install-or-source>/config/arm_on_workbench.urdf.xacro > /tmp/wb_arm.urdf && check_urdf /tmp/wb_arm.urdf reports no errors and a single connected tree rooted at world (verified: passes in both install and source space via $(find workbench_motion))",
-    "arm-specific identity (planning group, ik tip, base frame) is read from config/arm.yaml by runtime Python via workbench_motion.arm_config, not hard-coded; regression-guarded in test/test_arm_config.py",
-    "batch reachability: >=20 sampled poses over the block region and >=20 over the tray region, IK success >=95% per region, numbers + seed archived in docs/evaluation/phase1-reachability.json (PENDING: requires MoveIt+TRAC-IK install; not run at authoring time)",
-    "pure sampling/threshold logic + arm.yaml loading have unit tests that run under uv run pytest without ROS",
-    "colcon build --packages-select workbench_motion passes; root make lint/test/contract stay green (no interfaces change)"
+    "`xacro <install-or-source>/config/arm_on_workbench.urdf.xacro > /tmp/wb_arm.urdf && check_urdf /tmp/wb_arm.urdf` 不报错，且产生一棵以 world 为根的单一连通树（已验证：通过 `$(find workbench_motion)` 在 install 与 source 两种空间下均通过）",
+    "机械臂专属身份（规划组、IK 末端、基坐标系）由运行时 Python 通过 workbench_motion.arm_config 从 `config/arm.yaml` 读取，而非硬编码；并由 `test/test_arm_config.py` 提供回归保护",
+    "批量可达性：方块区采样 >=20 个位姿、托盘区采样 >=20 个位姿，每个区域 IK 成功率 >=95%，数字与种子归档到 `docs/evaluation/phase1-reachability.json`（PENDING：需要安装 MoveIt+TRAC-IK；编写时未运行）",
+    "纯采样/阈值逻辑与 `arm.yaml` 加载具有可在 `uv run pytest` 下运行且不依赖 ROS 的单元测试",
+    "`colcon build --packages-select workbench_motion` 通过；根级 `make lint/test/contract` 保持绿色（无接口变更）"
   ],
   "commands": [
     "make task-check PACKET=docs/task_packets/motion-001-arm-selection.json",
@@ -38,15 +38,15 @@
     "make lint && make test && make contract"
   ],
   "evidence": [
-    "check_urdf output on the composed arm+workbench URDF",
-    "docs/evaluation/phase1-reachability.json with per-region success counts and RNG seed",
-    "reachability unit test output under uv run pytest",
-    "RViz screenshot of the composed arm reaching the block and tray regions (aux)"
+    "组合后机械臂+工作台 URDF 的 `check_urdf` 输出",
+    "`docs/evaluation/phase1-reachability.json`，含每个区域的成功计数与 RNG 种子",
+    "`uv run pytest` 下的可达性单元测试输出",
+    "组合机械臂触达方块区与托盘区的 RViz 截图（辅助）"
   ],
   "stop_conditions": [
-    "vendor arm package not installable under Jazzy/Harmonic or license not usable (switch model, self-decidable)",
-    "reachability below 95% after base-placement tuning (re-place base or reconsider model)",
-    "any change would require touching a forbidden path or interfaces/",
-    "bringup arm attach point conflicts with Integration once bringup exists"
+    "供应商机械臂包无法在 Jazzy/Harmonic 下安装，或许可证不可用（更换型号，自行决定）",
+    "调整底座位置后可达性仍低于 95%（重新摆放底座或重新考虑型号）",
+    "任何变更都将需要触碰禁止路径或 `interfaces/`",
+    "一旦启动调试建立，机械臂附着点与集成发生冲突"
   ]
 }

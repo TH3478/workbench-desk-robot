@@ -1,7 +1,7 @@
 {
   "issue": "home-robot-revision-d",
   "human_owner": "Quchaosheng",
-  "objective": "Upgrade Revision C into a wheeled bimanual household robot with two seven-axis arms, a liftable torso, shared-workspace interlocks, quick-change tools, a premium product visual grounded in public dual-arm mobile-manipulator references, and a fail-closed simulation entry point that never presents missing Gazebo execution as a pass.",
+  "objective": "将 Revision C 升级为轮式双臂家用机器人：两条七轴机械臂、可升降躯干、共享工作区联锁、快换工具、以公开的双臂移动机械臂参考资料为依据的高端产品视觉，以及一个失败即拒绝的仿真入口点——绝不将缺失的 Gazebo 执行呈现为通过。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "tests/hardware/test_engineering_packages.py",
@@ -81,9 +81,9 @@
     "docs/assets/brand-directions.svg"
   ],
   "stop_conditions": [
-    "a change requires robot control, firmware, interfaces, or PCB ownership",
-    "the concept would claim autonomous open-flame cooking, stairs, person lifting, or certified payload performance",
-    "dual-arm interference or lift stability evidence would need to be invented",
-    "the visual cannot show both arms connected to a credible structural shoulder"
+    "某项改动需要 `robot/control`、`firmware`、`interfaces` 或 PCB 的归属",
+    "该概念将声称自主明火烹饪、爬楼梯、载人或经认证的负载性能",
+    "双臂干涉或升降稳定性证据将需要被虚构",
+    "视觉效果无法展示两条机械臂连接到可信的结构肩部"
   ]
 }

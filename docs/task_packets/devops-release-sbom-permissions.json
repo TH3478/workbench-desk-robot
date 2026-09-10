@@ -1,7 +1,7 @@
 {
   "issue": 20,
   "human_owner": "Quchaosheng",
-  "objective": "Keep tag-triggered SBOM generation least-privileged while retaining the SPDX artifact and provenance input.",
+  "objective": "在保留 SPDX 产物与来源证明输入的同时，让标签触发的 SBOM 生成保持最小权限。",
   "allowed_paths": [
     ".github/workflows/release-image.yml",
     "tests/unit/test_release_workflow.py",
@@ -30,14 +30,14 @@
     "make check"
   ],
   "evidence": [
-    "Task Packet validation output",
-    "release workflow regression test output",
-    "full repository check output",
-    "GitHub Actions result from a human-owned tag or manual dispatch"
+    "任务包校验输出",
+    "发布工作流回归测试输出",
+    "全仓库检查输出",
+    "来自人工创建的标签或手动分发的 GitHub Actions 结果"
   ],
   "stop_conditions": [
-    "the fix requires contents write or release credentials",
-    "a new release or version tag is required",
-    "the SBOM cannot be generated without changing the runtime image"
+    "该修复需要 contents 写权限或发布凭据",
+    "需要新的发布或版本标签",
+    "不改动运行时镜像就无法生成 SBOM"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": "102",
   "human_owner": "Quchaosheng",
-  "objective": "Reject unregistered or schema-invalid messages before the kernel broker publication boundary.",
+  "objective": "在内核 broker 发布边界之前拒绝未注册或 schema 无效的消息。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/communication.py",
     "libs/kernel/workbench/kernel/schema_compiler.py",
@@ -18,11 +18,11 @@
     "interfaces/**"
   ],
   "acceptance": [
-    "message type and exact version must exist in the configured registry",
-    "payloads satisfy the registered schema before publication",
-    "invalid envelopes and payloads never enter message_log",
-    "registry reopen preserves broker validation behavior",
-    "repository lint and tests pass"
+    "消息类型与确切版本必须存在于已配置的登记表中",
+    "载荷在发布之前满足已注册的 schema",
+    "无效的信封与载荷绝不进入 message_log",
+    "登记表重新打开后仍保持 broker 校验行为",
+    "仓库 lint 与测试通过"
   ],
   "commands": [
     "python -m pytest tests/unit/test_kernel_communication_broker.py tests/unit/test_kernel_envelope_lifecycle.py -q",
@@ -30,14 +30,14 @@
     "python -m pytest tests/ -q"
   ],
   "evidence": [
-    "unknown type and version rejection assertions",
-    "schema boundary and no-partial-log assertions",
-    "registry reopen assertion",
-    "repository test output"
+    "未知类型与版本拒绝断言",
+    "schema 边界与无部分日志断言",
+    "登记表重新打开断言",
+    "仓库测试输出"
   ],
   "stop_conditions": [
-    "interface schema changes are required",
-    "implicit semantic-version compatibility is required",
-    "robot-control or firmware changes are required"
+    "需要修改接口 schema",
+    "需要隐式的语义版本兼容",
+    "需要修改机器人控制或固件"
   ]
 }

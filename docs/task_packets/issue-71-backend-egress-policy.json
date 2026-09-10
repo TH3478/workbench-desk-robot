@@ -1,7 +1,7 @@
 {
   "issue": 71,
   "human_owner": "kukuboring",
-  "objective": "Constrain the Backend remote Dashboard event-source HTTP client to loopback or an explicit IP/CIDR allow-list, pin validated DNS results to the actual connection, disable redirects, bound remote responses and timeouts, and make invalid configuration fail readiness closed without changing deployment wiring or public data contracts.",
+  "objective": "把 Backend 远程 Dashboard 事件源 HTTP 客户端限制为回环或显式的 IP/CIDR 允许列表，将经校验的 DNS 结果固定到实际连接，禁用重定向，为远程响应与超时设上限，并让无效配置导致就绪检查失败即拒绝，同时不改变部署接线或公开数据契约。",
   "allowed_paths": [
     "services/backend/workbench_backend/remote_http.py",
     "services/backend/workbench_backend/read_model.py",
@@ -52,21 +52,21 @@
     "docs/task_packets/example-001-world-reducer.json"
   ],
   "acceptance": [
-    "IPv4 loopback, IPv6 loopback, and localhost are accepted without an allow-list.",
-    "Every non-loopback resolved address must match an explicit comma-separated IP or CIDR allow-list supplied to the Backend application.",
-    "Missing or malformed allow-list configuration rejects every non-loopback target fail closed.",
-    "The Phase A allow-list is supplied only through create_server(..., event_source_allowlist=...) and the --event-source-allowlist CLI argument; this Packet does not add or read WORKBENCH_EVENT_SOURCE_ALLOWLIST and does not modify Compose.",
-    "Credentials, query strings, fragments, non-HTTP schemes, invalid ports, and non-root base paths are rejected.",
-    "Unspecified, link-local, multicast, and reserved addresses are rejected even when mistakenly included in the allow-list.",
-    "Every IPv4 and IPv6 DNS result is validated; mixed permitted and forbidden results fail closed.",
-    "IPv4-mapped IPv6 addresses are evaluated using their effective IPv4 address, and mixed permitted and forbidden effective addresses fail closed.",
-    "The HTTP connection uses the already validated resolved address and does not perform a second unvalidated DNS lookup.",
-    "HTTP redirects are never followed, and a local redirect target receives zero requests.",
-    "Remote responses require an application/json media type with optional charset parameters; a valid JSON response whose complete encoded body is 4194304 bytes is accepted and a 4194305-byte response is rejected, with or without Content-Length.",
-    "A timeout of 2 seconds is accepted; zero, negative, NaN, infinity, and values greater than 2 seconds are rejected before network access.",
-    "Network connection and read timeouts are converted to ReadModelError without retrying an unvalidated destination.",
-    "Invalid remote configuration keeps healthz live while readyz and remote data endpoints fail closed with HTTP 503.",
-    "Existing duplicate JSON key rejection, ordered event handling, read-only API behavior, WorldEvent shape, and OpenAPI v1 contract remain unchanged."
+    "IPv4 回环、IPv6 回环与 localhost 在无允许列表时即被接受。",
+    "每个非回环的已解析地址都必须匹配提供给 Backend 应用的显式逗号分隔 IP 或 CIDR 允许列表。",
+    "缺失或格式错误的允许列表配置以失败即拒绝的方式拒绝每个非回环目标。",
+    "Phase A 允许列表仅通过 create_server(..., event_source_allowlist=...) 与 --event-source-allowlist CLI 参数提供；本任务包不添加或读取 WORKBENCH_EVENT_SOURCE_ALLOWLIST，也不修改 Compose。",
+    "凭据、查询字符串、片段、非 HTTP scheme、无效端口与非根基础路径均被拒绝。",
+    "未指定地址、链路本地地址、组播地址与保留地址即使被误加入允许列表也会被拒绝。",
+    "每个 IPv4 与 IPv6 DNS 结果都会被校验；允许与禁止结果混合时失败即拒绝。",
+    "IPv4 映射的 IPv6 地址按其有效 IPv4 地址评估，允许与禁止的有效地址混合时失败即拒绝。",
+    "HTTP 连接使用已经过校验的已解析地址，且不再进行第二次未经校验的 DNS 查询。",
+    "绝不跟随 HTTP 重定向，本地重定向目标收到的请求数为零。",
+    "远程响应必须是 application/json 媒体类型，可带可选的 charset 参数；完整编码体为 4194304 字节的有效 JSON 响应被接受，4194305 字节的响应被拒绝，无论是否携带 Content-Length。",
+    "2 秒的超时被接受；零、负数、NaN、无穷大与大于 2 秒的值在网络访问之前即被拒绝。",
+    "网络连接与读取超时被转换为 ReadModelError，且不会重试未经校验的目标。",
+    "无效的远程配置保持 healthz 存活，而 readyz 与远程数据端点以 HTTP 503 失败即拒绝。",
+    "现有重复 JSON 键拒绝、有序事件处理、只读 API 行为、WorldEvent 形状与 OpenAPI v1 契约保持不变。"
   ],
   "commands": [
     "python -m pytest tests/unit/test_multi_host.py tests/unit/test_dashboard_backend.py -v",
@@ -80,34 +80,34 @@
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-71-backend-egress-policy.json --base main"
   ],
   "evidence": [
-    "Targeted pytest output names and passes every new URL, address, DNS, redirect, content-type, size, timeout, and readiness test.",
-    "Verbose targeted pytest output includes the exact 4194304-byte and 4194305-byte response boundary cases.",
-    "Verbose targeted pytest output includes the accepted 2-second timeout and rejected zero, negative, NaN, infinity, and greater-than-2-second cases.",
-    "Verbose targeted pytest output includes IPv4, IPv6, IPv4-mapped IPv6, and mixed permitted-and-forbidden DNS cases.",
-    "The local redirect test records zero requests at the redirect target.",
-    "The DNS pinning test proves the connected IP is the same IP that passed policy validation.",
-    "HTTP evidence shows healthz returns 200 while readyz and data endpoints return 503 for invalid remote configuration.",
-    "The existing remote duplicate-key and controller peer-down tests continue to pass through the new HTTP client.",
-    "make check completes successfully.",
-    "git diff --check produces no output.",
-    "Task Packet diff-boundary validation confirms every changed path is allowed."
+    "定向 pytest 输出列出并通过每个新增的 URL、地址、DNS、重定向、内容类型、大小、超时与就绪测试。",
+    "详细的定向 pytest 输出包含精确的 4194304 字节与 4194305 字节响应边界用例。",
+    "详细的定向 pytest 输出包含被接受的 2 秒超时与被拒绝的零、负数、NaN、无穷大及大于 2 秒的用例。",
+    "详细的定向 pytest 输出包含 IPv4、IPv6、IPv4 映射的 IPv6 与允许-禁止混合的 DNS 用例。",
+    "本地重定向测试在重定向目标处记录到零个请求。",
+    "DNS 固定测试证明实际连接的 IP 就是通过策略校验的那个 IP。",
+    "HTTP 证据显示在无效远程配置下 healthz 返回 200，而 readyz 与数据端点返回 503。",
+    "现有远程重复键与控制器对端宕机测试继续通过新的 HTTP 客户端。",
+    "`make check` 成功完成。",
+    "`git diff --check` 无输出。",
+    "任务包差异边界校验确认每个变更路径都在允许范围内。"
   ],
   "stop_conditions": [
-    "A change to deploy/multi-host/compose.controller.yaml, the deployment environment contract, or multi-host deployment documentation is required.",
-    "The Phase A implementation reads WORKBENCH_EVENT_SOURCE_ALLOWLIST instead of accepting the allow-list only through the Python and CLI parameters.",
-    "A change to interfaces, OpenAPI, Pydantic models, WorldEvent fields, or Dashboard fixtures is required.",
-    "A non-loopback target is reachable without an explicit matching allow-list entry.",
-    "The implementation validates one DNS result but connects through a second unvalidated resolution.",
-    "The redirect test cannot prove that the target received zero requests.",
-    "Testing requires public network access, real external DNS, or timing sleeps.",
-    "The work expands into Issue #66 inbound exposure controls or Issue #74 partition and recovery semantics.",
-    "The timeout bound, allow-list format, or prohibited address policy must change beyond the approved acceptance behavior.",
-    "Unrelated user changes overlap an allowed path.",
-    "The Task Packet has not received explicit approval for this bounded security behavior."
+    "需要修改 `deploy/multi-host/compose.controller.yaml`、部署环境契约或多主机部署文档。",
+    "Phase A 实现改为读取 WORKBENCH_EVENT_SOURCE_ALLOWLIST，而不是仅通过 Python 与 CLI 参数接受允许列表。",
+    "需要修改 interfaces、OpenAPI、Pydantic 模型、WorldEvent 字段或 Dashboard 固定装置。",
+    "非回环目标在没有显式匹配的允许列表条目时仍可访问。",
+    "实现校验了一个 DNS 结果，却通过第二次未经校验的解析进行连接。",
+    "重定向测试无法证明目标收到的请求数为零。",
+    "测试需要公网访问、真实外部 DNS 或定时休眠。",
+    "工作扩展到 Issue #66 的入站暴露控制或 Issue #74 的分区与恢复语义。",
+    "超时上限、允许列表格式或禁用地址策略必须超出已批准的验收行为进行变更。",
+    "无关的用户修改与某个允许路径重叠。",
+    "任务包尚未就这一受限安全行为获得明确批准。"
   ],
   "risks_and_fallbacks": [
-    "Fail closed if URL parsing, allow-list parsing, DNS resolution, address validation, content-type validation, redirect handling, or timeout enforcement is ambiguous.",
-    "Do not fall back from a rejected remote source to Dashboard fixture data.",
-    "Keep deployment wiring for a separate Task Packet under the same Issue."
+    "当 URL 解析、允许列表解析、DNS 解析、地址校验、内容类型校验、重定向处理或超时执行存在歧义时失败即拒绝。",
+    "不得从被拒绝的远程源回退到 Dashboard 固定装置数据。",
+    "部署接线留给同一 Issue 下的单独任务包处理。"
   ]
 }

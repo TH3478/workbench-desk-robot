@@ -1,7 +1,7 @@
 {
   "issue": 103,
   "human_owner": "Quchaosheng",
-  "objective": "Reject unsafe numeric, relational, and blank-string tool parameters from immutable ToolRegistry schemas and the A5 policy boundary.",
+  "objective": "在不可变的 ToolRegistry schema 与 A5 策略边界中拒绝不安全的数值、关系与空白字符串工具参数。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/tool_schemas.py",
     "services/agent_runtime/workbench_agent_runtime/tool_registry.py",
@@ -38,15 +38,15 @@
     "make context-check"
   ],
   "evidence": [
-    "tool registry and A5 policy constraint regression output",
-    "agent runtime regression output",
-    "full test output",
-    "contract scenario and context check output"
+    "工具登记表与 A5 策略约束回归输出",
+    "智能体运行时回归输出",
+    "完整测试输出",
+    "契约场景与上下文检查输出"
   ],
   "stop_conditions": [
-    "an interface or contract change is required",
-    "a planner producer or world-model change is required",
-    "a write outside allowed_paths is required",
-    "a new supported parameter type or unbounded constraint kind is required"
+    "需要修改接口或契约",
+    "需要修改规划器生产者或世界模型",
+    "需要在 allowed_paths 之外写入",
+    "需要新的受支持参数类型或无界约束种类"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": "LINUX9",
   "human_owner": "Quchaosheng",
-  "objective": "Make the wbcan driver test suite produce validated, machine-readable evidence that CI archives without treating skipped or partial execution as a pass.",
+  "objective": "让 wbcan 驱动测试套件产出经过校验、机器可读的证据，由 CI 归档，且不把跳过或部分执行当作通过。",
   "allowed_paths": [
     "kernel/wbcan/test_wbcan.sh",
     "kernel/wbcan/validate_test_report.py",
@@ -22,11 +22,11 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "every wbcan assertion is recorded with a unique test id, expected value and actual value",
-    "the report validator rejects missing, malformed, duplicate or failed rows and enforces a minimum check count",
-    "CI validates and uploads the report even when the privileged suite fails",
-    "CI cannot report a passing structured suite when the report is missing or incomplete",
-    "the report remains software-driver evidence and does not claim physical throughput, latency or jitter"
+    "每条 wbcan 断言都以唯一测试 id、期望值与实际值记录",
+    "报告验证器拒绝缺失、格式错误、重复或失败的行，并强制执行最小检查次数",
+    "即使特权套件失败，CI 仍校验并上传报告",
+    "当报告缺失或不完整时，CI 不得报告结构化套件通过",
+    "报告仍属软件驱动证据，不声称物理吞吐量、延迟或抖动"
   ],
   "commands": [
     "python -m pytest tests/unit/test_linux_driver_tests.py tests/unit/test_release_workflow.py -v",
@@ -36,14 +36,14 @@
     "git diff --check"
   ],
   "evidence": [
-    "unit test output for report validation and CI wiring",
-    "kernel module build and checkpatch output",
-    "privileged wbcan suite output",
-    "uploaded wbcan-driver-test-report artifact"
+    "报告校验与 CI 接线的单元测试输出",
+    "内核模块构建与 checkpatch 输出",
+    "特权 wbcan 套件输出",
+    "上传的 wbcan-driver-test-report 制品"
   ],
   "stop_conditions": [
-    "the hosted runner cannot execute privileged kernel-module tests",
-    "a physical CAN controller or hardware performance measurement is required",
-    "the change would require firmware, interface or robot-control writes"
+    "托管运行器无法执行特权内核模块测试",
+    "需要物理 CAN 控制器或硬件性能测量",
+    "该变更需要写入固件、接口或机器人控制"
   ]
 }

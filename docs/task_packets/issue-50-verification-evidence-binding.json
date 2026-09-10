@@ -1,8 +1,8 @@
 {
   "issue": 50,
   "human_owner": "kukuboring",
-  "objective": "Bind every VerificationResult evidence_refs list to the entity evidence that supports the actual verification outcome, fail closed when claimed-object evidence is missing, and deterministically deduplicate references without changing schemas or public verifier signatures.",
-  "decision_supported": "Whether a World Model verification outcome is supported by evidence bound to the entities participating in that outcome.",
+  "objective": "把每个 VerificationResult 的 evidence_refs 列表绑定到支撑实际验证结果的实体证据上，在声称对象证据缺失时失败即拒绝，并在不修改 schema 或公开验证器签名的情况下确定性地去重引用。",
+  "decision_supported": "World Model 的验证结果是否由绑定到参与该结果的实体的证据所支撑。",
   "allowed_paths": [
     "services/world_model/workbench_world_model/verifier.py",
     "tests/unit/test_world_model.py",
@@ -68,16 +68,16 @@
     "docs/task_packets/issue-50-verification-evidence-binding.json"
   ],
   "acceptance": [
-    "verify_object_in_tray returns confirmed only when the claimed object has non-empty entity-bound evidence.",
-    "An observed object relation without claimed-object evidence returns insufficient_evidence with reason_code evidence_missing and recovery_hint re_observe even when unrelated global or entity evidence is abundant.",
-    "Confirmed object verification returns only the claimed object's entity-bound evidence and excludes state-level and unrelated-entity evidence.",
-    "Kit, inspection, workspace-clearance, parcel-sorting, and parcel-policy verification results derive evidence_refs only from entities supporting the selected outcome.",
-    "Refuted results retain evidence bound to the entities that establish the refutation and exclude unrelated evidence.",
-    "When no supporting entity-bound reference exists, evidence_refs contains only system://world-state/no-evidence to preserve the non-empty VerificationResult contract.",
-    "Supporting entity IDs are traversed in lexicographic order, references retain their stored per-entity order, and duplicate references retain only their first deterministic occurrence.",
-    "Adversarial states with abundant evidence for wrong entities cannot confirm a claim or contaminate returned evidence_refs.",
-    "Existing verifier function signatures, claim formats, rule versions, status semantics, and reason-code precedence remain unchanged except for the specified fail-closed missing-object-evidence behavior.",
-    "No JSON Schema, Python contract model, reducer, event store, integration consumer, demo, backend, robot, firmware, simulation, or deployment file is modified."
+    "只有当声称对象具有非空的实体绑定证据时，verify_object_in_tray 才返回 confirmed。",
+    "没有声称对象证据的已观测对象关系返回 insufficient_evidence，reason_code 为 evidence_missing，recovery_hint 为 re_observe，即使无关的全局或实体证据非常充分。",
+    "confirmed 对象验证只返回声称对象的实体绑定证据，并排除状态级与无关实体的证据。",
+    "Kit、检查、工作区清空、包裹分拣与包裹策略的验证结果，只从支撑所选结果的实体中导出 evidence_refs。",
+    "refuted 结果保留绑定到确立该反驳的实体的证据，并排除无关证据。",
+    "当不存在支撑性的实体绑定引用时，evidence_refs 只包含 system://world-state/no-evidence，以维持非空 VerificationResult 契约。",
+    "支撑实体 ID 按字典序遍历，引用保留其逐实体的存储顺序，重复引用只保留第一次的确定性出现。",
+    "对错误实体拥有大量证据的对抗性状态，既不能确认声称，也不能污染返回的 evidence_refs。",
+    "既有验证器函数签名、声称格式、规则版本、状态语义与原因码优先级保持不变，仅允许指定的「缺失对象证据即失败即拒绝」行为。",
+    "不得修改任何 JSON Schema、Python 契约模型、化简器、事件库、集成消费者、演示、后端、机器人、固件、仿真或部署文件。"
   ],
   "commands": [
     "make task-check PACKET=docs/task_packets/issue-50-verification-evidence-binding.json",
@@ -97,34 +97,34 @@
     "git diff --check"
   ],
   "evidence": [
-    "Before implementation, each newly added Issue #50 test fails because unrelated evidence is accepted, unrelated evidence is returned, or duplicate support references are not scoped deterministically.",
-    "After implementation, the five named Issue #50 tests pass and directly execute every verifier evidence-selection path added or changed by this issue.",
-    "The complete tests/unit/test_world_model.py output passes and preserves existing verifier status, reason-code, validation, reducer, parcel-sorting, and parcel-policy behavior.",
-    "Assertions compare exact VerificationResult.status, reason_code, recovery_hint, and evidence_refs values for confirmed, refuted, and insufficient-evidence outcomes.",
-    "Adversarial test output proves global evidence and evidence bound only to wrong entities neither confirms the claim nor appears in returned evidence_refs.",
-    "Determinism assertions compare exact evidence_refs lists across repeated references and different entity-map insertion orders.",
-    "Task Packet validation with --base main proves every Git-visible changed path is inside one approved allowed_paths set.",
-    "git diff --check produces no output.",
-    "make check output proves lint, formatting, full tests, contract validation, scenario validation, golden-set validation, context validation, and scripted/offline demos pass."
+    "实现前，每个新增的 Issue #50 测试都因无关证据被接受、无关证据被返回、或重复支撑引用未被确定性地界定作用域而失败。",
+    "实现后，五个具名的 Issue #50 测试通过，并直接执行本 Issue 新增或修改的每条验证器证据选择路径。",
+    "完整的 tests/unit/test_world_model.py 输出通过，并保留既有的验证器状态、原因码、校验、化简器、包裹分拣与包裹策略行为。",
+    "断言比较 confirmed、refuted 与证据不足结果下 VerificationResult.status、reason_code、recovery_hint 与 evidence_refs 的精确值。",
+    "对抗性测试输出证明，全局证据与仅绑定到错误实体的证据既不确认声称，也不出现在返回的 evidence_refs 中。",
+    "确定性断言在重复引用与不同实体映射插入顺序之间比较精确的 evidence_refs 列表。",
+    "带 `--base main` 的任务包校验证明每个 Git 可见的变更路径都位于已批准的 allowed_paths 集合内。",
+    "`git diff --check` 无输出。",
+    "`make check` 输出证明 lint、格式化、完整测试、契约校验、场景校验、黄金集校验、上下文校验以及脚本化/离线演示全部通过。"
   ],
   "stop_conditions": [
-    "Any required implementation or test change falls outside the three allowed_paths.",
-    "Completing the issue requires changing interfaces, JSON Schema, libs/contracts, WorldState, reducer, event store, or public package exports.",
-    "Completing the issue requires changes in Backend, Agent Runtime, Perception, Motion, robot, firmware, simulation, deployment, demo, or integration-test code.",
-    "A relation-level evidence field or another public contract change is required to determine the supporting evidence set.",
-    "A complex refuted outcome cannot be mapped to supporting entity IDs from the existing WorldState representation without inventing new semantics.",
-    "A verifier public function signature, claim format, rule version, or unrelated status and reason-code precedence must change.",
-    "A newly added test fails before implementation for a reason other than the current global or unrelated evidence behavior.",
-    "An existing test or public gate fails for a reason unrelated to Issue #50.",
-    "Task Packet validation reports a path outside allowed_paths.",
-    "The change affects physical completion, safety policy, robot control, firmware, or another protected boundary."
+    "任何所需的实现或测试改动落在三个 allowed_paths 之外。",
+    "完成本 Issue 需要修改 interfaces、JSON Schema、libs/contracts、WorldState、化简器、事件库或公开包导出。",
+    "完成本 Issue 需要修改 Backend、Agent Runtime、Perception、Motion、机器人、固件、仿真、部署、演示或集成测试代码。",
+    "确定支撑证据集需要关系级证据字段或其他公开契约改动。",
+    "复杂 refuted 结果无法在现有 WorldState 表示中映射到支撑实体 ID，除非虚构新语义。",
+    "必须修改验证器的公开函数签名、声称格式、规则版本或无关的状态与原因码优先级。",
+    "新增测试在实现前因当前全局或无关证据行为之外的原因而失败。",
+    "既有测试或公开闸门因与 Issue #50 无关的原因而失败。",
+    "任务包校验报告某个路径位于 allowed_paths 之外。",
+    "该改动影响物理完成、安全策略、机器人控制、固件或其他受保护边界。"
   ],
-  "data_classification": "Repository-local synthetic World Model test data only.",
-  "model_policy": "Deterministic local Python logic only; no model inference or network access.",
+  "data_classification": "仅仓库本地合成的 World Model 测试数据。",
+  "model_policy": "仅确定性本地 Python 逻辑；不涉及模型推理或网络访问。",
   "risks_and_fallbacks": [
-    "VerificationResult evidence_refs will become narrower; callers that incorrectly relied on unrelated run-wide evidence must be treated as defective consumers rather than preserved.",
-    "The existing internal WorldState Python representation differs structurally from the public WorldState JSON Schema; this issue does not resolve that drift because entity_evidence_refs already supplies the required internal binding.",
-    "If exact refutation support cannot be represented with current entity_evidence_refs, stop and request a separate interface-scoped design instead of modifying schemas in Issue #50.",
-    "Rollback is a revert of the verifier and unit-test changes; do not retain a partial implementation that mixes scoped and global evidence selection."
+    "VerificationResult 的 evidence_refs 将变窄；错误依赖无关运行级证据的调用方必须被视为有缺陷的消费者，而不是被迁就。",
+    "既有内部 WorldState Python 表示在结构上不同于公开 WorldState JSON Schema；由于 entity_evidence_refs 已提供所需的内部绑定，本 Issue 不解决该漂移。",
+    "若精确的反驳支撑无法用当前的 entity_evidence_refs 表示，即应停止并请求单独的接口范围设计，而不是在 Issue #50 中修改 schema。",
+    "回滚即撤销验证器与单元测试改动；不得保留同时混用定界与全局证据选择的部分实现。"
   ]
 }

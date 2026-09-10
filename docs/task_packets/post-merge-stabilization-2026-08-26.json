@@ -2,7 +2,7 @@
   "issue": "post-merge-stabilization-2026-08-26",
   "issues": [40, 157, 161, 222, 242, 243],
   "human_owner": "Quchaosheng",
-  "objective": "Restore post-merge test integrity, Windows portability, wbcan statistics serialization, and truthful platform documentation after the August 26 merge batch.",
+  "objective": "在 8 月 26 日合并批次之后，恢复合并后的测试完整性、Windows 可移植性、wbcan 统计序列化以及如实描述的平台文档。",
   "allowed_paths": [
     "README.md",
     "README.zh-CN.md",
@@ -33,14 +33,14 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "runtime and development containers use one immutable Ubuntu digest without duplicating that digest in a test constant",
-    "native Windows tests do not require POSIX resource APIs or symbolic-link privileges",
-    "read-only HTTP write rejection drains bounded request bodies before responding",
-    "wbcan netdev counters use a race-safe snapshot boundary and never count rejected RX delivery as received",
-    "JSONL append reuses validated in-process state while detecting and reloading external file changes",
-    "the wbcan machine-readable report is created and every check append fails closed",
-    "English and Chinese READMEs distinguish portable Python validation from privileged Linux and physical evidence",
-    "English and Chinese READMEs state scene materialization, event replay, and scripted fixture determinism as three separate guarantees"
+    "运行时与开发容器使用同一个不可变 Ubuntu 摘要，且不在测试常量中重复该摘要",
+    "原生 Windows 测试不要求 POSIX 资源 API 或符号链接权限",
+    "只读 HTTP 的写入拒绝在响应之前排空受限的请求体",
+    "wbcan netdev 计数器使用竞态安全的快照边界，且绝不把被拒绝的 RX 投递计为已接收",
+    "JSONL 追加复用已验证的进程内状态，同时检测并重新加载外部文件变更",
+    "wbcan 机器可读报告被创建，且每次检查追加失败即拒绝",
+    "英文与中文 README 区分可移植的 Python 校验、特权 Linux 与物理证据",
+    "英文与中文 README 将场景实体化、事件回放与脚本化固定装置确定性表述为三项独立的保证"
   ],
   "commands": [
     "python tools/scripts/check_task_packet.py docs/task_packets/post-merge-stabilization-2026-08-26.json",
@@ -55,16 +55,16 @@
     "git diff --check"
   ],
   "evidence": [
-    "focused Windows-compatible Python test output",
-    "full Python test-suite output on the current host",
-    "wbcan report-contract unit-test output",
-    "kernel build and privileged fault-suite output when a supported Linux host is available",
-    "Task Packet validation and clean diff output"
+    "聚焦的 Windows 兼容 Python 测试输出",
+    "当前主机上的完整 Python 测试套件输出",
+    "wbcan 报告契约单元测试输出",
+    "在有受支持的 Linux 主机可用时的内核构建与特权故障套件输出",
+    "任务包校验与干净 diff 输出"
   ],
   "stop_conditions": [
-    "a public interface or firmware change is required",
-    "physical CAN or robot evidence would be inferred from software tests",
-    "the kernel fix requires a second controller state machine beside Linux CAN core",
-    "a write outside the approved paths is required"
+    "需要变更公共接口或固件",
+    "将从软件测试推断物理 CAN 或机器人证据",
+    "内核修复需要在 Linux CAN core 之外引入第二个控制器状态机",
+    "需要向已批准路径之外写入"
   ]
 }

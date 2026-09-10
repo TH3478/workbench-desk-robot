@@ -1,7 +1,7 @@
 {
   "issue": 60,
   "human_owner": "TH3478",
-  "objective": "Implement the platform-independent MCU heartbeat watchdog and bounded STOP acknowledgement timing path with deterministic fake-clock and QEMU timer-interrupt evidence.",
+  "objective": "实现平台无关的 MCU 心跳看门狗与受限的 STOP 确认时序路径，并提供确定性的假时钟与 QEMU 定时器中断证据。",
   "allowed_paths": [
     "firmware/mcu/core/watchdog.h",
     "firmware/mcu/core/watchdog.c",
@@ -41,16 +41,16 @@
     "firmware/virtual_mcu/**"
   ],
   "acceptance": [
-    "Heartbeat period, software link timeout, STOP acknowledgement deadline and hardware watchdog timeout are named controlled constants.",
-    "Only explicitly accepted new protocol activity refreshes the software link watchdog; malformed, duplicate, retry and stale traffic cannot feed it.",
-    "A link timeout observed while executing dispatches WATCHDOG_EXPIRED, forces safe outputs, latches the fault and emits exactly one correlated fault/telemetry record.",
-    "A valid STOP enters the safe state and retains its command correlation until a bounded STOP acknowledgement is handed to transport; a missed deadline emits a distinct stop-timeout outcome and never reports stopped confirmation.",
-    "A pending STOP accepts an equal retry_count as a link replay and only a strictly greater retry_count as a protocol retry; decreasing or wrapped retry counts are rejected without changing ACK correlation or deadline.",
-    "Reset cannot clear an active watchdog or STOP-timeout cause without the existing trusted state-machine transition.",
-    "Deadline comparisons and deadline arithmetic remain deterministic across uint64_t wraparound.",
-    "Host tests use an injected fake clock with no sleep or wall-clock flakiness and cover feed eligibility, link timeout, STOP acknowledgement bound, timeout fault and single-emission behavior.",
-    "QEMU runs the shared timing tests and exercises a real machine-timer interrupt plus the modeled hardware-watchdog start/feed path.",
-    "The core remains freestanding-compatible with no vendor headers, dynamic allocation, floating point or hardware register access."
+    "心跳周期、软件链路超时、STOP 确认截止时间与硬件看门狗超时均为具名的受控常量。",
+    "只有被明确接受的新协议活动才能刷新软件链路看门狗；格式错误、重复、重试与过期的流量都不能喂给它。",
+    "执行期间观察到链路超时，将派发 WATCHDOG_EXPIRED、强制安全输出、锁存故障，并恰好发出一份相关联的故障/遥测记录。",
+    "有效的 STOP 进入安全状态并保持其命令关联，直到受限的 STOP 确认交给传输层；错过截止时间则发出独立的停止超时结果，且绝不报告已停止确认。",
+    "挂起的 STOP 把相等的 retry_count 接受为链路回放，只有严格更大的 retry_count 才作为协议重试；递减或回绕的 retry_count 被拒绝，且不改变 ACK 关联或截止时间。",
+    "没有现有的受信状态机转换，Reset 不能清除活动的看门狗或 STOP 超时原因。",
+    "截止时间比较与截止时间运算在 uint64_t 回绕情况下保持确定性。",
+    "Host 测试使用注入的假时钟，无 sleep 或墙上时钟抖动，覆盖喂狗资格、链路超时、STOP 确认上限、超时故障与单次发出行为。",
+    "QEMU 运行共享的时序测试，并演练真实机器定时器中断以及建模的硬件看门狗启动/喂狗路径。",
+    "核心保持独立环境兼容，不使用厂商头文件、动态分配、浮点运算或硬件寄存器访问。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-60-mcu-watchdog-stop-timing.json",
@@ -65,20 +65,20 @@
     "make context-check"
   ],
   "evidence": [
-    "Issue #60 Task Packet validation output.",
-    "Host fake-clock watchdog test output with assertion and failure counts.",
-    "ASan/UBSan output for the shared timing corpus.",
-    "QEMU output proving timer-interrupt dispatch and watchdog feed evidence.",
-    "verify-no-fp and size-check output for the QEMU firmware image.",
-    "Repository test, contract, scenario and context-check output.",
-    "Final changed-path review and git diff --check proving the Task Packet boundary."
+    "Issue #60 任务包校验输出。",
+    "Host 假时钟看门狗测试输出，含断言数与失败数。",
+    "共享时序语料的 ASan/UBSan 输出。",
+    "QEMU 输出，证明定时器中断派发与看门狗喂狗证据。",
+    "QEMU 固件镜像的 verify-no-fp 与 size-check 输出。",
+    "仓库 test、contract、scenario 与 context-check 输出。",
+    "最终的变更路径复核与 git diff --check，证明任务包边界。"
   ],
   "stop_conditions": [
-    "The implementation requires changing the frozen JSON Schema, Pydantic models or logical protocol semantics.",
-    "The implementation requires retry deduplication, host transport dispatch, vendor registers, motor control or physical CAN claims.",
-    "A new reset frame or reset opcode would be added to protocol v1.0.",
-    "The core cannot compile unchanged for Host and QEMU.",
-    "QEMU-only behavior would be presented as CH32V307 interrupt latency or physical E-stop evidence.",
-    "The implementation requires modifying .gitignore or unrelated local changes."
+    "实现需要修改冻结的 JSON Schema、Pydantic 模型或逻辑协议语义。",
+    "实现需要重试去重、宿主传输派发、厂商寄存器、电机控制或物理 CAN 声明。",
+    "需要向协议 v1.0 添加新的 reset 帧或 reset 操作码。",
+    "核心无法在 Host 与 QEMU 上原样编译。",
+    "仅 QEMU 下的行为会被当作 CH32V307 中断延迟或物理急停证据。",
+    "实现需要修改 .gitignore 或进行无关的本地改动。"
   ]
 }

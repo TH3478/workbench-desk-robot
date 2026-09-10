@@ -1,7 +1,7 @@
 {
   "issue": 71,
   "human_owner": "kukuboring",
-  "objective": "Wire the approved Backend remote event-source allow-list through WORKBENCH_EVENT_SOURCE_ALLOWLIST and the controller Compose deployment, document the operator contract, and preserve the Phase A fail-closed egress policy without changing public interfaces or implementing Issue #74 recovery behavior.",
+  "objective": "通过 WORKBENCH_EVENT_SOURCE_ALLOWLIST 与控制器 Compose 部署接通已获批的 Backend 远程事件源允许列表，记录运维契约，并保留 Phase A 失败即拒绝的出口策略，同时不修改公开接口，也不实现 Issue #74 的恢复行为。",
   "allowed_paths": [
     "services/backend/workbench_backend/server.py",
     "deploy/multi-host/compose.controller.yaml",
@@ -60,17 +60,17 @@
     "docs/task_packets/example-001-world-reducer.json"
   ],
   "acceptance": [
-    "When --event-source-allowlist is absent, the Backend CLI reads WORKBENCH_EVENT_SOURCE_ALLOWLIST as its default and passes the exact value to create_server.",
-    "An explicit --event-source-allowlist CLI value overrides WORKBENCH_EVENT_SOURCE_ALLOWLIST.",
-    "The controller Compose configuration requires non-empty WORKBENCH_EVENT_SOURCE_URL and WORKBENCH_EVENT_SOURCE_ALLOWLIST values and passes both values explicitly to the Backend command.",
-    "The controller Compose configuration contains no permissive allow-list default such as 0.0.0.0/0 or ::/0.",
-    "Missing, blank, or malformed allow-list configuration cannot make a non-loopback event source ready; existing Phase A fail-closed readiness behavior remains in force.",
-    "The deployment documentation defines WORKBENCH_EVENT_SOURCE_ALLOWLIST as a comma-separated list of literal IP addresses or CIDR ranges, shows controller and same-host examples, and does not describe hostnames as allow-list entries.",
-    "The rendered controller Compose configuration contains the expected event-source URL and allow-list arguments without granting write, robot-control, or additional filesystem capabilities.",
-    "A real runtime smoke starts separate simulation and controller Compose projects, dynamically discovers the controller bridge gateway, and proves an explicitly allow-listed non-loopback event source makes the controller ready and exposes remote runs.",
-    "The same runtime smoke replaces the allow-list with a non-matching CIDR and proves the controller fails closed with HTTP 503 while the simulation peer remains ready.",
-    "Existing URL validation, prohibited-address checks, all-DNS-result validation, DNS pinning, redirect rejection, response limits, timeout limits, read-only API behavior, WorldEvent shape, and OpenAPI behavior remain unchanged.",
-    "This Packet does not implement total DNS timeout, multiple safe-IP failover, retries, or partition recovery behavior assigned to Issue #74."
+    "当 --event-source-allowlist 缺省时，Backend CLI 读取 WORKBENCH_EVENT_SOURCE_ALLOWLIST 作为默认值，并把该确切值传给 create_server。",
+    "显式的 --event-source-allowlist CLI 值会覆盖 WORKBENCH_EVENT_SOURCE_ALLOWLIST。",
+    "控制器 Compose 配置要求 WORKBENCH_EVENT_SOURCE_URL 与 WORKBENCH_EVENT_SOURCE_ALLOWLIST 非空，并把两个值都显式传给 Backend 命令。",
+    "控制器 Compose 配置不含 0.0.0.0/0 或 ::/0 之类的宽松允许列表默认值。",
+    "缺失、空白或格式错误的允许列表配置不能让非回环事件源就绪；现有 Phase A 失败即拒绝的就绪行为仍然有效。",
+    "部署文档将 WORKBENCH_EVENT_SOURCE_ALLOWLIST 定义为字面 IP 地址或 CIDR 范围的逗号分隔列表，展示控制器与同主机示例，且不把主机名描述为允许列表条目。",
+    "渲染后的控制器 Compose 配置包含预期的事件源 URL 与允许列表参数，且不授予写、机器人控制或额外的文件系统能力。",
+    "一次真实运行时冒烟测试启动独立的仿真与控制器 Compose 项目，动态发现控制器桥接网关，并证明显式列入允许列表的非回环事件源能使控制器就绪并暴露远程运行。",
+    "同一次运行时冒烟测试把允许列表替换为不匹配的 CIDR，并证明控制器以 HTTP 503 失败即拒绝，而仿真对端保持就绪。",
+    "现有 URL 校验、禁用地址检查、全量 DNS 结果校验、DNS 固定、重定向拒绝、响应上限、超时上限、只读 API 行为、WorldEvent 形状与 OpenAPI 行为保持不变。",
+    "本任务包不实现分配给 Issue #74 的总 DNS 超时、多安全 IP 故障转移、重试或分区恢复行为。"
   ],
   "commands": [
     "python -m pytest tests/unit/test_multi_host.py tests/unit/test_multi_host_deployment.py tests/unit/test_dashboard_backend.py -v",
@@ -87,33 +87,33 @@
     "python tools/scripts/check_task_packet.py docs/task_packets/issue-71-backend-egress-policy-phase-b.json --base f821f417b1e202f310d5bf208a5136fa408fd789"
   ],
   "evidence": [
-    "Verbose CLI tests prove environment fallback and explicit CLI override while executing services/backend/workbench_backend/server.py.",
-    "Deployment tests prove both Compose variables are required, both CLI arguments are present, and no permissive allow-list default exists.",
-    "Deployment documentation tests prove the IP/CIDR-only operator contract and both deployment examples are present.",
-    "docker compose config renders the controller service successfully from the checked-in non-secret test environment fixture and shows the expected URL and allow-list arguments.",
-    "The dedicated Docker runtime smoke prints the dynamically discovered non-loopback gateway and proves allowed_status=200, denied_status=503, and sim_status_after_denial=200 across separate Compose projects.",
-    "Existing Phase A security and Dashboard regression tests continue to pass.",
-    "make check completes successfully.",
-    "git diff --check produces no output.",
-    "Task Packet diff-boundary validation against fixed follow-up base f821f417b1e202f310d5bf208a5136fa408fd789 confirms every changed path is allowed."
+    "详细的 CLI 测试在真实执行 `services/backend/workbench_backend/server.py` 时证明环境回退与显式 CLI 覆盖。",
+    "部署测试证明两个 Compose 变量均为必需、两个 CLI 参数均存在，且不存在宽松的允许列表默认值。",
+    "部署文档测试证明仅含 IP/CIDR 的运维契约与两个部署示例均存在。",
+    "`docker compose config` 从入库的非涉密测试环境固定装置成功渲染控制器服务，并显示预期的 URL 与允许列表参数。",
+    "专用 Docker 运行时冒烟测试打印动态发现的非回环网关，并在独立的 Compose 项目间证明 allowed_status=200、denied_status=503 与 sim_status_after_denial=200。",
+    "现有 Phase A 安全与 Dashboard 回归测试继续通过。",
+    "`make check` 成功完成。",
+    "`git diff --check` 无输出。",
+    "以固定后续基线 f821f417b1e202f310d5bf208a5136fa408fd789 为参照的任务包差异边界校验确认每个变更路径都在允许范围内。"
   ],
   "stop_conditions": [
-    "A change to services/backend/workbench_backend/remote_http.py or services/backend/workbench_backend/read_model.py is required.",
-    "A change to interfaces, OpenAPI, Pydantic models, WorldEvent fields, Dashboard fixtures, or public response shapes is required.",
-    "The deployment requires credentials, tokens, or secrets in the event-source URL or allow-list.",
-    "The allow-list must accept hostnames instead of literal IP addresses or CIDR ranges.",
-    "The work requires total DNS timeout, multiple safe-IP failover, retries, or recovery behavior belonging to Issue #74.",
-    "The work expands into Issue #66 inbound exposure controls or changes robot, Motion, MCU, firmware, Simulation, or Agent Runtime behavior.",
-    "The Phase A branch changes so that its approved egress-policy assumptions no longer match this Packet.",
-    "The Compose configuration cannot be rendered and validated with deterministic local values.",
-    "Unrelated user changes overlap an allowed path.",
-    "The Task Packet has not received explicit approval for the Backend and deployment configuration scope."
+    "需要修改 `services/backend/workbench_backend/remote_http.py` 或 `services/backend/workbench_backend/read_model.py`。",
+    "需要修改 interfaces、OpenAPI、Pydantic 模型、WorldEvent 字段、Dashboard 固定装置或公开响应形状。",
+    "部署需要在事件源 URL 或允许列表中放置凭据、令牌或机密。",
+    "允许列表必须接受主机名，而不是字面 IP 地址或 CIDR 范围。",
+    "工作需要属于 Issue #74 的总 DNS 超时、多安全 IP 故障转移、重试或恢复行为。",
+    "工作扩展到 Issue #66 的入站暴露控制，或改变 robot、运动、MCU、固件、仿真或智能体运行时行为。",
+    "Phase A 分支发生变化，使其已获批的出口策略假设不再与本任务包匹配。",
+    "Compose 配置无法用确定性的本地值渲染并校验。",
+    "无关的用户修改与某个允许路径重叠。",
+    "任务包尚未就 Backend 与部署配置范围获得明确批准。"
   ],
   "risks_and_fallbacks": [
-    "Phase B is stacked on Phase A and must not be merged independently before the Phase A policy is present.",
-    "Fail closed when a non-loopback deployment omits or supplies an invalid allow-list; do not add a permissive default.",
-    "Keep IP/CIDR values non-secret and do not put credentials into Compose arguments or documentation examples.",
-    "The runtime smoke discovers its bridge gateway and host ports dynamically; if the local Docker engine cannot publish ports between separate Compose projects, report the environment limitation instead of weakening the allow-list.",
-    "If deployment wiring must be rolled back, disable the non-loopback remote event source rather than restoring unrestricted outbound access."
+    "Phase B 叠加在 Phase A 之上，在 Phase A 策略就位之前不得独立合并。",
+    "当非回环部署缺失或提供无效的允许列表时失败即拒绝；不要添加宽松的默认值。",
+    "保持 IP/CIDR 值非涉密，不要把凭据放入 Compose 参数或文档示例。",
+    "运行时冒烟测试动态发现其桥接网关与主机端口；若本地 Docker 引擎无法在独立的 Compose 项目之间发布端口，应报告环境限制，而不是放宽允许列表。",
+    "若必须回滚部署接线，应禁用非回环远程事件源，而不是恢复不受限制的出站访问。"
   ]
 }

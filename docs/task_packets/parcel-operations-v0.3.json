@@ -1,7 +1,7 @@
 {
   "issue": "PARCEL-OPERATIONS-v0.3",
   "human_owner": "Quchaosheng",
-  "objective": "Make parcel batching capacity-aware, collision-safe, risk-prioritized, and exercised by the scripted evaluation path.",
+  "objective": "使包裹分批具备容量感知、碰撞安全与风险优先级，并由脚本化评估路径执行演练。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "tasks/parcels/**",
@@ -15,12 +15,12 @@
   "read_only_paths": ["interfaces/**", "libs/contracts/**", "services/world_model/**"],
   "forbidden": ["robot/control/**", "firmware/**", "hardware/safety/**"],
   "acceptance": [
-    "distinct parcel IDs always produce distinct task step IDs",
-    "condition exceptions route before label-only exceptions and verified intact parcels",
-    "capacity and occupancy snapshots reject infeasible batches before a task graph is returned",
-    "capacity projections, priority, policy version, and route reason remain auditable on place actions",
-    "scripted parcel evaluation obtains its operation order from the production policy planner",
-    "dashboard shows route priority and current configured capacity usage"
+    "不同的包裹 ID 总是产生不同的任务步骤 ID",
+    "状况异常优先于仅标签异常与已验证完好包裹进行路由",
+    "容量与占用快照在返回任务图之前拒绝不可行的批次",
+    "容量投影、优先级、策略版本与路由原因在放置动作上保持可审计",
+    "脚本化包裹评估从生产策略规划器获取其操作顺序",
+    "看板显示路由优先级与当前配置的容量使用情况"
   ],
   "commands": [
     "python -m ruff check .",
@@ -31,15 +31,15 @@
     "docker compose up -d --build"
   ],
   "evidence": [
-    "planner capacity, priority, and identifier-collision unit tests",
-    "evaluation test proving parcel task graph planner v2 and risk order",
-    "desktop and mobile parcel dashboard screenshots",
-    "scripted evaluation logs marked release_eligible false"
+    "规划器容量、优先级与标识符冲突单元测试",
+    "证明包裹任务图规划器 v2 与风险顺序的评估测试",
+    "桌面与移动包裹看板截图",
+    "标记为 release_eligible false 的脚本化评估日志"
   ],
   "stop_conditions": [
-    "capacity cannot be known before planning",
-    "conditional execution would require a new contract",
-    "mobile navigation or parcel-locker access is requested",
-    "scripted observations would be presented as physical sensor evidence"
+    "规划前无法获知容量",
+    "条件执行将需要新契约",
+    "要求移动导航或包裹柜访问",
+    "脚本化观测将被当作物理传感器证据呈现"
   ]
 }

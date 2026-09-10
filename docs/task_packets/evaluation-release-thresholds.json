@@ -1,7 +1,7 @@
 {
   "issue": 192,
   "human_owner": "Quchaosheng",
-  "objective": "Make every published evaluation threshold participate in the Go/No-Go release decision.",
+  "objective": "让每一个已发布的评估阈值都参与 Go/No-Go 发布决策。",
   "allowed_paths": [
     "tools/scripts/generate_report.py",
     "tests/unit/test_evaluation_tools.py",
@@ -34,14 +34,14 @@
     "make context-check"
   ],
   "evidence": [
-    "focused release-threshold regression output",
-    "evaluation unit-test output",
-    "Task Packet boundary validation",
-    "context validation output"
+    "聚焦的发布阈值回归输出",
+    "评估单元测试输出",
+    "任务包边界校验",
+    "上下文校验输出"
   ],
   "stop_conditions": [
-    "metric collection semantics must change",
-    "an interface or canonical contract change is required",
-    "a write outside allowed_paths is required"
+    "必须修改指标采集语义",
+    "需要修改接口或规范契约",
+    "需要在 allowed_paths 之外写入"
   ]
 }

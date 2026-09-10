@@ -1,7 +1,7 @@
 {
   "issue": "204",
   "human_owner": "Quchaosheng",
-  "objective": "Make the generated MCU Pydantic model enforce the current protocol branch semantics without changing the canonical interface.",
+  "objective": "让生成的 MCU Pydantic 模型强制执行当前协议分支语义，且不修改规范接口。",
   "allowed_paths": [
     "libs/kernel/workbench/kernel/schema_compiler.py",
     "tests/unit/test_kernel_schema_compiler.py",
@@ -20,12 +20,12 @@
     "robot/control/**"
   ],
   "acceptance": [
-    "generated MCU frames enforce branch-required fields",
-    "generated MCU frames reject branch-forbidden fields including legacy sent_at",
-    "generated MCU frames enforce current branch const and enum relationships",
-    "generated MCU frames serialize without absent branch fields and round-trip through their own validator",
-    "valid repository MCU frame vectors remain accepted",
-    "general schema compiler behavior remains bounded"
+    "生成的 MCU 帧强制执行分支必需字段",
+    "生成的 MCU 帧拒绝分支禁用字段，包括遗留的 sent_at",
+    "生成的 MCU 帧强制执行当前分支的 const 与 enum 关系",
+    "生成的 MCU 帧序列化时不带缺失的分支字段，并能经自身验证器往返",
+    "仓库中有效的 MCU 帧向量仍被接受",
+    "通用 schema 编译器行为保持受限"
   ],
   "commands": [
     "python -m pytest tests/unit/test_kernel_schema_compiler.py tests/unit/test_mcu_protocol_contract.py -q",
@@ -35,14 +35,14 @@
     "make context-check"
   ],
   "evidence": [
-    "generated-model acceptance and serialization round trips match the canonical MCU schema corpus",
-    "focused unit and contract checks",
-    "Task Packet boundary validation"
+    "生成模型的验收与序列化往返结果与规范 MCU schema 语料一致",
+    "聚焦的单元测试与契约检查",
+    "任务包边界校验"
   ],
   "stop_conditions": [
-    "an interfaces schema change is required",
-    "the canonical contracts package must change",
-    "firmware or robot-control changes are required",
-    "a general JSON Schema compiler rewrite is required"
+    "需要修改 interfaces schema",
+    "必须修改规范契约包",
+    "需要修改固件或机器人控制",
+    "需要重写通用 JSON Schema 编译器"
   ]
 }

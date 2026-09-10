@@ -1,8 +1,8 @@
 {
   "issue": 162,
   "human_owner": "TH3478",
-  "objective": "Add a bounded version-compatible NAVIGATE semantic action addressed only by a configured waypoint identifier, while preserving the independent STOP, execution, observation, and verification boundaries.",
-  "decision_supported": "Can Agent Runtime expose fixed-map waypoint navigation through the reviewed public semantic contract without accepting coordinates, raw motion controls, or unverified location claims?",
+  "objective": "新增一个有界的、版本兼容的 NAVIGATE 语义动作，它只能通过已配置的航点标识符寻址，同时保持 STOP、执行、观测与验证边界的相互独立。",
+  "decision_supported": "Agent Runtime 能否通过已评审的公开语义契约暴露固定地图航点导航，而不接受坐标、原始运动控制或未经验证的位置声称？",
   "allowed_paths": [
     "docs/task_packets/issue-162-navigate-contract.json",
     "interfaces/json_schema/semantic_action.schema.json",
@@ -73,15 +73,15 @@
     "docs/task_packets/issue-162-navigate-contract.json"
   ],
   "acceptance": [
-    "ActionType and the public SemanticAction JSON Schema both register navigate while the existing six action values and examples remain valid.",
-    "A navigate action requires a non-empty target_id that is treated as an opaque configured waypoint identifier; no coordinate, pose, TF, wheel, velocity, acceleration, joint, or free-form planner field is accepted.",
-    "The navigate parameter object is closed and currently empty, so no caller-supplied selector can loosen deployment safety limits; unknown waypoint resolution remains the injected executor adapter's explicit failure.",
-    "Pydantic construction and JSON ingress enforce the navigate-specific target and parameter boundary, and schema validation enforces the same conditional shape and rejects extra fields.",
-    "The repository Schema Compiler accepts the structural navigate conditional and generated models enforce its required target and closed parameter shape.",
-    "ToolRegistry and PolicyValidator accept a valid navigate action through the existing single allow-list, reject missing or blank targets and forbidden parameters, and allow STOP to remain independently registered.",
-    "Execution-controller regression evidence shows a valid navigate action is forwarded without inventing coordinates, an adapter-reported unknown waypoint fails explicitly, and a queued STOP is still dispatched at the next boundary.",
-    "A completed navigation ActionResult remains adapter evidence only and does not assert an observed or verified World Model location.",
-    "The Task Packet boundary, focused tests, contract, scenario, context, full test, lint, and whitespace checks pass; interface changes remain subject to Runtime, World Model, and Integration owner approval before merge."
+    "ActionType 与公开的 SemanticAction JSON Schema 都注册 navigate，同时既有的六个动作值与示例保持有效。",
+    "navigate 动作要求非空 target_id，并将其视为不透明的已配置航点标识符；不接受任何坐标、位姿、TF、车轮、速度、加速度、关节或自由形式规划器字段。",
+    "navigate 参数对象是封闭的且当前为空，因此任何调用方提供的选择器都无法放宽部署安全限制；未知航点的解析仍是注入的执行器适配器的显式失败。",
+    "Pydantic 构造与 JSON 入口强制实施 navigate 特定的目标与参数边界，schema 校验实施相同的条件形状并拒绝多余字段。",
+    "仓库 Schema Compiler 接受结构化的 navigate 条件分支，生成的模型强制实施其必填目标与封闭参数形状。",
+    "ToolRegistry 与 PolicyValidator 通过既有的单一允许清单接受有效的 navigate 动作，拒绝缺失或空白的目标与禁用参数，并允许 STOP 保持独立注册。",
+    "执行控制器回归证据显示：有效的 navigate 动作被转发且不虚构坐标；适配器报告的未知航点显式失败；排队中的 STOP 仍会在下一个边界派发。",
+    "已完成的导航 ActionResult 仍只是适配器证据，且不得断言任何被观测或已验证的 World Model 位置。",
+    "任务包边界、聚焦测试、契约、场景、上下文、完整测试、lint 与空白检查全部通过；接口改动在合并前仍需 Runtime、World Model 与 Integration Owner 批准。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-162-navigate-contract.json --base origin/main",
@@ -96,26 +96,26 @@
     "git diff --check"
   ],
   "evidence": [
-    "Task Packet boundary output against the fixed branch base.",
-    "Focused contract, registry, policy, and execution-controller tests for valid navigation, closed parameters, unknown waypoint failure, STOP independence, and legacy action compatibility.",
-    "Schema/example and Pydantic round-trip output from make contract.",
-    "Full test, Ruff, scenario, context, and whitespace-check output.",
-    "Three-way Runtime, World Model, and Integration approval references on the eventual pull request."
+    "针对固定分支基的任务包边界输出。",
+    "针对有效导航、封闭参数、未知航点失败、STOP 独立性以及既有动作兼容性的聚焦契约、注册表、策略与执行控制器测试。",
+    "来自 `make contract` 的 Schema/示例与 Pydantic 往返输出。",
+    "完整测试、Ruff、场景、上下文与空白检查输出。",
+    "最终 pull request 上的 Runtime、World Model 与 Integration 三方批准引用。"
   ],
   "stop_conditions": [
-    "Implementation requires Nav2, mapping, planners, appliance skills, firmware, robot/control, or physical navigation changes.",
-    "A public parameter cannot be kept closed and typed without adding a raw motion or arbitrary pose side channel.",
-    "Unknown waypoint handling would require guessing coordinates or claiming observed/verified location from ActionResult alone.",
-    "A required change falls outside allowed_paths or conflicts with the pre-existing .gitignore edit.",
-    "The interface change lacks Runtime, World Model, or Integration owner approval for merge.",
-    "A required validation command fails for a reason that cannot be fixed within this bounded contract and consumer scope."
+    "实现需要 Nav2、建图、规划器、家电技能、固件、robot/control 或物理导航改动。",
+    "公开参数无法在保持封闭且有类型的同时不引入原始运动或任意位姿侧信道。",
+    "处理未知航点将需要猜测坐标，或仅凭 ActionResult 声称已观测/已验证的位置。",
+    "所需改动落在 allowed_paths 之外，或与既有的 `.gitignore` 修改冲突。",
+    "接口改动缺少 Runtime、World Model 或 Integration Owner 的合并批准。",
+    "某个必需的校验命令因无法在本有界契约与消费者范围内修复的原因而失败。"
   ],
   "max_iterations": 3,
   "data_classification": "repository-contract",
   "model_policy": "external_allowed",
   "risks_and_fallbacks": [
-    "No waypoint catalog exists in this bounded contract change; the executor adapter owns deployment configuration and must return an explicit failure for an unknown identifier.",
-    "The zero-parameter NAVIGATE shape leaves future policy selectors for a separately reviewed contract change rather than accepting open-ended options.",
-    "Existing tabletop planners remain unchanged and continue emitting only their previously supported actions; navigation planning belongs to later issues."
+    "本有界契约改动中不存在航点目录；执行器适配器拥有部署配置，且必须对未知标识符返回显式失败。",
+    "零参数 NAVIGATE 形状把未来的策略选择器留给单独评审的契约改动，而不是接受开放式选项。",
+    "既有的桌面规划器保持不变，继续只产出其此前支持的动作；导航规划归属后续 Issue。"
   ]
 }

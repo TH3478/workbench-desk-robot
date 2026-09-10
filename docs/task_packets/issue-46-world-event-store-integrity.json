@@ -1,7 +1,7 @@
 {
   "issue": 46,
   "human_owner": "kukuboring",
-  "objective": "Make SQLiteEventStore reject conflicting event identities and sequence numbers while preserving exact duplicate idempotency and deterministic replay.",
+  "objective": "让 SQLiteEventStore 拒绝冲突的事件身份与序列号，同时保留完全重复的幂等性与确定性回放。",
   "allowed_paths": [
     "services/world_model/workbench_world_model/event_store.py",
     "tests/unit/test_world_event_store.py",
@@ -27,14 +27,14 @@
     "firmware/**"
   ],
   "acceptance": [
-    "Exact re-append of the same WorldEvent is idempotent and leaves exactly one stored row.",
-    "Reusing an event_id with different canonical event content raises a typed integrity error and preserves the original event.",
-    "Two different events cannot use the same run_id and sequence_no; the conflicting append raises a typed integrity error.",
-    "Every append is transactional and a failed append leaves no partial or additional row.",
-    "list_run returns events in deterministic sequence_no order.",
-    "Closing and reopening the database preserves stored events and all identity and sequence invariants.",
-    "Opening a legacy world_events table without the required sequence uniqueness constraint fails closed with an actionable backup-and-rebuild recovery instruction; automatic migration is not implemented.",
-    "Concurrent conflicting appends through separate SQLite connections result in exactly one stored event and an explicit failure for the conflicting writer."
+    "对同一 WorldEvent 的完全重复追加是幂等的，且恰好留下一行存储记录。",
+    "以不同的规范事件内容复用 event_id 会抛出类型化完整性错误，并保留原始事件。",
+    "两个不同事件不得使用相同的 run_id 与 sequence_no；冲突追加抛出类型化完整性错误。",
+    "每次追加都是事务性的，失败的追加不留下部分或额外行。",
+    "list_run 按确定性的 sequence_no 顺序返回事件。",
+    "关闭并重新打开数据库保留已存储事件以及全部身份与序列不变量。",
+    "打开缺少必需序列唯一性约束的遗留 world_events 表失败即拒绝，并给出可执行的「备份并重建」恢复指引；不实现自动迁移。",
+    "通过不同 SQLite 连接的并发冲突追加，恰好产生一条已存储事件，并对冲突写入者产生显式失败。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_world_event_store.py -v",
@@ -46,22 +46,22 @@
     "make check"
   ],
   "evidence": [
-    "Targeted unit test output covering normal, boundary, conflict, reopen, legacy database and concurrent behavior.",
-    "Stored row count and original event content after duplicate and conflicting append attempts.",
-    "Deterministic sequence_no ordering from list_run.",
-    "Database reopen test output proving constraints remain active.",
-    "Legacy database failure message containing backup-and-rebuild recovery instructions.",
-    "Concurrent conflict test proving only one event is stored.",
-    "Required repository check outputs."
+    "针对性单元测试输出，覆盖正常、边界、冲突、重开、遗留数据库与并发行为。",
+    "重复与冲突追加尝试后的已存储行数与原始事件内容。",
+    "来自 list_run 的确定性 sequence_no 排序。",
+    "数据库重开测试输出，证明约束保持有效。",
+    "包含「备份并重建」恢复指引的遗留数据库失败消息。",
+    "并发冲突测试，证明只存储一条事件。",
+    "必需的仓库检查输出。"
   ],
   "stop_conditions": [
-    "Implementation requires changing interfaces/** or libs/contracts/**.",
-    "Implementation requires changing reducer, verifier, backend, robot control or firmware.",
-    "A public WorldEvent schema or Pydantic model change is required.",
-    "Legacy database handling requires automatic or destructive migration instead of the approved fail-closed strategy.",
-    "The typed integrity error requires an unapproved package-level API change outside event_store.py.",
-    "Concurrent correctness cannot be demonstrated with temporary SQLite databases and separate connections.",
-    "A safety, interface or cross-module conflict is discovered.",
-    "Any required modification falls outside allowed_paths."
+    "实现需要修改 `interfaces/**` 或 `libs/contracts/**`。",
+    "实现需要修改 reducer、verifier、backend、机器人控制或固件。",
+    "需要修改公开的 WorldEvent schema 或 Pydantic 模型。",
+    "遗留数据库处理需要自动或破坏性迁移，而非已批准的失败即拒绝策略。",
+    "类型化完整性错误需要在 `event_store.py` 之外进行未经批准的包级 API 改动。",
+    "无法用临时 SQLite 数据库与独立连接演示并发正确性。",
+    "发现安全、接口或跨模块冲突。",
+    "任何所需修改落在 allowed_paths 之外。"
   ]
 }

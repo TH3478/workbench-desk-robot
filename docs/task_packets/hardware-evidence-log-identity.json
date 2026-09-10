@@ -1,7 +1,7 @@
 {
   "issue": 199,
   "human_owner": "Quchaosheng",
-  "objective": "Keep hardware performance evidence log identities one-to-one with the analyzed files.",
+  "objective": "让硬件性能证据日志标识与被分析文件保持一一对应。",
   "allowed_paths": [
     "tools/scripts/register_hardware_evidence.py",
     "tools/scripts/performance_tools.py",
@@ -32,14 +32,14 @@
     "make context-check"
   ],
   "evidence": [
-    "colliding-basename regression output",
-    "performance evidence unit-test output",
-    "Task Packet boundary validation",
-    "context validation output"
+    "冲突基名回归输出",
+    "性能证据单元测试输出",
+    "任务包边界校验",
+    "上下文校验输出"
   ],
   "stop_conditions": [
-    "telemetry schema or report semantics must change",
-    "a write outside allowed_paths is required",
-    "existing unique-name manifests become incompatible"
+    "必须修改遥测 schema 或报告语义",
+    "需要在 allowed_paths 之外写入",
+    "现有的唯一名称清单变得不兼容"
   ]
 }

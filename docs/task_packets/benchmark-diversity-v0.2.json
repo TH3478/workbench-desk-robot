@@ -1,7 +1,7 @@
 {
   "issue": "BENCHMARK-DIVERSITY-v0.2",
   "human_owner": "Quchaosheng",
-  "objective": "Expand the deterministic baseline from one pick/place task into a diverse semantic-task benchmark without exposing joint, firmware, or hardware control.",
+  "objective": "在不暴露关节、固件或硬件控制的前提下，将确定性基线从单个抓放任务扩展为多样化的语义任务基准测试。",
   "allowed_paths": [
     "services/agent_runtime/**",
     "services/world_model/**",
@@ -40,14 +40,14 @@
     "make container-smoke"
   ],
   "evidence": [
-    "planner and verifier unit tests",
-    "scenario distribution validation",
-    "90-run scripted evaluation metrics",
-    "desktop and mobile dashboard checks"
+    "规划器与验证器单元测试",
+    "场景分布校验",
+    "90 轮脚本化评估指标",
+    "桌面端与移动端 dashboard 检查"
   ],
   "stop_conditions": [
-    "a frozen interface change is required",
-    "raw joint, CAN, emergency-stop, or firmware access would be introduced",
-    "scripted results could be mistaken for physical robot evidence"
+    "需要修改冻结的接口",
+    "将引入对原始关节、CAN、急停或固件的访问",
+    "脚本化结果可能被误当作物理机器人证据"
   ]
 }

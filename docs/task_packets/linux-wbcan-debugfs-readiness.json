@@ -1,7 +1,7 @@
 {
   "issue": "141",
   "human_owner": "Quchaosheng",
-  "objective": "Fail closed when the wbcan debugfs fault plane is unavailable and report readiness truthfully.",
+  "objective": "当 wbcan debugfs 故障面不可用时失败即拒绝，并如实报告就绪状态。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -12,11 +12,11 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "debugfs directory and file creation results are checked for NULL and ERR_PTR",
-    "any fault-plane setup failure unregisters the CAN device and removes partial debugfs state",
-    "module logs readiness only after inject and status exist",
-    "an injected creation failure leaves no device or debugfs tree",
-    "CI reports fault-plane readiness as PASS, NOT_EXECUTED, or FAIL"
+    "debugfs 目录与文件创建结果会检查 NULL 与 ERR_PTR",
+    "任何故障面初始化失败都会注销 CAN 设备并清除残留的 debugfs 状态",
+    "模块只在 `inject` 与 `status` 存在之后才记录就绪状态",
+    "注入的创建失败不会留下设备或 debugfs 树",
+    "CI 将故障面就绪状态报告为 PASS、NOT_EXECUTED 或 FAIL"
   ],
   "commands": [
     "make -C kernel/wbcan",
@@ -27,15 +27,15 @@
     "sudo make -C kernel/wbcan test"
   ],
   "evidence": [
-    "module build output",
-    "checkpatch output",
-    "workflow regression output",
-    "injected debugfs failure cleanup assertions",
-    "fault-plane readiness line in job summary"
+    "模块构建输出",
+    "checkpatch 输出",
+    "工作流回归输出",
+    "注入的 debugfs 失败清理断言",
+    "任务摘要中的故障面就绪行"
   ],
   "stop_conditions": [
-    "debugfs must become a stable production control API",
-    "firmware or interface changes are required",
-    "the hosted runner cannot test module-init cleanup"
+    "debugfs 必须成为稳定的生产控制 API",
+    "需要修改固件或接口",
+    "托管运行器无法测试模块初始化清理"
   ]
 }

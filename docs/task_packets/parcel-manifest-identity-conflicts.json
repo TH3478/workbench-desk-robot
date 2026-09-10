@@ -1,7 +1,7 @@
 {
   "issue": 201,
   "human_owner": "Quchaosheng",
-  "objective": "Reject contradictory parcel identity fields before emitting a manifest-matched plan.",
+  "objective": "在输出清单匹配的计划之前，拒绝相互矛盾的包裹身份字段。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/planner.py",
     "tests/unit/test_agent_runtime.py",
@@ -24,10 +24,10 @@
     "evaluation/golden-set-parcel-v0.1.json"
   ],
   "acceptance": [
-    "every parcel identity key present in both observation and manifest normalizes to the same value",
-    "a conflicting shared identity fails before a TaskGraph is returned",
-    "at least one normalized identity match remains required",
-    "cross-field identity fallback and no-manifest planning remain compatible"
+    "同时出现在观测与清单中的每个包裹身份键归一化为相同值",
+    "冲突的共享身份在返回 TaskGraph 之前即失败",
+    "仍要求至少一个归一化身份匹配",
+    "跨字段身份回退与无清单规划保持兼容"
   ],
   "commands": [
     "python -m pytest tests/unit/test_agent_runtime.py -q",
@@ -37,14 +37,14 @@
     "make contract"
   ],
   "evidence": [
-    "focused planner regression test output",
-    "Ruff output",
-    "Task Packet boundary check",
-    "contract and context validation output"
+    "聚焦的规划器回归测试输出",
+    "Ruff 输出",
+    "任务包边界检查",
+    "契约与上下文校验输出"
   ],
   "stop_conditions": [
-    "an interface or contract change is required",
-    "World Model verification must change in the same pull request",
-    "motion, firmware, or physical hardware behavior is affected"
+    "需要变更接口或契约",
+    "World Model 验证必须在同一 pull request 中变更",
+    "影响运动、固件或物理硬件行为"
   ]
 }

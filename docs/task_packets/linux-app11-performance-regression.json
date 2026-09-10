@@ -1,7 +1,7 @@
 {
   "issue": "LINUX-APP11",
   "human_owner": "Quchaosheng",
-  "objective": "Add a fail-closed local-software performance regression gate with comparable baselines, absolute budgets and machine-readable evidence.",
+  "objective": "新增失败即拒绝的本地软件性能回归闸门，具备可比的基线、绝对预算与机器可读证据。",
   "allowed_paths": [
     "tools/scripts/performance_regression.py",
     "tools/scripts/benchmark_startup.py",
@@ -31,12 +31,12 @@
     "hardware/**"
   ],
   "acceptance": [
-    "startup, aggregate container CPU and memory, and simulation end-to-end P95 are compared against a same-environment baseline",
-    "both absolute budgets and relative regression limits must pass",
-    "missing, malformed, non-finite, negative, unordered or undersampled evidence fails closed",
-    "different platform, Python version, machine architecture or startup cache mode reports are rejected as incomparable",
-    "hardware telemetry is rejected and the output marks target hardware and physical validation NOT_EXECUTED",
-    "the command writes a machine-readable report and exits non-zero when any metric fails"
+    "启动、容器 CPU 与内存聚合以及仿真端到端 P95 都与同一环境的基线比较",
+    "绝对预算与相对回归上限都必须通过",
+    "缺失、格式错误、非有限、为负、乱序或采样不足的证据失败即拒绝",
+    "平台、Python 版本、机器架构或启动缓存模式不同的报告因不可比而被拒绝",
+    "硬件遥测被拒绝，输出将目标硬件与物理验证标记为 NOT_EXECUTED",
+    "命令写出机器可读报告，并在任一指标失败时以非零码退出"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/linux-app11-performance-regression.json",
@@ -50,15 +50,15 @@
     "git diff --check"
   ],
   "evidence": [
-    "performance regression unit-test output",
-    "passing and failing machine-readable gate reports",
-    "invalid and incomparable evidence rejection assertions",
-    "repository gate output"
+    "性能回归单元测试输出",
+    "通过与失败的机器可读闸门报告",
+    "无效与不可比证据拒绝断言",
+    "仓库闸门输出"
   ],
   "stop_conditions": [
-    "a threshold requires target-hardware or physical-robot measurement",
-    "reports were not captured on comparable software environments",
-    "a frozen interface, firmware, robot-control or hardware change is required",
-    "local software measurements would be presented as target-hardware or release evidence"
+    "某阈值需要目标硬件或物理机器人测量",
+    "报告并非在可比的软件环境中采集",
+    "需要修改冻结的接口、固件、机器人控制或硬件",
+    "本地软件测量会被冒充为目标硬件或发布证据"
   ]
 }

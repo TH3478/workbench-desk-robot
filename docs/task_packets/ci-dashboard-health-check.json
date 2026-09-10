@@ -1,7 +1,7 @@
 {
   "issue": "ci-dashboard-health-check",
   "human_owner": "TH3478",
-  "objective": "Make the full-stack container workflow validate dashboard health and readiness without crossing the dashboard local-trust boundary through Docker port forwarding.",
+  "objective": "让全栈容器工作流校验 dashboard 健康与就绪状态，同时不通过 Docker 端口转发跨越 dashboard 的本地信任边界。",
   "allowed_paths": [
     ".github/workflows/container-full-stack.yml",
     "tests/unit/test_container_profiles.py",
@@ -22,11 +22,11 @@
     "docker/**"
   ],
   "acceptance": [
-    "The dashboard health and readiness probes execute through docker compose exec inside the dashboard container.",
-    "The dashboard remains in local trust mode and no Docker bridge range is added to the trusted proxy allow-list.",
-    "The regression test fails if the workflow falls back to a host-side health probe.",
-    "The workflow YAML remains parseable and the existing container static checks continue to pass.",
-    "The changed paths are authorized by this Task Packet and no runtime, Compose security, interface, firmware, or robot-control code changes are introduced."
+    "dashboard 健康与就绪探针通过 docker compose exec 在 dashboard 容器内执行。",
+    "dashboard 保持本地信任模式，且不向受信代理允许列表添加任何 Docker 网桥网段。",
+    "若工作流回退到宿主机侧健康探针，回归测试即失败。",
+    "工作流 YAML 保持可解析，现有容器静态检查继续通过。",
+    "变更路径已获本任务包授权，且不引入任何运行时、Compose 安全、接口、固件或机器人控制代码变更。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py --all --base origin/main --head HEAD",
@@ -36,20 +36,20 @@
     "git diff --check"
   ],
   "evidence": [
-    "Task Packet changed-path validation output",
-    "Container baseline and workflow regression test output",
-    "Ruff and Compose configuration output",
-    "Diff whitespace validation output"
+    "任务包变更路径校验输出",
+    "容器基线测试与工作流回归测试输出",
+    "Ruff 与 Compose 配置输出",
+    "diff 空白校验输出"
   ],
   "stop_conditions": [
-    "The fix requires changing the backend inbound trust policy or Compose security settings.",
-    "A workflow other than container-full-stack.yml or a runtime source file must change.",
-    "The Docker bridge address can only be handled by broadening the trusted proxy allow-list.",
-    "A required check cannot be reproduced or remains attributable to an unrelated main-branch failure."
+    "修复需要修改后端入站信任策略或 Compose 安全设置。",
+    "必须修改 container-full-stack.yml 之外的工作流或某个运行时源文件。",
+    "只能通过扩大受信代理允许列表来处理 Docker 网桥地址。",
+    "某项必需检查无法复现，或仍可归因于无关的 main 分支失败。"
   ],
   "max_iterations": 3,
   "risks_and_fallbacks": [
-    "The container-side probe validates the service health and readiness endpoints from their intended local trust context; host port publication remains represented by the unchanged Compose configuration.",
-    "Native Docker daemon behavior is ultimately validated by the hosted static-and-cpu-image job."
+    "容器侧探针从其预期的本地信任上下文校验服务健康与就绪端点；宿主机端口发布仍由未改动的 Compose 配置表示。",
+    "原生 Docker 守护进程行为最终由托管的 static-and-cpu-image 作业验证。"
   ]
 }

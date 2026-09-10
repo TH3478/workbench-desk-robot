@@ -1,7 +1,7 @@
 {
   "issue": 41,
   "human_owner": "zhangjia-1111",
-  "objective": "Build a fail-closed ToolRegistry that validates all six SemanticAction types before they reach Motion or MCU.",
+  "objective": "构建一个失败即拒绝的 ToolRegistry，在全部六种 SemanticAction 类型到达 Motion 或 MCU 之前对它们进行校验。",
   "allowed_paths": [
     "services/agent_runtime/workbench_agent_runtime/tool_schemas.py",
     "services/agent_runtime/workbench_agent_runtime/tool_registry.py",
@@ -41,15 +41,15 @@
     "make demo-scripted"
   ],
   "evidence": [
-    "unit test output (30+ assertions)",
-    "make test full suite output",
-    "make contract output",
-    "make demo-scripted output"
+    "单元测试输出（30+ 断言）",
+    "`make test` 全套件输出",
+    "`make contract` 输出",
+    "`make demo-scripted` 输出"
   ],
   "stop_conditions": [
-    "interface conflict with interfaces/ or libs/contracts/",
-    "writing to a file outside allowed_paths",
-    "adding a new ActionType enum value",
-    "make demo-scripted regression"
+    "与 `interfaces/` 或 `libs/contracts/` 发生接口冲突",
+    "写入 allowed_paths 之外的文件",
+    "新增 ActionType 枚举值",
+    "`make demo-scripted` 出现回归"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "issue": "domestic-industrial-design-refinement",
   "human_owner": "Quchaosheng",
-  "objective": "Replace the undersized circular expression window with a wide rounded-rectangle face, replace tube-like arm geometry with legible joint cartridges and directional link fairings, and turn the visual neck into a manufacturable mounted head interface while preserving the torso-side shoulders and seven-axis Revision D architecture.",
+  "objective": "用宽大的圆角矩形面板替换尺寸不足的圆形表情窗口，用清晰的关节组件与带方向的连杆整流罩替换管状机械臂几何，并将视觉颈部改为可制造的挂载式头部接口，同时保留躯干侧肩部与七轴 Revision D 架构。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "tests/hardware/test_engineering_packages.py",
@@ -37,9 +37,9 @@
     "docs/assets/workbench-home-robot-premium.png"
   ],
   "stop_conditions": [
-    "the refinement requires altering robot control, firmware, interfaces, or PCB ownership",
-    "the display cannot retain a structural border inside the existing head envelope",
-    "arm styling would hide axis centers or contradict the declared seven-axis topology",
-    "the visual would imply a physical prototype or validation result that does not exist"
+    "该优化需要改动 `robot/control`、`firmware`、`interfaces` 或 PCB 的归属",
+    "显示面板无法在现有头部包络内保留结构性边框",
+    "机械臂造型会遮挡轴线中心，或与声明的七轴拓扑相矛盾",
+    "视觉效果会暗示不存在的物理原型或验证结果"
   ]
 }

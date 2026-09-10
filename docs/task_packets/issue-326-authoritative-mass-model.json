@@ -1,7 +1,7 @@
 {
   "issue": 326,
   "human_owner": "Quchaosheng",
-  "objective": "Make the Revision D mass model authoritative, hashed, traceable, and shared by every mechanical and release consumer.",
+  "objective": "让 Revision D 质量模型具有权威性、可哈希、可追溯，并由每个机械与发布消费者共享。",
   "allowed_paths": [
     "hardware/mechanical/**",
     "hardware/tools/**",
@@ -13,10 +13,10 @@
   "read_only_paths": ["interfaces/**", "robot/control/**", "firmware/**"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "design-spec.json#components is the only current source of total mass and CG",
-    "every component has a stable ID, source, uncertainty, status, inclusion rule, units, and frame",
-    "the legacy 55 kg rows are preserved as superseded and excluded",
-    "duplicate, missing, invalid, stale, or disagreeing mass data fails closed"
+    "design-spec.json#components 是总质量与重心的唯一现行来源。",
+    "每个组件都有稳定的 ID、来源、不确定度、状态、纳入规则、单位与坐标系。",
+    "遗留的 55 kg 行保留为「已取代」并被排除。",
+    "重复、缺失、无效、陈旧或相互矛盾的质量数据失败即拒绝。"
   ],
   "commands": [
     "python hardware/mechanical/tools/generate_artifacts.py",
@@ -34,8 +34,8 @@
     "hardware/mechanical/mass-model-migration.md"
   ],
   "stop_conditions": [
-    "owner approval or physical weighing would need to be fabricated",
-    "a change requires robot control, firmware, interfaces, or PCB ownership",
-    "the authoritative source and generated hash disagree"
+    "将需要伪造 Owner 批准或物理称重。",
+    "某项改动需要 robot control、固件、interfaces 或 PCB 所有权。",
+    "权威来源与生成的哈希不一致。"
   ]
 }

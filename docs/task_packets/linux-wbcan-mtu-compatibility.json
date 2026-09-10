@@ -1,7 +1,7 @@
 {
   "issue": "135",
   "human_owner": "Quchaosheng",
-  "objective": "Keep the classic-CAN-only wbcan module buildable across supported Linux CAN MTU APIs.",
+  "objective": "使仅支持经典 CAN 的 wbcan 模块在受支持的 Linux CAN MTU API 范围内保持可构建。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     ".github/workflows/ci.yml",
@@ -11,11 +11,11 @@
   "read_only_paths": ["firmware/**", "interfaces/**", "AGENTS.md"],
   "forbidden": ["robot/control/**", "firmware/**", "interfaces/**"],
   "acceptance": [
-    "classic CAN MTU remains the only accepted MTU",
-    "MTU changes while the interface is running fail closed",
-    "the module builds against Linux 6.17 and 7.0 headers",
-    "CI builds against generic LTS and hosted-runner headers",
-    "checkpatch remains required"
+    "经典 CAN MTU 仍是唯一被接受的 MTU",
+    "接口运行期间的 MTU 变更失败即拒绝",
+    "模块可基于 Linux 6.17 与 7.0 头文件构建",
+    "CI 基于通用 LTS 与托管 runner 头文件构建",
+    "checkpatch 仍是必做项"
   ],
   "commands": [
     "make -C kernel/wbcan KDIR=/usr/src/linux-headers-6.17.0-40-generic",
@@ -23,10 +23,10 @@
     "make -C kernel/wbcan checkpatch",
     "python -m pytest tests/unit/test_release_workflow.py -v"
   ],
-  "evidence": ["dual-header module build output", "checkpatch output", "workflow regression test"],
+  "evidence": ["双头文件模块构建输出", "checkpatch 输出", "工作流回归测试"],
   "stop_conditions": [
-    "supporting CAN FD or CAN XL is required",
-    "firmware or interface changes are required",
-    "the supported kernel range must change"
+    "需要支持 CAN FD 或 CAN XL",
+    "需要改动固件或接口",
+    "必须变更受支持的内核版本范围"
   ]
 }

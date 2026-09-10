@@ -1,7 +1,7 @@
 {
   "issue": 55,
   "human_owner": "TH3478",
-  "objective": "Replace the in-memory SafeCANBus placeholder with a bounded CAN Wire V1 DeviceAdapter hosted by the unified DeviceRuntime; fail closed on malformed frames, timeouts, link faults, and lifecycle races.",
+  "objective": "用统一 DeviceRuntime 承载的有界 CAN Wire V1 DeviceAdapter 替换内存中的 SafeCANBus 占位实现；对畸形帧、超时、链路故障与生命周期竞态失败即拒绝。",
   "allowed_paths": [
     "libs/hardware/workbench/hardware/can_driver_safe.py",
     "libs/hardware/workbench/hardware/__init__.py",
@@ -28,18 +28,18 @@
     "services/**"
   ],
   "acceptance": [
-    "Construction injects a small transport port and monotonic clock without opening hardware; explicit start and shutdown delegate lifecycle ownership to DeviceRuntime.",
-    "DeviceRuntime is the sole owner of configure/activate/deactivate/cleanup, cancellation, worker join, command/telemetry/health planes, backpressure, and subscriber snapshot dispatch; SafeCANBus is an adapter and its compatibility lifecycle methods delegate to that owner.",
-    "The command/ACK, telemetry, and health/provenance planes have independent fixed capacities and observable drops/errors; no adapter-local worker, queue, callback registry, or unbounded fallback exists.",
-    "Only immutable Classic CAN standard data frames with a known Wire V1 arbitration ID, DLC 8, valid version, reserved bytes, field registry, direction, and cross-field semantics enter the queue or subscriber boundary.",
-    "The outbound queue and subscriber sets are bounded, backpressure and rejection are typed, and STOP preempts queued ordinary commands.",
-    "At most one command is in flight; successful dispatch starts a local acknowledgement deadline, retries retain command correlation with bounded retry counts, and exhaustion escalates to a correlated STOP.",
-    "STOP acknowledgement timeout, bus-off, and link loss fail closed; ordinary commands remain rejected until an explicit successful transport recovery, and recovery never replays pre-fault traffic.",
-    "Duplicate, late, uncorrelated, and malformed responses do not confirm a command or cancel STOP escalation.",
-    "Accepted inbound results carry an immutable source/interface/sequence/monotonic-time/wall-time/health/evidence envelope; recovery does not silently reset adapter-ingress ordering, and wall-clock rollback is observable and fail-closed.",
-    "Subscribe, unsubscribe, counters, diagnostics, and callback snapshot dispatch are thread-safe; callback exceptions are isolated and recorded without terminating dispatch.",
-    "Fake transport and fake-clock tests cover validation, saturation, worker draining, timeout/retry/STOP escalation, duplicate and late acknowledgements, callback mutation/failure, shutdown, bus-off, and controlled recovery.",
-    "Documentation labels fake transport evidence as host adapter behavior only, not SocketCAN, physical CAN, MCU, actuator, or hard-real-time evidence."
+    "构造时注入小型传输端口与单调时钟，不打开硬件；显式的 start 与 shutdown 把生命周期所有权委托给 DeviceRuntime。",
+    "DeviceRuntime 是 configure/activate/deactivate/cleanup、取消、工作线程汇合、命令/遥测/健康平面、背压与订阅者快照派发的唯一所有者；SafeCANBus 是适配器，其兼容性生命周期方法都委托给该所有者。",
+    "命令/ACK、遥测与健康/来源平面具有相互独立的固定容量与可观测的丢弃/错误；不存在任何适配器本地工作线程、队列、回调注册表或无界回退。",
+    "只有带已知 Wire V1 仲裁 ID、DLC 8、有效版本、保留字节、字段注册表、方向与跨字段语义的不可变 Classic CAN 标准数据帧，才能进入队列或订阅者边界。",
+    "出站队列与订阅者集合有界，背压与拒绝是类型化的，STOP 抢占排队中的普通命令。",
+    "最多一条命令在途；成功派发启动本地确认截止时间，重试以受限重试次数保持命令相关性，耗尽则升级为相关联的 STOP。",
+    "STOP 确认超时、总线关闭与链路丢失失败即拒绝；在显式的成功传输恢复之前，普通命令保持被拒绝，且恢复绝不回放故障前流量。",
+    "重复、迟到、不相关与畸形的响应既不得确认命令，也不得取消 STOP 升级。",
+    "被接受的入站结果携带不可变的来源/接口/序列/单调时间/墙上时间/健康/证据信封；恢复不得静默重置适配器入口顺序，墙上时钟回拨可观测且失败即拒绝。",
+    "订阅、退订、计数器、诊断与回调快照派发是线程安全的；回调异常被隔离并记录，且不终止派发。",
+    "假传输与假时钟测试覆盖校验、饱和、工作线程排空、超时/重试/STOP 升级、重复与迟到确认、回调变更/失败、关停、总线关闭与受控恢复。",
+    "文档把假传输证据标注为仅主机适配器行为，而不是 SocketCAN、物理 CAN、MCU、执行器或硬实时证据。"
   ],
   "commands": [
     "python3 -m pytest tests/unit/test_can_transport.py -v",
@@ -52,17 +52,17 @@
     "make context-check"
   ],
   "evidence": [
-    "Focused fake transport and fake-clock regression output.",
-    "Task Packet validation and changed-path boundary output.",
-    "Repository test, contract, scenario, context, lint, and formatting output.",
-    "Final git diff check and changed-path review."
+    "聚焦的假传输与假时钟回归输出。",
+    "任务包校验与变更路径边界输出。",
+    "仓库 test、contract、scenario、context、lint 与格式化输出。",
+    "最终 `git diff` 检查与变更路径复核。"
   ],
   "stop_conditions": [
-    "The implementation requires changing frozen logical protocol or CAN Wire V1 identifiers, payload layouts, schemas, or canonical models.",
-    "The implementation requires kernel wbcan, firmware, robot control, or a concrete SocketCAN dependency.",
-    "The adapter would need to claim physical CAN delivery, MCU acceptance, stopped state, or real-time deadline evidence from queueing or fake transport behavior.",
-    "An unbounded queue, subscriber collection, retry path, diagnostic store, or shutdown wait is required.",
-    "A second adapter-local lifecycle, worker, queue, callback registry, or cancellation model would be needed outside DeviceRuntime.",
-    "A write outside allowed_paths is required."
+    "实现需要修改冻结的逻辑协议或 CAN Wire V1 标识符、负载布局、schema 或规范模型。",
+    "实现需要内核 wbcan、固件、机器人控制或具体的 SocketCAN 依赖。",
+    "适配器将需要仅凭排队或假传输行为声称物理 CAN 投递、MCU 接受、停止状态或实时截止时间证据。",
+    "需要无界队列、订阅者集合、重试路径、诊断存储或关停等待。",
+    "将需要在 DeviceRuntime 之外引入第二个适配器本地的生命周期、工作线程、队列、回调注册表或取消模型。",
+    "需要在 allowed_paths 之外写入。"
   ]
 }

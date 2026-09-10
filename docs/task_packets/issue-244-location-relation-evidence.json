@@ -1,7 +1,7 @@
 {
   "issue": 244,
   "human_owner": "Quchaosheng",
-  "objective": "Bind entity evidence to the current location transition so stale or unrelated evidence cannot confirm a location claim.",
+  "objective": "把实体证据绑定到当前的位置迁移，使陈旧或无关的证据无法确认位置声称。",
   "allowed_paths": [
     "services/world_model/workbench_world_model/reducer.py",
     "services/world_model/workbench_world_model/verifier.py",
@@ -18,10 +18,10 @@
     "hardware/safety/**"
   ],
   "acceptance": [
-    "a location change replaces evidence from the previous location",
-    "an evidence-free location change cannot reuse run-wide or unrelated entity evidence",
-    "same-location observations retain unique evidence in event order",
-    "object verification returns only evidence for the current object location"
+    "位置变化替换上一位置的证据。",
+    "无证据的位置变化不得复用运行级或无关实体的证据。",
+    "同一位置的观测按事件顺序保留唯一证据。",
+    "对象验证只返回当前对象位置的证据。"
   ],
   "commands": [
     "python -m pytest tests/unit/test_world_model.py -v",
@@ -30,13 +30,13 @@
     "git diff --check"
   ],
   "evidence": [
-    "world-model reducer and verifier regression output",
-    "full repository check output",
-    "Task Packet boundary output"
+    "世界模型化简器与验证器回归输出。",
+    "完整仓库检查输出。",
+    "任务包边界输出。"
   ],
   "stop_conditions": [
-    "a public schema or contract change is required",
-    "physical or robot-control evidence is requested",
-    "the fix requires writes outside the allowed paths"
+    "需要修改公开 schema 或契约。",
+    "被要求提供物理或 robot-control 证据。",
+    "修复需要在 allowed_paths 之外写入。"
   ]
 }

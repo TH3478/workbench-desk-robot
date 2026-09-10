@@ -2,8 +2,8 @@
   "issue": 318,
   "issues": [260, 305, 306, 312, 318],
   "human_owner": "TH3478",
-  "objective": "Define a controller-independent Design Partner handoff contract that separates product acceptance from Motion/MCU/Safety acceptance, preserves the evidence ladder, and makes stop authority and incomplete evidence explicit.",
-  "decision_supported": "Can a Design Partner task be continued, changed, deferred, or rejected without granting scenario code or product documentation motion, MCU, E-stop, release, or completion authority?",
+  "objective": "定义一个与控制器无关的 Design Partner 交接契约，将产品验收与 Motion/MCU/Safety 验收分离，保留证据阶梯，并显式声明停止权限与不完整证据。",
+  "decision_supported": "Design Partner 任务能否被继续、变更、推迟或拒绝，而不授予场景代码或产品文档运动、MCU、急停、发布或完成权限？",
   "allowed_paths": [
     "docs/product/README.md",
     "docs/product/design-partner-scenario-template.md",
@@ -66,17 +66,17 @@
     "tests/unit/test_design_partner_handoff.py"
   ],
   "acceptance": [
-    "The handoff document provides the required conclusion vocabulary: continue, change, defer, and reject, and makes the decision apply to a named claim and evidence class.",
-    "The documented public semantic action vocabulary includes navigate when the versioned contract registers it, alongside the existing bounded actions.",
-    "Scenario manifests may declare only versioned semantic actions, opaque targets, bounded typed policy selectors, adapter capability references, goals, evidence policy, and bounded recovery references; raw joint, Cartesian, velocity, torque, force, CAN, controller, pin, credential, or E-stop fields are explicitly forbidden.",
-    "The Motion handoff describes the existing ActionResult boundary, correlation, dispatch/device state, health/fault diagnostics, and evidence references, and explicitly says ActionResult completion is not observed WorldState completion.",
-    "The checklist gives separate inputs and outputs for Product, Motion, MCU/Safety, Runtime/Integration, and site/partner owners, including consent, version/configuration hashes, preflight, abort, and evidence responsibilities.",
-    "The evidence ladder distinguishes software, scripted_fixture, gazebo, and physical claims; lower-rung evidence cannot silently promote a higher-rung claim, and scripted_fixture remains release_eligible=false by default.",
-    "The stop boundary assigns safe_stop and abort to the trusted runtime path, E-stop and safe-enable to the independent site/MCU-Safety authority, bounded recovery to policy plus owner-approved reset rules, and manual confirmation to an authorized human.",
-    "The document defines confirmed, failed/refuted, insufficient_evidence, not_executed, and blocked without treating missing evidence as success.",
-    "At least one illustrative request is marked reject because it asks for raw joint/controller/CAN or direct E-stop access, with a safe semantic alternative and the reason a Safety Owner would refuse it.",
-    "The existing generic Design Partner template links to and remains consistent with the dedicated handoff contract; no public schema, firmware, robot-control, safety implementation, or physical result is changed or claimed.",
-    "The static regression test checks the required headings and boundary phrases so accidental removal of the safety/evidence contract fails locally."
+    "交接文档提供所需的结论词汇：continue、change、defer 与 reject，并让决定作用于具名的声称与证据类别。",
+    "文档化的公开语义动作词汇在版本化契约注册 navigate 时将其纳入，与既有的受限动作并列。",
+    "场景清单只能声明版本化语义动作、不透明目标、受限的类型化策略选择器、适配器能力引用、目标、证据策略与受限的恢复引用；原始关节、笛卡尔、速度、扭矩、力、CAN、控制器、引脚、凭据或急停字段被明确禁止。",
+    "Motion 交接描述既有的 ActionResult 边界、相关性、派发/设备状态、健康/故障诊断与证据引用，并明确说明 ActionResult 完成不是被观测的 WorldState 完成。",
+    "检查清单为 Product、Motion、MCU/Safety、Runtime/Integration 与现场/合作方 Owner 分别给出输入与输出，包括同意、版本/配置哈希、预检、中止与证据责任。",
+    "证据阶梯区分 software、scripted_fixture、gazebo 与 physical 声称；低一级的证据不得静默抬升高一级的声称，且 scripted_fixture 默认保持 release_eligible=false。",
+    "停止边界把 safe_stop 与 abort 分配给受信的运行时路径，把急停与安全使能分配给独立的现场/MCU-Safety 权威，把受限恢复分配给策略加 Owner 批准的复位规则，把手动确认分配给授权的人类。",
+    "文档定义 confirmed、failed/refuted、insufficient_evidence、not_executed 与 blocked，且不得把缺失证据当作成功。",
+    "至少一个示例性请求因要求原始关节/控制器/CAN 或直接急停访问而被标记为 reject，并附安全的语义替代方案与 Safety Owner 拒绝它的理由。",
+    "既有的通用 Design Partner 模板链接到专用交接契约并与之保持一致；不得修改或声称任何公开 schema、固件、robot-control、安全实现或物理结果。",
+    "静态回归测试检查必需的标题与边界措辞，使安全/证据契约被意外移除时能在本地失败。"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/issue-318-design-partner-handoff.json",
@@ -90,25 +90,25 @@
     "git diff --check"
   ],
   "evidence": [
-    "Issue #318 Task Packet validation and changed-path boundary output.",
-    "Static handoff policy regression tests covering conclusion vocabulary, authority boundaries, evidence statuses, and the rejected-request example.",
-    "Rendered/strict documentation validation and context-check output.",
-    "Full repository test output and final whitespace/diff audit.",
-    "The handoff document itself, including the Product/Motion/MCU/Safety/site checklist and evidence ladder."
+    "Issue #318 任务包校验与变更路径边界输出。",
+    "静态交接策略回归测试，覆盖结论词汇、权限边界、证据状态与被拒绝请求示例。",
+    "渲染/严格文档校验与 context-check 输出。",
+    "完整仓库测试输出与最终的空白/diff 审计。",
+    "交接文档本身，包括 Product/Motion/MCU/Safety/现场检查清单与证据阶梯。"
   ],
   "stop_conditions": [
-    "The requested work requires changing interfaces, public JSON Schema, Pydantic models, robot/control, firmware, or a safety implementation rather than documenting the boundary.",
-    "A scenario or product document would expose raw joint, controller, CAN, credential, safe-enable, E-stop, or emergency-reset authority.",
-    "A user report, screenshot, scripted fixture, Gazebo run, or verbal confirmation would be promoted to physical or release evidence without the eligible artifact and owner approval.",
-    "Identifiable Design Partner data, private logs, raw videos, access tokens, or unredacted quotes would need to be committed.",
-    "The static policy test or required repository checks fail for a reason that cannot be resolved within the allowed documentation/test paths."
+    "所请求的工作需要修改 interfaces、公开 JSON Schema、Pydantic 模型、robot/control、固件或安全实现，而非仅编写边界文档。",
+    "某个场景或产品文档将暴露原始关节、控制器、CAN、凭据、安全使能、急停或紧急复位权限。",
+    "用户报告、截图、脚本化固定装置、Gazebo 运行或口头确认将在缺少合格产物与 Owner 批准的情况下被抬升为物理或发布证据。",
+    "将需要提交可识别的 Design Partner 数据、私有日志、原始视频、访问令牌或未脱敏的引述。",
+    "静态策略测试或必需的仓库检查因无法在允许的文档/测试路径内解决的原因而失败。"
   ],
   "max_iterations": 3,
-  "data_classification": "Public repository documentation only; partner identity and raw evidence remain private and are represented by opaque references.",
-  "model_policy": "Neither a language model, scenario manifest, Design Partner, nor product acceptance record may grant Motion, MCU, E-stop, safe-enable, release, or observed-completion authority.",
+  "data_classification": "仅公开仓库文档；合作方身份与原始证据保持私有，并以不透明引用表示。",
+  "model_policy": "语言模型、场景清单、Design Partner 或产品验收记录均不得授予 Motion、MCU、急停、安全使能、发布或已观测完成权限。",
   "risks_and_fallbacks": [
-    "This change defines a handoff contract and does not implement a Motion adapter, MCU path, E-stop, ROS/DDS bridge, physical test, or scenario registry.",
-    "If owners disagree about a safety or evidence boundary, preserve the stricter interpretation and record the decision as defer or reject until the named human owner resolves it.",
-    "If no physical bench or eligible Gazebo runner exists, keep the corresponding evidence status not_executed or blocked; continue only with the explicitly bounded software/product claim."
+    "本改动定义交接契约，不实现 Motion 适配器、MCU 路径、急停、ROS/DDS 桥接、物理测试或场景注册表。",
+    "若各方 Owner 对安全或证据边界存在分歧，保留更严格的解释，并把决定记为 defer 或 reject，直到具名的人类 Owner 解决为止。",
+    "若不存在物理台架或合格的 Gazebo 运行器，则把相应证据状态保持为 not_executed 或 blocked；只以明确受限的软件/产品声称继续。"
   ]
 }

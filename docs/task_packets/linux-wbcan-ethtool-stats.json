@@ -1,7 +1,7 @@
 {
   "issue": "LINUX7",
   "human_owner": "Quchaosheng",
-  "objective": "Expose the wbcan driver's software-owned CAN counters through the standard ethtool statistics interface and verify their presence and movement in the privileged test suite.",
+  "objective": "通过标准 ethtool 统计接口暴露 wbcan 驱动软件拥有的 CAN 计数器，并在特权测试套件中验证其存在与变化。",
   "allowed_paths": [
     "kernel/wbcan/wbcan.c",
     "kernel/wbcan/test_wbcan.sh",
@@ -23,11 +23,11 @@
     "hardware/**"
   ],
   "acceptance": [
-    "ethtool -S wbcan0 exposes stable tx, rx, fault and CAN error counters",
-    "ethtool counters are read under the driver's existing lock and do not invent physical hardware metrics",
-    "the privileged suite verifies all advertised fields and proves tx_frames advances after a frame",
-    "CI installs ethtool and keeps module build, checkpatch and runtime failures fail-closed",
-    "the PR is explicitly software-only and does not claim CAN FD throughput or physical latency evidence"
+    "`ethtool -S wbcan0` 暴露稳定的 tx、rx、fault 与 CAN 错误计数器",
+    "ethtool 计数器在驱动现有锁下读取，且不凭空捏造物理硬件指标",
+    "特权套件验证所有公布字段，并证明 tx_frames 在收到一帧后递增",
+    "CI 安装 ethtool，并让模块构建、checkpatch 与运行时失败保持失败即拒绝",
+    "该 PR 明确仅涉及软件，且不声称具备 CAN FD 吞吐或物理时延证据"
   ],
   "commands": [
     "python3 tools/scripts/check_task_packet.py docs/task_packets/linux-wbcan-ethtool-stats.json",
@@ -39,14 +39,14 @@
     "git diff --check"
   ],
   "evidence": [
-    "module build and checkpatch output",
-    "ethtool -S field and counter-change assertions",
-    "privileged wbcan test report",
-    "release workflow regression output"
+    "模块构建与 checkpatch 输出",
+    "`ethtool -S` 字段与计数器变化断言",
+    "特权 wbcan 测试报告",
+    "发布工作流回归输出"
   ],
   "stop_conditions": [
-    "the target kernel lacks the documented ethtool statistics API",
-    "a physical controller, CAN FD data path or hardware performance measurement is required",
-    "firmware, interface, robot-control or hardware changes are required"
+    "目标内核缺少文档化的 ethtool 统计 API",
+    "需要物理控制器、CAN FD 数据通路或硬件性能测量",
+    "需要修改固件、接口、机器人控制或硬件"
   ]
 }
