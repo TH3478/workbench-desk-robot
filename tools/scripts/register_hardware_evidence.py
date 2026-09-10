@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create an operator-attested manifest binding hardware logs to their hashes."""
+"""创建由操作员确认（operator-attested）的清单，将硬件日志与其哈希值绑定。"""
 
 import argparse
 import json

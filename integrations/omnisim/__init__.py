@@ -1,4 +1,4 @@
-"""Isolated OmniSim World Harness pilot integration."""
+"""隔离式 OmniSim World Harness pilot 集成。"""
 
 from .client import (
     OmniSimClient,

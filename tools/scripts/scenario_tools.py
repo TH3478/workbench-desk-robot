@@ -81,7 +81,7 @@ TASK_PROFILES: dict[str, dict[str, Any]] = {
         "goal": "Scan the parcel batch, route verified intact parcels to pickup, and isolate exceptions",
         "goal_zh": "先扫描整批快递,完好核验件入取件架,标签异常或破损件进入隔离",
         "entities": ("parcel_box", "parcel_unreadable", "parcel_damaged"),
-        # The evaluator derives parcel operations from the production policy planner.
+        # 评估器从生产策略规划器推导快递操作。
         "operations": (),
         "attributes": {
             "parcel_box": {
@@ -134,7 +134,7 @@ def canonical_hash(value: Any) -> str:
 
 
 def validate_simulation_manifest(payload: dict[str, Any]) -> ScenarioManifest:
-    """Validate the canonical manifest plus reviewed simulator extensions."""
+    """校验规范清单，以及经过评审的仿真器扩展字段。"""
 
     canonical_fields = set(ScenarioManifest.model_fields)
     unknown_fields = set(payload) - canonical_fields - SIMULATION_MANIFEST_EXTENSIONS
@@ -151,7 +151,7 @@ def validate_simulation_manifest(payload: dict[str, Any]) -> ScenarioManifest:
 
 
 def materialize_scenario(manifest: dict[str, Any]) -> dict[str, Any]:
-    """Build the deterministic scene parameters owned by the scenario seed."""
+    """构建由场景种子决定的确定性场景参数。"""
     rng = random.Random(manifest["seed"])
     scene_variant = manifest.get("scene_variant", "baseline")
     task_id = manifest["task_id"]

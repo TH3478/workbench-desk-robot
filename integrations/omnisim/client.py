@@ -1,4 +1,4 @@
-"""Bounded loopback client for the OmniSim World Harness protocol."""
+"""OmniSim World Harness 协议的受限回环客户端。"""
 
 from __future__ import annotations
 
@@ -15,19 +15,19 @@ _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 
 
 class OmniSimError(RuntimeError):
-    """Base error for the isolated OmniSim integration."""
+    """隔离式 OmniSim 集成的基类错误。"""
 
 
 class OmniSimUnavailable(OmniSimError):
-    """The configured loopback harness could not be reached."""
+    """无法连接所配置的回环 harness。"""
 
 
 class OmniSimRequestError(OmniSimError):
-    """The harness rejected a valid HTTP request."""
+    """harness 拒绝了一个有效的 HTTP 请求。"""
 
 
 class OmniSimProtocolError(OmniSimError):
-    """The harness response did not satisfy the expected protocol."""
+    """harness 的响应不符合预期协议。"""
 
 
 class _DuplicateJsonKey(ValueError):
@@ -36,7 +36,7 @@ class _DuplicateJsonKey(ValueError):
 
 @dataclass(frozen=True)
 class OmniSimClient:
-    """Small HTTP/JSON client restricted to a local OmniSim harness."""
+    """仅限连接本地 OmniSim harness 的小型 HTTP/JSON 客户端。"""
 
     base_url: str = "http://127.0.0.1:6789"
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS

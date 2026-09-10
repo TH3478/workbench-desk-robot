@@ -1,4 +1,4 @@
-"""Bounded local-model routing for semantic task planning."""
+"""面向语义任务规划的受限本地模型路由。"""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ Return JSON only. Never claim that a task completed and never output motor comma
 
 
 class LocalModelError(RuntimeError):
-    """Raised when a local model cannot produce a trustworthy route."""
+    """当本地模型无法产出可信路由时抛出。"""
 
 
 @dataclass(frozen=True)
@@ -114,7 +114,7 @@ def validate_local_endpoint(endpoint: str, allowed_hosts: set[str] | None = None
 
 
 class OllamaModelProvider:
-    """Call an Ollama-compatible API reachable only through an approved local host."""
+    """调用只能通过获批本地主机访问的 Ollama 兼容 API。"""
 
     name = "ollama"
 
@@ -182,7 +182,7 @@ class OllamaModelProvider:
 
 
 def build_local_model_plan(goal: str, provider: ModelProvider) -> TaskGraph:
-    """Use a model for routing, then build actions through trusted deterministic code."""
+    """先用模型做路由，再通过可信的确定性代码构建动作。"""
     known_family: str | None = None
     try:
         known_family = {
@@ -204,9 +204,9 @@ def build_local_model_plan(goal: str, provider: ModelProvider) -> TaskGraph:
             f"got {decision.task_family}"
         )
     unsafe = [requirement for requirement in UNSAFE_REQUIREMENTS if getattr(decision, requirement)]
-    # The deterministic classifier is authoritative for bounded tabletop language.
-    # A small model may over-report navigation for ordinary parcel handling, but it
-    # must never override an explicit out-of-boundary phrase caught above.
+    # 确定性分类器对受限的桌面语言具有权威性。
+    # 小模型可能对普通包裹处理过度上报导航需求，但它绝不能
+    # 推翻上面捕获到的明确越界措辞。
     if known_family and decision.task_family == known_family:
         unsafe = [requirement for requirement in unsafe if requirement != "requires_navigation"]
     if unsafe:

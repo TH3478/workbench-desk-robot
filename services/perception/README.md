@@ -1,14 +1,7 @@
-# Perception (Owner: Perception)
+# 感知（Owner: Perception）
 
-P0 emits `Observation` from a controlled Gazebo camera using OpenCV plus AprilTag or color recognition. Required fields are documented in `interfaces/json_schema/observation.schema.json`.
+P0 用 OpenCV 加 AprilTag 或颜色识别，从受控的 Gazebo 相机发出 `Observation`。必需字段记录在 `interfaces/json_schema/observation.schema.json`。
 
-Do not use simulator Oracle values in sensor-mode metrics.
+不要在传感器模式指标中使用仿真器 Oracle 值。
 
-`workbench_perception.ObservationIngestionAdapter` is the fail-closed boundary
-between an Observation producer and the World Model event stream. Callers must
-name an approved camera calibration revision and pose unit, and inject a clock
-from the same domain as the Observation. The adapter rejects malformed, stale,
-future-skewed, low-confidence, duplicate, uncalibrated, and frame-mismatched
-records before invoking its World Model sink. It preserves the unmodified JSON
-Observation under `payload.raw_observation` and emits the calibrated pose at
-`payload.pose`; it never writes `WorldState` facts directly.
+`workbench_perception.ObservationIngestionAdapter` 是 Observation 生产者与世界模型事件流之间失败即拒绝的边界。调用方必须指明已批准的相机标定修订与位姿单位，并注入与 Observation 同域的时钟。适配器在调用其 World Model sink 之前拒绝格式错误、过期、未来偏移、低置信度、重复、未标定与坐标系不匹配的记录。它在 `payload.raw_observation` 下保留未修改的 JSON Observation，并在 `payload.pose` 发出标定位姿；它绝不直接写 `WorldState` 事实。

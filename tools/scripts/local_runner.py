@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a bounded template or localhost-only model planner."""
+"""运行受限的模板规划器，或仅限 localhost 的模型规划器。"""
 
 import argparse
 import json

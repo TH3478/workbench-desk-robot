@@ -1,4 +1,4 @@
-"""K4-K5: 通信层和版本检查"""
+"""K4-K5：通信层和版本检查"""
 
 import hashlib
 import hmac
@@ -13,11 +13,11 @@ from .schema_compiler import SchemaValidationError, validate_schema_instance
 
 
 class MessageIntegrityError(ValueError):
-    """Raised when a serialized message envelope cannot be trusted."""
+    """当序列化消息信封不可信时抛出。"""
 
 
 class BrokerValidationError(ValueError):
-    """Raised when a message cannot cross the broker publication boundary."""
+    """当消息无法越过 broker 发布边界时抛出。"""
 
 
 def _freeze_json(value: Any, ancestors: set[int] | None = None) -> Any:

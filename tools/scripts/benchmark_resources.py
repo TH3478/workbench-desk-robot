@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sample Docker CPU/RAM usage while exercising the read-only API."""
+"""在调用只读 API 的同时采样 Docker 的 CPU/内存使用情况。"""
 
 import argparse
 import json

@@ -1,9 +1,8 @@
-"""Tool registry with fail-closed parameter validation.
+"""带失败即拒绝参数校验的工具注册表。
 
-Every SemanticAction dispatched by the Agent Runtime MUST pass through
-ToolRegistry.validate() before execution.  The registry is the single source of
-truth for legal parameter shapes; A5 (Policy Validator) reads it to build
-its whitelist.
+Agent Runtime 派发的每个 SemanticAction 在执行前都必须经过
+ToolRegistry.validate()。注册表是合法参数形态的唯一事实来源；
+A5（Policy Validator）读取它以构建白名单。
 """
 
 from __future__ import annotations
@@ -18,7 +17,7 @@ from workbench_contracts import ActionType, SemanticAction
 from . import tool_schemas as _schemas
 
 # ---------------------------------------------------------------------------
-# public types
+# 公开类型
 # ---------------------------------------------------------------------------
 
 _TARGET_REQUIRED_ACTIONS: frozenset[ActionType] = frozenset({ActionType.GRASP, ActionType.PLACE, ActionType.NAVIGATE})
@@ -43,7 +42,7 @@ _DESTINATION_COUNT_PARAMS: frozenset[str] = frozenset(
 
 @dataclass(frozen=True)
 class ValidationError:
-    """A single validation failure."""
+    """单条校验失败。"""
 
     field: str
     message: str
@@ -51,7 +50,7 @@ class ValidationError:
 
 @dataclass(frozen=True)
 class ValidationResult:
-    """Result of validating one SemanticAction against the registry."""
+    """对照注册表校验单个 SemanticAction 的结果。"""
 
     is_valid: bool
     action_id: str
@@ -70,26 +69,25 @@ class ValidationResult:
 
 
 # ---------------------------------------------------------------------------
-# registry implementation
+# 注册表实现
 # ---------------------------------------------------------------------------
 
 
 class ToolRegistry:
-    """Register and validate the seven bounded semantic-action tools.
+    """注册并校验七种受限语义动作工具。
 
-    Validation layers, applied in order:
+    校验层次按顺序依次应用：
 
-    1. **Existence** — the action_type must be registered.
-    2. **Target** — GRASP and PLACE require a non-empty ``target_id``.
-    3. **Field set** — parameters must contain every required key and no key
-       outside the union of required + optional.
-    4. **Type safety** — every parameter value must match its declared type.
-       ``bool`` is checked *before* ``int`` so that ``True`` / ``False`` can
-       never silently pass an integer slot.
-    5. **Schema constraints** — finite numeric ranges, non-blank strings, and
-       declared relationships between parameters.
-    6. **Semantic constraints** — emotion_state enum, observe attribute
-       allow-list.
+    1. **存在性**——action_type 必须已注册。
+    2. **目标**——GRASP 与 PLACE 要求非空 ``target_id``。
+    3. **字段集合**——parameters 必须包含全部必需键，且不得包含
+       必需 + 可选并集之外的键。
+    4. **类型安全**——每个参数值必须与其声明类型相符。``bool`` 在
+       ``int`` 之前检查，``True`` / ``False`` 因此永远无法静默通过
+       整型槽位。
+    5. **Schema 约束**——有限的数值范围、非空字符串，以及参数之间
+       已声明的关系。
+    6. **语义约束**——emotion_state 枚举、观测属性白名单。
     """
 
     def __init__(self, *, load_defaults: bool = True) -> None:
@@ -98,13 +96,13 @@ class ToolRegistry:
             for action_type, schema in _schemas.TOOL_SCHEMAS.items():
                 self.register(action_type, schema)
 
-    # -- public API ----------------------------------------------------------
+    # -- 公开 API ------------------------------------------------------------
 
     def register(self, action_type: ActionType, schema: Mapping[str, object]) -> None:
-        """Register a tool schema.
+        """注册一个工具 schema。
 
-        Raises ``ValueError`` if *action_type* is not an ``ActionType`` member.
-        Rejects duplicate registration of an already-registered type."""
+        Raises ``ValueError``：当 *action_type* 不是 ``ActionType`` 成员时抛出。
+        拒绝重复注册已注册过的类型。"""
         if not isinstance(action_type, ActionType):
             raise ValueError(f"action_type must be an ActionType enum member, got {type(action_type).__name__!r}")
         if action_type in self._tool_param_schemas:
@@ -116,10 +114,10 @@ class ToolRegistry:
         self._tool_param_schemas[action_type] = frozen_schema
 
     def get(self, action_type: ActionType) -> Mapping[str, object]:
-        """Return the schema for *action_type*.
+        """返回 *action_type* 的 schema。
 
-        Raises ``ValueError`` if *action_type* is not an ``ActionType`` member.
-        Raises ``KeyError`` if *action_type* is not registered."""
+        Raises ``ValueError``：当 *action_type* 不是 ``ActionType`` 成员时抛出。
+        Raises ``KeyError``：当 *action_type* 未注册时抛出。"""
         if not isinstance(action_type, ActionType):
             raise ValueError(f"action_type must be an ActionType enum member, got {type(action_type).__name__!r}")
         if action_type not in self._tool_param_schemas:
@@ -127,7 +125,7 @@ class ToolRegistry:
         return self._tool_param_schemas[action_type]
 
     def list_all(self) -> tuple[ActionType, ...]:
-        """Return every registered ActionType."""
+        """返回所有已注册的 ActionType。"""
         return tuple(self._tool_param_schemas)
 
     def required_params(self, action_type: ActionType) -> frozenset[str]:
@@ -141,16 +139,15 @@ class ToolRegistry:
         return schema["required_params"] | schema["optional_params"]
 
     def validate(self, action: SemanticAction) -> ValidationResult:
-        """Validate *action* and return ``ValidationResult``.
+        """校验 *action* 并返回 ``ValidationResult``。
 
-        This method **never raises** — every rejection is encoded in the result
-        so callers cannot accidentally skip validation by forgetting a
-        ``try`` / ``except``.  Even a non-ActionType input is caught and
-        returned as a validation failure rather than an exception.
+        本方法**绝不抛出异常**——每次拒绝都编码进结果，调用方即使忘记
+        写 ``try`` / ``except`` 也无法意外跳过校验。连非 ActionType 的
+        输入也会被捕获，并以校验失败而不是异常的形式返回。
         """
         errors: list[ValidationError] = []
 
-        # ---- 0. guard — is action_type even an ActionType? ------------------
+        # ---- 0. 防护——action_type 到底是不是 ActionType？ ----------------
         try:
             action_type_value = action.action_type.value
         except AttributeError:
@@ -164,7 +161,7 @@ class ToolRegistry:
                 ],
             )
 
-        # ---- 1. existence --------------------------------------------------
+        # ---- 1. 存在性 ----------------------------------------------------
         if action.action_type not in self._tool_param_schemas:
             return ValidationResult.fail(
                 action.action_id,
@@ -190,7 +187,7 @@ class ToolRegistry:
             )
         params: Mapping[str, object] = raw_params
 
-        # ---- 2. target_id ---------------------------------------------------
+        # ---- 2. target_id --------------------------------------------------
         if target_id_required:
             if not isinstance(action.target_id, str) or not action.target_id.strip():
                 errors.append(
@@ -200,7 +197,7 @@ class ToolRegistry:
                     )
                 )
 
-        # ---- 3. field set --------------------------------------------------
+        # ---- 3. 字段集合 --------------------------------------------------
         actual_keys = set(params)
         extra = actual_keys - allowed
         missing = required - actual_keys
@@ -219,16 +216,16 @@ class ToolRegistry:
                     f"missing required keys for '{action_type_value}': {sorted(missing)}",
                 )
             )
-        # early-exit when the field set is broken — type checking on a
-        # structurally invalid dict produces noisy secondary errors.
+        # 字段集合损坏时提前退出——对结构无效的字典做类型检查会
+        # 产生大量嘈杂的次级错误。
         if errors:
             return ValidationResult.fail(action.action_id, errors)
 
-        # ---- 4. type safety ------------------------------------------------
+        # ---- 4. 类型安全 --------------------------------------------------
         for key, value in params.items():
             expected_type = param_types.get(key)
             if expected_type is None:
-                # param has no declared type — permissive
+                # 参数没有声明类型——放行
                 continue
 
             if expected_type is bool:
@@ -242,7 +239,7 @@ class ToolRegistry:
                 continue
 
             if expected_type is int:
-                # bool is a subclass of int in Python — reject it explicitly
+                # 在 Python 中 bool 是 int 的子类——显式拒绝它
                 if isinstance(value, bool):
                     errors.append(
                         ValidationError(
@@ -296,7 +293,7 @@ class ToolRegistry:
                     )
                 continue
 
-            # generic isinstance fallback
+            # 通用的 isinstance 兜底
             if not isinstance(value, expected_type):
                 errors.append(
                     ValidationError(
@@ -305,15 +302,15 @@ class ToolRegistry:
                     )
                 )
 
-        # Do not compare or inspect values that failed their declared type.
+        # 不要比较或检查声明类型不符的值。
         if errors:
             return ValidationResult.fail(action.action_id, errors)
 
-        # ---- 5. schema constraints -----------------------------------------
+        # ---- 5. schema 约束 -----------------------------------------------
         errors.extend(_validate_parameter_values(params, schema["param_constraints"]))
         errors.extend(_validate_parameter_relations(params, schema["relational_constraints"]))
 
-        # ---- 6. semantic constraints ----------------------------------------
+        # ---- 6. 语义约束 ---------------------------------------------------
         if action.action_type is ActionType.EXPRESS:
             emotion = params.get("emotion_state")
             if isinstance(emotion, str) and emotion not in _schemas.EXPRESS_EMOTION_STATES:
@@ -340,7 +337,7 @@ class ToolRegistry:
                             f"allowed: {sorted(_schemas.KNOWN_OBSERVE_ATTRIBUTES)}",
                         )
                     )
-                # Each element must be a string
+                # 每个元素都必须是字符串
                 non_strings = [attr for attr in raw_attributes if not isinstance(attr, str)]
                 if non_strings:
                     errors.append(
@@ -356,12 +353,12 @@ class ToolRegistry:
 
 
 # ---------------------------------------------------------------------------
-# helpers
+# 辅助函数
 # ---------------------------------------------------------------------------
 
 
 def _validate_schema(schema: Mapping[str, object]) -> None:
-    """Reject schemas that could make :meth:`ToolRegistry.validate` raise."""
+    """拒绝可能导致 :meth:`ToolRegistry.validate` 抛出异常的 schema。"""
     if not isinstance(schema, Mapping):
         raise ValueError(f"schema must be a mapping, got {type(schema).__name__!r}")
 

@@ -1,8 +1,8 @@
-"""Fail-closed sequential orchestration for already-typed semantic actions.
+"""对已完成类型化的语义动作进行失败即拒绝的顺序编排。
 
-The controller owns dispatch ordering and execution-state evidence only.  It
-does not cancel an active Motion goal, create contract results, write world
-state, verify task completion, or infer physical execution.
+控制器只负责派发顺序与执行状态证据。它不取消进行中的 Motion 目标、
+不创建契约结果、不写入世界状态、不验证任务完成情况，也不推断物理
+执行过程。
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from .policy_validator import PolicyDecision, PolicyReport, PolicyValidator
 
 
 class ExecutionState(StrEnum):
-    """Deterministic controller states for one dispatch record."""
+    """单条派发记录的确定性控制器状态。"""
 
     PENDING = "pending"
     DISPATCHED = "dispatched"
@@ -30,7 +30,7 @@ class ExecutionState(StrEnum):
 
 
 class ExecutionReasonCode(StrEnum):
-    """Stable report and record reasons without completion claims."""
+    """稳定的报告与记录原因，不含完成声明。"""
 
     SEQUENCE_SUCCEEDED = "sequence_succeeded"
     INVALID_INPUT = "invalid_input"
@@ -48,7 +48,7 @@ class ExecutionReasonCode(StrEnum):
 
 
 class StopRequestStatus(StrEnum):
-    """Synchronous acknowledgement for queuing a dispatch-boundary STOP."""
+    """排队一个派发边界 STOP 的同步确认。"""
 
     ACCEPTED = "accepted"
     DUPLICATE = "duplicate"
@@ -57,15 +57,15 @@ class StopRequestStatus(StrEnum):
 
 @runtime_checkable
 class ActionAdapter(Protocol):
-    """Typed adapter port owned by the caller's execution boundary."""
+    """由调用方执行边界拥有的类型化适配器端口。"""
 
     def dispatch(self, action: SemanticAction) -> ActionResult:
-        """Dispatch exactly one typed semantic action."""
+        """恰好派发一个类型化语义动作。"""
 
 
 @dataclass(frozen=True)
 class StepExecutionRecord:
-    """Immutable orchestration evidence for one action."""
+    """单个动作的不可变编排证据。"""
 
     step_id: str
     action_id: str
@@ -77,7 +77,7 @@ class StepExecutionRecord:
 
 @dataclass(frozen=True)
 class ExecutionReport:
-    """Immutable controller report; not verification or WorldState evidence."""
+    """不可变的控制器报告；不是验证证据，也不是 WorldState 证据。"""
 
     task_id: str | None
     terminal_state: ExecutionState
@@ -117,11 +117,11 @@ _RESULT_STATES: dict[ActionOutcome, tuple[ExecutionState, ExecutionReasonCode | 
 
 
 class ExecutionController:
-    """Preflight, revalidate, and sequentially dispatch one typed TaskGraph.
+    """对一个类型化 TaskGraph 进行预检、重新校验与顺序派发。
 
-    Duplicate suppression and STOP queuing are deliberately in-memory and
-    scoped to this running controller instance.  STOP is examined only between
-    adapter calls; interrupting an already-active call belongs to Motion.
+    重复抑制与 STOP 排队有意保持在内存中，并限定于当前运行的控制器
+    实例。STOP 只在两次适配器调用之间被检查；中断进行中的调用属于
+    Motion 的职责。
     """
 
     def __init__(self, *, policy_validator: PolicyValidator, adapter: ActionAdapter) -> None:
@@ -136,7 +136,7 @@ class ExecutionController:
         self._pending_stop: SemanticAction | None = None
 
     def request_stop(self, action: SemanticAction) -> StopRequestStatus:
-        """Queue one typed STOP for the next controller dispatch boundary."""
+        """为下一个控制器派发边界排队一个类型化 STOP。"""
 
         if not isinstance(action, SemanticAction):
             return StopRequestStatus.REJECTED
@@ -160,7 +160,7 @@ class ExecutionController:
         *,
         confirmed_action_ids: frozenset[str] = frozenset(),
     ) -> ExecutionReport:
-        """Execute a graph sequentially after full-graph fail-closed preflight."""
+        """在全图失败即拒绝预检通过后顺序执行一个图。"""
 
         if not isinstance(graph, TaskGraph):
             return ExecutionReport(
@@ -335,7 +335,7 @@ class ExecutionController:
         confirmed_action_ids: frozenset[str],
     ) -> ExecutionReport:
         queued_action = self._pending_stop
-        if queued_action is None:  # pragma: no cover - caller guards the boundary
+        if queued_action is None:  # pragma: no cover - 调用方已在此边界处防护
             raise RuntimeError("STOP dispatch requested without a pending STOP")
 
         queued_action_id = queued_action.action_id if isinstance(queued_action.action_id, str) else "<invalid-stop>"
@@ -411,7 +411,7 @@ class ExecutionController:
         action_snapshot, snapshot_errors = _snapshot_semantic_action(action)
         if (
             snapshot_errors or action_snapshot is None or action_snapshot.action_id != record.action_id
-        ):  # pragma: no cover - callers provide validated snapshots
+        ):  # pragma: no cover - 调用方提供已校验的快照
             record.transitions.append(ExecutionState.FAILED)
             record.reason_code = ExecutionReasonCode.INVALID_INPUT
             record.details = snapshot_errors or (f"expected action_id {record.action_id}",)
@@ -433,7 +433,7 @@ class ExecutionController:
             record.reason_code = ExecutionReasonCode.ADAPTER_TIMEOUT
             record.details = ("TimeoutError",)
             return ExecutionState.TIMED_OUT, ExecutionReasonCode.ADAPTER_TIMEOUT
-        except Exception as error:  # noqa: BLE001 - adapter failures become typed fail-closed records
+        except Exception as error:  # noqa: BLE001 - 适配器故障转换为类型化的失败即拒绝记录
             record.transitions.append(ExecutionState.FAILED)
             record.reason_code = ExecutionReasonCode.ADAPTER_EXCEPTION
             record.details = (type(error).__name__,)
@@ -472,7 +472,7 @@ class ExecutionController:
         confirmed_action_ids: frozenset[str],
     ) -> tuple[PolicyReport | None, tuple[str, ...]]:
         policy_graph, snapshot_errors = _snapshot_task_graph(graph)
-        if policy_graph is None:  # pragma: no cover - callers provide validated snapshots
+        if policy_graph is None:  # pragma: no cover - 调用方提供已校验的快照
             return None, snapshot_errors
         policy_payload = policy_graph.model_dump(mode="json")
 
@@ -481,7 +481,7 @@ class ExecutionController:
                 policy_graph,
                 confirmed_action_ids=confirmed_action_ids,
             )
-        except Exception:  # noqa: BLE001 - injected validation must fail closed
+        except Exception:  # noqa: BLE001 - 注入的校验必须失败即拒绝
             return None, ("PolicyValidator.check raised",)
 
         if not isinstance(report, PolicyReport):
@@ -570,7 +570,7 @@ def _snapshot_confirmed_action_ids(value: object) -> frozenset[str] | None:
         return None
     try:
         items = tuple(value)
-    except Exception:  # noqa: BLE001 - malformed caller input must fail closed
+    except Exception:  # noqa: BLE001 - 格式错误的调用方输入必须失败即拒绝
         return None
     if any(not isinstance(action_id, str) or not action_id.strip() for action_id in items):
         return None
@@ -583,7 +583,7 @@ def _snapshot_task_graph(
     try:
         payload = deepcopy(graph.model_dump(mode="python", warnings="error"))
         return TaskGraph.model_validate(payload, strict=True), ()
-    except Exception as error:  # noqa: BLE001 - mutable model input must fail closed
+    except Exception as error:  # noqa: BLE001 - 可变的模型输入必须失败即拒绝
         return None, (f"TaskGraph snapshot validation failed: {type(error).__name__}",)
 
 
@@ -593,7 +593,7 @@ def _snapshot_semantic_action(
     try:
         payload = deepcopy(action.model_dump(mode="python", warnings="error"))
         return SemanticAction.model_validate(payload, strict=True), ()
-    except Exception as error:  # noqa: BLE001 - mutable model input must fail closed
+    except Exception as error:  # noqa: BLE001 - 可变的模型输入必须失败即拒绝
         return None, (f"SemanticAction snapshot validation failed: {type(error).__name__}",)
 
 
@@ -603,7 +603,7 @@ def _snapshot_action_result(
     try:
         payload = deepcopy(result.model_dump(mode="python", warnings="error"))
         return ActionResult.model_validate(payload, strict=True), ()
-    except Exception as error:  # noqa: BLE001 - adapter output must fail closed
+    except Exception as error:  # noqa: BLE001 - 适配器输出必须失败即拒绝
         return None, (f"ActionResult snapshot validation failed: {type(error).__name__}",)
 
 

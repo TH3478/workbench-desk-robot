@@ -196,7 +196,7 @@ McuFrameValue = Annotated[
 
 
 class McuFrame(RootModel[McuFrameValue]):
-    """Fail-closed MCU logical frame protocol v1.0."""
+    """失败即拒绝（fail-closed）的 MCU 逻辑帧协议 v1.0。"""
 
 
 class _CanonicalRuntimeModel(BaseModel):
@@ -210,7 +210,7 @@ class Position(_CanonicalRuntimeModel):
 
 
 class Orientation(_CanonicalRuntimeModel):
-    """Unit quaternion. A tabletop grasp needs orientation, not just a point."""
+    """单位四元数。桌面抓取需要姿态（orientation），而不只是一个点。"""
 
     x: float
     y: float
@@ -264,7 +264,7 @@ class EmotionTrigger(StrEnum):
 
 
 class EmotionIntent(_CanonicalRuntimeModel):
-    """Display-only expression state; it never gates execution."""
+    """仅用于显示的表情状态；它从不作为执行的闸门（gate）。"""
 
     intent_id: str
     run_id: str
@@ -318,7 +318,7 @@ class ActionOutcome(StrEnum):
 
 
 class DispatchState(StrEnum):
-    """Whether the frame left the host. Not whether the device acted on it."""
+    """帧是否已离开主机；而不是设备是否已对其执行了动作。"""
 
     NOT_SENT = "not_sent"
     SENT = "sent"
@@ -326,8 +326,9 @@ class DispatchState(StrEnum):
 
 
 class DeviceState(StrEnum):
-    """Whether the device confirmed. Separate from DispatchState by design:
-    a written frame is not a confirmed action."""
+    """设备是否已确认。按设计，它与 DispatchState 分离：
+    已写入的帧并不等于已确认的动作。
+    """
 
     UNCONFIRMED = "unconfirmed"
     CONFIRMED = "confirmed"
@@ -435,10 +436,10 @@ class WorldRelation(_CanonicalRuntimeModel):
 
 
 class WorldState(_CanonicalRuntimeModel):
-    """Public JSON-shaped WorldState contract.
+    """公开的 JSON 形态 WorldState 契约。
 
-    The World Model reducer owns a separate internal state representation; this
-    model is only the versioned interface projection described by the schema.
+    世界模型（World Model）化简器持有独立的内部状态表示；本模型只是
+    schema 所描述的带版本接口投影。
     """
 
     run_id: str
@@ -465,8 +466,7 @@ class TaskGraph(_CanonicalRuntimeModel):
 
 
 class VerificationStatus(StrEnum):
-    """Three-valued on purpose. A boolean would force the system to guess when
-    the evidence does not support either answer."""
+    """有意采用三值逻辑。若用布尔值，当证据不支持任一答案时，系统将被迫猜测。"""
 
     CONFIRMED = "confirmed"
     REFUTED = "refuted"
@@ -533,9 +533,8 @@ class VerificationResult(_CanonicalRuntimeModel):
 
     @property
     def completed(self) -> bool:
-        """True only for a confirmed goal. Both `refuted` and
-        `insufficient_evidence` are not-completed, but they are not the same
-        thing — read `status` when the distinction matters."""
+        """仅当目标已确认（confirmed）时为真。`refuted` 与 `insufficient_evidence`
+        都属于未完成，但二者并不相同——当区分有意义时应读取 `status`。"""
         return self.status is VerificationStatus.CONFIRMED
 
     @property

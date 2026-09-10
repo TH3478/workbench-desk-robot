@@ -40,7 +40,7 @@ COMMAND_SUBSTITUTION = "$(ros2 pkg prefix workbench_motion)"
 
 
 class TaskPacketError(RuntimeError):
-    """A Task Packet is malformed or exceeds its Git-visible repository boundary."""
+    """任务包格式错误，或超出了其在 Git 中可见的仓库边界。"""
 
 
 def _format_json_path(parts: list[Any]) -> str:

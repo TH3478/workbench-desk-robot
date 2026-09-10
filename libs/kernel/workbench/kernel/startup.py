@@ -1,4 +1,4 @@
-"""K9-K10: startup configuration and fail-closed readiness checks."""
+"""K9-K10：启动配置与失败即拒绝的就绪检查。"""
 
 import json
 from collections.abc import Mapping

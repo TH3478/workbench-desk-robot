@@ -12,15 +12,15 @@ _READ_CHUNK_BYTES = 64 * 1024
 
 
 class RemoteHttpError(RuntimeError):
-    """Raised when a remote event-source request cannot be trusted."""
+    """当远程事件源请求不可信时抛出。"""
 
 
 class RemoteHttpConfigurationError(RemoteHttpError, ValueError):
-    """Raised when a remote event-source URL or policy is invalid."""
+    """当远程事件源 URL 或策略无效时抛出。"""
 
 
 class RemoteHttpResponseTooLarge(RemoteHttpError):
-    """Raised when a remote response exceeds the configured byte limit."""
+    """当远程响应超出配置的字节上限时抛出。"""
 
 
 @dataclass(frozen=True)

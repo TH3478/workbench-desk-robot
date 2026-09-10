@@ -1,8 +1,8 @@
-"""Validate and calibrate observations before they enter the World Model.
+"""在观测进入 World Model 之前对其进行校验与标定。
 
-The adapter deliberately owns no detector and writes no ``WorldState`` facts.
-It turns one untrusted Observation mapping into a contract-shaped observation
-``WorldEvent`` only after every boundary check succeeds.
+该适配器有意不拥有检测器，也不写入任何 ``WorldState`` 事实。只有全部
+边界检查通过后，它才会把一份不可信的 Observation 映射转换为契约形状
+的观测 ``WorldEvent``。
 """
 
 from __future__ import annotations
@@ -36,12 +36,12 @@ _QUATERNION_TOLERANCE = 1e-6
 
 
 class ObservationRejected(ValueError):
-    """An observation failed a fail-closed ingestion boundary check."""
+    """某观测未能通过失败即拒绝的接入边界检查。"""
 
 
 @dataclass(frozen=True)
 class CalibrationRecord:
-    """One approved rigid transform for a camera calibration revision."""
+    """某相机标定版本的一个已获批准的刚性变换。"""
 
     camera_id: str
     revision: str
@@ -73,7 +73,7 @@ class CalibrationRecord:
 
 
 class ObservationIngestionAdapter:
-    """Emit only validated, fresh and calibrated observation events."""
+    """只输出已校验、新鲜且已完成标定的观测事件。"""
 
     def __init__(
         self,
@@ -136,10 +136,10 @@ class ObservationIngestionAdapter:
         pose_units: str,
         sequence_no: int,
     ) -> WorldEvent:
-        """Validate one record, optionally deliver it, and return its WorldEvent.
+        """校验一条记录、按需投递它，并返回其 WorldEvent。
 
-        The injected sink is called only after the complete record has passed
-        structural, calibration, freshness and duplicate checks.
+        只有在完整记录通过结构、标定、新鲜度与重复检查之后，注入的
+        sink 才会被调用。
         """
         raw_record, observation = _parse_contract_observation(record)
         _require_non_empty(camera_id, "camera_id")

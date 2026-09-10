@@ -1,8 +1,8 @@
-"""Bounded, in-process health metrics and snapshots.
+"""受限的进程内健康指标与快照。
 
-The collector is deliberately pull-driven: an owner records samples from its
-existing component or OS adapter, then asks for a snapshot. There is no
-monitoring thread, network exporter, or unbounded time-series buffer here.
+采集器有意采用拉取驱动：由所有者（owner）从现有组件
+或操作系统（OS）适配器记录采样，然后再请求快照。
+这里没有监控线程、网络导出器，也没有无界时间序列缓冲区。
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ from typing import Any
 
 
 class MetricError(ValueError):
-    """Raised when a metric or sample violates the monitoring contract."""
+    """当某个指标或采样违反监控契约时抛出。"""
 
 
 class MetricKind(StrEnum):
@@ -505,7 +505,7 @@ DEFAULT_SPECS = (
 
 
 class MetricRegistry:
-    """Fixed metric definitions; no dynamic production registration."""
+    """固定指标定义；生产环境不支持动态注册。"""
 
     def __init__(self, specs: tuple[MetricSpec, ...] = DEFAULT_SPECS) -> None:
         if (
@@ -533,7 +533,7 @@ class MetricRegistry:
 
 
 class SystemMetrics:
-    """Thread-safe bounded metric storage with a Prometheus text projection."""
+    """线程安全的受限指标存储，支持 Prometheus 文本格式输出。"""
 
     def __init__(
         self,
@@ -767,7 +767,7 @@ def _format_labels(labels: tuple[tuple[str, str], ...]) -> str:
 
 
 class HealthSnapshotCollector:
-    """Evaluate current fixed-registry samples without owning a scheduler."""
+    """评估当前固定注册表中的采样，而不持有调度器。"""
 
     def __init__(
         self,
@@ -885,7 +885,7 @@ def _worst(states: list[HealthStatus]) -> HealthStatus:
 
 
 class LinuxHealthAdapter:
-    """Pull bounded host metrics from injectable procfs/sysfs readers."""
+    """从可注入的 procfs/sysfs 读取器中拉取受限主机指标。"""
 
     def __init__(
         self,
@@ -964,7 +964,7 @@ class LinuxHealthAdapter:
 
 
 class ComponentHealthAdapter:
-    """Pull a bounded set of component or ROS-diagnostic readers."""
+    """拉取一组受限的组件或 ROS 诊断读取器。"""
 
     def __init__(self, source: str, readers: Mapping[str, Callable[[], object]]) -> None:
         if type(source) is not str or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.:-]{0,63}", source):

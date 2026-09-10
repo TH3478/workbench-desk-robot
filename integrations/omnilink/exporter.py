@@ -1,4 +1,4 @@
-"""One-way export of safe run summaries into OmniLink bookmarks."""
+"""将安全的运行摘要单向导出为 OmniLink 书签。"""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ class RunSummaryExporter:
         self.backend_base_url = backend_base_url.rstrip("/")
 
     def export(self, summary: dict[str, Any]) -> dict[str, Any]:
-        """Export only the public projection; raw events and payloads stay local."""
+        """仅导出公开投影；原始事件与载荷保留在本地。"""
         run_id = summary.get("run_id")
         if not isinstance(run_id, str) or not run_id:
             raise ValueError("summary.run_id must be a non-empty string")

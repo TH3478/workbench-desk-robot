@@ -1,9 +1,9 @@
-"""Standard-library SocketCAN transport for the bounded CAN runtime.
+"""基于标准库的 SocketCAN 传输层，服务于受限 CAN 运行时。
 
-This module owns one AF_CAN/CAN_RAW file descriptor and no worker, queue or
-lifecycle state machine.  ``DeviceRuntime`` remains the owner of those
-concerns; :class:`SocketCANTransport` only translates the Linux
-``struct can_frame`` boundary into immutable :class:`CanFrame` values.
+本模块只持有 1 个 AF_CAN/CAN_RAW 文件描述符，不包含 worker、队列或
+生命周期状态机。``DeviceRuntime`` 仍是这些关注点的所有者；
+:class:`SocketCANTransport` 只负责把 Linux ``struct can_frame`` 边界
+翻译成不可变的 :class:`CanFrame` 值。
 """
 
 from __future__ import annotations
@@ -46,8 +46,8 @@ CAN_FILTER_STRUCT = struct.Struct("=II")
 CAN_ERR_FILTER_STRUCT = struct.Struct("=I")
 RXQ_OVFL_STRUCT = struct.Struct("=I")
 CAN_FRAME_SIZE = CAN_FRAME_STRUCT.size
-# Linux SocketCAN constants are absent on Windows, but keeping their ABI values
-# available lets injected fake sockets exercise the pure framing logic there.
+# Linux 的 SocketCAN 常量在 Windows 上不存在，但保留其 ABI 值
+# 可以让注入的假 socket 在那里演练纯组帧逻辑。
 AF_CAN = getattr(socket, "AF_CAN", 29)
 CAN_RAW = getattr(socket, "CAN_RAW", 1)
 SOL_CAN_RAW = getattr(socket, "SOL_CAN_RAW", 101)
@@ -59,30 +59,30 @@ SCM_TIMESTAMPNS = getattr(socket, "SCM_TIMESTAMPNS", SO_TIMESTAMPNS)
 SO_RXQ_OVFL = getattr(socket, "SO_RXQ_OVFL", 40)
 SCM_RXQ_OVFL = SO_RXQ_OVFL
 CAN_RAW_ERR_FILTER = getattr(socket, "CAN_RAW_ERR_FILTER", 2)
-# Linux ``struct timespec`` is two signed 64-bit fields on the supported
-# amd64 image.  Keep the wire layout explicit so a Windows host cannot make
-# an eight-byte test fixture look like a complete timestamp.
+# 在受支持的 amd64 镜像上，Linux ``struct timespec``
+# 由两个有符号 64 位字段组成。
+# 显式保留线缆布局，以免 Windows 主机把 8 字节的
+# 测试固定装置（test fixture）误当成完整时间戳。
 _TIMESPEC_STRUCT = struct.Struct("=qq")
 _CAN_FLAG_MASK = CAN_EFF_FLAG | CAN_RTR_FLAG | CAN_ERR_FLAG
 
 
 class SocketCANError(CanTransportError):
-    """A SocketCAN operation failed for an environmental or link reason."""
+    """某个 SocketCAN 操作因环境或链路原因失败。"""
 
 
 class SocketCANFrameError(CanTransportFrameError):
-    """A raw SocketCAN record is malformed and is rejected before Wire V1 decode."""
+    """原始 SocketCAN 记录格式不合法，在 Wire V1 解码前即被拒绝。"""
 
 
 @dataclass(frozen=True)
 class SocketCANFilter:
-    """A typed SocketCAN raw filter.
+    """带类型的 SocketCAN 原始过滤器。
 
-    ``mask`` applies to the arbitration-id bits.  The frame-kind flags are
-    automatically included in the kernel mask so a standard filter cannot
-    accidentally consume an extended or RTR frame.  Error frames use
-    ``CAN_RAW_ERR_FILTER`` separately: Linux assigns the same bit value to
-    ``CAN_ERR_FLAG`` and ``CAN_INV_FILTER`` in ``can_filter.can_id``.
+    ``mask`` 作用于仲裁 ID 位。帧类型标志会自动并入内核掩码，使标准过滤器
+    不会意外吞掉扩展帧或 RTR 帧。错误帧单独使用 ``CAN_RAW_ERR_FILTER``:
+    在 ``can_filter.can_id`` 中，Linux 为 ``CAN_ERR_FLAG`` 与 ``CAN_INV_FILTER``
+    分配了相同的位值。
     """
 
     arbitration_id: int
@@ -113,8 +113,8 @@ class SocketCANFilter:
 
     @property
     def raw_can_mask(self) -> int:
-        # CAN_ERR_FLAG is also CAN_INV_FILTER in the kernel filter ABI.  It
-        # must only be used through CAN_RAW_ERR_FILTER for error frames.
+        # 在内核过滤器 ABI 中，CAN_ERR_FLAG 同时也是 CAN_INV_FILTER。
+        # 它只能通过 CAN_RAW_ERR_FILTER 用于错误帧。
         return self.mask | CAN_EFF_FLAG | CAN_RTR_FLAG
 
     def pack(self) -> bytes:
@@ -122,7 +122,7 @@ class SocketCANFilter:
 
 
 def pack_socketcan_frame(frame: CanFrame) -> bytes:
-    """Encode one classic CAN frame using Linux ``struct can_frame`` layout."""
+    """按 Linux ``struct can_frame`` 布局编码 1 个经典 CAN 帧。"""
 
     if not isinstance(frame, CanFrame):
         raise SocketCANFrameError("SocketCAN send requires a CanFrame")
@@ -174,7 +174,7 @@ def unpack_socketcan_frame(
     observed_monotonic_ts: float | None = None,
     observed_wall_ts: float | None = None,
 ) -> CanFrame:
-    """Decode one complete classic CAN record and preserve its frame flags."""
+    """解码 1 条完整的经典 CAN 记录，并保留其帧标志。"""
 
     if not isinstance(payload, bytes):
         raise SocketCANFrameError("SocketCAN receive payload must be bytes")
@@ -232,13 +232,12 @@ def unpack_socketcan_frame(
 
 
 class SocketCANTransport:
-    """One bounded, synchronous AF_CAN/CAN_RAW transport port.
+    """1 个受限的、同步的 AF_CAN/CAN_RAW 传输端口。
 
-    Construction is side-effect free.  ``open`` owns exactly one raw socket;
-    ``receive`` uses ``poll`` followed by ``recvmsg`` and never creates a
-    background worker or an adapter-local queue.  CAN bus restart remains a
-    CAN-core/network-admin operation; the optional recovery probe tells the
-    adapter that an operator or supervisor has completed that operation.
+    构造过程无副作用。``open`` 只持有 1 个原始 socket；``receive`` 先 ``poll``
+    再 ``recvmsg``，从不创建后台 worker 或适配器本地队列。CAN 总线重启仍属于
+    CAN 核心/网络管理员的运维操作；可选的恢复探针（recovery probe）用于告知
+    适配器：操作员或监管进程已完成该操作。
     """
 
     def __init__(
@@ -453,7 +452,7 @@ class SocketCANTransport:
         )
 
     def recover(self) -> bool:
-        """Acknowledge an externally completed CAN-core restart, if configured."""
+        """若已配置，则确认外部完成的 CAN 核心重启。"""
 
         if not self.is_open or self._recovery_probe is None:
             return False
@@ -487,8 +486,8 @@ def _validate_name(value: str, name: str) -> str:
 
 def _resolve_poll_api(poller_factory: Callable[[], Any] | None) -> tuple[Callable[[], Any], int, int]:
     resolved_factory = poller_factory if poller_factory is not None else getattr(select, "poll", None)
-    # POSIX poll bit values are stable; use them for injected pollers on
-    # platforms whose select module omits one or more constants.
+    # POSIX poll 位值稳定；在 select 模块缺少一个或多个常量的平台上，
+    # 用它们支持注入的 poller。
     poll_input_mask = getattr(select, "POLLIN", 0x001)
     poll_error_masks = tuple(
         getattr(select, name, fallback)

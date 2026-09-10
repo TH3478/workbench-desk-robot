@@ -1,4 +1,4 @@
-"""K1-K10补充测试 - 修正版本"""
+"""K1-K10 补充测试 - 修正版本"""
 
 import json
 import tempfile
@@ -12,12 +12,12 @@ from workbench.kernel.schema_compiler import SchemaCompiler
 from workbench.kernel.version_registry import VersionRegistry
 
 # ============================================================================
-# Schema Compiler补充测试
+# Schema Compiler 补充测试
 # ============================================================================
 
 
 def test_schema_types():
-    """K1-K2: 基础Schema类型"""
+    """K1-K2：基础 Schema 类型"""
     with tempfile.TemporaryDirectory() as tmpdir:
         compiler = SchemaCompiler(Path(tmpdir))
         # 测试编译器的基础功能
@@ -25,18 +25,18 @@ def test_schema_types():
 
 
 def test_schema_nested():
-    """K1-K2: 嵌套Schema"""
+    """K1-K2：嵌套 Schema"""
     schema = {"type": "object", "properties": {"motor": {"type": "object"}}}
     assert "motor" in schema["properties"]
 
 
 # ============================================================================
-# Version Registry补充测试
+# Version Registry 补充测试
 # ============================================================================
 
 
 def test_registry_version():
-    """K3: 版本注册"""
+    """K3：版本注册"""
     with tempfile.TemporaryDirectory() as tmpdir:
         registry = VersionRegistry(Path(tmpdir) / "registry.json")
         registry.register_schema("motor", "1.0.0", {})
@@ -44,7 +44,7 @@ def test_registry_version():
 
 
 def test_registry_reloads_multiple_versions():
-    """K3: 多版本持久化。"""
+    """K3：多版本持久化。"""
     with tempfile.TemporaryDirectory() as tmpdir:
         registry_file = Path(tmpdir) / "registry.json"
         registry = VersionRegistry(registry_file)
@@ -56,25 +56,25 @@ def test_registry_reloads_multiple_versions():
 
 
 # ============================================================================
-# Communication补充测试
+# Communication 补充测试
 # ============================================================================
 
 
 def test_message_create():
-    """K4-K5: 创建消息"""
+    """K4-K5：创建消息"""
     msg = Message(payload={"cmd": "move"}, message_type="motor", version="1.0.0", actor="planner")
     assert msg.message_type == "motor"
 
 
 def test_message_serialize():
-    """K4-K5: 序列化消息"""
+    """K4-K5：序列化消息"""
     msg = Message(payload={"value": 100}, message_type="sensor", version="1.0.0", actor="hw")
     serialized = json.dumps(msg.to_dict())
     assert "sensor" in serialized
 
 
 def test_message_batch():
-    """K4-K5: 批量消息"""
+    """K4-K5：批量消息"""
     messages = []
     for i in range(10):
         msg = Message(payload={"id": i}, message_type="test", version="1.0.0", actor="batch")
@@ -83,12 +83,12 @@ def test_message_batch():
 
 
 # ============================================================================
-# Event Store补充测试
+# Event Store 补充测试
 # ============================================================================
 
 
 def test_event_append():
-    """K6-K7: 追加事件"""
+    """K6-K7：追加事件"""
     with tempfile.TemporaryDirectory() as tmpdir:
         store = EventStore(Path(tmpdir) / "events.jsonl", legacy_objects=True)
         store.append({"action": "start"})
@@ -96,7 +96,7 @@ def test_event_append():
 
 
 def test_event_multiple():
-    """K6-K7: 多个事件"""
+    """K6-K7：多个事件"""
     with tempfile.TemporaryDirectory() as tmpdir:
         store = EventStore(Path(tmpdir) / "events.jsonl", legacy_objects=True)
         for i in range(5):
@@ -105,7 +105,7 @@ def test_event_multiple():
 
 
 def test_event_replay():
-    """K6-K7: 事件重放"""
+    """K6-K7：事件重放"""
     with tempfile.TemporaryDirectory() as tmpdir:
         log_file = Path(tmpdir) / "events.jsonl"
 
@@ -119,12 +119,12 @@ def test_event_replay():
 
 
 # ============================================================================
-# Lifecycle补充测试
+# Lifecycle 补充测试
 # ============================================================================
 
 
 def test_lifecycle_basic():
-    """K8: 基础生命周期"""
+    """K8：基础生命周期"""
     manager = LifecycleManager()
     node = manager.create_node("test")
 
@@ -135,7 +135,7 @@ def test_lifecycle_basic():
 
 
 def test_lifecycle_multi_node():
-    """K8: 多节点生命周期"""
+    """K8：多节点生命周期"""
     manager = LifecycleManager()
     manager.create_node("k1")
     manager.create_node("k2")
@@ -151,7 +151,7 @@ def test_lifecycle_multi_node():
 
 
 def test_lifecycle_state_query():
-    """K8: 状态查询"""
+    """K8：状态查询"""
     manager = LifecycleManager()
     node = manager.create_node("test")
 
@@ -161,11 +161,11 @@ def test_lifecycle_state_query():
 
 
 def test_lifecycle_invalid_transition():
-    """K8: 无效转移"""
+    """K8：无效转移"""
     manager = LifecycleManager()
     node = manager.create_node("test")
 
-    # 从CREATED不能直接ACTIVATE
+    # 从 CREATED 不能直接 ACTIVATE
     result = node.activate()
     assert not result
 
@@ -176,7 +176,7 @@ def test_lifecycle_invalid_transition():
 
 
 def test_perf_message_creation():
-    """性能: 消息创建延迟"""
+    """性能：消息创建延迟"""
     start = time.time()
     for i in range(100):
         Message({"id": i}, "perf", "1.0.0", "test")
@@ -186,7 +186,7 @@ def test_perf_message_creation():
 
 
 def test_perf_event_append():
-    """性能: 事件追加延迟"""
+    """性能：事件追加延迟"""
     with tempfile.TemporaryDirectory() as tmpdir:
         store = EventStore(Path(tmpdir) / "perf.jsonl", legacy_objects=True)
 
@@ -198,7 +198,7 @@ def test_perf_event_append():
 
 
 def test_perf_lifecycle():
-    """性能: 生命周期转移"""
+    """性能：生命周期转移"""
     start = time.time()
     for _ in range(50):
         mgr = LifecycleManager()
@@ -216,7 +216,7 @@ def test_perf_lifecycle():
 
 def test_versioned_message_format():
     """版本化消息保留显式消息类型。"""
-    # 模拟v1消息
+    # 模拟 v1 消息
     msg = Message(payload={"legacy": "data"}, message_type="v1_message", version="1.0.0", actor="legacy_system")
     assert msg.message_type == "v1_message"
 
@@ -233,7 +233,7 @@ def test_event_object_format_replay():
 
 
 def test_registered_versions_coexist_without_implied_compatibility():
-    """多版本可共存; 不据此宣称自动兼容。"""
+    """多版本可共存；不据此宣称自动兼容。"""
     with tempfile.TemporaryDirectory() as tmpdir:
         registry = VersionRegistry(Path(tmpdir) / "compat.json")
 

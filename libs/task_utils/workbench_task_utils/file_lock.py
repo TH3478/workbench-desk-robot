@@ -1,4 +1,4 @@
-"""Cross-platform advisory file locking using only the Python standard library."""
+"""仅使用 Python 标准库实现的跨平台咨询式文件锁。"""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def _release_descriptor(descriptor: int) -> None:
 
 @contextmanager
 def exclusive_file_lock(lock_path: str | os.PathLike[str]) -> Iterator[None]:
-    """Hold an exclusive advisory lock for one persistent sidecar file."""
+    """为 1 个持久化的伴随（sidecar）文件持有排他的咨询式锁。"""
 
     path = _normalized_path(lock_path)
     os.makedirs(os.path.dirname(path), exist_ok=True)

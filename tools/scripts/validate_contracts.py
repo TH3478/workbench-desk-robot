@@ -1,18 +1,17 @@
-"""Validate every committed contract example against its schema and typed model.
+"""对照其 schema 与类型化模型，校验每一个已提交的契约示例。
 
-Independent checks run here:
-1. Every schema is registered (no schema without an example or a stated reason)
-2. All example files parse as valid JSON
-3. All required fields in schemas are also defined in properties
-4. All examples satisfy the required fields of their schema
-5. jsonschema Draft-2020-12 full structural validation (enum, type, allOf, $ref, etc.)
-6. Pydantic models accept their examples (runtime type check)
-7. Pydantic output satisfies the source schema and rejects omitted schema-required fields
-8. Template planner round-trips to JSON
+此处运行的独立检查：
+1. 每个 schema 都已注册（不允许出现既无示例又无书面理由的 schema）
+2. 所有示例文件都能解析为合法 JSON
+3. schema 中的所有必填字段都在 properties 中定义
+4. 所有示例都满足其 schema 的必填字段
+5. jsonschema Draft-2020-12 完整结构校验（enum、类型、allOf、$ref 等）
+6. Pydantic 模型接受其示例（运行时类型检查）
+7. Pydantic 输出满足源 schema，并拒绝省略 schema 必填字段的输入
+8. 模板规划器可以往返序列化为 JSON
 
-The jsonschema check (5) is what was missing before — it catches enum mismatches,
-type errors, range violations and $ref constraints that a manual field-presence check
-silently ignores.
+第 5 项 jsonschema 检查正是此前缺失的一环——它能够捕获 enum 不匹配、
+类型错误、范围越界与 $ref 约束，而这些是手工字段存在性检查会静默忽略的。
 """
 
 import json
@@ -53,7 +52,7 @@ EXAMPLE_DIR = ROOT / "interfaces" / "examples"
 
 @dataclass(frozen=True)
 class SchemaCoverage:
-    """Executable ownership record for one committed JSON Schema."""
+    """单个已提交 JSON Schema 的可执行归属记录。"""
 
     stem: str
     example: str | None
@@ -64,9 +63,8 @@ class SchemaCoverage:
     replacement_validation: str | None = None
 
 
-# Every schema MUST have one entry. A missing example/model is allowed only when
-# all three exemption fields are populated; this keeps a reviewed escape hatch
-# without allowing an untracked None entry to silently reduce coverage.
+# 每个 schema 都必须有一条记录。只有在三个豁免字段全部填写时才允许缺少 example/model；
+# 这样既保留了经过评审的逃生通道，又不会让未经追踪的 None 记录悄悄降低覆盖率。
 SCHEMA_COVERAGE = (
     SchemaCoverage("action_result", "action-result-place-confirmed.json", ActionResult),
     SchemaCoverage("emotion_intent", "emotion-intent-uncertain.json", EmotionIntent),
@@ -123,7 +121,7 @@ def check_every_schema_is_registered() -> list[str]:
 
 
 def check_schema_properties_have_model_fields() -> list[str]:
-    """Catch declared schema fields that a mapped object model would reject."""
+    """捕获映射的对象模型会拒绝的已声明 schema 字段。"""
     problems = []
     for entry in sorted(SCHEMA_COVERAGE, key=lambda item: item.stem):
         if entry.model is None:
@@ -165,9 +163,8 @@ def check_examples_parse() -> list[str]:
 
 
 def check_required_fields_are_defined() -> list[str]:
-    """A schema that requires a field it never defines will silently accept a
-    document missing that field. This check exists because two schemas shipped
-    with exactly that defect."""
+    """要求一个从未定义字段的 schema 会静默接受缺少该字段的文档。
+    此检查的存在是因为有两个 schema 曾经恰好带着该缺陷发布。"""
     problems = []
     for path in sorted(SCHEMA_DIR.glob("*.schema.json")):
         schema = json.loads(path.read_text(encoding="utf-8"))
@@ -197,8 +194,8 @@ def check_examples_satisfy_required() -> list[str]:
 
 
 def _schema_registry() -> "Registry":
-    """Register every schema under its bare filename so a sibling $ref such as
-    {"$ref": "pose.schema.json"} resolves without a network fetch."""
+    """以裸文件名注册每个 schema，使 {"$ref": "pose.schema.json"} 这类同级 $ref
+    无需网络抓取即可解析。"""
     resources = []
     for path in sorted(SCHEMA_DIR.glob("*.schema.json")):
         contents = json.loads(path.read_text(encoding="utf-8"))
@@ -207,9 +204,8 @@ def _schema_registry() -> "Registry":
 
 
 def check_jsonschema_validation() -> list[str]:
-    """Full Draft-2020-12 structural validation: enum, type, range, allOf, $ref.
-    This is what the previous version was missing — the checks above only verify
-    field presence, not field values.
+    """Draft-2020-12 完整结构校验：enum、类型、范围、allOf、$ref。
+    这正是此前版本所缺失的——上面的检查只验证字段是否存在，不验证字段值。
     """
     if not HAS_JSONSCHEMA:
         return [
@@ -226,7 +222,7 @@ def check_jsonschema_validation() -> list[str]:
         schema_path = SCHEMA_DIR / f"{stem}.schema.json"
         example_path = EXAMPLE_DIR / example_name
         if not example_path.is_file():
-            continue  # already reported by check_examples_satisfy_required
+            continue  # 已由 check_examples_satisfy_required 报告
 
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
         example = json.loads(example_path.read_text(encoding="utf-8"))
@@ -258,7 +254,7 @@ def check_models_accept_examples() -> list[str]:
 
 
 def check_bidirectional_model_validation() -> list[str]:
-    """Validate both the committed JSON input and canonical model output."""
+    """同时校验已提交的 JSON 输入与规范的模型输出。"""
     if not HAS_JSONSCHEMA:
         return ["jsonschema is not installed; bidirectional contract validation is unavailable"]
 

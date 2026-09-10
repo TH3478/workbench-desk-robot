@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a release-gate report from three evaluation metric files."""
+"""根据三个评测指标文件生成发布闸门报告。"""
 
 import argparse
 import json

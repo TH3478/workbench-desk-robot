@@ -1,4 +1,4 @@
-"""Bounded RLSOK Shadow evaluation integration."""
+"""受限的 RLSOK Shadow 评估集成。"""
 
 from .shadow import (
     RlsokShadowError,

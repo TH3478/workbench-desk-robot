@@ -1,4 +1,4 @@
-"""K1-K10 integration test"""
+"""K1-K10 集成测试"""
 
 import json
 import sys
@@ -21,7 +21,7 @@ def test_all():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
 
-        # K1-K2: Schema compiler
+        # K1-K2：Schema 编译器
         schema_dir = tmp_path / "schemas"
         schema_dir.mkdir()
         (schema_dir / "action.schema.json").write_text(
@@ -59,18 +59,18 @@ def test_all():
         assert compiler.verify_type_compatibility() == {"action": True}
         print("[PASS] K1-K2 Schema compiler")
 
-        # K4-K5: Communication
+        # K4-K5：通信层
         msg = Message(payload={"action": "grasp"}, message_type="action", version="1.0.0", actor="planner")
         assert msg.checksum
         print("[PASS] K4-K5 Communication")
 
-        # K3: Version registry
+        # K3：版本注册表
         registry = VersionRegistry(tmp_path / "versions.json")
         registry.register_schema("action", "1.0.0", {"type": "object"})
         assert VersionRegistry(tmp_path / "versions.json").versions["action"]["1.0.0"]
         print("[PASS] K3 Version registry")
 
-        # K6-K7: Event Store
+        # K6-K7：事件库
         log = tmp_path / "events.jsonl"
         store = EventStore(log, legacy_objects=True)
         for i in range(10):
@@ -87,7 +87,7 @@ def test_all():
         assert reopened.replay(from_checkpoint=restart_checkpoint) == []
         print("[PASS] K6-K7 Event Store")
 
-        # K8: Lifecycle
+        # K8：生命周期
         manager = LifecycleManager()
         manager.create_node("kernel")
         assert manager.startup_sequence()
@@ -98,7 +98,7 @@ def test_all():
         assert manager.get_all_states()["kernel"] == "finalized"
         print("[PASS] K8 Lifecycle")
 
-        # K9-K10: Bootstrap
+        # K9-K10：启动引导
         bootstrapper = SystemBootstrapper(tmp_path / "config", offline=True)
         assert bootstrapper.bootstrap()
         (tmp_path / "config").mkdir()
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
 
 def test_schema_compiler_all_types():
-    """K1-K2: 所有基础Schema类型"""
+    """K1-K2：所有基础 Schema 类型"""
     tests = [
         ({"type": "string"}, "str"),
         ({"type": "integer"}, "int"),
@@ -156,13 +156,13 @@ def test_schema_compiler_all_types():
 
 
 def test_schema_compiler_nested():
-    """K1-K2: 嵌套对象"""
+    """K1-K2：嵌套对象"""
     schema = {"type": "object", "properties": {"motor": {"type": "object"}}}
     assert _python_type(schema) == "dict[str, Any]"
 
 
 def test_version_registry_persists_versions():
-    """K3: 多版本持久化。"""
+    """K3：多版本持久化。"""
     with tempfile.TemporaryDirectory() as tmpdir:
         registry_file = Path(tmpdir) / "registry.json"
         registry = VersionRegistry(registry_file)
@@ -174,21 +174,21 @@ def test_version_registry_persists_versions():
 
 
 def test_message_serialization():
-    """K4-K5: 消息序列化"""
+    """K4-K5：消息序列化"""
     msg = Message({}, "motor", "1.0.0", "planner")
     serialized = json.dumps(msg.to_dict())
     assert "motor" in serialized
 
 
 def test_message_checksum_is_deterministic():
-    """K4-K5: 相同消息产生相同校验和。"""
+    """K4-K5：相同消息产生相同校验和。"""
     msg1 = Message({}, "test", "1.0.0", "a")
     msg2 = Message({}, "test", "1.0.0", "a")
     assert msg1.checksum == msg2.checksum
 
 
 def test_event_store_persistence():
-    """K6-K7: 事件持久化"""
+    """K6-K7：事件持久化"""
     with tempfile.TemporaryDirectory() as tmpdir:
         log_file = Path(tmpdir) / "test.jsonl"
         store1 = EventStore(log_file, legacy_objects=True)
@@ -199,7 +199,7 @@ def test_event_store_persistence():
 
 
 def test_event_store_checkpoint():
-    """K6-K7: 事件检查点"""
+    """K6-K7：事件检查点"""
     with tempfile.TemporaryDirectory() as tmpdir:
         store = EventStore(Path(tmpdir) / "test.jsonl", legacy_objects=True)
         for i in range(5):
@@ -214,7 +214,7 @@ def test_event_store_checkpoint():
 
 
 def test_event_store_scale():
-    """K6-K7: 大规模事件"""
+    """K6-K7：大规模事件"""
     with tempfile.TemporaryDirectory() as tmpdir:
         store = EventStore(Path(tmpdir) / "large.jsonl", legacy_objects=True)
         for i in range(100):
@@ -223,7 +223,7 @@ def test_event_store_scale():
 
 
 def test_lifecycle_sequence():
-    """K8: 完整生命周期"""
+    """K8：完整生命周期"""
     lm = LifecycleManager()
     node = lm.create_node("motor")
     assert node.configure()
@@ -233,7 +233,7 @@ def test_lifecycle_sequence():
 
 
 def test_lifecycle_invalid():
-    """K8: 无效转移"""
+    """K8：无效转移"""
     lm = LifecycleManager()
     result = lm.create_node("motor").activate()
     assert not result
@@ -241,7 +241,7 @@ def test_lifecycle_invalid():
 
 # 性能测试
 def test_perf_schema():
-    """性能: Schema编译"""
+    """性能：Schema 编译"""
     import time
 
     start = time.time()
@@ -252,7 +252,7 @@ def test_perf_schema():
 
 
 def test_perf_message():
-    """性能: 消息创建"""
+    """性能：消息创建"""
     import time
 
     start = time.time()
@@ -263,7 +263,7 @@ def test_perf_message():
 
 
 def test_perf_event():
-    """性能: 事件追加"""
+    """性能：事件追加"""
     import time
 
     with tempfile.TemporaryDirectory() as tmpdir:

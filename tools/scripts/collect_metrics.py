@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract reproducible metrics from one version's JSON Lines event logs."""
+"""从单个版本的 JSON Lines 事件日志中提取可复现的指标。"""
 
 import argparse
 import hashlib

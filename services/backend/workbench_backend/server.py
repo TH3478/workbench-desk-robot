@@ -35,7 +35,7 @@ RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 
 class BoundedThreadingHTTPServer(ThreadingHTTPServer):
-    """Threading HTTP server with a hard bound before worker creation."""
+    """在创建工作线程之前就施加硬性上限的多线程 HTTP 服务器。"""
 
     daemon_threads = True
 
@@ -63,8 +63,8 @@ class BoundedThreadingHTTPServer(ThreadingHTTPServer):
             )
             try:
                 request.sendall(response)
-                # Half-close after the complete response to avoid a TCP reset
-                # on Windows when the client has no unread request body.
+                # 完整响应后做半关闭，避免客户端没有未读请求体时在
+                # Windows 上触发 TCP 重置。
                 request.shutdown(socket.SHUT_WR)
             except OSError:
                 pass
@@ -210,7 +210,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _drain_request_body(self, content_length: int) -> bool:
-        """Consume a bounded rejected body so the 405 response is not reset."""
+        """消费有界且被拒绝的请求体，以免 405 响应被重置。"""
         if content_length == 0:
             return True
         previous_timeout = self.connection.gettimeout()

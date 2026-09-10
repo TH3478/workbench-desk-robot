@@ -1,4 +1,4 @@
-"""APP1: Production system manager"""
+"""APP1：生产系统管理器"""
 
 import logging
 import threading
@@ -15,7 +15,7 @@ class ComponentState(Enum):
 
 
 class SystemManager:
-    """Thread-safe lifecycle management"""
+    """线程安全的生命周期管理"""
 
     def __init__(self):
         self.components = {}

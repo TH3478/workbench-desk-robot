@@ -1,4 +1,4 @@
-"""Shared validation and aggregation for performance evidence."""
+"""性能证据的共享校验与聚合逻辑。"""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ MEMORY_UNITS = {
 
 
 def software_environment() -> dict[str, str]:
-    """Return the stable environment identity shared by software reports."""
+    """返回软件报告共享的稳定环境标识。"""
     return {
         "platform": platform.platform(),
         "python": platform.python_version(),

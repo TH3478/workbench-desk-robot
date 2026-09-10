@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare local-software performance reports against a baseline and budget."""
+"""将本地软件性能报告与基线和预算进行比较。"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from typing import Any
 
 
 class PerformanceGateError(ValueError):
-    """A report or policy cannot be used as trustworthy comparison evidence."""
+    """报告或策略无法用作可信的比较证据。"""
 
 
 def _reject_constant(value: str) -> None:

@@ -1,4 +1,4 @@
-"""Append-only event storage with a strict JSONL compatibility path and SQLite backend."""
+"""仅追加（append-only）的事件存储，带严格 JSONL 兼容路径与 SQLite 后端。"""
 
 from __future__ import annotations
 
@@ -33,15 +33,15 @@ SCHEMA_VERSION = 1
 
 
 class EventStoreError(ValueError):
-    """Raised when persisted evidence cannot be written or replayed safely."""
+    """当持久化证据无法安全写入或回放时抛出。"""
 
 
 class EventStore:
-    """Persist one contiguous event run.
+    """持久化一个连续的事件运行。
 
-    SQLite is the default for database-looking paths (``.sqlite3``, ``.sqlite``
-    and ``.db``). ``.jsonl`` remains an explicit compatibility format so old
-    logs can be inspected and migrated without silently changing their meaning.
+    对形似数据库的路径（``.sqlite3``、``.sqlite`` 与 ``.db``），SQLite 是默认后端。
+    ``.jsonl`` 仍作为显式兼容格式保留，使旧日志可以在不悄然改变其含义的情况下
+    被检查与迁移。
     """
 
     def __init__(self, log_file: Path, *, legacy_objects: bool = False, backend: str | None = None):
@@ -208,7 +208,7 @@ class EventStore:
         self.append_many([event])
 
     def append_many(self, new_events: list[dict[str, Any]]) -> None:
-        """Append a validated batch in one transaction."""
+        """在单个事务中追加一批经过校验的事件。"""
         if any(not isinstance(event, dict) for event in new_events):
             raise TypeError("event must be an object")
         try:
@@ -292,7 +292,7 @@ class EventStore:
             return True
 
     def backup(self, destination: Path) -> Path:
-        """Create a checksummed SQLite snapshot and return its manifest path."""
+        """创建带校验和的 SQLite 快照，并返回其清单（manifest）路径。"""
         if self.backend != "sqlite":
             raise EventStoreError("backup requires the SQLite backend")
         destination = Path(destination)
@@ -329,7 +329,7 @@ class EventStore:
 
     @classmethod
     def restore(cls, snapshot: Path, destination: Path) -> EventStore:
-        """Verify a snapshot before atomically replacing a destination database."""
+        """在原子替换目标数据库之前先校验快照。"""
         snapshot = Path(snapshot)
         destination = Path(destination)
         if snapshot.resolve() == destination.resolve():
@@ -371,7 +371,7 @@ class EventStore:
 
 
 def migrate_jsonl(source: Path, destination: Path) -> EventStore:
-    """Migrate a strict JSONL log into SQLite after validating every event."""
+    """在逐条校验每个事件后，把严格 JSONL 日志迁移到 SQLite。"""
     source_store = EventStore(source, backend="jsonl")
     events = source_store.replay()
     destination = Path(destination)

@@ -1,4 +1,4 @@
-"""K3: durable schema version registry."""
+"""K3：持久化的 schema 版本注册表。"""
 
 import json
 import os
@@ -12,11 +12,11 @@ from workbench_task_utils import exclusive_file_lock
 
 
 class VersionRegistryError(ValueError):
-    """Raised when a version registry cannot be loaded or written safely."""
+    """当版本注册表无法被安全加载或写入时抛出。"""
 
 
 class VersionConflictError(VersionRegistryError):
-    """Raised when a published schema version is registered with new content."""
+    """当已发布的 schema 版本以新内容被注册时抛出。"""
 
 
 class VersionRegistry:
@@ -47,7 +47,7 @@ class VersionRegistry:
 
     @contextmanager
     def _file_lock(self):
-        """Serialize registry writers across threads and processes."""
+        """跨线程与进程串行化注册表写入。"""
         try:
             self.registry_file.parent.mkdir(parents=True, exist_ok=True)
             lock_path = self.registry_file.with_name(f".{self.registry_file.name}.lock")

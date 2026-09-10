@@ -7,15 +7,15 @@ from workbench_contracts import ActionType, SemanticAction, TaskGraph, TaskStep
 
 from .tool_registry import ToolRegistry
 
-# Module-level singleton — created once, shared by all planner entry points.
+# 模块级单例——只创建一次，由所有规划器入口共享。
 _tool_registry = ToolRegistry()
 
 
 def _validate_plan(plan: TaskGraph) -> None:
-    """Validate every step in *plan* against the tool registry.
+    """对照工具注册表校验 *plan* 中的每一步。
 
-    Raises ValueError on the first validation failure so a buggy planner
-    (or model) cannot silently emit an invalid action.
+    Raises ValueError：在首个校验失败处即抛出，使有缺陷的规划器
+    （或模型）无法静默产出无效动作。
     """
     for step in plan.steps:
         result = _tool_registry.validate(step.action)
@@ -67,7 +67,7 @@ def _validate_entity_ids(values: Sequence[str], label: str) -> tuple[str, ...]:
 
 
 def _unique_step_tokens(entity_ids: Sequence[str], *, preserve_legacy_tokens: bool = False) -> dict[str, str]:
-    """Create readable, deterministic tokens without collapsing distinct IDs."""
+    """生成可读且确定性的标记，不会把不同 ID 折叠到一起。"""
     tokens: dict[str, str] = {}
     used: set[str] = set()
     for index, entity_id in enumerate(entity_ids, start=1):
@@ -626,7 +626,7 @@ def build_policy_routed_parcel_plan(
 
 
 def build_template_plan(goal: str, block_id: str = "red_block", tray_id: str = "tray") -> TaskGraph:
-    """Route a bounded offline goal to semantic actions; never emit joint or firmware commands."""
+    """将受限的离线目标路由为语义动作；绝不输出关节或固件命令。"""
     task_id = classify_template_task(goal)
     if task_id == "task-kit-three-parts":
         plan = build_kitting_plan(goal)

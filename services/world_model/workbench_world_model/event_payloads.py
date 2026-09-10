@@ -1,4 +1,4 @@
-"""Typed validation for state-affecting WorldEvent payloads."""
+"""对影响状态的 WorldEvent 载荷进行类型化校验。"""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ MAX_ATTRIBUTES_JSON_BYTES = 4096
 
 
 class WorldEventPayloadValidationError(ValueError):
-    """A state-affecting WorldEvent payload is malformed or inconsistent."""
+    """影响状态的 WorldEvent 载荷格式错误或不一致。"""
 
 
 def _strict_non_blank_string(value: object, field_name: str) -> str:
@@ -99,7 +99,7 @@ def _normalize_observation_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 class TypedActionResult(ActionResult):
-    """World Model's strict specialization of the shared ActionResult model."""
+    """World Model 对共享 ActionResult 模型的严格特化。"""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -172,7 +172,7 @@ def normalize_action_result_payload(
     event_evidence_refs: object | None = None,
     expected_action_id: object | None = None,
 ) -> ActionResult:
-    """Validate ActionResult fields and their enclosing event correlations."""
+    """校验 ActionResult 字段及其与外层事件的关联性。"""
 
     try:
         adapted = TypedActionResult.model_validate(payload)
@@ -196,7 +196,7 @@ def normalize_world_event(
     *,
     expected_action_id: object | None = None,
 ) -> WorldEvent:
-    """Return a detached event with validated, normalized state-affecting payload."""
+    """返回一个载荷已完成校验与标准化的分离事件。"""
 
     if event.event_type is WorldEventType.OBSERVATION:
         payload = _normalize_observation_payload(event.payload)

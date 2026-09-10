@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compute stage P50/P95 from simulation or attested hardware JSONL logs."""
+"""从仿真或经确认（attested）的硬件 JSONL 日志中计算各阶段的 P50/P95。"""
 
 import argparse
 import json

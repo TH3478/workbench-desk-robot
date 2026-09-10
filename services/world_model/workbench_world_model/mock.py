@@ -4,7 +4,7 @@ _FIXED_TIMESTAMP = "2026-08-04T00:00:16.200Z"
 
 
 def mock_world_state(run_id: str) -> dict[str, object]:
-    """Return deterministic, Schema-shaped WorldState data for development consumers."""
+    """为开发期消费方返回确定性的、符合 Schema 形状的 WorldState 数据。"""
     return {
         "run_id": run_id,
         "sequence_no": 31,
@@ -52,7 +52,7 @@ def mock_world_state(run_id: str) -> dict[str, object]:
 
 
 def mock_verification(status: str) -> dict[str, object]:
-    """Return deterministic, Schema-shaped VerificationResult data."""
+    """返回确定性的、符合 Schema 形状的 VerificationResult 数据。"""
     outcomes = {
         "confirmed": {
             "claim": "red_block inside tray",

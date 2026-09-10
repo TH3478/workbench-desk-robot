@@ -1,9 +1,8 @@
-"""Parameter schemas for the seven semantic-action tools.
+"""七种语义动作工具的参数 schema。
 
-Each tool is defined by its ActionType, a set of required and optional parameter
-keys, and the expected Python type for each parameter value.  The schemas here
-are the single source of truth consumed by ToolRegistry; A5 (Policy Validator)
-reads the same registry to build its whitelist.
+每个工具由其 ActionType、一组必需与可选的参数键、以及每个参数值的
+期望 Python 类型定义。这里的 schema 是 ToolRegistry 消费的唯一事实
+来源；A5（Policy Validator）读取同一注册表来构建其白名单。
 """
 
 from __future__ import annotations
@@ -11,7 +10,7 @@ from __future__ import annotations
 from workbench_contracts import ActionType
 
 # ---------------------------------------------------------------------------
-# per-tool definitions
+# 各工具定义
 # ---------------------------------------------------------------------------
 
 TOOL_SCHEMAS: dict[ActionType, dict[str, object]] = {
@@ -136,11 +135,10 @@ TOOL_SCHEMAS: dict[ActionType, dict[str, object]] = {
     },
 }
 
-# Additional per-tool runtime constraints.
+# 各工具的附加运行时约束。
 EXPRESS_EMOTION_STATES: frozenset[str] = frozenset({"idle", "thinking", "uncertain", "pleased"})
 
-# Allow-list for observe attributes (used by policy-based planners and validated
-# by the registry).
+# 观测属性白名单（供基于策略的规划器使用，并接受注册表校验）。
 KNOWN_OBSERVE_ATTRIBUTES: frozenset[str] = frozenset(
     {
         "presence",

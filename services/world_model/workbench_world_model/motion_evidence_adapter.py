@@ -1,8 +1,7 @@
-"""Persist Motion action-result execution events in the World Model store.
+"""在 World Model 存储中持久化 Motion 的动作结果执行事件。
 
-The adapter is structurally compatible with Motion's append-only EvidenceSink,
-but deliberately has no runtime import of the separately packaged
-workbench_motion module.
+该适配器在结构上兼容 Motion 的仅追加 EvidenceSink，但有意不在运行时
+导入独立打包的 workbench_motion 模块。
 """
 
 from __future__ import annotations
@@ -22,17 +21,17 @@ REFERENCE_PREFIX = "world-event:"
 
 
 class MotionEvidenceValidationError(ValueError):
-    """The execution event cannot be represented as a valid ActionResult event."""
+    """该执行事件无法表示为有效的 ActionResult 事件。"""
 
 
 class SerializableExecutionEvent(Protocol):
     def as_serializable(self) -> dict[str, Any]:
-        """Return the event as detached strict-JSON-ready data."""
+        """以可直接用于严格 JSON 的分离数据形式返回事件。"""
         ...
 
 
 class MotionEvidenceAdapter:
-    """World Model-owned durable implementation of Motion's EvidenceSink."""
+    """由 World Model 拥有的 Motion EvidenceSink 持久化实现。"""
 
     def __init__(self, store: SQLiteEventStore) -> None:
         self._store = store

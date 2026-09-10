@@ -1,9 +1,8 @@
-# OmniLink integration
+# OmniLink 集成
 
-This is an optional HTTP adapter to a separately hosted [OmniLink AI](https://github.com/vivekmaru/omnilink-ai) instance.
-It adds knowledge search, RAG questions, and one-way export of Workbench run summaries.
+这是一个可选的 HTTP 适配器，连接单独托管的 [OmniLink AI](https://github.com/vivekmaru/omnilink-ai) 实例。它增加知识搜索、RAG 问答与 Workbench 运行摘要的单向导出。
 
-## Quick start
+## 快速开始
 
 ```python
 from integrations.omnilink import OmniLinkClient, RunSummaryExporter
@@ -14,10 +13,6 @@ answer = client.ask("Which calibration notes mention the gripper?")
 RunSummaryExporter(client, "http://127.0.0.1:8080").export(run_summary)
 ```
 
-Keep OmniLink in its own process/container and database. The adapter never sends raw event streams,
-`TaskGraph`, `SemanticAction`, action results, camera data, or safety state. OmniLink being unavailable
-must not block Workbench's offline/control paths; catch `OmniLinkError` at optional call sites.
+让 OmniLink 留在它自己的进程/容器与数据库中。适配器绝不发送原始事件流、`TaskGraph`、`SemanticAction`、动作结果、相机数据或安全状态。OmniLink 不可用不得阻塞 Workbench 的离线/控制路径；在可选的调用点捕获 `OmniLinkError`。
 
-Before deployment, bind OmniLink to a private interface, put authentication/TLS/rate limiting in front
-of it, allowlist outbound URLs, pin the OmniLink commit/image digest, and review its license and Gemini
-data handling policy.
+部署前，把 OmniLink 绑定到私有接口，在前面放置认证/TLS/速率限制，对出站 URL 做白名单，钉定 OmniLink 的 commit/镜像摘要，并评审其许可证与 Gemini 数据处理政策。

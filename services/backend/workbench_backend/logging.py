@@ -6,7 +6,7 @@ from typing import Any, TextIO
 
 
 class StructuredLogger:
-    """Emit one stable JSON object per line for simulation and hardware services."""
+    """为仿真与硬件服务按行输出稳定的 JSON 对象。"""
 
     def __init__(self, service: str, stream: TextIO | None = None) -> None:
         self.service = service

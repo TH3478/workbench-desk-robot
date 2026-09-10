@@ -367,7 +367,7 @@ def verify_parcel_policy(
     parcel_manifest: Mapping[str, Mapping[str, str]] | None = None,
     manifest_id: str | None = None,
 ) -> VerificationResult:
-    """Verify routes derived from observed parcel attributes, never caller claims."""
+    """验证由观测到的包裹属性推导出的路由，绝不采信调用方的声明。"""
     required = _required_entity_set(parcel_ids, "parcel policy")
     if not isinstance(pickup_shelf_id, str) or not pickup_shelf_id.strip():
         raise ValueError("pickup_shelf_id must be non-empty")

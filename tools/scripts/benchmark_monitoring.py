@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure bounded collector cost and emit synthetic snapshot evidence."""
+"""测量受限采集器的成本，并产出合成快照证据。"""
 
 import argparse
 import json

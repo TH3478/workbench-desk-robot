@@ -1,4 +1,4 @@
-"""Truthful simulation-only pilot runner for an OmniSim World Harness."""
+"""面向 OmniSim World Harness 的如实仿真专用 pilot 运行器。"""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ _TRUSTED_PHYSICS_SOURCES = frozenset({"sidecar", "engine_log"})
 
 @dataclass(frozen=True)
 class OmniSimPilotResult:
-    """Published result for one isolated OmniSim probe."""
+    """一次隔离式 OmniSim 探针的对外发布结果。"""
 
     run_id: str
     status: str
@@ -30,7 +30,7 @@ class OmniSimPilotResult:
 
 
 class OmniSimPilotRunner:
-    """Load, reset, step, and record one bounded OmniSim world probe."""
+    """加载、复位、步进并记录一次受限的 OmniSim 世界探针。"""
 
     def __init__(self, client: OmniSimClient) -> None:
         self._client = client

@@ -9,11 +9,11 @@ from .event_payloads import normalize_world_event
 
 
 class EventStoreIntegrityError(RuntimeError):
-    """The requested append conflicts with the persisted event stream."""
+    """所请求的追加与已持久化的事件流冲突。"""
 
 
 class EventStoreMigrationRequiredError(EventStoreIntegrityError):
-    """The database schema cannot be upgraded safely by this store."""
+    """该存储无法安全升级此数据库 schema。"""
 
 
 class SQLiteEventStore:
@@ -144,10 +144,10 @@ class SQLiteEventStore:
         payload: dict[str, Any],
         evidence_refs: list[str] | None = None,
     ) -> WorldEvent:
-        """Atomically allocate the next per-run sequence and append an event.
+        """原子地分配每个运行的下一个序号并追加一个事件。
 
-        Exact retries reuse the persisted sequence and event. Reusing an
-        event_id with different canonical content fails closed.
+        完全相同的重试复用已持久化的序号与事件。以不同的规范化内容
+        复用 event_id 时失败即拒绝。
         """
         references = list(evidence_refs or [])
         preflight = normalize_world_event(

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check physical bring-up prerequisites without touching robot controls."""
+"""在不触碰机器人控制的前提下，检查实体启动调试（bring-up）的前置条件。"""
 
 import argparse
 import json

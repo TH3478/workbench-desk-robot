@@ -1,9 +1,6 @@
-# RLSOK Shadow pilot
+# RLSOK Shadow 试点
 
-This optional adapter invokes RLSOK's standalone `shadow` command and then its
-`verify-evidence` command. It accepts blocked decisions as truthful results but
-requires both `controllerGoalsAttempted: 0` and `hardwareSignalSent: false` in
-the command summary and every evidence entry.
+这个可选适配器调用 RLSOK 的独立 `shadow` 命令，然后调用其 `verify-evidence` 命令。它把被阻止的决策当作真实结果接受，但要求命令摘要与每条证据条目中同时满足 `controllerGoalsAttempted: 0` 与 `hardwareSignalSent: false`。
 
 ```python
 from pathlib import Path
@@ -18,18 +15,6 @@ result = RlsokShadowRunner().run(
 print(result.decision, result.evidence_ref)
 ```
 
-The adapter never calls `rlsok run`, a ROS controller, or Workbench's
-`ActionAdapter`. Standalone Shadow is a compatibility and evidence-format
-probe; it is not the Hosted Cloud approval flow and does not prove this robot's
-controller binding. The official live path still requires Ubuntu 24.04, ROS 2
-Jazzy, Fast DDS, a supported controller graph, Cloud pairing, and independent
-approval. RLSOK does not replace E-stop, watchdog, controller limits, motion
-planning, or physical validation.
+适配器绝不调用 `rlsok run`、ROS 控制器或 Workbench 的 `ActionAdapter`。独立 Shadow 是兼容性与证据格式探针；它不是 Hosted Cloud 审批流程，也不能证明本机器人的控制器绑定。官方正式路径仍需要 Ubuntu 24.04、ROS 2 Jazzy、Fast DDS、受支持的控制器图、Cloud 配对与独立审批。RLSOK 不替代 E-stop、看门狗、控制器限位、运动规划或物理验证。
 
-The checked-in Workbench fixture is bound to the current planner, contracts,
-policy validator, execution controller, arm Xacro, controller configuration,
-and a recorded five-test integration result. Its release status is `tested`,
-not `approved`, so a current RLSOK runtime blocks it with
-`release_not_approved` before considering dispatch. It also intentionally omits
-an execution-configuration binding, which remains a second blocker after any
-future independent approval.
+入库的 Workbench 固定装置绑定当前规划器、契约、policy 验证器、执行控制器、机械臂 Xacro、控制器配置，以及一条已记录的五测试集成结果。其发布状态是 `tested` 而非 `approved`，因此当前 RLSOK 运行时会在考虑派发之前以 `release_not_approved` 阻止它。它还刻意省略执行配置绑定，这在未来任何独立审批之后仍是第二个阻塞项。

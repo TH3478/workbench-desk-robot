@@ -31,7 +31,7 @@ class ExpressionMachine:
 
 
 def derive_expression(events: list[dict[str, Any]]) -> ExpressionState:
-    """Derive expression from facts; it never decides whether the task succeeded."""
+    """由事实推导表情；它从不判断任务是否成功。"""
     if not events:
         return ExpressionState.IDLE
     latest_verification = next(

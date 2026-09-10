@@ -1,4 +1,4 @@
-"""Small reproducible SQLite event-store benchmark; no third-party runner needed."""
+"""小型的、可复现的 SQLite 事件库基准测试；无需第三方运行器。"""
 
 from __future__ import annotations
 

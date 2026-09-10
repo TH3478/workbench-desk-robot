@@ -30,7 +30,7 @@ def _update_location(state: WorldState, entity_id: str, location: str, evidence_
 
 
 def apply_event(state: WorldState, event: WorldEvent) -> WorldState:
-    """Apply one ordered event. Re-applying an event is idempotent."""
+    """应用一个有序事件。重复应用同一事件是幂等的。"""
     event = normalize_world_event(event)
     if event.event_id in state.applied_event_ids:
         return state
@@ -97,7 +97,7 @@ def _validated_event_stream(run_id: str, events: list[WorldEvent]) -> list[World
 
 
 def reduce_events(run_id: str, events: list[WorldEvent]) -> WorldState:
-    """Preflight the full stream, fold exact duplicates, then replay by ascending sequence_no."""
+    """预检完整事件流、折叠完全重复项，再按 sequence_no 升序回放。"""
     ordered_events = _validated_event_stream(run_id, events)
     state = WorldState(run_id=run_id)
     for event in ordered_events:

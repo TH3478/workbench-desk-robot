@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare evaluation versions with confidence intervals using only stdlib."""
+"""仅用标准库，以置信区间比较各评估版本。"""
 
 import argparse
 import json

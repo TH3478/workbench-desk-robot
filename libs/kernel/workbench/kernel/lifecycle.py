@@ -1,4 +1,4 @@
-"""K8: ROS 2 Lifecycle 状态机"""
+"""K8：ROS 2 Lifecycle 状态机"""
 
 from enum import Enum
 

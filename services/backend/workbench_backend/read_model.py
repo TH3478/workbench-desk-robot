@@ -42,15 +42,15 @@ MAX_READ_ATTEMPTS = 2
 
 
 class ReadModelError(ValueError):
-    """Raised when a persisted run cannot be trusted as an ordered event stream."""
+    """当持久化的运行无法作为有序事件流被信任时抛出。"""
 
 
 class ReadModelResponseTooLarge(ReadModelError):
-    """Raised when a local or remote projection exceeds the HTTP contract."""
+    """当本地或远程投影超出 HTTP 契约时抛出。"""
 
 
 class _DuplicateJsonKey(ValueError):
-    """Raised before JSON decoding can silently discard an object member."""
+    """在 JSON 解码可能静默丢弃对象成员之前抛出。"""
 
 
 def _object_without_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -214,7 +214,7 @@ class DashboardReadModel:
 
 
 class RemoteDashboardReadModel(DashboardReadModel):
-    """Read the simulation event source over HTTP for a split-host controller."""
+    """通过 HTTP 读取仿真事件源，供分离主机部署的控制器使用。"""
 
     data_source = "remote-simulation-event-source"
 
@@ -291,7 +291,7 @@ class RemoteDashboardReadModel(DashboardReadModel):
 
 
 class UnavailableRemoteDashboardReadModel(RemoteDashboardReadModel):
-    """Keep the Backend live while rejecting an invalid remote configuration."""
+    """在拒绝无效远程配置的同时保持 Backend 存活。"""
 
     def __init__(self, error: Exception) -> None:
         self._configuration_error = str(error)

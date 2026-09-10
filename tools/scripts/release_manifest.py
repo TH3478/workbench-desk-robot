@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write release provenance tying the tested image and SBOM to a commit."""
+"""写入发布溯源（provenance）信息，将已测试镜像与 SBOM 关联到某个提交。"""
 
 import argparse
 import hashlib

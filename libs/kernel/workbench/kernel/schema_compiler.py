@@ -1,4 +1,4 @@
-"""K1-K2: compile object-shaped JSON Schemas to Python and TypeScript models."""
+"""K1-K2：把对象形态的 JSON Schema 编译为 Python 与 TypeScript 模型。"""
 
 import json
 import keyword
@@ -44,19 +44,19 @@ RUNTIME_SCHEMA_KEYWORDS = (ROOT_KEYWORDS | PROPERTY_KEYWORDS) - {"$ref"} | {
 
 
 class SchemaValidationError(ValueError):
-    """Raised when a value does not satisfy the supported schema subset."""
+    """当某个值不满足受支持的 schema 子集时抛出。"""
 
 
 class _SchemaMismatch(SchemaValidationError):
-    """Raised when a value does not match an otherwise valid schema."""
+    """当某个值与一个本身合法的 schema 不匹配时抛出。"""
 
 
 class _MalformedSchema(SchemaValidationError):
-    """Raised when a schema cannot be evaluated safely."""
+    """当某个 schema 无法被安全求值时抛出。"""
 
 
 def _is_finite_json_number(value: Any) -> bool:
-    """Return whether value is a JSON number representable by the runtime validator."""
+    """返回 value 是否为运行时验证器可表示的 JSON 数值。"""
     if type(value) is int:
         return True
     return type(value) is float and math.isfinite(value)
@@ -238,7 +238,7 @@ def validate_schema_instance(
     location: str = "$",
     _reference_stack: frozenset[str] = frozenset(),
 ) -> None:
-    """Validate one value against the JSON Schema subset the compiler supports."""
+    """对照编译器支持的 JSON Schema 子集校验一个值。"""
     _validate_schema_structure(schema, references=references, location=location)
     if not isinstance(schema, dict):
         raise _MalformedSchema(f"schema at {location} must be an object")
@@ -699,7 +699,7 @@ def _conditional_validators(schema: dict[str, Any], name: str) -> tuple[list[str
 
 
 class SchemaCompiler:
-    """Generate importable Pydantic models and valid TypeScript interfaces."""
+    """生成可导入的 Pydantic 模型与合法的 TypeScript 接口。"""
 
     def __init__(self, schemas_dir: Path):
         self.schemas_dir = schemas_dir

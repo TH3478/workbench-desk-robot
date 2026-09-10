@@ -1,4 +1,4 @@
-"""Run an external RLSOK standalone Shadow check and verify its evidence."""
+"""运行一次外部 RLSOK 独立 Shadow 检查并验证其证据。"""
 
 from __future__ import annotations
 
@@ -19,11 +19,11 @@ MAX_COMMAND_TOKENS = 16
 
 
 class RlsokShadowError(RuntimeError):
-    """RLSOK failed or returned output that cannot be trusted."""
+    """RLSOK 失败或返回了不可信的输出。"""
 
 
 class RlsokShadowUnavailable(RlsokShadowError):
-    """The configured RLSOK command could not be started."""
+    """无法启动所配置的 RLSOK 命令。"""
 
 
 class _DuplicateJsonKey(ValueError):
@@ -32,7 +32,7 @@ class _DuplicateJsonKey(ValueError):
 
 @dataclass(frozen=True)
 class RlsokShadowResult:
-    """Verified local record of one zero-dispatch Shadow evaluation."""
+    """单次零派发 Shadow 评估的已核验本地记录。"""
 
     decision: str
     reason: str
@@ -54,7 +54,7 @@ class _ProcessResult:
 
 
 class RlsokShadowRunner:
-    """Invoke only the standalone Shadow and evidence-verification commands."""
+    """仅调用独立 Shadow 与证据核验命令。"""
 
     def __init__(self, command: Sequence[str] = ("rlsok",), *, timeout_seconds: float = 30.0) -> None:
         tokens = tuple(command)
@@ -68,7 +68,7 @@ class RlsokShadowRunner:
         self._timeout_seconds = timeout_seconds
 
     def run(self, release_path: Path, proposal_path: Path, evidence_path: Path) -> RlsokShadowResult:
-        """Run Shadow, require zero dispatch, then verify the EvidenceBundle."""
+        """运行 Shadow、要求零派发，并核验 EvidenceBundle。"""
         release = _validate_input_file(release_path, "release")
         proposal = _validate_input_file(proposal_path, "proposal")
         evidence = Path(evidence_path).resolve()

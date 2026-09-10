@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run reproducible scenario evaluations without confusing fixtures for evidence."""
+"""运行可复现的场景评测，避免把固定装置误当作证据。"""
 
 import argparse
 import json
@@ -38,7 +38,7 @@ TIMESTAMP_WINDOW_SECONDS = 365 * 24 * 60 * 60
 
 
 class EvaluationInputError(ValueError):
-    """Raised before execution when an evaluation input is unsafe or ambiguous."""
+    """当评测输入不安全或存在歧义时，在执行前抛出。"""
 
 
 def validate_label(value: str, field: str) -> str:
@@ -84,7 +84,7 @@ def write_jsonl(path: Path, events: list[dict[str, Any]]) -> None:
 
 
 def scripted_events(version: str, manifest: dict[str, Any], commit: str, seed_base: int) -> list[dict[str, Any]]:
-    """Produce deterministic multi-task fixtures for pipeline and UI tests only."""
+    """仅为流水线与 UI 测试生成确定性的多任务固定装置。"""
     scenario_id = manifest["scenario_id"]
     task_id = manifest["task_id"]
     profile = TASK_PROFILES.get(task_id)

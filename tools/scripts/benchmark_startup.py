@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure compose build, process start, health and readiness phases."""
+"""测量 compose 构建、进程启动、健康检查与就绪等阶段的耗时。"""
 
 import argparse
 import json

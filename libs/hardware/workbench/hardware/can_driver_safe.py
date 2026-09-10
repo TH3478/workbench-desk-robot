@@ -1,4 +1,4 @@
-"""Bounded host-side CAN adapter hosted by the unified device runtime."""
+"""由统一设备运行时托管的受限主机侧 CAN 适配器。"""
 
 from __future__ import annotations
 
@@ -48,10 +48,10 @@ class CanLinkState(StrEnum):
 
 
 class DeviceRuntimeState(StrEnum):
-    """Lifecycle states owned by :class:`DeviceRuntime`.
+    """由 :class:`DeviceRuntime` 持有的生命周期状态。
 
-    CAN link health is deliberately represented separately by ``CanLinkState``.
-    An adapter must not use its link state as a second lifecycle owner.
+    CAN 链路健康有意用 ``CanLinkState`` 单独表示。
+    适配器不得把链路状态当作第二个生命周期所有者。
     """
 
     NEW = "new"
@@ -163,15 +163,15 @@ class CanFrameValidationError(ValueError):
 
 
 class CanTransportError(Exception):
-    """Base exception exposed by an injected transport port."""
+    """注入式传输端口暴露的基础异常。"""
 
 
 class CanTransportFrameError(CanTransportError):
-    """A received transport record is malformed but the link may remain usable."""
+    """收到的传输记录格式不合法，但链路可能仍可用。"""
 
 
 class CanTransportBackpressureError(CanTransportError):
-    """The kernel transport temporarily rejected a frame because it is full."""
+    """内核传输因已满而暂时拒绝了一个帧。"""
 
 
 class CanBusOffError(CanTransportError):
@@ -198,7 +198,7 @@ class CanFrame:
 
     @property
     def effective_dlc(self) -> int:
-        """Return the wire DLC, including an RTR frame's data-less length."""
+        """返回线缆 DLC，包括 RTR 帧无数据时的长度。"""
 
         return len(self.data) if self.dlc is None else self.dlc
 
@@ -300,7 +300,7 @@ class CanDiagnostic:
 
 @dataclass(frozen=True)
 class CanTransportEnvelope:
-    """Immutable ingress metadata for the future typed runtime boundary."""
+    """面向未来带类型运行时边界的不可变入口元数据。"""
 
     source: str
     interface: str
@@ -317,13 +317,11 @@ class CanTransportEnvelope:
 
 @dataclass(frozen=True)
 class CanExternalRecord:
-    """Immutable, read-only projection safe for an external observer.
+    """对外部观察者安全的不可变只读投影。
 
-    The projection intentionally contains only validated scalar frame fields
-    and immutable bytes.  It never carries a socket, device handle, callback,
-    or writable protocol object.  ``frame_valid`` means that the complete
-    Wire V1 validation succeeded; ``exposure_allowed`` is true only for an
-    accepted inbound event.
+    该投影有意只包含经过校验的标量帧字段与不可变字节。它从不携带 socket、
+    设备句柄、回调或可写的协议对象。``frame_valid`` 表示完整的 Wire V1
+    校验已通过；``exposure_allowed`` 仅在入站事件被接受时为真。
     """
 
     status: CanReceiveStatus
@@ -449,7 +447,7 @@ class CanExternalRecord:
         return None if self.data is None else self.data.hex()
 
     def to_dict(self) -> dict[str, object | None]:
-        """Serialize only the safe projection fields for a JSON consumer."""
+        """只为 JSON 消费方序列化安全的投影字段。"""
 
         return {
             "status": self.status.value,
@@ -540,7 +538,7 @@ Subscriber = Callable[[CanWireFrame], None]
 
 
 class DeviceAdapter(Protocol):
-    """Port implemented by a hardware adapter hosted by ``DeviceRuntime``."""
+    """由 ``DeviceRuntime`` 托管的硬件适配器所实现的端口。"""
 
     def configure(self) -> bool: ...
 
@@ -554,12 +552,11 @@ class DeviceAdapter(Protocol):
 
 
 class DeviceRuntime:
-    """The single lifecycle, worker, queue and callback owner for one device.
+    """单个设备的唯一生命周期、worker、队列与回调所有者。
 
-    The runtime is transport-neutral at its public boundary.  The CAN adapter
-    uses the private command/telemetry/health plane methods while holding this
-    one lock; it never creates another worker, cancellation token, lifecycle
-    state machine, queue or subscriber registry.
+    运行时在其公共边界处与传输无关。CAN 适配器在持有同一把锁时使用私有的
+    命令/遥测/健康平面方法；它从不创建另一个 worker、取消令牌、生命周期
+    状态机、队列或订阅者注册表。
     """
 
     def __init__(
@@ -610,9 +607,8 @@ class DeviceRuntime:
         self._shutdown_result: bool | None = None
         self._shutdown_timeout_reported = False
 
-        # These are the only runtime data planes.  The adapter's protocol
-        # state is protected by this same lock, so admission and dispatch are
-        # atomic with respect to lifecycle transitions.
+        # 这些是仅有的运行时数据平面。适配器的协议状态由同一把锁保护，
+        # 因此准入与派发对生命周期转换而言是原子的。
         self._command_queue: deque[object] = deque()
         self._telemetry_queue: deque[object] = deque()
         self._health_queue: deque[object] = deque()
@@ -630,7 +626,7 @@ class DeviceRuntime:
 
     @property
     def lock(self) -> threading.RLock:
-        """The shared state lock used by the adapter port."""
+        """适配器端口使用的共享状态锁。"""
 
         return self._lock
 
@@ -680,7 +676,7 @@ class DeviceRuntime:
             return self._worker is not None and self._worker.is_alive()
 
     def start(self, *, background: bool = True) -> bool:
-        """Run configure/activate once and optionally start the one worker."""
+        """执行一次 configure/activate，并可选地启动唯一的 worker。"""
 
         if type(background) is not bool:
             raise ValueError("background must be a bool")
@@ -694,7 +690,7 @@ class DeviceRuntime:
 
         try:
             configured = bool(self._adapter.configure())
-        except Exception as exc:  # noqa: BLE001 - adapter faults are isolated at the runtime boundary.
+        except Exception as exc:  # noqa: BLE001 - 适配器故障在运行时边界处被隔离。
             self._notify_adapter_error(exc)
             configured = False
 
@@ -707,7 +703,7 @@ class DeviceRuntime:
             elif self._state is DeviceRuntimeState.CONFIGURING:
                 self._state = DeviceRuntimeState.CONFIGURED
             else:
-                # shutdown() won the race; do not activate an abandoned port.
+                # shutdown() 赢得了竞争；不要激活被放弃的端口。
                 configured = False
 
         if not configured:
@@ -726,7 +722,7 @@ class DeviceRuntime:
 
         try:
             activated = bool(self._adapter.activate())
-        except Exception as exc:  # noqa: BLE001 - adapter faults are isolated at the runtime boundary.
+        except Exception as exc:  # noqa: BLE001 - 适配器故障在运行时边界处被隔离。
             self._notify_adapter_error(exc)
             activated = False
 
@@ -750,14 +746,14 @@ class DeviceRuntime:
         return False
 
     def _finish_start(self, activated: bool) -> None:
-        """Dispose an activation that failed or lost a shutdown race."""
+        """处置一个失败或在 shutdown 竞争中落败的激活。"""
 
         with self._lock:
             shutdown_requested = self._shutdown_requested or self._state is DeviceRuntimeState.DEACTIVATING
             self._state = DeviceRuntimeState.DEACTIVATING
-            # Keep the lifecycle marker until the owner has completed cleanup.
-            # A concurrent shutdown must not mistake this hand-off window for
-            # an idle runtime and start a second cleanup owner.
+            # 保留生命周期标记，直到所有者完成清理。
+            # 并发 shutdown 不得把这个交接窗口误认为空闲运行时，
+            # 从而启动第二个清理所有者。
             self._cleanup_in_progress = True
         cleanup_ok = self._run_cleanup(activated)
         with self._lock:
@@ -773,7 +769,7 @@ class DeviceRuntime:
                 self._state = DeviceRuntimeState.FAILED
 
     def service_once(self, *, receive_timeout_s: float = 0.0) -> object | None:
-        """Let the runtime's sole worker, or a manual caller, poll the adapter."""
+        """让运行时唯一的 worker（或手动调用方）轮询适配器。"""
 
         if (
             isinstance(receive_timeout_s, bool)
@@ -789,16 +785,15 @@ class DeviceRuntime:
                 raise RuntimeError("manual service is unavailable while the background worker is active")
         try:
             return self._adapter.poll(float(receive_timeout_s))
-        except Exception as exc:  # noqa: BLE001 - an adapter exception fails closed without killing the process.
+        except Exception as exc:  # noqa: BLE001 - 适配器异常按失败即拒绝处理，且不会终止进程。
             self._notify_adapter_error(exc)
             return None
 
     def shutdown(self, *, timeout_s: float) -> bool:
-        """Cancel, join and clean up exactly once.
+        """恰好一次地取消、join 并清理。
 
-        ``False`` means a worker or cleanup operation is still outstanding;
-        callers may retry.  A terminal ``CLEANED`` runtime returns the stored
-        cleanup result instead of treating the state label as success.
+        ``False`` 表示仍有 worker 或清理操作未完成；调用方可以重试。
+        处于终态 ``CLEANED`` 的运行时返回保存的清理结果，而不是把状态标签当作成功。
         """
 
         if (
@@ -821,9 +816,9 @@ class DeviceRuntime:
                 self._state = DeviceRuntimeState.DEACTIVATING
             worker = self._worker
 
-            # The adapter may be in a blocking configure/activate/recovery
-            # operation.  It owns that call until it returns; cleanup must not
-            # race it.  The operation's completion path calls the finalizer.
+            # 适配器可能正处于阻塞的 configure/activate/recovery 操作中。
+            # 在返回之前，该调用归它所有；清理不得与之竞争。
+            # 该操作的完成路径会调用终结器。
 
         shutdown_hook = getattr(self._adapter, "on_runtime_shutdown_requested", None)
         if shutdown_hook is not None:
@@ -847,9 +842,8 @@ class DeviceRuntime:
         if cleanup_in_progress:
             return False
         if operation_pending:
-            # Cancellation has been accepted, but the operation that owns the
-            # blocking call has not completed its cleanup yet.  Report failure
-            # until a later call observes CLEANED and its stored result.
+            # 取消已被接受，但拥有该阻塞调用的操作尚未完成其清理。
+            # 先报告失败，直到后续调用观察到 CLEANED 及其保存的结果。
             return False
         if cleaned:
             return shutdown_result is True
@@ -884,7 +878,7 @@ class DeviceRuntime:
         if activated or self._configured:
             try:
                 deactivate_ok = bool(self._adapter.deactivate())
-            except Exception as exc:  # noqa: BLE001 - cleanup must report failure, not revive the adapter.
+            except Exception as exc:  # noqa: BLE001 - 清理必须报告失败，而不是让适配器复活。
                 self._notify_adapter_error(exc)
                 deactivate_ok = False
         try:
@@ -895,7 +889,7 @@ class DeviceRuntime:
         return deactivate_ok and cleanup_ok
 
     def begin_operation(self) -> int | None:
-        """Reserve a blocking adapter operation against concurrent cleanup."""
+        """为阻塞的适配器操作预留保护，防止并发清理。"""
 
         with self._lock:
             if self._state is not DeviceRuntimeState.ACTIVE:
@@ -931,7 +925,7 @@ class DeviceRuntime:
         on_priority: Callable[[], None],
         on_backpressure: Callable[[], CanSendResult],
     ) -> CanSendResult:
-        """Atomically admit an adapter command into the runtime command plane."""
+        """原子地把一条适配器命令准入运行时命令平面。"""
 
         with self._lock:
             result = admit()
@@ -964,11 +958,10 @@ class DeviceRuntime:
         self._command_queue.appendleft(item)
 
     def publish_telemetry(self, item: object) -> None:
-        """Place one item in the bounded telemetry plane.
+        """把 1 条数据放入受限的遥测平面。
 
-        Producers and dispatchers are separate operations even though the CAN
-        poll path drains one item immediately after ingress. This keeps the
-        capacity and drop policy real for adapters that batch or fan in data.
+        生产者与派发器是相互独立的操作，即使 CAN 轮询路径在入口后立即
+        排空 1 条数据。这使容量与丢弃策略对批量或扇入数据的适配器保持真实。
         """
 
         with self._lock:
@@ -982,7 +975,7 @@ class DeviceRuntime:
             return self._telemetry_queue.popleft() if self._telemetry_queue else None
 
     def publish_external(self, item: object) -> None:
-        """Publish one immutable external record to the bounded read plane."""
+        """把 1 条不可变外部记录发布到受限的读取平面。"""
 
         with self._lock:
             if len(self._external_queue) >= self._external_capacity:
@@ -1037,7 +1030,7 @@ class DeviceRuntime:
             return False
 
     def dispatch_callbacks(self, wire_frame: CanWireFrame) -> int:
-        """Dispatch a locked snapshot and return the number of failures."""
+        """派发一个加锁快照，并返回失败数量。"""
 
         with self._lock:
             handlers = tuple(self._subscribers.get(wire_frame.frame.arbitration_id, ()))
@@ -1045,7 +1038,7 @@ class DeviceRuntime:
         for handler in handlers:
             try:
                 handler(wire_frame)
-            except Exception as exc:  # noqa: BLE001 - callback failures cannot terminate the runtime worker.
+            except Exception as exc:  # noqa: BLE001 - 回调失败不能终止运行时 worker。
                 callback_errors += 1
                 logger.error("CAN subscriber failed: %s", exc)
         return callback_errors
@@ -1057,9 +1050,8 @@ class DeviceRuntime:
                     return
             result = self.service_once(receive_timeout_s=self._poll_interval_s)
             if result is None:
-                # An adapter may be faulted and deliberately return without
-                # touching its file descriptor.  Keep that fail-closed state
-                # bounded instead of spinning a CPU while waiting for repair.
+                # 适配器可能处于故障状态，故意在不触碰文件描述符的情况下返回。
+                # 保持该失败即拒绝状态受限，而不是在等待修复时空转 CPU。
                 self._cancel_event.wait(self._poll_interval_s)
 
     def _notify_adapter_error(self, error: Exception) -> None:
@@ -1080,7 +1072,7 @@ class DeviceRuntime:
 
 
 def decode_can_frame(frame: object) -> CanWireFrame:
-    """Validate and decode one complete MCU CAN Wire V1 frame."""
+    """校验并解码 1 个完整的 MCU CAN Wire V1 帧。"""
 
     if not isinstance(frame, CanFrame):
         raise CanFrameValidationError("transport frames must be CanFrame instances")
@@ -1207,7 +1199,7 @@ def _validate_frame_timestamps(frame: CanFrame) -> None:
 
 
 def _validate_raw_can_id(frame: CanFrame) -> None:
-    """Reject stale or contradictory raw ID metadata before protocol use."""
+    """在协议使用前拒绝过期或矛盾的原始 ID 元数据。"""
 
     raw_can_id = frame.raw_can_id
     if raw_can_id is None:
@@ -1227,12 +1219,11 @@ def _validate_raw_can_id(frame: CanFrame) -> None:
 
 
 class SafeCANBus:
-    """CAN ``DeviceAdapter`` hosted by one shared :class:`DeviceRuntime`.
+    """由 1 个共享的 :class:`DeviceRuntime` 托管的 CAN ``DeviceAdapter``。
 
-    ``CanLinkState`` below is link/protocol health only.  Lifecycle, worker,
-    cancellation, bounded planes and callbacks belong to ``self._runtime``.
-    The small ``start``/``shutdown`` methods retained on this facade delegate
-    to that owner for compatibility with the original Issue #55 API.
+    下方的 ``CanLinkState`` 仅表示链路/协议健康。生命周期、worker、取消、
+    受限平面与回调都归 ``self._runtime`` 所有。为兼容最初的 Issue #55 API，
+    本外观（facade）上保留的少量 ``start``/``shutdown`` 方法会委托给该所有者。
     """
 
     def __init__(
@@ -1284,9 +1275,8 @@ class SafeCANBus:
             self,
             command_capacity=self._config.queue_capacity,
             telemetry_capacity=self._config.telemetry_capacity,
-            # ``diagnostic_capacity`` is the legacy public name for the
-            # health-plane bound.  Honor either setting when callers provide
-            # the newer explicit health capacity.
+            # ``diagnostic_capacity`` 是健康平面上限的历史公开名称。
+            # 当调用方提供更新的显式健康容量时，任一设置都会生效。
             health_capacity=min(self._config.health_capacity, self._config.diagnostic_capacity),
             max_subscribers_per_id=self._config.max_subscribers_per_id,
             poll_interval_s=self._config.poll_interval_s,
@@ -1295,7 +1285,7 @@ class SafeCANBus:
 
     @property
     def runtime(self) -> DeviceRuntime:
-        """The unified runtime owner used by this adapter."""
+        """本适配器使用的统一运行时所有者。"""
 
         return self._runtime
 
@@ -1410,13 +1400,13 @@ class SafeCANBus:
         return CanSendResult(CanSendStatus.BACKPRESSURE, reason, wire_frame.command_id)
 
     def configure(self) -> bool:
-        """Prepare protocol state; the runtime owns the transition itself."""
+        """准备协议状态；转换本身由运行时负责。"""
 
         with self._runtime.lock:
             return self._state is CanLinkState.NEW
 
     def activate(self) -> bool:
-        """Open the injected port without creating a worker."""
+        """打开注入端口，但不创建 worker。"""
 
         with self._runtime.lock:
             self._state = CanLinkState.STARTING
@@ -1435,13 +1425,13 @@ class SafeCANBus:
         return True
 
     def service_once(self, *, receive_timeout_s: float = 0.0) -> CanReceiveResult | None:
-        """Compatibility facade delegating polling to the unified runtime."""
+        """兼容外观，把轮询委托给统一运行时。"""
 
         result = self._runtime.service_once(receive_timeout_s=receive_timeout_s)
         return result if isinstance(result, CanReceiveResult) else None
 
     def poll(self, receive_timeout_s: float) -> CanReceiveResult | None:
-        """Poll one transport cycle; called only by ``DeviceRuntime``."""
+        """轮询一个传输周期；仅由 ``DeviceRuntime`` 调用。"""
 
         with self._runtime.lock:
             if self._state not in {CanLinkState.ACTIVE, CanLinkState.STOPPING}:
@@ -1519,7 +1509,7 @@ class SafeCANBus:
         return self._runtime.shutdown(timeout_s=timeout)
 
     def deactivate(self) -> bool:
-        """Close the port after the runtime has cancelled and joined its worker."""
+        """在运行时取消并 join 其 worker 后关闭端口。"""
 
         with self._runtime.lock:
             if self._runtime._shutdown_requested or self._state not in {
@@ -1546,7 +1536,7 @@ class SafeCANBus:
         return True
 
     def cleanup(self) -> bool:
-        """Destroy adapter data planes without reopening or replaying traffic."""
+        """销毁适配器数据平面，不重新打开或回放流量。"""
 
         with self._runtime.lock:
             self._runtime._clear_commands_locked()
@@ -1581,13 +1571,13 @@ class SafeCANBus:
         return tuple(item for item in self._runtime.health_records() if isinstance(item, CanDiagnostic))
 
     def take_external_record(self) -> CanExternalRecord | None:
-        """Read one immutable external record without exposing transport state."""
+        """读取 1 条不可变外部记录，而不暴露传输状态。"""
 
         item = self._runtime.take_external()
         return item if isinstance(item, CanExternalRecord) else None
 
     def external_records(self) -> tuple[CanExternalRecord, ...]:
-        """Return a snapshot of the bounded read-only external projection."""
+        """返回受限只读外部投影的快照。"""
 
         return tuple(item for item in self._runtime.external_records() if isinstance(item, CanExternalRecord))
 
@@ -1596,7 +1586,7 @@ class SafeCANBus:
             self._handle_transport_error(CanLinkLostError(str(error)))
 
     def on_runtime_shutdown_requested(self) -> None:
-        """Cancel protocol work without closing a port used by a live poll."""
+        """取消协议工作，而不关闭正在被活动轮询使用的端口。"""
 
         with self._runtime.lock:
             self._runtime._clear_commands_locked()
@@ -2330,11 +2320,11 @@ class SafeCANBus:
         self._transport_backpressure_attempts = 0
 
     def _safe_monotonic_locked(self) -> float:
-        """Timestamp diagnostics even when the injected clock is the fault."""
+        """即使注入的时钟本身发生故障，也为诊断记录时间戳。"""
 
         try:
             value = self._clock.monotonic()
-        except Exception:  # noqa: BLE001 - diagnostics must remain bounded during clock failure.
+        except Exception:  # noqa: BLE001 - 时钟故障期间诊断必须保持受限。
             return time.monotonic()
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(value):
             return time.monotonic()
@@ -2363,7 +2353,7 @@ def _safe_external_frame_metadata(
     *,
     frame_valid: bool,
 ) -> dict[str, object | None]:
-    """Project malformed ingress metadata without reproducing the fault."""
+    """投影格式不合法的入口元数据，而不复现该故障。"""
 
     if not isinstance(frame, CanFrame):
         return {

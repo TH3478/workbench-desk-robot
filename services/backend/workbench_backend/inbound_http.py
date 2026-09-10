@@ -1,4 +1,4 @@
-"""Fail-closed policy for the controller's inbound HTTP deployment boundary."""
+"""控制器入站 HTTP 部署边界的失败即拒绝策略。"""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ _ALLOWED_ADDRESS_RANGES: tuple[IpNetwork, ...] = (
 
 
 class InboundHttpConfigurationError(ValueError):
-    """Raised before serving when the inbound trust boundary is ambiguous."""
+    """当入站信任边界不明确时，在开始提供服务之前抛出。"""
 
 
 def _parse_address(value: str, *, setting: str) -> IpAddress:
@@ -65,7 +65,7 @@ def _parse_allowlist(value: str | None) -> tuple[IpNetwork, ...]:
 
 @dataclass(frozen=True)
 class InboundHttpPolicy:
-    """Validated controller publication and reverse-proxy source policy."""
+    """经校验的控制器发布与反向代理来源策略。"""
 
     published_host: str = "127.0.0.1"
     trust_mode: str = LOCAL_TRUST_MODE

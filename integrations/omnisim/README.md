@@ -1,10 +1,6 @@
-# OmniSim pilot
+# OmniSim 试点
 
-This optional pilot talks only to an OmniSim World Harness on loopback. It
-loads one vendor world in light mode, verifies a connected supervisor and a
-finalized non-degraded Newton backend, restores the authored state, advances a
-bounded number of steps, and records the raw vendor events in an atomic,
-checksummed artifact.
+这个可选试点只与 loopback 上的 OmniSim World Harness 通信。它以轻量模式加载一个厂商世界，验证已连接的 supervisor 与已定型的非降级 Newton 后端，恢复作者设定的状态，推进受限的步数，并把原始厂商事件记录进一个原子的、带校验和的产物。
 
 ```python
 from pathlib import Path
@@ -18,12 +14,6 @@ result = OmniSimPilotRunner(OmniSimClient()).run(
 print(result.status, result.artifact_dir)
 ```
 
-Start the separately installed simulator with `python -m omnisim harness`
-before running the pilot. Every artifact is fixed to `evidence_class:
-SIMULATION`, `physical_evidence: false`, `release_eligible: false`, and
-`mapped_to_workbench_event_contract: false`.
+运行试点前，用 `python -m omnisim harness` 启动单独安装的仿真器。每个产物固定为 `evidence_class: SIMULATION`、`physical_evidence: false`、`release_eligible: false` 与 `mapped_to_workbench_event_contract: false`。
 
-This adapter does not replace `tools/scripts/sim_cli.py`, translate Workbench
-scenario manifests, or promote OmniSim events into the existing event-log
-contract. Those require a later compatibility slice with explicit mapping,
-reset-isolation, arm, gripper, camera, and collision tests.
+本适配器不替代 `tools/scripts/sim_cli.py`，不翻译 Workbench 场景清单，也不把 OmniSim 事件提升进既有事件日志契约。这些需要后续带显式映射、重置隔离、机械臂、夹爪、相机与碰撞测试的兼容切片。

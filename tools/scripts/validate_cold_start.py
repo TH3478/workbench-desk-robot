@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the three-person clean-machine cold-start evidence table."""
+"""校验由三位参与者在干净机器上完成的冷启动证据表。"""
 
 import argparse
 import json

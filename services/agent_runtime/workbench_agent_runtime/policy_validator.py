@@ -1,14 +1,12 @@
-"""Fail-closed authorization policy for typed semantic actions.
+"""面向类型化语义动作的失败即拒绝授权策略。
 
-``ToolRegistry`` is the only action and parameter-field allow-list.  This
-module consumes its validation result, then applies two independent policy
-rules: raw-control identifiers are forbidden even inside registry-accepted
-nested payloads, and configured high-impact actions require confirmation for
-the exact ``action_id``.
+``ToolRegistry`` 是唯一的动作与参数字段白名单。本模块消费其校验结果，
+然后应用两条相互独立的策略规则：即使在注册表接受的嵌套载荷中，原始
+控制标识符也一律禁止；已配置的高影响动作必须针对确切的 ``action_id``
+完成确认。
 
-The output is immutable authorization evidence.  It never dispatches an
-action, obtains or stores confirmation, emits execution or verification
-results, writes WorldState, or claims completion.
+输出是不可变的授权证据。它绝不派发动作、获取或存储确认、产出执行或
+验证结果、写入 WorldState，也绝不宣告完成。
 """
 
 from __future__ import annotations
@@ -35,7 +33,7 @@ _CONFIG_SNAPSHOT_FAILED = object()
 
 
 class PolicyOutcome(StrEnum):
-    """Authorization outcome for one TaskGraph step."""
+    """单个 TaskGraph 步骤的授权结果。"""
 
     ALLOW = "allow"
     DENY = "deny"
@@ -43,7 +41,7 @@ class PolicyOutcome(StrEnum):
 
 
 class PolicyReasonCode(StrEnum):
-    """Stable, machine-readable reasons for policy outcomes."""
+    """策略结果的稳定、机器可读原因。"""
 
     POLICY_ALLOWED = "policy_allowed"
     POLICY_CONFIG_MISSING = "policy_config_missing"
@@ -59,7 +57,7 @@ class PolicyReasonCode(StrEnum):
 
 @dataclass(frozen=True)
 class PolicyFinding:
-    """One policy detail, located to a step and field."""
+    """一条策略详情，定位到具体的步骤与字段。"""
 
     step_id: str
     action_id: str
@@ -69,7 +67,7 @@ class PolicyFinding:
 
 @dataclass(frozen=True)
 class PolicyDecision:
-    """Immutable authorization decision for exactly one TaskGraph step."""
+    """恰好针对一个 TaskGraph 步骤的不可变授权决策。"""
 
     step_id: str
     action_id: str
@@ -81,13 +79,13 @@ class PolicyDecision:
 
 @dataclass(frozen=True)
 class PolicyReport:
-    """Immutable collection of per-step authorization decisions."""
+    """每步骤授权决策的不可变集合。"""
 
     decisions: tuple[PolicyDecision, ...]
 
     @property
     def findings(self) -> tuple[PolicyFinding, ...]:
-        """Flattened compatibility view of details from denied decisions."""
+        """拒绝决策详情的扁平化兼容视图。"""
         return tuple(finding for decision in self.decisions for finding in decision.findings)
 
     @property
@@ -96,7 +94,7 @@ class PolicyReport:
 
 
 class PolicyViolation(RuntimeError):
-    """Raised when a TaskGraph contains a non-allow policy decision."""
+    """当 TaskGraph 包含非允许的策略决策时抛出。"""
 
     def __init__(self, report: PolicyReport) -> None:
         self.report = report
@@ -113,7 +111,7 @@ class _PolicyConfigState:
 
 
 class _PolicyInputMalformed(ValueError):
-    """Internal signal converted into a structured fail-closed decision."""
+    """内部信号，将转换为结构化的失败即拒绝决策。"""
 
     def __init__(self, field: str, message: str) -> None:
         self.field = field
@@ -122,14 +120,14 @@ class _PolicyInputMalformed(ValueError):
 
 
 class PolicyValidator:
-    """Authorize TaskGraphs against explicit policy and an injected registry.
+    """依据显式策略与注入的注册表对 TaskGraph 进行授权。
 
-    ``policy_config`` must be an in-memory mapping with exactly two keys:
-    ``policy_version`` is a non-blank string and ``high_impact_actions`` is a
-    ``frozenset`` of ActionType values registered in the injected registry.
+    ``policy_config`` 必须是恰好包含两个键的内存映射：``policy_version``
+    是非空字符串，``high_impact_actions`` 是已注册于注入注册表的
+    ActionType 值的 ``frozenset``。
 
-    Confirmation is supplied per call as a set of confirmed action IDs.  It is
-    consumed only for the current check and is never obtained or persisted here.
+    确认信息以已确认动作 ID 集合的形式按调用提供。它只用于当次检查，
+    此处从不获取或持久化它。
     """
 
     def __init__(self, registry: ToolRegistry | None = None, *, policy_config: object = None) -> None:
@@ -142,7 +140,7 @@ class PolicyValidator:
         *,
         confirmed_action_ids: frozenset[str] = frozenset(),
     ) -> PolicyReport:
-        """Return one immutable structured authorization decision per step."""
+        """为每个步骤返回一个不可变的结构化授权决策。"""
         config = _validate_policy_config(self._policy_config, self._registry)
         if config.error_code is not None:
             return PolicyReport(tuple(_config_error_decision(step, config) for step in graph.steps))
@@ -160,7 +158,7 @@ class PolicyValidator:
         *,
         confirmed_action_ids: frozenset[str] = frozenset(),
     ) -> None:
-        """Raise PolicyViolation for deny and confirmation-required outcomes."""
+        """对拒绝与需确认的结果抛出 PolicyViolation。"""
         report = self.check(graph, confirmed_action_ids=confirmed_action_ids)
         if not report.is_valid:
             raise PolicyViolation(report)
@@ -253,7 +251,7 @@ def _snapshot_confirmed_action_ids(value: object) -> frozenset[str] | None:
         return None
     try:
         snapshot = frozenset(value)
-    except Exception:  # noqa: BLE001 - malformed injected confirmation input must fail closed
+    except Exception:  # noqa: BLE001 - 格式错误的注入确认输入必须失败即拒绝
         return None
     if any(not isinstance(action_id, str) or not action_id.strip() for action_id in snapshot):
         return None
@@ -265,7 +263,7 @@ def _snapshot_policy_config(policy_config: object) -> object:
         return policy_config
     try:
         return MappingProxyType(dict(policy_config))
-    except Exception:  # noqa: BLE001 - malformed injected mappings must fail closed during check
+    except Exception:  # noqa: BLE001 - 格式错误的注入映射必须在检查期间失败即拒绝
         return _CONFIG_SNAPSHOT_FAILED
 
 

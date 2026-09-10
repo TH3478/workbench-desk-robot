@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Truthful, bounded control surface for Workbench simulation runs.
+"""Workbench 仿真运行的真实、受限控制面。
 
-This module deliberately separates the runnable scripted fixture from a real
-Gazebo execution.  A missing adapter is reported as ``NOT_EXECUTED`` rather
-than being converted into a green regression result.
+本模块有意把可运行的脚本化固定装置与真正的 Gazebo 执行区分开。
+缺失适配器时，结果如实上报为 ``NOT_EXECUTED``，而不是被粉饰成绿色的回归结果。
 """
 
 from __future__ import annotations
@@ -58,7 +57,7 @@ EXIT_CODES = {
 
 
 class SimulationInputError(ValueError):
-    """Raised when a scenario or runner input cannot be trusted."""
+    """当场景或 runner 输入不可信时抛出。"""
 
 
 class _DuplicateJsonKey(ValueError):
@@ -112,7 +111,7 @@ def _command_is_available(command: Sequence[str] | None) -> bool:
 
 @dataclass(frozen=True)
 class Scenario:
-    """A manifest plus its deterministic, non-Gazebo scene projection."""
+    """清单及其确定性的非 Gazebo 场景投影。"""
 
     path: Path
     manifest: dict[str, Any]
@@ -177,7 +176,7 @@ def _read_manifest(path: Path) -> tuple[dict[str, Any], bytes]:
 
 
 def load_scenarios(paths: Iterable[Path] | None = None) -> list[Scenario]:
-    """Load and validate manifests, rejecting duplicate IDs and duplicate JSON keys."""
+    """加载并校验清单，拒绝重复的 ID 与重复的 JSON 键。"""
 
     candidates = sorted(paths if paths is not None else SCENARIO_ROOT.rglob("*.json"))
     if not candidates:
@@ -211,7 +210,7 @@ def scenario_catalog(scenarios: Iterable[Scenario]) -> list[dict[str, Any]]:
 
 
 def doctor(*, require_gazebo: bool = False) -> tuple[dict[str, Any], int]:
-    """Return dependency diagnostics without starting a simulator."""
+    """返回依赖诊断结果，且不启动仿真器。"""
 
     scenarios: list[Scenario] = []
     manifest_error: str | None = None
@@ -283,7 +282,7 @@ def _default_command(runner: str) -> list[str] | None:
 
 
 def _terminate_process_tree(process: subprocess.Popen[Any], grace_s: float = 2.0) -> None:
-    """Stop a launched process and its descendants, best effort but bounded."""
+    """停止已启动的进程及其后代进程，尽力而为但保持受限。"""
 
     if process.poll() is not None:
         return
@@ -333,7 +332,7 @@ def _wait_bounded(
     stdout_path: Path,
     stderr_path: Path,
 ) -> tuple[int | None, bool, bool]:
-    """Wait while bounding wall time and captured log growth."""
+    """等待进程结束，同时对墙钟时间与被捕获日志的增长加以限制。"""
 
     deadline = time.monotonic() + timeout_s
     while process.poll() is None:
@@ -401,7 +400,7 @@ def run_scenario(
     command: Sequence[str] | None = None,
     seed_base: int = 1000,
 ) -> RunResult:
-    """Run one scenario and atomically publish a bounded evidence directory."""
+    """运行单个场景，并原子化地发布受限证据目录。"""
 
     if runner not in {"scripted", "gazebo", "external"}:
         raise SimulationInputError(f"unsupported runner: {runner}")
