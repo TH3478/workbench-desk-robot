@@ -1,75 +1,36 @@
-# wbcan virtual latency evidence
+# wbcan 虚拟延迟证据
 
-The latency probe measures userspace-observed native SocketCAN send-to-receive
-time with `monotonic_ns`. It exercises the virtual `wbcan` netdevice only. Its
-reports are not physical CAN, controller IRQ, transceiver, MCU, actuator,
-PREEMPT_RT, or hard-real-time evidence.
+延迟探针用 `monotonic_ns` 测量用户空间观测到的原生 SocketCAN 发送到接收时间。它只驱动虚拟 `wbcan` 网络设备。其报告不是物理 CAN、控制器 IRQ、收发器、MCU、执行器、PREEMPT_RT 或硬实时证据。
 
-## Profiles
+## 配置档
 
-- `idle` runs only the bounded measurement loop.
-- `controlled-load` runs a fixed number of CPU and I/O workers while measuring.
-  Each CPU worker repeatedly hashes a fixed 64 KiB in-memory buffer. Each I/O
-  worker repeatedly overwrites and `fsync`s one 4 KiB temporary file at offset
-  zero, then uses `fstat` to verify its bounded size. The report records every
-  worker's observed iterations, logical bytes written, and observed maximum file
-  size. Temporary files are removed after each run, so the profile does not grow
-  disk use with run duration. Each worker completes its first-use allocation,
-  file setup, and setup verification before publishing `ready`. The parent waits
-  for every worker, starts the monotonic and process-CPU clocks, and then opens
-  one common start gate. Consequently, setup is outside the controlled-load
-  measurement window and the idle and controlled-load windows are comparable.
-- `status-readers` is the separate Issue #155 comparison profile. It repeatedly
-  reads the bounded debugfs status snapshot while using the same latency loop.
+- `idle` 只运行受限的测量循环。
+- `controlled-load` 在测量期间运行固定数量的 CPU 与 I/O worker。每个 CPU worker 反复哈希一块固定的 64 KiB 内存缓冲。每个 I/O worker 反复覆盖一个 4 KiB 临时文件并 `fsync` 它（在偏移零处写入），然后用 `fstat` 验证其受限大小。报告记录每个 worker 观测到的迭代次数、写入的逻辑字节数与观测到的最大文件大小。临时文件在每次运行后删除，因此该配置档的磁盘占用不随运行时长增长。每个 worker 在发布 `ready` 之前完成首次使用分配、文件设置与设置验证。父进程等待每个 worker，启动 monotonic 与进程 CPU 时钟，然后打开一个公共起始闸门。因此，设置位于受控负载测量窗口之外，`idle` 与 `controlled-load` 窗口可比较。
+- `status-readers` 是独立的 Issue #155 比较配置档。它在使用同一延迟循环的同时反复读取受限的 debugfs 状态快照。
 
-Every worker must become ready within two seconds and stop within the bounded
-shutdown deadline. Shutdown first requests cooperative stop and then uses
-bounded `terminate`/`kill` fallbacks. The parent verifies that every worker is
-no longer alive and has an exit status before closing its process handle. A
-readiness timeout, cooperative-stop timeout, forced termination, non-zero exit,
-unverified shutdown, short write, worker exception, incomplete activity, partial
-frame run, duplicate, unexpected frame, or clock regression produces `FAIL`
-evidence. A worker that does not produce measured activity is also rejected.
+每个 worker 必须在两秒内就绪，并在受限的停机期限内停止。停机先请求协作停止，然后使用受限的 `terminate`/`kill` 兜底。父进程在关闭进程句柄前验证每个 worker 不再存活且有退出状态。就绪超时、协作停止超时、强制终止、非零退出、未验证的停机、短写、worker 异常、活动不完整、部分帧运行、重复、意外帧或时钟倒退产生 `FAIL` 证据。未产生实测活动的 worker 同样被拒绝。
 
-## Repeated campaign
+## 重复战役
 
-The authoritative execution path is the privileged GitHub Actions
-`kernel-module` job. It builds and loads `wbcan`, runs the complete driver gate,
-then records and uploads the repeated idle/controlled-load reports together
-with the strict campaign JSON. On a Linux host with matching headers, root
-access, debugfs, and `wbcan0` available, the equivalent local command is:
+权威执行路径是特权 GitHub Actions `kernel-module` 任务。它构建并加载 `wbcan`，运行完整的驱动闸门，然后把重复的 idle/controlled-load 报告连同严格战役 JSON 一起记录并上传。在头文件匹配的 Linux 主机上，若有 root 权限、debugfs 与可用的 `wbcan0`，等效的本地命令是：
 
 ```bash
 sudo make -C kernel/wbcan latency-campaign
 ```
 
-The default campaign runs three idle repetitions and three controlled-load
-repetitions with identical warm-up, sample, CAN ID, commit, kernel, affinity,
-clock, and environment fields. Three repetitions are the minimum completeness
-budget for this hosted comparison; they are not a latency acceptance threshold.
-The bounded limits are 20 repetitions and 100,000 measured samples per run.
+默认战役运行三次 idle 重复与三次 controlled-load 重复，预热、采样、CAN ID、commit、内核、亲和性、时钟与环境字段完全一致。三次重复是这次托管比较的最低完整性预算；它们不是延迟验收阈值。受限上限是每次运行 20 次重复与 100,000 个实测采样。
 
-If a local environment cannot build/load the module or access debugfs (for
-example, WSL without headers matching its running kernel), leave the runtime
-campaign `NOT_EXECUTED` locally and use the hosted `kernel-module` result as the
-virtual-wbcan runtime evidence. A hosted PASS does not extend the claim beyond
-that runner: physical CAN, MCU, actuator, PREEMPT_RT, and hard-real-time
-validation remain `NOT_EXECUTED`.
+如果本地环境无法构建/加载模块或访问 debugfs（例如 WSL 头文件与运行内核不匹配），把本地运行时战役保持 `NOT_EXECUTED`，并用托管 `kernel-module` 结果作为虚拟 wbcan 运行时证据。托管 PASS 不把声称扩展到该 runner 之外：物理 CAN、MCU、执行器、PREEMPT_RT 与硬实时验证保持 `NOT_EXECUTED`。
 
-The two profile reports preserve every run's P50/P95/P99/max, population
-standard-deviation jitter, optional deadline misses, elapsed time, process CPU
-time, throughput, delivery counters, and load activity. The campaign report
-binds both source reports by SHA-256 and gives min/nearest-rank-median/max
-observational envelopes plus signed median deltas. It deliberately has no
-latency PASS/FAIL threshold and cannot establish an SLA from hosted-runner data.
+两个配置档报告保留每次运行的 P50/P95/P99/max、总体标准差抖动、可选期限错过、耗时、进程 CPU 时间、吞吐量、投递计数器与负载活动。战役报告用 SHA-256 绑定两个源报告，并给出 min/最近秩中位数/max 观测包络及带符号中位数差值。它刻意没有延迟 PASS/FAIL 阈值，也不能从托管 runner 数据建立 SLA。
 
-Default output files are:
+默认输出文件：
 
 - `/tmp/wbcan-latency-idle.json`
 - `/tmp/wbcan-latency-controlled-load.json`
 - `/tmp/wbcan-latency-campaign.json`
 
-Validate saved evidence independently:
+独立验证已保存的证据：
 
 ```bash
 python3 kernel/wbcan/test_latency.py --validate-report /tmp/wbcan-latency-idle.json
@@ -78,6 +39,4 @@ python3 kernel/wbcan/validate_latency_campaign.py \
   --validate-report /tmp/wbcan-latency-campaign.json
 ```
 
-Keep reports from different kernels, commits, CPU affinities, CAN IDs, sample
-budgets, or deadlines as separate campaigns. Do not combine their percentiles
-or present a virtual comparison as physical or real-time qualification.
+把来自不同内核、commit、CPU 亲和性、CAN ID、采样预算或期限的报告作为独立战役保存。不要合并它们的百分位，也不要把虚拟比较呈现为物理或实时资质。

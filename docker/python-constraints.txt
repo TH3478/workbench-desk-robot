@@ -1,5 +1,5 @@
-# Linux/amd64 container resolution recorded on 2026-08-28.
-# Keep application and development dependency versions stable across rebuilds.
+# Linux/amd64 容器解析结果，记录于 2026-08-28。
+# 在多次重建之间保持应用与开发依赖版本稳定。
 jsonschema==4.26.0
 kiutils==1.4.8
 mkdocs==1.6.1

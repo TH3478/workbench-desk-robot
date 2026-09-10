@@ -1,29 +1,27 @@
-"""Unified logging configuration for the Motion package.
+"""Motion 包的统一日志配置。
 
-Rules (see robot/control/PLAN.md, "全局约定"):
-- Every module uses ``logging.getLogger(__name__)``; ``print`` is never used.
-- Levels: DEBUG planning detail / INFO action start-stop / WARNING retry-degrade
-  / ERROR failure-and-rejection.
-- Every action log line carries ``run_id`` + ``action_id`` for human trace-back.
+规则（见 robot/control/PLAN.md「全局约定」）：
+- 每个模块使用 ``logging.getLogger(__name__)``；绝不使用 ``print``。
+- 级别：DEBUG 规划细节 / INFO 动作起止 / WARNING 重试降级 / ERROR 失败与拒绝。
+- 每条动作日志行携带 ``run_id`` + ``action_id`` 供人工回溯。
 
-Logs are for humans and debugging. They are deliberately NOT the evidence
-channel: anything referenced by ``evidence_refs`` must have a stable id and go
-through :mod:`workbench_motion.evidence`, not a log line.
+日志面向人类与调试，刻意不作为证据通道：凡被 ``evidence_refs`` 引用的对象必须有
+稳定 id，并经由 :mod:`workbench_motion.evidence`，而非日志行。
 """
 
 from __future__ import annotations
 
 import logging
 
-# Fields we always want present on a record so the formatter never crashes on a
-# plain ``logger.info(...)`` call that did not supply action context.
+# 我们总是希望记录上存在这些字段，以便格式化器在遇到未提供动作上下文的普通
+# ``logger.info(...)`` 调用时不会崩溃。
 _DEFAULT_CONTEXT = {"run_id": "-", "action_id": "-"}
 
 LOG_FORMAT = "%(asctime)s %(levelname)s [run=%(run_id)s action=%(action_id)s] %(name)s: %(message)s"
 
 
 class _ContextDefaultsFilter(logging.Filter):
-    """Fill in ``run_id``/``action_id`` defaults for records that omit them."""
+    """为缺失 ``run_id``/``action_id`` 的记录补默认值。"""
 
     def filter(self, record: logging.LogRecord) -> bool:
         for key, value in _DEFAULT_CONTEXT.items():
@@ -33,11 +31,10 @@ class _ContextDefaultsFilter(logging.Filter):
 
 
 def configure_logging(level: int = logging.INFO) -> None:
-    """Install the unified handler + formatter on the ``workbench_motion`` logger.
+    """在 ``workbench_motion`` 日志器上安装统一的 handler + formatter。
 
-    Idempotent: calling it more than once does not stack handlers. Attaches to
-    the package logger (not the root) so the host application keeps control of
-    global logging config.
+    幂等：多次调用不会堆叠 handler。挂到包日志器（而非根日志器）上，让宿主应用保持
+    对全局日志配置的控制。
     """
     logger = logging.getLogger("workbench_motion")
     logger.setLevel(level)
@@ -49,13 +46,13 @@ def configure_logging(level: int = logging.INFO) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(LOG_FORMAT))
     handler.addFilter(_ContextDefaultsFilter())
-    handler._workbench_motion = True  # type: ignore[attr-defined]  # marker for idempotency
+    handler._workbench_motion = True  # type: ignore[attr-defined]  # 幂等性标记
     logger.addHandler(handler)
 
 
 def get_action_logger(name: str, *, run_id: str, action_id: str = "-") -> logging.LoggerAdapter:
-    """Return a logger adapter that stamps ``run_id``/``action_id`` on every line.
+    """返回在每行日志上盖 ``run_id``/``action_id`` 戳的日志器适配器。
 
-    Use one per action so all of an action's log lines carry the same ids.
+    每个动作一个，使该动作的所有日志行携带相同 id。
     """
     return logging.LoggerAdapter(logging.getLogger(name), {"run_id": run_id, "action_id": action_id})

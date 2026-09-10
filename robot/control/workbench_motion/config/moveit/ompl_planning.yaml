@@ -1,9 +1,8 @@
-# OMPL planning pipeline for the arm group.
+# 机械臂组的 OMPL 规划流水线。
 #
-# Minimal, standard OMPL setup. RRTConnect is the default because it is fast and
-# reliable for the short free-space motions phase 1 needs (home -> above block,
-# above block -> above tray). Planner tuning is not a phase-1 deliverable; this
-# is a working baseline, recorded in config rather than left implicit.
+# 最小化的标准 OMPL 配置。RRTConnect 是默认规划器，因为它对阶段 1 所需的短距离
+# 自由空间运动（home -> 方块上方，方块上方 -> 托盘上方）快速且可靠。规划器调优不是
+# 阶段 1 的交付物；这里是一个可工作的基线，显式记录在配置中而不是留作隐式默认。
 planning_plugins:
   - ompl_interface/OMPLPlanner
 
@@ -27,7 +26,7 @@ ur_manipulator:
 planner_configs:
   RRTConnectkConfigDefault:
     type: geometric::RRTConnect
-    range: 0.0        # 0 => auto (max motion length), OMPL default
+    range: 0.0        # 0 => 自动（最大运动长度），OMPL 默认值
   RRTstarkConfigDefault:
     type: geometric::RRTstar
     range: 0.0

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only host prerequisite report for the full development container."""
+"""针对完整开发容器的只读宿主机前置条件报告。"""
 
 from __future__ import annotations
 

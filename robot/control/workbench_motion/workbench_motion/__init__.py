@@ -1,7 +1,7 @@
-"""Motion (robot/control) semantic-action adapter package.
+"""Motion（robot/control）语义动作适配器包。
 
-Phase 0 delivers only the engineering scaffold: unified logging setup and the
-EvidenceSink interface plus a test double. No arm, MoveIt, or grasp logic yet.
+阶段 0 只交付工程脚手架：统一日志配置与 EvidenceSink 接口加测试替身。尚无机械臂、
+MoveIt 或抓取逻辑。
 """
 
 from .evidence import EvidenceRef, EvidenceSink, ExecutionEvent, FakeEvidenceSink

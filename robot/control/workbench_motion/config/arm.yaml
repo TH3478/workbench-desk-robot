@@ -1,27 +1,26 @@
-# Arm swap surface — the ONE place arm-specific identity lives.
+# 机械臂替换面 — 机械臂特有身份信息的唯一存放处。
 #
-# Everything an adapter, launch, MoveIt config or the reachability script needs
-# to know about "which arm" is here. Adapter *logic* never hard-codes any of
-# these; it reads them. Swapping UR5e -> Panda (or UR5e -> UR10e) is an edit to
-# this file plus the matching xacro args and MoveIt config — never a code edit.
-# See docs/decisions/ADR-0004-arm-selection.md and the README swap checklist.
+# 适配器、启动文件、MoveIt 配置或可达性脚本需要了解的“是哪台机械臂”的一切都在这
+# 里。适配器*逻辑*从不硬编码这些值；它只是读取。替换 UR5e -> Panda（或 UR5e ->
+# UR10e）只需修改本文件以及配套的 xacro 参数与 MoveIt 配置 — 从不改代码。
+# 参见 docs/decisions/ADR-0004-arm-selection.md 与 README 替换清单。
 #
-# The values here MUST match the defaults in config/arm_on_workbench.urdf.xacro.
+# 这里的取值必须与 config/arm_on_workbench.urdf.xacro 中的默认值一致。
 
 arm:
   model: ur5e
   vendor_description_pkg: ur_description
-  ur_type: ur5e            # arm_on_workbench.urdf.xacro arg: ur_type
-  tf_prefix: ""            # arm_on_workbench.urdf.xacro arg: tf_prefix
+  ur_type: ur5e            # arm_on_workbench.urdf.xacro 参数：ur_type
+  tf_prefix: ""            # arm_on_workbench.urdf.xacro 参数：tf_prefix
   dof: 6
 
-  # Kinematic frames.
-  base_link: base_link     # arm root, fixed to `world`
-  flange_link: flange      # ROS-Industrial flange
-  ee_link: tool0           # all-zeros tool frame (EE reference)
-  ik_tip_link: grasp_tcp   # IK/planning tip: grasp point between the fingers
+  # 运动学坐标系。
+  base_link: base_link     # 机械臂根部，固定于 `world`
+  flange_link: flange      # ROS-Industrial 法兰
+  ee_link: tool0           # 全零工具坐标系（EE 参考）
+  ik_tip_link: grasp_tcp   # IK/规划末端：两指之间的抓取点
 
-  # The 6 actuated arm joints, in chain order.
+  # 6 个驱动关节，按运动链顺序排列。
   joints:
     - shoulder_pan_joint
     - shoulder_lift_joint
@@ -30,34 +29,33 @@ arm:
     - wrist_2_joint
     - wrist_3_joint
 
-  # MoveIt planning-group name for the arm (must match config/moveit/*.srdf).
+  # 机械臂的 MoveIt 规划组名称（必须与 config/moveit/*.srdf 匹配）。
   planning_group: ur_manipulator
 
-# Base mount pose in the workbench `world` frame. Arm mounts on the table
-# surface (world z = table_height = 0.75) at the back-left corner, yawed to face
-# the block + tray. Tuned against the reachability gate (>=95%); see the
-# reachability_check console script and docs/evaluation/phase1-reachability.json.
+# 机械臂底座在工作台 `world` 坐标系中的安装位姿。机械臂安装于桌面
+# （world z = table_height = 0.75）的左后角，偏航以面向方块 + 托盘。根据可达性
+# 闸门（>=95%）调优；参见 reachability_check 控制台脚本与
+# docs/evaluation/phase1-reachability.json。
 base_placement:
-  frame: world                # workbench root the base is fixed to (IK/planning frame)
-  xyz: [-0.30, -0.15, 0.75]   # arm_on_workbench.urdf.xacro args: base_x/y/z
-  rpy: [0.0, 0.0, 0.36]       # arm_on_workbench.urdf.xacro arg: base_yaw (yaw only)
+  frame: world                # 底座固定的工作台根坐标系（IK/规划坐标系）
+  xyz: [-0.30, -0.15, 0.75]   # arm_on_workbench.urdf.xacro 参数：base_x/y/z
+  rpy: [0.0, 0.0, 0.36]       # arm_on_workbench.urdf.xacro 参数：base_yaw（仅偏航）
 
-# Gripper — UR ships none, so a Robotiq 2F-85 is added (ADR-0004).
+# 夹爪 — UR 出厂不带夹爪，因此加装 Robotiq 2F-85（ADR-0004）。
 gripper:
   model: robotiq_2f_85
   vendor_description_pkg: robotiq_description
-  attach_link: tool0             # via the official ur_to_robotiq adapter
+  attach_link: tool0             # 经由官方 ur_to_robotiq 适配器
   mount_link: gripper_mount_link
   base_link: robotiq_85_base_link
-  # The single actuated (driver) joint; the opposite knuckle mimics it (-1).
+  # 唯一的驱动关节；对侧指节以 -1 倍率跟随它。
   driver_joint: robotiq_85_left_knuckle_joint
   planning_group: gripper
-  # tool0 -> grasp_tcp offset along tool0 +z (arm_on_workbench.urdf.xacro arg tcp_z).
+  # tool0 -> grasp_tcp 沿 tool0 +z 的偏移（arm_on_workbench.urdf.xacro 参数 tcp_z）。
   tcp_offset_z: 0.16
 
-# Controller names and controller-manager settings are safety-relevant runtime
-# configuration. Consumers must read them through ArmConfig and fail closed if
-# this section is absent.
+# 控制器名称与 controller-manager 设置是与安全相关的运行时配置。使用方必须通过
+# ArmConfig 读取它们，且在本节缺失时失败即拒绝。
 controllers:
   update_rate_hz: 500
   joint_state_broadcaster: joint_state_broadcaster

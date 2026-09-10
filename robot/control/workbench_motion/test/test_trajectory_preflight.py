@@ -1,4 +1,4 @@
-"""Boundary and determinism tests for Issue #57 trajectory preflight."""
+"""Issue #57 轨迹预检的边界与确定性测试。"""
 
 from __future__ import annotations
 

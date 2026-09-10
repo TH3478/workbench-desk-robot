@@ -1,9 +1,7 @@
 # assembly
 
-Connect two parts in a defined configuration (peg-in-hole, connector seating,
-bolt engagement).
+按指定构型连接两个零件（peg-in-hole、连接器就位、螺栓啮合）。
 
-Requires force/torque feedback for confirmation — cannot be verified by
-vision alone. Planned for v0.3 with real hardware bring-up.
+需要力/力矩反馈来确认——仅凭视觉无法验证。规划于 v0.3，随真机启动调试进行。
 
-Not implemented yet.
+尚未实现。

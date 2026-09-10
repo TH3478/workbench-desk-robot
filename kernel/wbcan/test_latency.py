@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure bounded userspace-observed TX-to-RX latency on virtual wbcan."""
+"""测量虚拟 wbcan 上受限的用户态观测 TX-to-RX 延迟。"""
 
 from __future__ import annotations
 
@@ -453,11 +453,10 @@ def measure(interface: str, warmup: int, sample_count: int, can_id: int) -> list
 
 
 def _send_worker_error(connection: Any, error: BaseException) -> None:
-    """Send a child failure without allowing a broken report pipe to mask it.
+    """上报子进程失败，且不让损坏的报告管道掩盖它。
 
-    The worker owns the connection lifetime and closes it from its ``finally``
-    block. Keeping that responsibility in one place avoids a second close when
-    the error path is taken.
+    工作进程拥有连接的生命周期，并在其 ``finally`` 块中关闭它。
+    把这一职责集中在一处，可避免走错误路径时发生第二次关闭。
     """
 
     try:
@@ -467,7 +466,7 @@ def _send_worker_error(connection: Any, error: BaseException) -> None:
 
 
 def _close_worker_connection(connection: Any) -> None:
-    """Close a worker's error connection without masking the original result."""
+    """关闭工作进程的错误连接，且不掩盖原始结果。"""
 
     try:
         connection.close()
@@ -476,7 +475,7 @@ def _close_worker_connection(connection: Any) -> None:
 
 
 def _wait_for_measurement(start: Any, stop: Any) -> bool:
-    """Wait interruptibly for the post-readiness measurement gate."""
+    """可中断地等待就绪之后的测量闸门。"""
 
     while not start.wait(0.05):
         if stop.is_set():
@@ -497,8 +496,8 @@ def _cpu_load_worker(
     cpu_start: int | None = None
     payload = bytes([index % 251]) * CPU_WORK_BYTES
     try:
-        # Complete first-use allocation/hash before ready is published. It is
-        # setup, not part of the timed comparison window.
+        # 在发布 ready 之前完成首次使用的分配/哈希。它属于
+        # 准备阶段，不属于计时比较窗口。
         hashlib.sha256(payload).digest()
         ready.set()
         if not _wait_for_measurement(start, stop):
@@ -507,7 +506,7 @@ def _cpu_load_worker(
         while not stop.is_set():
             hashlib.sha256(payload).digest()
             iterations += 1
-    except Exception as exc:  # noqa: BLE001 - preserve worker failures as evidence.
+    except Exception as exc:  # noqa: BLE001 - 将工作进程故障作为证据保留。
         stop.set()
         _send_worker_error(error_connection, exc)
     finally:
@@ -559,7 +558,7 @@ def _io_load_worker(
                 raise OSError(f"controlled I/O worker size is {observed_size}, expected {IO_WORK_BYTES}")
             maximum_file_size = max(maximum_file_size, observed_size)
             iterations += 1
-    except Exception as exc:  # noqa: BLE001 - preserve worker failures as evidence.
+    except Exception as exc:  # noqa: BLE001 - 将工作进程故障作为证据保留。
         stop.set()
         _send_worker_error(error_connection, exc)
     finally:
@@ -598,7 +597,7 @@ def _status_load_worker(
             if "state" not in text or "queue_stopped" not in text:
                 raise AssertionError("debugfs status snapshot is incomplete")
             count += 1
-    except Exception as exc:  # noqa: BLE001 - preserve worker failures as evidence.
+    except Exception as exc:  # noqa: BLE001 - 将工作进程故障作为证据保留。
         stop.set()
         _send_worker_error(error_connection, exc)
     finally:
@@ -611,7 +610,7 @@ def _status_load_worker(
 
 
 def _worker_context() -> Any:
-    """Use fork on Linux and retain a standard-library spawn fallback."""
+    """在 Linux 上使用 fork，并保留标准库的 spawn 回退方案。"""
 
     methods = multiprocessing.get_all_start_methods()
     return multiprocessing.get_context("fork" if "fork" in methods else "spawn")
@@ -643,7 +642,7 @@ def _read_worker_errors(receivers: list[Any]) -> list[Exception]:
 
 
 def _stop_workers(processes: list[Any], receivers: list[Any], stop: Any, start: Any, errors: list[Exception]) -> None:
-    """Stop workers cooperatively, then force and verify termination if needed."""
+    """先协作式地停止工作进程，必要时再强制并核实其终止。"""
 
     if not processes:
         return
@@ -691,9 +690,9 @@ def _stop_workers(processes: list[Any], receivers: list[Any], stop: Any, start: 
     errors.extend(_read_worker_errors(receivers))
     for process in processes:
         if process.is_alive():
-            # Process.close() raises while a child is alive. Leaving the
-            # object open preserves the failure and avoids hiding it with a
-            # cleanup exception; the caller will fail closed below.
+            # 子进程仍存活时，Process.close() 会抛异常。让对象保持
+            # 打开可保留故障，避免用清理异常掩盖它；
+            # 调用方将在下方按失败即拒绝处理。
             continue
         if process.exitcode is None:
             errors.append(RuntimeError(f"{process.name} has no verified exit code"))
@@ -825,8 +824,8 @@ def measure_profile(
         if any(not process.is_alive() for process in processes):
             raise RuntimeError("latency load worker exited before measurement")
 
-        # Readiness includes first-use setup. Only now do wall and CPU clocks
-        # start, so idle and controlled-load reports cover comparable windows.
+        # 就绪包含了首次使用准备。墙钟与 CPU 时钟从此刻才
+        # 开始计时，使 idle 与 controlled-load 报告覆盖可比较的窗口。
         started_wall = time.monotonic_ns()
         started_cpu = time.process_time_ns()
         if start is not None:
@@ -839,7 +838,7 @@ def measure_profile(
             )
         elapsed_ns = time.monotonic_ns() - started_wall
         parent_cpu_ns = time.process_time_ns() - started_cpu
-    except Exception as exc:  # noqa: BLE001 - preserve measurement and worker failures together.
+    except Exception as exc:  # noqa: BLE001 - 将测量故障与工作进程故障一并保留。
         errors.append(exc)
     finally:
         if processes and stop is not None and start is not None:
@@ -1044,7 +1043,7 @@ def main() -> int:
             )
             report.update({"completed_repetitions": len(runs), "runs": runs})
         report.update({"result": "PASS", "observed_envelope": aggregate_runs(runs)})
-    except Exception as exc:  # noqa: BLE001 - preserve failure as evidence.
+    except Exception as exc:  # noqa: BLE001 - 将故障作为证据保留。
         report.update(
             {
                 "result": "FAIL",

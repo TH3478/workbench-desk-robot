@@ -1,18 +1,18 @@
 ---
-name: Feature or integration task
-about: A bounded implementation task
+name: 功能或集成任务
+about: 一个受限的实施任务
 ---
 
 ## Owner
 
-## Problem and objective
+## 问题与目标
 
-## Allowed paths
+## 允许路径
 
-## Interfaces affected
+## 受影响的接口
 
-## Acceptance criteria
+## 验收标准
 
-## Commands and evidence
+## 命令与证据
 
-## Dependencies and stop conditions
+## 依赖与停止条件

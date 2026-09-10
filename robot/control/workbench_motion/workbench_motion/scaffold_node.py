@@ -1,20 +1,18 @@
-"""Minimal Motion node used for the phase-0 empty-world self test.
+"""用于阶段 0 空世界自测的最小 Motion 节点。
 
-It does nothing but come up, log a unified start line carrying a ``run_id``,
-append a startup ExecutionEvent to a (fake) EvidenceSink, then either run a
-bounded self test and exit cleanly (default) or spin indefinitely. It exists so
-the package's launch can be exercised without any external bringup (no Gazebo,
-no arm, no MCU). Real adapter behaviour lands in later phases.
+它什么也不做，只是启动、记录一条携带 ``run_id`` 的统一启动日志行、向（假的）
+EvidenceSink 追加一条启动 ExecutionEvent，然后要么运行一次受限自测并干净退出（默认），
+要么无限 spin。它存在是为了在没有任何外部启动调试（无 Gazebo、无机械臂、无 MCU）的
+情况下让包的 launch 可被演练。真正的适配器行为在后续阶段落地。
 
-Behaviour is controlled by the ``self_test_seconds`` ROS parameter:
-- ``> 0`` (default 2.0): spin for that long, log "self-test passed", exit 0.
-  This is the CI-friendly path — no SIGINT needed, launch sees a clean exit.
-- ``<= 0``: spin indefinitely (interactive use; stop with Ctrl-C).
+行为由 ``self_test_seconds`` ROS 参数控制：
+- ``> 0``（默认 2.0）：spin 这么久，记录 "self-test passed"，以 0 退出。
+  这是 CI 友好的路径——无需 SIGINT，launch 看到干净退出。
+- ``<= 0``：无限 spin（交互使用；Ctrl-C 停止）。
 
-``rclpy`` is an apt/rosdep-managed ROS 2 runtime dependency, not a uv-managed
-one. The import is done lazily inside ``main`` so the pure-Python parts of this
-package (evidence, logging_setup and their tests) import and run under a plain
-uv environment where rclpy is not present.
+``rclpy`` 是 apt/rosdep 管理的 ROS 2 运行时依赖，不是 uv 管理的。导入在 ``main``
+内惰性进行，使本包的纯 Python 部分（evidence、logging_setup 及其测试）在没有 rclpy
+的纯 uv 环境里也能导入并运行。
 """
 
 from __future__ import annotations
@@ -40,8 +38,8 @@ def main(args: list[str] | None = None) -> None:
             super().__init__("workbench_motion_scaffold")
             self.log = get_action_logger("workbench_motion.scaffold", run_id=run_id)
             self.self_test_seconds = self.declare_parameter("self_test_seconds", 2.0).get_parameter_value().double_value
-            # Phase-0 sink is the test double; production sink is wired in later
-            # phases via the World Model Event Store adapter.
+            # 阶段 0 的 sink 是测试替身；生产 sink 在后续阶段经 World Model 事件库
+            # 适配器接入。
             self._sink = FakeEvidenceSink()
             ref = self._sink.append(ExecutionEvent(event_type="node_started", run_id=run_id, action_id="-"))
             self.log.info("workbench_motion scaffold node up; startup event ref=%s", ref)

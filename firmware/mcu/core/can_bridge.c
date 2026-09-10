@@ -201,8 +201,8 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
     }
     local.request_decoded = true;
 
-    /* STOP is deliberately tested before the ordinary path. It bypasses the
-     * session gate and replay window and is never converted into a command. */
+    /* STOP 有意在普通路径之前先行检查。它绕过会话闸门与回放窗口，
+     * 且永远不会被转换为命令。 */
     if (local.request.kind == MCU_WIRE_FRAME_STOP) {
         mcu_watchdog_record_t stop_record;
 
@@ -252,9 +252,8 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
         return true;
     }
 
-    /* ACK, STOP_ACK and telemetry are MCU-originated under Wire V1. A frame
-     * with one of those IDs on the MCU ingress is validly encoded but has the
-     * wrong direction and must not reach safety state. */
+    /* ACK、STOP_ACK 与遥测在 Wire V1 下均由 MCU 发出。携带这些 ID 之一的帧
+     * 出现在 MCU 入口时，虽然编码合法但方向错误，绝不能到达安全状态。 */
     local.outcome = MCU_CAN_BRIDGE_OUTCOME_REJECTED;
     local.status = MCU_CAN_BRIDGE_UNEXPECTED_DIRECTION;
     copy_record(record, &local);

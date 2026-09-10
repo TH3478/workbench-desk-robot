@@ -1,6 +1,6 @@
-# Kbuild for the out-of-tree wbcan module.
+# 树外 wbcan 模块的 Kbuild。
 #
-# -Werror on purpose: a warning in a driver that fabricates bus errors is not
-# something to skim past.
+# 有意使用 -Werror：一个会制造总线错误的驱动若产生警告，
+# 绝不应被轻易略过。
 obj-m += wbcan.o
 ccflags-y := -Wall -Wextra -Werror -Wno-unused-parameter

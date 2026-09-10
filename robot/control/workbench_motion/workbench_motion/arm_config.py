@@ -1,17 +1,14 @@
-"""Loader for ``config/arm.yaml`` — the single source of arm-specific identity.
+"""``config/arm.yaml`` 的加载器——机械臂身份的单一来源。
 
-The phase-1 promise (README + ADR-0004) is that swapping the arm touches
-configuration only, never Python. That promise is only real if the Python that
-needs the planning group, IK tip, base frame, joint list and model names *reads
-them from arm.yaml* instead of hard-coding them. This module is that read path.
+第一阶段承诺（README + ADR-0004）是：更换机械臂只改配置，绝不改 Python。只有让需要
+规划组、IK 末端、基座坐标系、关节列表与模型名的 Python 代码*从 arm.yaml 读取*而不是
+硬编码时，这一承诺才成立。本模块就是这条读取路径。
 
-It resolves ``arm.yaml`` from the installed package share directory when running
-under a sourced ROS workspace (``ament_index``), and falls back to the in-source
-copy next to this file's package so it also works from a source checkout / uv
-venv. No ROS *runtime* import (rclpy) is required; ``ament_index_python`` is a
-lightweight pure-Python lookup, and even that is optional (guarded), so the
-module and its callers stay importable with no ROS at all — the unit tests load a
-literal path directly.
+在已 source 的 ROS 工作区（``ament_index``）下运行时，从安装后的包 share 目录解析
+``arm.yaml``；否则回退到本文件所在包的源码内副本，使源码检出 / uv venv 环境也能
+工作。不需要任何 ROS *运行时*导入（rclpy）；``ament_index_python`` 是轻量纯 Python
+查找，而且它本身也是可选的（有保护），因此本模块及其调用方在完全没有 ROS 的环境中
+仍然可导入——单元测试直接加载字面路径。
 """
 
 from __future__ import annotations
@@ -22,14 +19,14 @@ from typing import Any
 
 import yaml
 
-# In-source location: this file is workbench_motion/workbench_motion/arm_config.py;
-# the config dir is workbench_motion/config/arm.yaml (two parents up, then config).
+# 源码内位置：本文件位于 workbench_motion/workbench_motion/arm_config.py；
+# 配置目录为 workbench_motion/config/arm.yaml（向上两级，再进 config）。
 _IN_SOURCE_ARM_YAML = Path(__file__).resolve().parent.parent / "config" / "arm.yaml"
 
 
 @dataclass(frozen=True)
 class ArmConfig:
-    """Typed view over arm.yaml. Attribute access, not dict rummaging."""
+    """arm.yaml 的类型化视图。属性访问，而非在字典里翻找。"""
 
     model: str
     vendor_description_pkg: str
@@ -54,12 +51,12 @@ class ArmConfig:
 
     @property
     def arm_label(self) -> str:
-        """Stable label for evidence archives, e.g. ``ur5e+robotiq_2f_85``."""
+        """证据归档用的稳定标签，例如 ``ur5e+robotiq_2f_85``。"""
         return f"{self.model}+{self.gripper_model}"
 
 
 def _find_arm_yaml() -> Path:
-    """Locate arm.yaml: installed share dir first, then the in-source copy."""
+    """定位 arm.yaml：先找安装后的 share 目录，再回退到源码内副本。"""
     try:
         from ament_index_python.packages import (
             PackageNotFoundError,
@@ -81,10 +78,10 @@ def _find_arm_yaml() -> Path:
 
 
 def parse_arm_config(data: dict[str, Any]) -> ArmConfig:
-    """Build an :class:`ArmConfig` from a parsed arm.yaml mapping.
+    """从解析后的 arm.yaml 映射构建 :class:`ArmConfig`。
 
-    Kept separate from file IO so the unit tests can exercise the mapping->object
-    contract on a literal dict without touching the filesystem or ROS.
+    与文件 IO 分离，使单元测试可以在字面字典上验证 映射->对象 的契约，而不触碰
+    文件系统或 ROS。
     """
     try:
         arm = data["arm"]
@@ -136,7 +133,7 @@ def parse_arm_config(data: dict[str, Any]) -> ArmConfig:
         ee_link=ee_link,
         ik_tip_link=ik_tip_link,
         joints=joints,
-        # The IK/planning frame is the workbench world root the base is fixed to.
+        # IK/规划坐标系是底座所固定的工作台世界根坐标系。
         base_frame=placement.get("frame", "world"),
         gripper_model=gripper_model,
         gripper_group=gripper_group,
@@ -149,7 +146,7 @@ def parse_arm_config(data: dict[str, Any]) -> ArmConfig:
 
 
 def load_arm_config(path: Path | str | None = None) -> ArmConfig:
-    """Load and parse arm.yaml. ``path`` overrides discovery (used by tests)."""
+    """加载并解析 arm.yaml。``path`` 覆盖自动发现（供测试使用）。"""
     yaml_path = Path(path) if path is not None else _find_arm_yaml()
     data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     return parse_arm_config(data)

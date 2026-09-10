@@ -1,32 +1,32 @@
-# BSP V0.1 Review Checklist
+# BSP V0.1 评审清单
 
-Use this checklist before approving the prototype BSP baseline.
+在批准原型 BSP 基线之前使用本清单。
 
-## Architecture
+## 架构
 
-- [ ] One Linux board and six controller domains match the intended robot.
-- [ ] Left/right arms and tools remain independently resettable and observable.
-- [ ] `MCU-SAFETY` remains independent of Linux and ordinary motion control.
-- [ ] Lift ownership in `MCU-BASE` is acceptable for the first prototype.
+- [ ] 一块 Linux 板与六个控制器域匹配目标机器人。
+- [ ] 左/右机械臂与工具保持可独立复位与可观测。
+- [ ] `MCU-SAFETY` 保持独立于 Linux 与普通运动控制。
+- [ ] 升降装置归 `MCU-BASE` 对首个原型可接受。
 
-## Cost and supply
+## 成本与供应
 
-- [ ] Jetson Orin Nano Super satisfies measured workload before any AGX upgrade.
-- [ ] NVMe, cooling and isolated CAN adapter are included in the prototype cost.
-- [ ] STM32H563 and STM32G0B1 lifecycle and lead time are acceptable.
-- [ ] Arm/tool controllers are included in supplier quotations and not double-counted.
-- [ ] No custom carrier-board spin is approved without measured prototype need.
+- [ ] Jetson Orin Nano Super 在任何 AGX 升级之前满足实测工作负载。
+- [ ] NVMe、散热与隔离 CAN 适配器计入原型成本。
+- [ ] STM32H563 与 STM32G0B1 的生命周期与交期可接受。
+- [ ] 臂/工具控制器包含在供应商报价中且不重复计价。
+- [ ] 未经实测原型需要，不批准任何定制载板打样。
 
-## Interfaces and safety
+## 接口与安全
 
-- [ ] Carrier power, camera bandwidth, CAN adapter and thermal limits have sources.
-- [ ] Six node IDs, reset domains, heartbeats and supplier protocols are confirmed.
-- [ ] E-stop and safe enable remain hardware-controlled and fail closed.
-- [ ] Linux boot, service restart and update cannot clear the safety latch.
+- [ ] 载板供电、相机带宽、CAN 适配器与热限值有出处。
+- [ ] 六个节点 ID、复位域、心跳与供应商协议已确认。
+- [ ] E-stop 与安全使能保持硬件控制并失败即拒绝。
+- [ ] Linux 启动、服务重启与更新不能清除安全锁存。
 
-## Evidence
+## 证据
 
-- [ ] Kernel/JetPack, DTB, rootfs and firmware hashes are recorded.
-- [ ] Physical tests remain `NOT_EXECUTED` until raw evidence is attached.
-- [ ] `python bsp/validation/validate_manifests.py` passes.
-- [ ] Hardware release remains governed by `hardware/release/`.
+- [ ] 记录内核/JetPack、DTB、rootfs 与固件 hash。
+- [ ] 物理测试在挂接原始证据之前保持 `NOT_EXECUTED`。
+- [ ] `python bsp/validation/validate_manifests.py` 通过。
+- [ ] 硬件发布仍由 `hardware/release/` 治理。

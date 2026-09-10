@@ -1,4 +1,4 @@
-"""Shared parameter assembly for the phase-1 and phase-2 launch files."""
+"""阶段 1 与阶段 2 launch 文件共享的参数组装。"""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ def move_group_parameters(
     *,
     use_sim_time: bool,
 ) -> list[dict[str, Any]]:
-    """Assemble MoveIt parameters without creating any nodes or publishers."""
+    """组装 MoveIt 参数，不创建任何节点或发布器。"""
     moveit_dir = share / "config" / "moveit"
     srdf = require_file(moveit_dir / "workbench_arm.srdf", "SRDF")
     kinematics = require_file(moveit_dir / "kinematics.yaml", "kinematics.yaml")

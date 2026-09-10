@@ -71,10 +71,10 @@ static bool activity_is_valid(mcu_watchdog_activity_t activity)
 static bool stop_matches_pending(const mcu_watchdog_t *watchdog,
                                  const mcu_wire_frame_t *stop)
 {
-    /* retry_count is attempt metadata, not part of STOP command semantics.
-     * Equal counts are link-level replays and strictly greater counts are
-     * protocol retries. A pending uint8_t retry sequence does not wrap: a
-     * lower count is stale and must not roll back the correlation slot. */
+    /* retry_count 是尝试元数据，不属于 STOP 命令语义。
+     * 计数相等是链路级重放，严格更大是协议重试。
+     * 待处理的 uint8_t 重试序号不会回绕：
+     * 更小的计数是过期流量，不得回滚关联槽位。 */
     return watchdog->stop_ack_pending && watchdog->stop_command_id == stop->command_id &&
            stop->retry_count >= watchdog->stop_retry_count;
 }
@@ -156,12 +156,12 @@ static void replay_pending_stop_ack(mcu_watchdog_t *watchdog,
     record->command_id = watchdog->stop_command_id;
     record->retry_count = stop->retry_count;
     copy_frame(&record->frame, &watchdog->stop_ack_frame);
-    /* Preserve the original result/fault/device mode while echoing the
-     * attempt metadata carried by a protocol-level retry. */
+    /* 保留原始 result/fault/device mode，同时回显
+     * 协议级重试携带的尝试元数据。 */
     record->frame.retry_count = stop->retry_count;
     if (!exact_retry) {
-        /* The next exact link retry must replay this most recently emitted
-         * attempt, while the semantic response fields remain immutable. */
+        /* 下一次完全相同的链路重试必须重放这次最近发出的尝试，
+         * 同时语义响应字段保持不可变。 */
         watchdog->stop_ack_observed_at_us = now_us;
         watchdog->stop_ack_frame.retry_count = stop->retry_count;
     }

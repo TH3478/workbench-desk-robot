@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a bounded Fast DDS interface profile after validating the host NIC."""
+"""校验宿主机网卡后生成受限的 Fast DDS 接口配置档。"""
 
 from __future__ import annotations
 

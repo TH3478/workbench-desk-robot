@@ -1,7 +1,6 @@
 # tasks
 
-Task definitions: one directory per task type. Each task has a goal description,
-a verifier, and a set of scenarios.
+任务定义：每种任务类型一个目录。每个任务有目标描述、一个验证器和一组场景。
 
 ```
 tasks/
@@ -11,12 +10,10 @@ tasks/
   assembly/      connect two parts in a defined configuration
 ```
 
-Adding a task:
-1. Write a verifier in `tasks/<name>/verifier.py` that takes a `WorldState` and
-   returns `VerificationResult`
-2. Add at least 3 frozen scenarios to `sim/scenarios/frozen/`
-3. Add a task description to `interfaces/examples/`
-4. Write unit tests for the verifier
+新增任务：
+1. 在 `tasks/<name>/verifier.py` 写一个验证器，接收 `WorldState` 并返回 `VerificationResult`
+2. 向 `sim/scenarios/frozen/` 添加至少 3 个冻结场景
+3. 向 `interfaces/examples/` 添加任务描述
+4. 为验证器写单元测试
 
-The verifier is the only thing that changes per task. Everything else
-(planning, execution, event store, replay) is reused.
+验证器是每个任务唯一变化的部分。其余（规划、执行、事件库、回放）全部复用。

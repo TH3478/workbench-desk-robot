@@ -1,21 +1,18 @@
-# MoveIt planning-layer joint limits for the UR5e arm.
+# UR5e 机械臂的 MoveIt 规划层关节限位。
 #
-# This is the PLANNING layer (velocity/acceleration scaling MoveIt uses), which
-# per PLAN.md §阶段 2 is DISTINCT from and usually more conservative than the
-# hard URDF/ros2_control limits and the real-hardware safety override. Those two
-# other layers land in phase 2 (config/controllers.yaml, joint_limits.hw_override).
-# Do not confuse the three sources.
+# 这是规划层（MoveIt 使用的速度/加速度缩放）；按照 PLAN.md §阶段 2，它与 URDF/
+# ros2_control 硬限位及真实硬件安全覆盖截然不同，通常也更为保守。另外两层在阶段 2
+# 落地（config/controllers.yaml、joint_limits.hw_override）。切勿混淆这三处来源。
 #
-# Shoulder pan/lift are deliberately tightened to 120 deg/s from the vendor's
-# 180 deg/s nominal hard limit. The other nominal values and the 0.1 scaling are
-# planning-layer choices; this file is not consumed by the safety validator.
+# 肩部回转/俯仰有意从厂商 180 deg/s 的标称硬限位收紧到 120 deg/s。其余标称值与
+# 0.1 缩放系数都是规划层的选择；本文件不被安全校验器读取。
 default_velocity_scaling_factor: 0.1
 default_acceleration_scaling_factor: 0.1
 
 joint_limits:
   shoulder_pan_joint:
     has_velocity_limits: true
-    max_velocity: 2.0943951    # rad/s (120 deg/s), tightened from vendor 180 deg/s
+    max_velocity: 2.0943951    # rad/s（120 deg/s），由厂商 180 deg/s 收紧
     has_acceleration_limits: true
     max_acceleration: 5.0
   shoulder_lift_joint:
@@ -25,7 +22,7 @@ joint_limits:
     max_acceleration: 5.0
   elbow_joint:
     has_velocity_limits: true
-    max_velocity: 3.1415927    # rad/s (180 deg/s), UR5e nominal
+    max_velocity: 3.1415927    # rad/s（180 deg/s），UR5e 标称值
     has_acceleration_limits: true
     max_acceleration: 5.0
   wrist_1_joint:

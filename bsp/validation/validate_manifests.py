@@ -1,4 +1,4 @@
-"""Validate the repository-side robot BSP manifests."""
+"""校验仓库侧的机器人 BSP 清单。"""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import yaml
 
 try:
     from bsp.validation.validate_image_inputs import validate as validate_image_inputs
-except ModuleNotFoundError:  # Direct script execution from bsp/validation.
+except ModuleNotFoundError:  # 从 bsp/validation 直接执行脚本时。
     from validate_image_inputs import validate as validate_image_inputs
 
 ROOT = Path(__file__).resolve().parents[2]

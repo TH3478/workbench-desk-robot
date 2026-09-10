@@ -336,9 +336,8 @@ bool mcu_command_dedup_receive(mcu_command_dedup_t *dedup,
               ? serial_delta(command->command_id, dedup->last_accepted_id)
               : 1u;
     entry = find_entry(dedup, command->command_id);
-    /* A half-range-new candidate wins over an old retained ID with the same
-     * numeric value. That is what distinguishes a genuine serial wrap from a
-     * delayed old-epoch replay when Wire V1 has no epoch field. */
+    /* 半程范围内的新候选会胜过数值相同的旧保留 ID。在 Wire V1 没有纪元
+     * 字段的情况下，这正用于区分真正的序号回绕与延迟的旧纪元回放。 */
     if (dedup->has_last_accepted && delta != 0u &&
         delta < MCU_COMMAND_SERIAL_HALF_RANGE) {
         entry = 0;
@@ -393,8 +392,8 @@ bool mcu_command_dedup_receive(mcu_command_dedup_t *dedup,
 
     wrapped = dedup->has_last_accepted && command->command_id < dedup->last_accepted_id;
     if (wrapped) {
-        /* A forward max-to-zero transition begins a new serial epoch. Wire V1
-         * carries no epoch bit, so no pre-wrap cache entry may survive. */
+        /* 从最大值到零的正向跳变开启新的序号纪元。Wire V1 不携带纪元位，
+         * 因此任何回绕前的缓存条目都不得存留。 */
         clear_history(dedup);
     }
 

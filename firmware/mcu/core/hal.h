@@ -1,11 +1,11 @@
-/* The HAL boundary. Task FW1.
+/* HAL 边界。任务 FW1。
  *
- * core/ calls these. It never touches a register directly. Every target
- * (qemu, ch32v307, host) implements this header and nothing wider.
+ * core/ 调用这些接口，从不直接触碰寄存器。每个目标
+ * （qemu、ch32v307、host）都实现此头文件，且仅此而已。
  *
- * The rule from ADR-0003: an #ifdef CH32V307 in core/ means this boundary was
- * drawn wrong. If core/ needs something the board can do and QEMU cannot, the
- * fix is a new function here, implemented three times.
+ * 来自 ADR-0003 的规则：core/ 中出现 #ifdef CH32V307 就意味着这条边界
+ * 划分错了。如果 core/ 需要板子能做而 QEMU 不能做的事，
+ * 修复方式是在这里新增一个函数，并在三处各实现一遍。
  */
 #ifndef MCU_HAL_H
 #define MCU_HAL_H
@@ -13,46 +13,45 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* ---------------------------------------------------------------- diagnostics
- * Byte sink. On QEMU this is the 16550 UART; on the board, USART1; on host,
- * stdout. core/ uses it for test output only — never in the safety path, since
- * a blocking write is unbounded time.
+/* ---------------------------------------------------------------- 诊断输出
+ * 字节出口。在 QEMU 上是 16550 UART；在板子上是 USART1；在 host 上是
+ * stdout。core/ 仅将其用于测试输出——绝不用于安全路径，
+ * 因为阻塞写入的时间无上界。
  */
 void hal_putc(char c);
 void hal_puts(const char *s);
 void hal_put_u32(uint32_t v);
 
-/* Called by crt0 when main returns, and from the trap handler. */
+/* 当 main 返回时由 crt0 调用，也由陷阱处理程序调用。 */
 void hal_report_exit(int code);
 void hal_report_trap(uint32_t mcause, uint32_t mepc);
 
-/* ---------------------------------------------------------------------- time
- * Monotonic tick count. Backed by mtime on RISC-V, a plain counter on host.
+/* ---------------------------------------------------------------------- 时间
+ * 单调递增的滴答计数。在 RISC-V 上由 mtime 支撑，在 host 上是普通计数器。
  *
- * uint64_t on purpose: a 32-bit microsecond counter wraps in 71 minutes, and
- * a watchdog that misbehaves once every 71 minutes is worse than one that
- * never works. FW6 handles wraparound for CAN sequence numbers, where the
- * width is fixed by the wire format; here we are free to just not wrap.
+ * 有意使用 uint64_t：32 位微秒计数器 71 分钟就会回绕，
+ * 而一个每 71 分钟就行为异常一次的看门狗还不如永不工作的看门狗。
+ * FW6 负责 CAN 序号回绕（其宽度由线上格式固定）；
+ * 这里我们完全可以选择不回绕。
  */
 uint64_t hal_now_us(void);
 
-/* Arm a one-shot timer interrupt at an absolute time. Used by FW5. */
+/* 在绝对时间点上武装一次单次定时器中断。由 FW5 使用。 */
 void hal_timer_arm_us(uint64_t deadline_us);
 void hal_timer_disarm(void);
-/* Enable the target's global timer-interrupt delivery after setup. */
+/* 在设置完成后启用目标的全局定时器中断投递。 */
 void hal_timer_enable(void);
 
 /* ----------------------------------------------------------------------- CAN
- * Raw controller envelope, before Wire V1 decoding.  The arbitration ID is
- * the standard 11-bit CAN identifier; it is not the logical 16-bit command
- * ID stored in payload bytes 1..2.  Keeping those names distinct prevents a
- * STOP command_id (>= 0x8000) from being written into an 11-bit controller
- * register.
+ * Wire V1 解码之前的原始控制器封装。仲裁 ID 是标准 11 位 CAN 标识符；
+ * 不是存放在负载字节 1..2 中的逻辑 16 位命令 ID。
+ * 将这两个名称区分开，可防止 STOP 的 command_id（>= 0x8000）
+ * 被写入 11 位控制器寄存器。
  *
- * flags is deliberately a byte rather than C bit-fields so every target maps
- * controller metadata explicitly.  Wire V1 accepts only flags == NONE,
- * DLC == 8 and arbitration_id <= 0x7ff.  The bridge rejects all other
- * envelopes before decoding or safety-state mutation.
+ * flags 有意使用单个字节而非 C 位域，以便每个目标都能显式映射
+ * 控制器元数据。Wire V1 仅接受 flags == NONE、DLC == 8 且
+ * arbitration_id <= 0x7ff。桥接层会在解码或安全状态变更之前
+ * 拒绝所有其他封装。
  */
 #define HAL_CAN_STANDARD_ID_MAX 0x07ffu
 #define HAL_CAN_CLASSIC_DLC_MAX 8u
@@ -75,13 +74,13 @@ typedef struct {
 bool hal_can_init(void);
 bool hal_can_send(const hal_can_frame *f);
 
-/* Non-blocking. Returns false when nothing is pending. */
+/* 非阻塞。没有待处理帧时返回 false。 */
 bool hal_can_recv(hal_can_frame *out);
 
-/* ------------------------------------------------------------------ watchdog
- * Hardware watchdog, distinct from the software timeout in core/. On the board
- * this is IWDG (FW20) and cannot be stopped once started, which is the point.
- * On QEMU it is modelled well enough to test the feed path.
+/* ------------------------------------------------------------------ 看门狗
+ * 硬件看门狗，与 core/ 中的软件超时相互独立。在板子上它是 IWDG（FW20），
+ * 一旦启动就无法停止——这正是它的意义所在。
+ * 在 QEMU 上对其建模的程度足以测试喂狗路径。
  */
 void hal_wdt_start(uint32_t timeout_ms);
 void hal_wdt_feed(void);

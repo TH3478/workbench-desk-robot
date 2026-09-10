@@ -298,7 +298,7 @@ jobs:
             status=NOT_EXECUTED
           fi
           {
-            echo "### wbcan virtual latency campaign"
+            echo "### wbcan 虚拟时延测试"
             echo
             echo "Status: **$status**"
             echo
@@ -333,7 +333,7 @@ jobs:
             *) status=NOT_EXECUTED ;;
           esac
           {
-            echo "### wbcan runtime fault suite"
+            echo "### wbcan 运行时故障套件"
             echo
             echo "Status: **$status**"
             echo

@@ -1,6 +1,6 @@
 # sim/worlds
 
-Gazebo world files (.world / .sdf) for each scenario class.
+每个场景类别的 Gazebo 世界文件（.world / .sdf）。
 
 ```
 worlds/
@@ -9,6 +9,4 @@ worlds/
   inspection_station.sdf flat inspection table, overhead camera (future)
 ```
 
-World version is pinned in each scenario manifest (`world_version` field).
-Changing a world file requires bumping the version string and re-freezing
-affected scenarios.
+世界版本钉在每个场景清单里（`world_version` 字段）。改动世界文件需要提升版本字符串并重新冻结受影响的场景。

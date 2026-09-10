@@ -1,12 +1,11 @@
-"""Unit tests for the arm.yaml loader — the single-source-of-truth contract.
+"""arm.yaml 加载器的单元测试——单一事实来源契约。
 
-The phase-1 promise is "swap the arm by editing config, not Python". These tests
-assert the mechanism that makes that true: (1) the shipped config/arm.yaml parses
-into a typed ArmConfig, and (2) the reachability_check CLI takes its arm identity
-(group / tip / base frame) from that config, not from hard-coded strings. If
-someone re-hardcodes "ur_manipulator" in the script, test (2) fails.
+阶段 1 的承诺是「换机械臂只改配置，不改 Python」。这些测试断言使该承诺成立的机制：
+(1) 随包的 config/arm.yaml 解析为类型化 ArmConfig，(2) reachability_check CLI 从该
+配置取机械臂身份（组 / 末端 / 基座坐标系）而非硬编码字符串。如果有人重新在脚本里
+硬编码 "ur_manipulator"，测试 (2) 即失败。
 
-ROS-free: runs under `uv run pytest`. rclpy/moveit are never imported.
+无 ROS：在 `uv run pytest` 下运行。绝不导入 rclpy/moveit。
 """
 
 from __future__ import annotations
@@ -17,8 +16,8 @@ from pathlib import Path
 import pytest
 from workbench_motion.arm_config import ArmConfig, load_arm_config, parse_arm_config
 
-# The shipped config, resolved from the source tree (two parents up from this test
-# file's package: workbench_motion/test -> workbench_motion -> config).
+# 随包配置，从源码树解析（本测试文件所在包向上两级：
+# workbench_motion/test -> workbench_motion -> config）。
 _CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
 _ARM_YAML = _CONFIG_DIR / "arm.yaml"
 _SRDF = _CONFIG_DIR / "moveit" / "workbench_arm.srdf"
@@ -45,7 +44,7 @@ def test_shipped_arm_yaml_loads():
 
 
 def test_shipped_arm_yaml_joint_list():
-    """arm.yaml carries the 6 UR joints in chain order."""
+    """arm.yaml 按链序携带 6 个 UR 关节。"""
     cfg = load_arm_config(_ARM_YAML)
     assert cfg.joints == (
         "shoulder_pan_joint",
@@ -62,28 +61,26 @@ def _srdf_groups(root: ET.Element) -> dict[str, ET.Element]:
 
 
 def test_arm_yaml_agrees_with_srdf():
-    """arm.yaml and the hand-authored SRDF must not drift apart.
+    """arm.yaml 与手工编写的 SRDF 不得漂移。
 
-    The SRDF (config/moveit/workbench_arm.srdf) is what move_group actually loads;
-    arm.yaml is what the runtime Python reads. If someone edits the SRDF chain or
-    renames a group without updating arm.yaml (or vice versa), IK would target a
-    group/tip move_group does not expose. This parses the real SRDF (stdlib XML,
-    no ROS) and asserts the arm planning group, its chain base/tip links, and the
-    gripper group name match arm.yaml exactly.
+    SRDF（config/moveit/workbench_arm.srdf）是 move_group 实际加载的；arm.yaml 是
+    运行时 Python 读取的。如果有人改 SRDF 链或改组名而不同步 arm.yaml（或反之），IK
+    就会指向 move_group 未暴露的组/末端。本测试解析真实 SRDF（标准库 XML，无 ROS），
+    并断言机械臂规划组、其链基座/末端 link 与夹爪组名与 arm.yaml 完全一致。
     """
     cfg = load_arm_config(_ARM_YAML)
     root = ET.fromstring(_SRDF.read_text(encoding="utf-8"))
     groups = _srdf_groups(root)
 
-    # Arm planning group exists under the name arm.yaml declares.
+    # 机械臂规划组以 arm.yaml 声明的名字存在。
     assert cfg.planning_group in groups, f"missing SRDF arm group {cfg.planning_group!r}; groups={sorted(groups)}"
-    # Its chain resolves IK to the tip arm.yaml names, rooted at base_link.
+    # 其链把 IK 解析到 arm.yaml 命名的末端，以 base_link 为根。
     chain = groups[cfg.planning_group].find("chain")
     assert chain is not None, f"SRDF group {cfg.planning_group!r} is not a chain group"
     assert chain.get("base_link") == cfg.base_link
     assert chain.get("tip_link") == cfg.ik_tip_link
 
-    # Gripper group name matches too (arm.yaml gripper.planning_group).
+    # 夹爪组名也要一致（arm.yaml 的 gripper.planning_group）。
     assert cfg.gripper_group in groups, f"missing SRDF gripper group {cfg.gripper_group!r}; groups={sorted(groups)}"
 
 
@@ -242,15 +239,14 @@ def test_parse_rejects_invalid_controller_update_rate(rate):
 
 
 def test_reachability_check_defaults_come_from_arm_yaml():
-    """Regression guard for the 'single source' defect.
+    """「单一来源」缺陷的回归守卫。
 
-    The CLI must resolve group/tip/base-frame from arm.yaml when the flags are
-    unset — not from hard-coded literals. We replicate the exact resolution the
-    script's main() performs and assert it yields the config values.
+    CLI 在标志未设置时必须从 arm.yaml 解析 group/tip/base-frame——而非硬编码字面量。
+    我们复刻脚本 main() 执行的解析并断言它得到配置值。
     """
     from workbench_motion.reachability_check import _parse_args
 
-    args = _parse_args([])  # no overrides
+    args = _parse_args([])  # 无覆盖
     assert args.group is None and args.tip is None and args.base_frame is None
 
     cfg = load_arm_config(_ARM_YAML)

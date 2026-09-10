@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* Platform-independent safety states.  Protocol device modes are exposed
- * separately because EXECUTING can represent moving or holding. */
+/* 平台无关的安全状态。协议设备模式单独暴露，
+ * 因为 EXECUTING 既可以表示运动中也可以表示保持中。 */
 typedef enum {
     MCU_STATE_IDLE = 0,
     MCU_STATE_EXECUTING,
@@ -23,8 +23,8 @@ typedef enum {
     MCU_DEVICE_MODE_COUNT
 } mcu_device_mode_t;
 
-/* MCU-originated fault meanings from protocol v1.0.  ACK_TIMEOUT and
- * STOP_TIMEOUT are host diagnostics, so they do not belong in this core. */
+/* 来自协议 v1.0 的 MCU 侧故障含义。ACK_TIMEOUT 与 STOP_TIMEOUT 属于主机侧
+ * 诊断，因此不应出现在本 core 中。 */
 typedef enum {
     MCU_FAULT_NONE = 0,
     MCU_FAULT_STOP_REJECTED,
@@ -50,16 +50,16 @@ typedef enum {
 typedef struct {
     mcu_event_kind_t kind;
 
-    /* Used only by MCU_EVENT_RAISE_FAULT. */
+    /* 仅由 MCU_EVENT_RAISE_FAULT 使用。 */
     mcu_fault_code_t fault_code;
 
-    /* Used only by MCU_EVENT_TRUSTED_RESET.  These gates come from a trusted
-     * control path, never from a protocol v1.0 frame. */
+    /* 仅由 MCU_EVENT_TRUSTED_RESET 使用。这些闸门来自可信控制路径，
+     * 绝不来自协议 v1.0 帧。 */
     bool reset_authorized;
     bool cause_cleared;
 } mcu_event_t;
 
-/* Values deliberately match protocol v1.0 result_code. */
+/* 取值有意与协议 v1.0 的 result_code 保持一致。 */
 typedef enum {
     MCU_RESULT_ACCEPTED = 0,
     MCU_RESULT_REJECTED = 1
@@ -89,11 +89,11 @@ typedef struct {
     mcu_state_t state;
     mcu_device_mode_t device_mode;
 
-    /* Active latched cause, if any. */
+    /* 当前锁存的活动原因（若有）。 */
     mcu_fault_code_t fault_code;
 
-    /* Fault to place in the response for this event.  This differs from the
-     * active cause when STOP is processed while an earlier fault is latched. */
+    /* 本事件响应中要放置的故障。当 STOP 在更早的故障仍被锁存时被处理，
+     * 该值与活动原因不同。 */
     mcu_fault_code_t response_fault_code;
 
     bool execution_active;
@@ -102,9 +102,8 @@ typedef struct {
 
 void mcu_sm_init(mcu_state_machine_t *machine);
 bool mcu_sm_is_valid(const mcu_state_machine_t *machine);
-/* A missing result buffer is invalid caller input for ordinary events and
- * fails closed. STOP is still dispatched so a missing diagnostic buffer can
- * never suppress the safety action. */
+/* 对普通事件而言，缺失结果缓冲区属于无效的调用方输入，按失败即拒绝处理。
+ * STOP 仍会被派发，因此诊断缓冲区缺失永远不会压制安全动作。 */
 void mcu_sm_dispatch(mcu_state_machine_t *machine,
                      const mcu_event_t *event,
                      mcu_transition_result_t *result);

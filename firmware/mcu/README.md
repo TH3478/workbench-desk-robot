@@ -1,9 +1,9 @@
-# Safety MCU firmware
+# 安全 MCU 固件
 
-Target: RISC-V rv32imac. Reference part: CH32V307.
-Decision and rationale: `docs/decisions/ADR-0003-mcu-riscv-qemu.md`.
+目标：RISC-V rv32imac。参考器件：CH32V307。
+决策与理由：`docs/decisions/ADR-0003-mcu-riscv-qemu.md`。
 
-## Layout
+## 布局
 
 ```
 core/           platform-independent C. State machine, frame codec,
@@ -15,41 +15,30 @@ hal/host/       x86_64 build, for fast logic tests.
 tests/          shared test suite, runs against all three targets.
 ```
 
-`core/` compiles to three targets from one source. Changing the board means
-writing a new `hal/`, not touching `core/`.
+`core/` 从单一源码编译到三个目标。换板意味着写一个新的 `hal/`，而不是动 `core/`。
 
-## The one rule
+## 唯一规则
 
-`core/` must not include a vendor or platform header. Any register access
-belongs in `hal/`. An `#ifdef CH32V307` inside `core/` means the boundary has
-been violated.
+`core/` 不得包含厂商或平台头文件。任何寄存器访问都属于 `hal/`。`core/` 内出现 `#ifdef CH32V307` 就意味着边界被违反。
 
-## Authority boundary
+## 权威边界
 
-The C safety state machine under `core/` and its shared Host/QEMU transition
-suite are authoritative for MCU safety behavior. The allocation-free Wire V1
-codec under `core/frame_codec.[ch]`, its binary contract in
-`docs/architecture/mcu-wire-v1.md`, and the shared Host/QEMU golden vectors are
-authoritative for the Classic CAN payload encoding. `firmware/virtual_mcu/` is
-retired as a safety reference and parity oracle. It remains only as a legacy
-compatibility stub for earlier Python consumers and is not evidence of C
-protocol, firmware, or physical safety behavior. Changes to that model require
-a separate issue and must not silently be treated as C parity work.
+`core/` 下的 C 安全状态机及其共享 Host/QEMU 迁移套件是 MCU 安全行为的权威。`core/frame_codec.[ch]` 下的无分配 Wire V1 编解码器、`docs/architecture/mcu-wire-v1.md` 中的二进制契约，以及共享的 Host/QEMU 黄金向量是 Classic CAN 载荷编码的权威。`firmware/virtual_mcu/` 已退役为安全参考与奇偶校验基准。它只作为早期 Python 消费者的旧式兼容存根保留，不是 C 协议、固件或物理安全行为的证据。对该模型的改动需要单独的 Issue，且不得被静默当作 C 奇偶校验工作。
 
-## What QEMU proves and doesn't
+## QEMU 证明什么、不证明什么
 
-QEMU models SJA1000 and CTU CAN FD, not the CH32V307 CAN peripheral.
+QEMU 建模 SJA1000 与 CTU CAN FD，而不是 CH32V307 CAN 外设。
 
-| Proven in QEMU | Requires the board |
+| QEMU 中已证明 | 需要板卡 |
 |---|---|
-| State machine transitions | CH32V307 CAN register behaviour |
-| Watchdog timing under a real timer interrupt | Bit timing (BRP/TSEG1/TSEG2/SJW) |
-| Dedup across sequence wraparound | Error frames, bus-off recovery |
-| Frame codec, ID partition enforcement | Electrical behaviour, EMI |
-| Raw-envelope rejection and STOP-first bridge logic | Controller FIFO/IRQ and wire arbitration |
-| Absence of malloc and FP instructions | Brownout, power-on reset |
+| 状态机迁移 | CH32V307 CAN 寄存器行为 |
+| 真实定时器中断下的看门狗时序 | 位时序（BRP/TSEG1/TSEG2/SJW） |
+| 跨序列回绕的去重 | 错误帧、bus-off 恢复 |
+| 帧编解码器、ID 分区强制 | 电气行为、EMI |
+| 原始包络拒绝与 STOP 优先桥逻辑 | 控制器 FIFO/IRQ 与线路仲裁 |
+| 无 malloc 与 FP 指令 | 欠压、上电复位 |
 
-## Build
+## 构建
 
 ```bash
 make host        # x86_64 library for fast tests
@@ -61,65 +50,26 @@ make test-host-sanitize  # Host corpus under ASan and UBSan
 make test-qemu   # fault suite in QEMU, what CI runs
 ```
 
-## Status
+## 状态
 
-The platform-independent C safety state machine is implemented by Issue #53.
-Issue #54 adds the strict Classic CAN Wire V1 codec and shared Host/QEMU golden
-vectors. Issue #60 adds the allocation-free heartbeat watchdog, bounded STOP
-acknowledgement timing, fake-clock tests and QEMU machine-timer/watchdog
-evidence. Issue #61 adds the fixed-memory ordinary-command replay window,
-trusted startup-session gate and shared Host/QEMU wraparound corpus. Issue #180
-adds the strict raw HAL/Wire V1 bridge and bounded Host fake CAN transport. The
-QEMU and physical target CAN drivers, six-domain arbitration and physical CAN
-validation remain separate owner-gated follow-up work and are `NOT_EXECUTED`.
+平台无关的 C 安全状态机由 Issue #53 实现。Issue #54 增加严格的 Classic CAN Wire V1 编解码器与共享 Host/QEMU 黄金向量。Issue #60 增加无分配心跳看门狗、受限的 STOP 确认时序、假时钟测试与 QEMU 机器定时器/看门狗证据。Issue #61 增加定长内存的普通命令回放窗口、可信启动会话闸门与共享 Host/QEMU 回绕语料。Issue #180 增加严格的原始 HAL/Wire V1 桥与受限的 Host 假 CAN 传输。QEMU 与物理目标的 CAN 驱动、六域仲裁与物理 CAN 验证仍是单独的 Owner 门控后续工作，且为 `NOT_EXECUTED`。
 
-## CAN HAL/Wire boundary
+## CAN HAL/Wire 边界
 
-`core/can_bridge.[ch]` is the only raw-envelope mapping. The HAL exposes an
-11-bit `arbitration_id`, DLC, explicit extended/RTR/error/FD flags and eight
-data bytes. The logical 16-bit `command_id` remains in Wire V1 payload bytes
-1..2. Only a flag-free, DLC-8 standard frame with a known Wire V1 ID can be
-decoded; malformed or wrong-direction traffic produces no state-machine event.
+`core/can_bridge.[ch]` 是唯一的原始包络映射。HAL 暴露 11 位 `arbitration_id`、DLC、显式 extended/RTR/error/FD 标志与八个数据字节。逻辑 16 位 `command_id` 留在 Wire V1 载荷字节 1..2。只有无标志、DLC-8 且带已知 Wire V1 ID 的标准帧才能被解码；格式错误或方向错误的流量不产生状态机事件。
 
-MCU ingress checks STOP before ordinary command routing. A valid STOP bypasses
-the ordinary startup-session gate and dedup window, and its ACK is confirmed
-only after `hal_can_send()` accepts the transport handoff. The complete
-contract, fake evidence and physical/multi-node limits are documented in
-`docs/architecture/mcu-can-hal-boundary-v1.md`.
+MCU 入口在普通命令路由之前检查 STOP。有效 STOP 绕过普通启动会话闸门与去重窗口，且其 ACK 仅在 `hal_can_send()` 接受传输交接后才确认。完整契约、假证据与物理/多节点限值记录在 `docs/architecture/mcu-can-hal-boundary-v1.md`。
 
-## Timing safety path
+## 时序安全路径
 
-`core/watchdog.[ch]` owns the timing state but not timer or watchdog registers.
-Only a complete, valid and serially new ordinary frame may refresh the
-software link watchdog. Malformed, retry, duplicate, stale and STOP traffic do
-not extend the execution deadline. A missed deadline enters the existing
-latched `FAULT/watchdog_expired` state and emits one telemetry record.
+`core/watchdog.[ch]` 拥有时序状态，但不拥有定时器或看门狗寄存器。只有完整、有效且序列更新的普通帧可以刷新软件链路看门狗。格式错误、重试、重复、过期与 STOP 流量不延长执行期限。错过期限进入既有锁存的 `FAULT/watchdog_expired` 状态并发出一个遥测记录。
 
-A valid STOP immediately transitions the state machine to `SAFE_STOP` and
-creates a correlated `STOP_ACK` handoff record. The transport must confirm the
-handoff before the controlled deadline; otherwise the core emits one local
-`STOP_TIMEOUT` outcome and never claims stopped confirmation. The exact
-constants and clock-wrap rules are documented in
-`docs/architecture/mcu-watchdog-v1.md`.
+有效 STOP 立即把状态机迁移到 `SAFE_STOP` 并创建一个关联的 `STOP_ACK` 交接记录。传输必须在受控期限前确认交接；否则 core 发出一个本地 `STOP_TIMEOUT` 结果并绝不声称已停止确认。精确常量与时钟回绕规则记录在 `docs/architecture/mcu-watchdog-v1.md`。
 
-While the STOP handoff is pending, an equal `retry_count` is an exact
-link-level replay and a strictly greater count is a protocol-level retry.
-Decreasing or wrapped retry counts are stale and rejected without changing the
-pending ACK correlation.
+STOP 交接挂起期间，相等的 `retry_count` 是精确的链路级回放，严格更大的计数是协议级重试。递减或回绕的重试计数为过期，被拒绝且不改变挂起的 ACK 关联。
 
-## Ordinary command replay protection
+## 普通命令回放保护
 
-`core/command_dedup.[ch]` is the platform-independent entry for decoded
-ordinary commands. It keeps eight cached semantic ACK records, applies the
-frozen 15-bit half-range comparison, clears pre-wrap records before accepting a
-new serial epoch, and never allocates. Exact duplicates and increasing
-protocol retries replay the original result without dispatching another safety
-event or refreshing the watchdog. Conflicting, decreasing, stale and evicted
-attempts fail closed with `duplicate_frame`.
+`core/command_dedup.[ch]` 是解码后普通命令的平台无关入口。它保留八条缓存的语义 ACK 记录，应用冻结的 15 位半程比较，在接受新序列纪元前清除回绕前记录，且绝不分配内存。精确重复与递增的协议重试回放原始结果，不再派发另一个安全事件或刷新看门狗。冲突、递减、过期与被驱逐的尝试以 `duplicate_frame` 失败即拒绝。
 
-Boot starts with ordinary command dispatch closed. The transport must drain
-queued pre-session traffic before opening the trusted session gate; an ordinary
-safety reset does not erase replay history. STOP remains on the independent
-watchdog path and cannot be consumed by a full or closed ordinary window. The
-exact algorithm and evidence limits are documented in
-`docs/architecture/mcu-command-dedup-v1.md`.
+启动时普通命令派发是关闭的。传输必须在打开可信会话闸门之前排空排队的会话前流量；普通安全复位不擦除回放历史。STOP 留在独立看门狗路径上，不能被已满或已关闭的普通窗口消费。精确算法与证据限值记录在 `docs/architecture/mcu-command-dedup-v1.md`。

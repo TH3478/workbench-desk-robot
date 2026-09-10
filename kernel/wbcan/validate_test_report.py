@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the machine-readable report emitted by test_wbcan.sh."""
+"""验证 test_wbcan.sh 输出的机器可读报告。"""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ SUITE_PATH = Path(__file__).with_name("test_wbcan.sh")
 
 
 class ReportError(ValueError):
-    """A report is malformed or contains a failed assertion."""
+    """报告格式错误，或包含失败的断言。"""
 
 
 def _test_id(name: str) -> str:

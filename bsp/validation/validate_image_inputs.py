@@ -1,4 +1,4 @@
-"""Validate fail-closed Jetson BSP image build inputs."""
+"""校验失败即拒绝的 Jetson BSP 镜像构建输入。"""
 
 from __future__ import annotations
 

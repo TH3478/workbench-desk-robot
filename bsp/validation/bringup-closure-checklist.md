@@ -1,38 +1,34 @@
-# BSP Bring-up Closure Checklist
+# BSP 启动调试闭合清单
 
-This checklist is the release gate for moving the BSP from candidate selection
-to a physically reproducible prototype image. A checked item must link to raw
-evidence; a simulation result or CI pass is not physical evidence.
+本清单是把 BSP 从候选选型推进到物理可复现原型镜像的发布闸门。勾选项必须链接原始证据；仿真结果或 CI 通过不是物理证据。
 
-## 1. Hardware identity
+## 1. 硬件身份
 
-- [ ] Carrier-board MPN, revision, schematic and pinmux are recorded.
-- [ ] Jetson module SKU and board revision are recorded.
-- [ ] CAN transceiver, connector, harness, termination and measured bitrate are recorded.
-- [ ] Camera serial, USB topology, stream modes and calibration artifact are recorded.
-- [ ] Arm and tool controller MPN, firmware, protocol and safety I/O are recorded.
-- [ ] U2 exact MPN, input range, isolation rating, derating curve, footprint and thermal review are approved.
+- [ ] 记录载板 MPN、修订、原理图与 pinmux。
+- [ ] 记录 Jetson 模组 SKU 与板卡修订。
+- [ ] 记录 CAN 收发器、连接器、线束、终端与实测比特率。
+- [ ] 记录相机序列号、USB 拓扑、流模式与标定产物。
+- [ ] 记录臂与工具控制器 MPN、固件、协议与安全 I/O。
+- [ ] 批准 U2 精确 MPN、输入范围、隔离额定值、降额曲线、封装与热评审。
 
-## 2. Reproducible software
+## 2. 可复现软件
 
-- [ ] JetPack/L4T release, vendor package URLs and SHA256 values are locked.
-- [ ] Kernel source, compiler, merged `.config`, Image/modules and DTB hashes are locked.
-- [ ] Rootfs package lock, firmware bundle, recovery image and rollback procedure are attached.
-- [ ] ROS 2 distribution and third-party package versions are pinned per deployment image.
+- [ ] 锁定 JetPack/L4T 版本、厂商包 URL 与 SHA256 值。
+- [ ] 锁定内核源码、编译器、合并后的 `.config`、Image/modules 与 DTB hash。
+- [ ] 挂接 Rootfs 包锁、固件捆绑包、恢复镜像与回滚流程。
+- [ ] 按部署镜像钉定 ROS 2 发行版与第三方包版本。
 
-## 3. Safety and performance evidence
+## 3. 安全与性能证据
 
-- [ ] Power-on, brownout, thermal and sustained-load logs pass the acceptance limits.
-- [ ] CAN loss, watchdog, emergency-stop and brake tests pass with measured trip times.
-- [ ] Tip-stability tests cover every declared pose, payload and floor condition.
-- [ ] Fault injection and recovery transcripts are archived with board and firmware identity.
+- [ ] 上电、欠压、热与持续负载日志通过验收限值。
+- [ ] CAN 丢失、看门狗、急停与刹车测试通过，并带实测跳闸时间。
+- [ ] 防倾倒稳定性测试覆盖每个声明的位姿、负载与地面条件。
+- [ ] 故障注入与恢复记录连同板卡与固件身份一起归档。
 
-## 4. Release decision
+## 4. 发布决策
 
-- [ ] Safety owner signs the hazard-analysis and external-inhibit review.
-- [ ] Legal owner signs third-party license, NOTICE and redistribution review.
-- [ ] Release owner verifies every manifest hash and evidence link.
+- [ ] 安全 Owner 签署危害分析与外部抑制评审。
+- [ ] 法务 Owner 签署第三方许可证、NOTICE 与再分发评审。
+- [ ] 发布 Owner 核验每个清单 hash 与证据链接。
 
-Until all applicable boxes are checked, keep `bsp/readiness.yaml` at
-`REPOSITORY_BASELINE_READY_PHYSICAL_BRINGUP_BLOCKED` and keep image inputs at
-`inputs_unresolved`.
+在所有适用项勾选之前，保持 `bsp/readiness.yaml` 为 `REPOSITORY_BASELINE_READY_PHYSICAL_BRINGUP_BLOCKED`，并保持镜像输入为 `inputs_unresolved`。

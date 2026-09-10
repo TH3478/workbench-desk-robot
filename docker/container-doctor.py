@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed, read-only checks for container capability profiles."""
+"""对容器能力配置档执行失败即拒绝的只读检查。"""
 
 from __future__ import annotations
 

@@ -1,14 +1,14 @@
-# Frozen P1 scenarios
+# 冻结的 P1 场景
 
-This directory contains the 12 immutable v0.1 evaluation manifests:
+本目录包含 12 个不可变的 v0.1 评测清单：
 
-- normal: 3;
-- occlusion / low confidence: 3;
-- moving target: 3;
-- grasp failure: 3.
+- normal: 3；
+- occlusion / low confidence: 3；
+- moving target: 3；
+- grasp failure: 3。
 
-Each manifest must contain a stable scenario ID, seed, world version, timeout and fault type. The expected outcome is held separately from generators and candidate-model prompts.
+每个清单必须包含稳定的场景 ID、种子、世界版本、超时与故障类型。期望结果与生成器、候选模型提示分开存放。
 
-The same 12 manifests run against every system version under comparison. `python tools/scripts/validate_scenarios.py` also materializes every seed twice and rejects distribution drift or non-determinism.
+同一批 12 个清单对每个被比较的系统版本运行。`python tools/scripts/validate_scenarios.py` 还会把每个种子物化两次，并拒绝分布漂移或非确定性。
 
-The `expanded/` directory adds 18 P2 manifests for path blocking, low light, and multiple same-colour objects. It does not modify this frozen baseline.
+`expanded/` 目录为路径阻塞、低光照与多个同色物体新增 18 个 P2 清单。它不修改本冻结基线。

@@ -4,22 +4,21 @@
   <name>workbench_motion</name>
   <version>0.2.0</version>
   <description>
-    Motion (robot/control) semantic-action adapter package: entry validation,
-    grasp/place/stop execution over a replaceable backend, and ActionResult
-    production. Phase 2 adds the Gazebo Harmonic ros2_control foundation,
-    controller bringup, and a ROS-free joint-limit pre-filter.
+    运动（robot/control）语义动作适配器包：入口校验、经由可替换后端执行抓取/放置/停
+    止，以及 ActionResult 生成。阶段 2 新增 Gazebo Harmonic 的 ros2_control 基础、
+    控制器启动调试与无 ROS 的关节限位预过滤器。
   </description>
   <maintainer email="motion-owner@workbench-1.invalid">Motion Owner</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_python</buildtool_depend>
 
-  <!-- ROS 2 runtime deps are apt/rosdep-managed, not uv-managed. -->
+  <!-- ROS 2 运行时依赖由 apt/rosdep 管理，不由 uv 管理。 -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
 
-  <!-- Phase 1: arm composition + MoveIt reachability. -->
+  <!-- 阶段 1：机械臂组成 + MoveIt 可达性。 -->
   <exec_depend>xacro</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>

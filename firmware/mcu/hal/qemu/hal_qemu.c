@@ -1,19 +1,19 @@
-/* QEMU virt machine HAL. Task FW1/FW2.
+/* QEMU virt 机器 HAL。任务 FW1/FW2。
  *
- * Addresses come from QEMU's hw/riscv/virt.c memory map. They live here and
- * nowhere else — that is the whole reason this file exists.
+ * 地址来自 QEMU hw/riscv/virt.c 的内存映射。它们只存在于这里、
+ * 别处绝无——这正是本文件存在的全部理由。
  */
 #include "hal.h"
 
-/* NS16550A UART. */
+/* NS16550A UART。 */
 #define UART0_BASE  0x10000000u
 #define UART_THR    (*(volatile uint8_t *)(UART0_BASE + 0x00))
 #define UART_LSR    (*(volatile uint8_t *)(UART0_BASE + 0x05))
-#define UART_LSR_THRE 0x20u   /* transmit holding register empty */
+#define UART_LSR_THRE 0x20u   /* 发送保持寄存器为空 */
 
-/* CLINT: mtime is a memory-mapped 64-bit counter on this machine, ticking at
- * 10 MHz. On the CH32V307 it is the mtime CSR instead, which is why hal_now_us
- * is behind the HAL and not a macro in core/.
+/* CLINT：mtime 在本机器上是内存映射的 64 位计数器，以 10 MHz 走时。
+ * 在 CH32V307 上它则是 mtime CSR，这正是 hal_now_us
+ * 位于 HAL 之后、而非 core/ 中宏的原因。
  */
 #define CLINT_BASE      0x02000000u
 #define CLINT_MTIMECMP  (*(volatile uint64_t *)(CLINT_BASE + 0x4000))
@@ -36,8 +36,8 @@ void hal_puts(const char *s)
 
 void hal_put_u32(uint32_t v)
 {
-    /* Decimal, no printf: pulling in stdio would blow the size budget and
-     * drag in an allocator, which FW9 forbids. */
+    /* 十进制输出，不用 printf：引入 stdio 会击穿体积预算，
+     * 并拖入 FW9 所禁止的分配器。 */
     char buf[11];
     int i = 0;
     if (v == 0) { hal_putc('0'); return; }
@@ -50,9 +50,9 @@ void hal_report_exit(int code)
     hal_puts(code == 0 ? "\n[mcu] PASS\n" : "\n[mcu] FAIL code=");
     if (code != 0) { hal_put_u32((uint32_t)code); hal_putc('\n'); }
 
-    /* Hand the exit code to the harness so `make test-qemu` fails the build.
-     * QEMU's riscv virt exposes a SiFive test finisher at 0x100000:
-     *   0x5555 = pass, 0x3333 | (code << 16) = fail.
+    /* 把退出码交给测试框架，使 `make test-qemu` 在失败时判负。
+     * QEMU 的 riscv virt 在 0x100000 处暴露 SiFive 测试终结器：
+     *   0x5555 = 通过，0x3333 | (code << 16) = 失败。
      */
     volatile uint32_t *finisher = (volatile uint32_t *)0x100000u;
     *finisher = (code == 0) ? 0x5555u : (0x3333u | ((uint32_t)code << 16));
@@ -60,8 +60,8 @@ void hal_report_exit(int code)
 
 void hal_report_trap(uint32_t mcause, uint32_t mepc)
 {
-    /* A trap in a safety MCU is never routine. Say exactly what and where,
-     * then let crt0 halt — no attempt to resume. */
+    /* 安全 MCU 中的陷阱绝非寻常。精确报告发生了什么、发生在哪里，
+     * 然后让 crt0 停机——不做任何恢复尝试。 */
     hal_puts("\n[mcu] TRAP mcause=");
     hal_put_u32(mcause);
     hal_puts(" mepc=");
@@ -72,8 +72,8 @@ void hal_report_trap(uint32_t mcause, uint32_t mepc)
     *finisher = 0x3333u | (99u << 16);
 }
 
-/* Divide a 64-bit timer value without pulling __udivdi3 into the freestanding
- * rv32 image. Each half is processed with 32-bit shifts only.
+/* 对 64 位定时器值做除法，同时避免把 __udivdi3 拉进独立运行的
+ * rv32 镜像。每一半都只用 32 位移位处理。
  */
 static uint64_t divide_u64_by_10(uint64_t value)
 {
@@ -94,7 +94,7 @@ static uint64_t divide_u64_by_10(uint64_t value)
     return ((uint64_t)quotient[0] << 32) | quotient[1];
 }
 
-/* mtime is 10 MHz on this machine, so microseconds = ticks / 10. */
+/* 本机器的 mtime 为 10 MHz，因此微秒数 = 滴答数 / 10。 */
 uint64_t hal_now_us(void)
 {
     return divide_u64_by_10(CLINT_MTIME);
@@ -102,9 +102,9 @@ uint64_t hal_now_us(void)
 
 void hal_timer_arm_us(uint64_t deadline_us)
 {
-    /* Same reasoning in reverse: multiply by 10, do not divide by 1000000. */
+    /* 反向同理：乘以 10，而不是除以 1000000。 */
     CLINT_MTIMECMP = deadline_us * (MTIME_HZ / 1000000ull);
-    /* Enable machine timer interrupt (MTIE, bit 7). */
+    /* 使能机器定时器中断（MTIE，第 7 位）。 */
     __asm__ volatile("csrs mie, %0" :: "r"(1u << 7));
 }
 
@@ -116,21 +116,21 @@ void hal_timer_disarm(void)
 
 void hal_timer_enable(void)
 {
-    /* Enable global machine interrupts (MIE, bit 3) after mtvec is valid. */
+    /* 在 mtvec 有效之后使能全局机器中断（MIE，第 3 位）。 */
     __asm__ volatile("csrs mstatus, %0" :: "r"(1u << 3));
 }
 
-/* --- CAN: FW10 wires CTU CAN FD over PCI to the host vcan. Not yet. --------
- * Returning false rather than pretending to succeed: a stub that reports
- * success would let FW4's tests pass against nothing.
+/* --- CAN：FW10 将通过 PCI 把 CTU CAN FD 接到主机 vcan。尚未实现。-------
+ * 宁可返回 false 也不假装成功：报告成功的桩会让 FW4 的测试
+ * 对着空气通过。
  */
 bool hal_can_init(void) { return false; }
 bool hal_can_send(const hal_can_frame *f) { (void)f; return false; }
 bool hal_can_recv(hal_can_frame *out) { (void)out; return false; }
 
-/* QEMU virt has no CH32V307 IWDG. This bounded model records the same start,
- * feed and expiry decisions so the core's feed policy is observable without
- * presenting it as physical hardware evidence. */
+/* QEMU virt 没有 CH32V307 的 IWDG。此受限模型记录相同的启动、
+ * 喂狗与过期判定，使 core 的喂狗策略可被观测，
+ * 同时又不会把它伪装成物理硬件证据。 */
 static bool qemu_wdt_running;
 static bool qemu_wdt_expired;
 static uint32_t qemu_wdt_timeout_ms;

@@ -1,7 +1,7 @@
-"""Unit tests for the unified logging configuration.
+"""统一日志配置的单元测试。
 
-Proves the phase-0 acceptance criterion: the unified format carries run_id and
-the setup is idempotent (no stacked handlers, no reliance on ``print``).
+证明阶段 0 验收标准：统一格式携带 run_id，且配置幂等（无堆叠 handler、不依赖
+``print``）。
 """
 
 from __future__ import annotations
@@ -18,12 +18,11 @@ from workbench_motion.logging_setup import (
 
 
 def _capture_handler(logger: logging.Logger) -> io.StringIO:
-    """Attach a StringIO handler mirroring the unified format + context filter.
+    """挂一个镜像统一格式 + 上下文过滤器的 StringIO handler。
 
-    We cannot rely on capsys/capfd here: the real StreamHandler binds sys.stderr
-    at construction, before pytest swaps the stream, so capsys never sees it.
-    This handler captures deterministically while exercising the same LOG_FORMAT
-    and defaults filter the package installs.
+    这里不能依赖 capsys/capfd：真正的 StreamHandler 在构造时绑定 sys.stderr——早于
+    pytest 换流——所以 capsys 永远看不到它。本 handler 在确定性捕获的同时，走包安装
+    的同一 LOG_FORMAT 与默认值过滤器。
     """
     stream = io.StringIO()
     handler = logging.StreamHandler(stream)
@@ -65,6 +64,6 @@ def test_plain_log_without_context_uses_defaults() -> None:
     stream = _capture_handler(logger)
     logger.warning("no context here")
     line = stream.getvalue()
-    # The context filter must supply defaults so the formatter never crashes.
+    # 上下文过滤器必须提供默认值，使格式化器永不崩溃。
     assert "run=-" in line
     assert "action=-" in line

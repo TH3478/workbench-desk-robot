@@ -1,4 +1,4 @@
-"""Fail-closed validation for bounded wbcan kernel diagnostics."""
+"""对受限的 wbcan 内核诊断做失败即拒绝式验证。"""
 
 from __future__ import annotations
 

@@ -1,11 +1,11 @@
-# wbcan - virtual CAN device with programmable fault injection.
+# wbcan——支持可编程故障注入的虚拟 CAN 设备。
 #
-# Out-of-tree build against the running kernel's headers.
+# 基于运行中内核的头文件进行树外构建。
 #   make            build wbcan.ko
-#   make load       insmod, bring the interface up
-#   make unload     take it down, rmmod
-#   make test       run the fault suite (needs the module loaded)
-#   make checkpatch run the kernel's own style checker, if available
+#   make load       insmod，启用接口
+#   make unload     关闭接口，rmmod
+#   make test       运行故障套件（需要模块已加载）
+#   make checkpatch 运行内核自带风格检查器（若可用）
 
 KDIR  ?= /lib/modules/$(shell uname -r)/build
 PWD   := $(shell pwd)
@@ -43,15 +43,15 @@ all:
 clean:
 	@if [ -d "$(KDIR)" ]; then $(MAKE) -C $(KDIR) M=$(PWD) clean; else rm -f *.o *.ko *.mod* .*.cmd modules.order Module.symvers; fi
 
-# can-dev provides alloc_candev/register_candev. On most distros it is a
-# module, not built in, so load it first or insmod fails on symbols.
+# can-dev 提供 alloc_candev/register_candev。在大多数发行版上它是
+# 模块而非内建，因此要先加载它，否则 insmod 会因符号缺失失败。
 load: all
 	sudo modprobe can
 	sudo modprobe can-raw
 	sudo modprobe can-dev
 	sudo insmod ./wbcan.ko
-	@# restart-ms is what makes the CAN core auto-recover from bus-off,
-	@# which is the behaviour FW19 has to survive.
+	@# restart-ms 让 CAN 核心能从 bus-off 自动恢复，
+	@# 这正是 FW19 必须扛过去的行为。
 	sudo ip link set $(IFACE) type can restart-ms 100
 	sudo ip link set $(IFACE) up
 	@ip -details link show $(IFACE)
@@ -112,7 +112,7 @@ latency-campaign:
 	@python3 ./validate_latency_campaign.py --validate-report $(LATENCY_CAMPAIGN_REPORT)
 	@echo "wbcan latency campaign evidence: $(LATENCY_CAMPAIGN_REPORT)"
 
-# The kernel's own checker. Catches the style issues a maintainer would.
+# 内核自带的检查器，能抓出维护者会抓的风格问题。
 checkpatch:
 	@if [ -x "$(KDIR)/scripts/checkpatch.pl" ]; then \
 	  $(KDIR)/scripts/checkpatch.pl --no-tree --file --strict wbcan.c; \

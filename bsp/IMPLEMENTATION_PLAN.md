@@ -1,21 +1,17 @@
-# BSP Implementation Plan
+# BSP 实施计划
 
-This is the execution register for the cost-conscious robot BSP baseline.
-Completion means repository artifacts and repeatable commands exist; physical
-bring-up remains a separate evidence gate.
+这是成本敏感机器人 BSP 基线的执行登记表。完成意味着仓库产物与可复现命令存在；物理启动调试仍是单独的证据闸门。
 
-| Stage | Deliverable | Status | Exit evidence |
+| 阶段 | 交付物 | 状态 | 出口证据 |
 |---|---|---|---|
-| BSP-0 | six-domain topology, ownership and CAN contract | COMPLETE | architecture docs and manifest |
-| BSP-1 | Jetson board, carrier, power and thermal closure | BLOCKED | vendor schematic, load test, approved BOM |
-| BSP-2 | STM32H563 base and STM32G0B1 safety closure | BLOCKED | part/revision, pin budget, programming and safety review |
-| BSP-3 | kernel config, device tree and interface enumeration | READY_TO_START | BSP-1/BSP-2 inputs |
-| BSP-4 | bootloader, rootfs, firmware bundle and recovery image | READY_TO_START | reproducible build and recovery transcript |
-| BSP-5 | CAN discovery, six heartbeats, STOP and reset validation | NOT_EXECUTED | guarded hardware capture |
-| BSP-6 | power, thermal, latency, bus-load and long-run validation | NOT_EXECUTED | calibrated raw measurements |
+| BSP-0 | 六域拓扑、所有权与 CAN 契约 | COMPLETE | 架构文档与清单 |
+| BSP-1 | Jetson 板、载板、供电与热闭合 | BLOCKED | 厂商原理图、负载测试、已批准的 BOM |
+| BSP-2 | STM32H563 基座与 STM32G0B1 安全闭合 | BLOCKED | 部件/修订、引脚预算、编程与安全评审 |
+| BSP-3 | 内核配置、设备树与接口枚举 | READY_TO_START | BSP-1/BSP-2 输入 |
+| BSP-4 | 引导加载器、rootfs、固件捆绑包与恢复镜像 | READY_TO_START | 可复现构建与恢复记录 |
+| BSP-5 | CAN 发现、六路心跳、STOP 与复位验证 | NOT_EXECUTED | 受控的硬件采集 |
+| BSP-6 | 供电、热、延迟、总线负载与长时运行验证 | NOT_EXECUTED | 校准的原始测量 |
 
-## Working rule
+## 工作规则
 
-Do not close a blocked stage by changing its status manually. Attach the named
-evidence first, then update this register and the release evidence register in
-the same change.
+不要靠手动改状态来闭合一个受阻阶段。先挂接所指证据，然后在同一次变更中更新本登记表与发布证据登记表。

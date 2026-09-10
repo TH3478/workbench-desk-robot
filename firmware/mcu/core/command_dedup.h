@@ -8,9 +8,8 @@
 #include "state_machine.h"
 #include "watchdog.h"
 
-/* Ordinary command IDs use the low 15 bits as a serial number.  Eight
- * retained results cover the current bounded host implementation (one
- * in-flight command plus retries) while keeping firmware memory fixed. */
+/* 普通命令 ID 使用低 15 位作为序号。保留 8 个结果即可覆盖当前受限的
+ * 主机实现（一个在途命令加若干重试），同时保持固件内存占用固定。 */
 #define MCU_COMMAND_SERIAL_MASK 0x7fffu
 #define MCU_COMMAND_SERIAL_HALF_RANGE 0x4000u
 #define MCU_COMMAND_REPLAY_WINDOW_SIZE 8u
@@ -31,8 +30,8 @@ typedef enum {
 typedef struct {
     mcu_command_outcome_t outcome;
     bool ack_available;
-    /* True only when a serially new ordinary command reached the safety state
-     * machine. Replays and correlation rejections never set this flag. */
+    /* 仅当序号上全新的普通命令到达安全状态机时为真。
+     * 回放与关联性拒绝永远不会置位此标志。 */
     bool ordinary_event_dispatched;
     bool watchdog_refreshed;
     mcu_wire_frame_t ack;
@@ -57,26 +56,24 @@ typedef struct {
     mcu_command_replay_entry_t entries[MCU_COMMAND_REPLAY_WINDOW_SIZE];
 } mcu_command_dedup_t;
 
-/* Boot initialization deliberately leaves ordinary command dispatch closed.
- * STOP remains owned by mcu_watchdog_receive_stop() and is not gated here. */
+/* 启动初始化有意保持普通命令派发处于关闭状态。
+ * STOP 仍归 mcu_watchdog_receive_stop() 所有，不受此处闸门限制。 */
 void mcu_command_dedup_init(mcu_command_dedup_t *dedup);
 bool mcu_command_dedup_is_valid(const mcu_command_dedup_t *dedup);
 
-/* This trusted transport gate may open only after queued pre-session traffic
- * has been discarded. Reopening an already active session is rejected so a
- * caller cannot silently erase replay history. */
+/* 该可信传输闸门只能在排队的会话前流量被丢弃之后打开。
+ * 重新打开已激活的会话会被拒绝，以免调用方静默抹除回放历史。 */
 bool mcu_command_dedup_open_session(mcu_command_dedup_t *dedup,
                                     bool queued_traffic_discarded);
 bool mcu_command_dedup_close_session(mcu_command_dedup_t *dedup);
 
-/* Receive one fully decoded ordinary COMMAND. Structurally invalid input and
- * corrupt dependencies return false without modifying the output. A closed
- * session returns a record with no ACK. Every other successful call returns a
- * correlated ACK; only a serially new command dispatches an ordinary event.
+/* 接收一个完全解码的普通 COMMAND。结构上非法的输入与损坏的依赖
+ * 会返回 false 且不修改输出。会话关闭时返回的记录不带 ACK。
+ * 其余每次成功调用都返回关联的 ACK；
+ * 只有序号上全新的命令才会派发普通事件。
  *
- * MOVE and grip commands enter MOVING, HOLD enters HOLDING, and HEARTBEAT
- * preserves the current safe state. Only accepted serially new activity can
- * refresh the software watchdog. */
+ * MOVE 与夹爪命令进入 MOVING，HOLD 进入 HOLDING，HEARTBEAT
+ * 保持当前安全状态。只有被接受的、序号上全新的活动才能刷新软件看门狗。 */
 bool mcu_command_dedup_receive(mcu_command_dedup_t *dedup,
                                mcu_state_machine_t *machine,
                                mcu_watchdog_t *watchdog,

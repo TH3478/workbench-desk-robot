@@ -1,22 +1,17 @@
-# BSP Validation Evidence
+# BSP 验证证据
 
-Store raw bring-up captures outside source control when they contain sensitive
-device details, and commit only immutable manifests and hashes.
+当原始启动调试采集包含敏感设备细节时，把它们存放在源码控制之外，只提交不可变的清单与 hash。
 
-Every record must identify board revision, kernel/JetPack version, firmware
-versions, node IDs, instrument/calibration references, UTC timestamp, command
-and result (`PASS`, `FAIL` or `NOT_EXECUTED`).
+每条记录必须标明板卡修订、内核/JetPack 版本、固件版本、节点 ID、仪器/标定引用、UTC 时间戳、命令与结果（`PASS`、`FAIL` 或 `NOT_EXECUTED`）。
 
-Minimum evidence set:
+最小证据集：
 
-- Linux cold/warm boot and recovery transcript
-- device-tree and interface enumeration
-- CAN discovery and six-domain heartbeat capture
-- STOP and independent E-stop timing capture
-- per-domain reset and Linux restart behavior
-- bus-off/restart counters and bounded queue behavior
-- CPU, memory, temperature, power and CAN bus-load samples
+- Linux 冷/热启动与恢复记录
+- 设备树与接口枚举
+- CAN 发现与六域心跳采集
+- STOP 与独立 E-stop 计时采集
+- 逐域复位与 Linux 重启行为
+- bus-off/重启计数器与受限队列行为
+- CPU、内存、温度、供电与 CAN 总线负载采样
 
-`PASS` here means only that the named test ran and met its stated criterion. It
-does not authorize production release; hardware release gates remain governed
-by `hardware/release/`.
+这里的 `PASS` 只意味着所指测试运行且满足其声明的判据。它不授权生产发布；硬件发布闸门仍由 `hardware/release/` 治理。

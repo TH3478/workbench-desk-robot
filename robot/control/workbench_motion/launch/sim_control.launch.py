@@ -1,4 +1,4 @@
-"""Gazebo Harmonic + ros2_control + MoveIt bringup for phase-2 evidence."""
+"""阶段 2 证据的 Gazebo Harmonic + ros2_control + MoveIt 启动调试。"""
 
 from __future__ import annotations
 

@@ -1,19 +1,17 @@
-/* Entry point for the QEMU build. Task FW1/FW2 acceptance.
+/* QEMU 构建的入口点。任务 FW1/FW2 验收。
  *
- * This lives in hal/qemu/, not core/, for two reasons:
- *   - it reads __stack_bottom/__stack_top, which are QEMU link.ld symbols
- *   - the host build has its own main() in tests/, and two main()s in one
- *     link is an error
+ * 它位于 hal/qemu/ 而非 core/，原因有二：
+ *   - 它读取 __stack_bottom/__stack_top，这些是 QEMU link.ld 符号
+ *   - host 构建在 tests/ 中拥有自己的 main()，一次链接中出现两个
+ *     main() 是错误
  *
- * core/ stays free of entry points. That is what makes it compile unchanged
- * for all three targets.
+ * core/ 保持不含入口点。这正是它能在全部三个目标上原样编译的原因。
  *
- * This is a smoke test, not the fault suite. It proves the four things FW1 and
- * FW2 are actually about:
- *   - the toolchain produces a bootable rv32imac image
- *   - crt0 set up sp and gp, and zeroed .bss
- *   - the UART works, so later tests have a way to report
- *   - mtime advances, so FW5's watchdog has a clock to trust
+ * 这是冒烟测试，不是故障套件。它验证 FW1 与 FW2 真正关心的四件事：
+ *   - 工具链能产出可启动的 rv32imac 镜像
+ *   - crt0 设置好 sp 和 gp，并将 .bss 清零
+ *   - UART 可用，后续测试才有上报途径
+ *   - mtime 在走时，FW5 的看门狗才有可信的时钟
  */
 #include "hal.h"
 #include "can_bridge_tests.h"
@@ -23,10 +21,10 @@
 #include "watchdog.h"
 #include "watchdog_tests.h"
 
-/* Deliberately uninitialised: if crt0 skipped the .bss loop this is garbage
- * and the check below fails. QEMU happens to hand out zeroed RAM, so this
- * test can pass for the wrong reason on this target — it earns its keep on
- * the board (FW17), where it does not.
+/* 有意保持未初始化：如果 crt0 跳过了 .bss 清零循环，这里就是垃圾数据，
+ * 下面的检查便会失败。QEMU 恰好会分配清零的 RAM，因此本测试
+ * 在该目标上可能因错误的原因通过——它在板子（FW17）上才真正发挥作用，
+ * 因为那里 RAM 不会预先清零。
  */
 static uint32_t bss_probe[4];
 
@@ -55,9 +53,9 @@ static void copy_timer_record(const mcu_watchdog_record_t *source)
     timer_record.frame.device_mode = source->frame.device_mode;
 }
 
-/* Called by the machine-timer path in crt0.S. It is intentionally tiny: the
- * same allocation-free poll used by Host runs here, followed by the HAL-owned
- * hardware watchdog feed and the next one-shot timer arm. */
+/* 由 crt0.S 中的机器定时器路径调用。它有意保持极简：这里运行与 Host
+ * 相同的零分配轮询，随后是 HAL 自有的硬件看门狗喂狗，
+ * 以及下一次单次定时器的武装。 */
 void mcu_qemu_timer_interrupt(void)
 {
     mcu_watchdog_record_t record;
@@ -93,8 +91,8 @@ static int check_clock_advances(void)
 {
     uint64_t t0 = hal_now_us();
 
-    /* Spin, don't sleep: there is no scheduler here. volatile keeps -Os from
-     * deleting the loop. */
+    /* 自旋而非休眠：这里没有调度器。volatile 防止 -Os 优化
+     * 把循环删掉。 */
     for (volatile uint32_t i = 0; i < 200000; i++) { }
 
     uint64_t t1 = hal_now_us();
@@ -110,9 +108,8 @@ static int check_clock_advances(void)
 
 static int check_stack_sane(void)
 {
-    /* sp should sit inside the region the linker reserved. Off-by-one here
-     * shows up as memory corruption much later, so check it while we can
-     * still print. */
+    /* sp 应位于链接器保留的区域之内。此处的越界偏差要到很久之后
+     * 才会表现为内存损坏，所以要趁还能打印时尽早检查。 */
     extern char __stack_bottom[], __stack_top[];
     uintptr_t sp;
     __asm__ volatile("mv %0, sp" : "=r"(sp));
@@ -235,9 +232,9 @@ static int run_qemu_timing_evidence(void)
     hal_timer_arm_us(start_us + MCU_HEARTBEAT_PERIOD_US);
     hal_timer_enable();
 
-    /* Three timer periods reach the software deadline. The fourth proves that
-     * the timer keeps running after the fault while the core stops feeding the
-     * modeled hardware watchdog. */
+    /* 三个定时器周期即可到达软件截止时间。第四个周期证明：
+     * 故障发生后定时器仍持续运行，而 core 停止喂
+     * 建模的硬件看门狗。 */
     while (timer_interrupts < 4u && !hal_wdt_is_expired()) {
         __asm__ volatile("wfi");
     }
@@ -278,9 +275,8 @@ int main(void)
     rc |= run_can_bridge_tests();
     rc |= run_qemu_timing_evidence();
 
-    /* The platform-independent HAL/Wire boundary is covered above. QEMU CAN
-     * transport remains explicit NOT_EXECUTED because these HAL functions are
-     * still false-returning stubs. */
+    /* 平台无关的 HAL/Wire 边界已在上方覆盖。QEMU 的 CAN 传输明确保持
+     * NOT_EXECUTED，因为这些 HAL 函数仍是返回 false 的桩。 */
     hal_puts("[mcu] CAN transport NOT_EXECUTED - QEMU HAL is a stub\n");
 
     return rc;

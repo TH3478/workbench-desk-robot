@@ -6,9 +6,9 @@
 
 #include "hal.h"
 
-/* Fixed test-only queues for the x86_64 fake HAL. They model bounded
- * transport handoff and deterministic arbitration; they are not a board CAN
- * driver or evidence of physical delivery. */
+/* x86_64 假 HAL 专用的固定测试队列。它们建模受限的
+ * 传输交接与确定性仲裁；既不是板载 CAN 驱动，
+ * 也不构成物理送达的证据。 */
 #define HAL_HOST_CAN_QUEUE_CAPACITY 16u
 
 void hal_host_can_reset(void);

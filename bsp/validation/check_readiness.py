@@ -1,4 +1,4 @@
-"""Check that BSP readiness remains evidence-bound and fail closed."""
+"""检查 BSP 就绪状态始终受证据约束并失败即拒绝。"""
 
 from __future__ import annotations
 

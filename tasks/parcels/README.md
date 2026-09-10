@@ -1,40 +1,13 @@
 # parcel handling
 
-Process any non-empty batch of parcels already present at the tabletop
-workstation. The bounded flow scans the complete batch before manipulation,
-routes verified intact parcels to a pickup shelf, and isolates damaged,
-unreadable, or otherwise unverified parcels in a quarantine bin. Exceptions are
-handled first so the arm does not carry a questionable item through the pickup
-area. Condition exceptions are handled before label-only exceptions, followed
-by verified intact parcels. Before any action graph is returned, an optional
-capacity snapshot can reject a batch that would overflow either managed zone;
-the planner never starts a batch that it already knows it cannot finish.
+处理桌面上已经存在的任意非空包裹批次。受限流程在操作前扫描整个批次，把验证完好的包裹送到取件架，并把损坏、不可读或无法验证的包裹隔离到隔离箱。例外先处理，这样机械臂不会带着可疑物品穿过取件区。状态例外先于仅标签例外处理，然后是验证完好的包裹。在返回任何动作图之前，可选的容量快照可以拒绝会溢出任一受管区域的批次；规划器绝不启动它已知无法完成的批次。
 
-Parcel IDs that normalize to the same readable step name are disambiguated, so
-mixed upstream naming styles cannot create duplicate graph steps. Capacity,
-projected occupancy, policy version, priority, and routing reason are retained
-in semantic action parameters for audit and replay.
+归一化后得到相同可读步骤名的包裹 ID 会被消歧，因此上游混用的命名风格不会产生重复的图步骤。容量、预计占用、policy 版本、优先级与路由原因保留在语义动作参数中，供审计与回放使用。
 
-When perception supplies a `tracking_id`, `barcode`, or `parcel_uid`, the batch
-preflight normalizes compatibility characters, case, whitespace, and hyphens,
-then rejects a repeated value even when it moves between identity fields. The
-verifier repeats that guard from world-state attributes, so scanner formatting
-differences cannot turn one parcel into two separately handled parcels.
+当感知提供 `tracking_id`、`barcode` 或 `parcel_uid` 时，批次预检会归一化兼容字符、大小写、空白与连字符，然后拒绝重复值，即使它在身份字段之间移动。验证器从世界状态属性重复该守卫，因此扫描器格式差异不会把一个包裹变成两个被分别处理的包裹。
 
-An optional inbound manifest can bind every planned parcel to one or more of
-those non-personal identity values. Planning fails before manipulation when the
-manifest is incomplete, an observed identity is missing, or no observed value
-matches the expected entry. The independent verifier treats a missing observed
-identity as `insufficient_evidence` and a contradictory identity as `refuted`.
-Manifest IDs and per-parcel match outcomes remain in the action and replay
-metadata; recipient names and addresses are deliberately out of scope.
+可选的入站清单可以把每个计划的包裹绑定到一个或多个非个人身份值。当清单不完整、观测到的身份缺失、或没有观测值与期望条目匹配时，规划在操作前失败。独立验证器把缺失的观测身份视为 `insufficient_evidence`，把矛盾身份视为 `refuted`。清单 ID 与逐包裹匹配结果保留在动作与回放元数据中；收件人姓名与地址刻意不在范围内。
 
-The verifier requires per-parcel confidence and evidence, exact destinations,
-verified labels, the expected condition, a policy-derived destination, and no
-extra parcel in either managed zone. Missing label or condition evidence is
-`insufficient_evidence`; an observed mismatch or wrong destination is
-`refuted`.
+验证器要求逐包裹置信度与证据、精确目的地、已验证标签、期望状态、由 policy 推导的目的地，且任一受管区域没有多余包裹。缺失标签或状态证据为 `insufficient_evidence`；观测到不匹配或目的地错误为 `refuted`。
 
-This capability does not navigate to a lobby or parcel locker. Requests that
-require a mobile base fail closed until a navigation contract and hardware are
-owned by the project.
+本能力不会导航到大堂或包裹柜。需要移动底盘的请求在导航契约与硬件由项目拥有之前失败即拒绝。

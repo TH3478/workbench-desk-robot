@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Exercise the bounded SocketCAN ingress boundary on a virtual CAN device.
+"""在虚拟 CAN 设备上检验受限的 SocketCAN 入口边界。
 
-The probe deliberately uses two ordinary AF_CAN/CAN_RAW sockets: the adapter
-under test and a peer that represents a virtual MCU.  It verifies the exact
-read-only projection produced by ``SafeCANBus`` and never treats this virtual
-loopback as physical CAN, MCU, actuator, or real-time evidence.
+该探针有意使用两个普通的 AF_CAN/CAN_RAW 套接字：被测适配器与
+代表虚拟 MCU 的对端。它验证 ``SafeCANBus`` 产生的精确只读投影，
+并且绝不把这一虚拟回环当作物理 CAN、MCU、执行器或实时证据。
 """
 
 from __future__ import annotations
@@ -114,11 +113,11 @@ EXTERNAL_RECORD_FIELDS = frozenset(
 
 
 class NotExecutedError(RuntimeError):
-    """The host lacks a prerequisite for the privileged virtual probe."""
+    """主机缺少运行该特权虚拟探针所需的前提条件。"""
 
 
 class ProbeFailure(RuntimeError):
-    """A probe assertion failed while retaining its partial evidence."""
+    """某条探针断言失败，同时保留了其部分证据。"""
 
     def __init__(self, message: str, details: dict[str, Any]) -> None:
         super().__init__(message)
@@ -414,7 +413,7 @@ def _validate_records(
 
 
 def _validate_deterministic_records(records: dict[str, Any]) -> None:
-    """Validate the exact five-frame sequence emitted by the virtual probe."""
+    """验证虚拟探针发出的精确五帧序列。"""
 
     expected_sequences = {
         "ack": 0,
@@ -582,7 +581,7 @@ def write_report(path: Path, report: dict[str, Any]) -> None:
 
 
 def _ensure_failure_check(checks: list[dict[str, str]], failure: Exception) -> None:
-    """Make direct helper/cleanup exceptions visible to the report validator."""
+    """让直接的辅助函数/清理异常对报告验证器可见。"""
 
     if any(item.get("result") == "FAIL" for item in checks):
         return
@@ -910,7 +909,7 @@ def run_probe(interface: str, source: str, timeout_s: float) -> dict[str, Any]:
             < records["invalid"]["ingress_sequence"]
             < records["stop_ack"]["ingress_sequence"],
         )
-    except Exception as exc:  # noqa: BLE001 - retain partial virtual evidence before reporting failure.
+    except Exception as exc:  # noqa: BLE001 - 在上报失败之前保留部分虚拟证据。
         failure = exc
     finally:
         if bus is not None:
@@ -918,43 +917,43 @@ def run_probe(interface: str, source: str, timeout_s: float) -> dict[str, Any]:
                 shutdown_ok = bus.shutdown(timeout_s=max(1.0, timeout_s * 4))
                 if not shutdown_ok and failure is None:
                     failure = AssertionError("SafeCANBus shutdown did not complete")
-            except Exception as exc:  # noqa: BLE001 - cleanup failure is part of the probe evidence.
+            except Exception as exc:  # noqa: BLE001 - 清理失败属于探针证据的一部分。
                 if failure is None:
                     failure = exc
         if peer is not None:
             try:
                 peer.close()
-            except Exception as exc:  # noqa: BLE001 - retain cleanup failures in the report.
+            except Exception as exc:  # noqa: BLE001 - 在报告中保留清理失败。
                 if failure is None:
                     failure = exc
         if bus is not None:
             try:
                 stale_result = bus.service_once()
-            except Exception as exc:  # noqa: BLE001 - post-shutdown behavior is evidence.
+            except Exception as exc:  # noqa: BLE001 - 关闭后的行为即证据。
                 stale_result = exc
             try:
                 external_records_empty = bus.external_records() == ()
                 external_depth = bus.external_depth
-            except Exception as exc:  # noqa: BLE001 - retain cleanup inspection failures in the report.
+            except Exception as exc:  # noqa: BLE001 - 在报告中保留清理检查失败。
                 external_records_empty = False
                 external_depth = None
                 if failure is None:
                     failure = exc
             try:
                 socket_open = transport.is_open
-            except Exception as exc:  # noqa: BLE001 - retain cleanup inspection failures in the report.
+            except Exception as exc:  # noqa: BLE001 - 在报告中保留清理检查失败。
                 socket_open = None
                 if failure is None:
                     failure = exc
             try:
                 peer_closed = peer is None or peer.fileno() == -1
-            except Exception as exc:  # noqa: BLE001 - retain cleanup inspection failures in the report.
+            except Exception as exc:  # noqa: BLE001 - 在报告中保留清理检查失败。
                 peer_closed = False
                 if failure is None:
                     failure = exc
             try:
                 worker_alive = bus.runtime.worker_alive
-            except Exception as exc:  # noqa: BLE001 - retain cleanup inspection failures in the report.
+            except Exception as exc:  # noqa: BLE001 - 在报告中保留清理检查失败。
                 worker_alive = None
                 if failure is None:
                     failure = exc
@@ -1045,7 +1044,7 @@ def main() -> int:
         report.update(exc.details)
         report["error"] = str(exc)
         report["result"] = "FAIL"
-    except Exception as exc:  # noqa: BLE001 - preserve deterministic probe failure as evidence.
+    except Exception as exc:  # noqa: BLE001 - 将确定性探针失败作为证据保留。
         report["error"] = f"{type(exc).__name__}: {exc}"
         report.setdefault(
             "checks",

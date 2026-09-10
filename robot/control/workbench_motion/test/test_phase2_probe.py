@@ -1,4 +1,4 @@
-"""ROS-free tests for phase2_probe orchestration and evidence math."""
+"""phase2_probe 编排与证据数学的无 ROS 测试。"""
 
 from __future__ import annotations
 

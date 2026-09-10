@@ -1,20 +1,20 @@
 ---
-name: Bug or failed run
-about: Evidence-grounded defect report
+name: Bug 或失败运行
+about: 基于证据的缺陷报告
 ---
 
-## Run and version
+## 运行与版本
 
 - run_id:
 - commit:
 - scenario_id / seed:
 
-## Expected and actual behavior
+## 期望与实际行为
 
-## Evidence references
+## 证据引用
 
-## Reproduction command
+## 复现命令
 
-## Suspected boundary
+## 疑似边界
 
-## Regression test proposal
+## 回归测试提案

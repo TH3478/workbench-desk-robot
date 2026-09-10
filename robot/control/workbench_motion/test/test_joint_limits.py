@@ -1,4 +1,4 @@
-"""Attack-style tests for the ROS-free phase-2 joint-limit validator."""
+"""阶段 2 关节限位验证器（无 ROS）的攻击式测试。"""
 
 from __future__ import annotations
 

@@ -1,11 +1,10 @@
-# Frames and dimensions
+# 坐标系与尺寸
 
-Every number in `workbench.urdf.xacro` and why it is that number. Change a
-dimension without reading this and something downstream breaks quietly.
+`workbench.urdf.xacro` 里的每个数字以及它为什么是这个数。不读本文件就改尺寸，下游某处会无声地坏掉。
 
 ---
 
-## Frame tree
+## 坐标系树
 
 ```
 world
@@ -21,62 +20,52 @@ world
                 └── camera_optical   REP-103: z fwd, x right, y down
 ```
 
-The arm attaches at `world` and is composed at launch. It is not in this file.
+机械臂挂在 `world` 上，并在启动时组合。它不在本文件里。
 
 ---
 
-## Why `table_surface` exists
+## `table_surface` 为什么存在
 
-Scenario poses are expressed relative to `table_surface`, not `table`.
+场景位姿相对于 `table_surface` 表达，而不是 `table`。
 
-`table` is the slab *centre*, so a pose relative to it depends on
-`table_thick`. Change the slab from 40 mm to 30 mm and every object in every
-manifest shifts by 5 mm — the manifests still validate, the scenes are all
-subtly wrong, and nothing reports it.
+`table` 是桌面的*中心*，因此相对它的位姿依赖于 `table_thick`。把桌面从 40 mm 改成 30 mm，每个清单里的每个物体会平移 5 mm——清单仍然校验通过，所有场景都微妙地错了，而且没有任何东西报告它。
 
-`table_surface` sits on the working plane. Objects placed relative to it stay
-put when the slab changes.
+`table_surface` 位于工作平面上。相对它放置的物体在桌面厚度变化时保持不动。
 
 ---
 
-## Dimensions
+## 尺寸
 
-| Property | Value | Reasoning |
+| 属性 | 数值 | 理由 |
 |---|---|---|
-| `table_x` × `table_y` | 1.20 × 0.80 m | Fits a 850 mm-reach arm's workspace with margin on all sides |
-| `table_thick` | 0.04 m | Structural only. Nothing depends on it because poses go through `table_surface` |
-| `table_height` | 0.75 m | Standard bench height; matches where a real arm base would mount |
-| `tray_x` × `tray_y` | 0.24 × 0.18 m | Holds several 40 mm modules with clearance for approach error |
-| `tray_wall` | 0.006 m | Thin enough not to dominate the interior, thick enough for stable contact |
-| `tray_depth` | 0.05 m | Deeper than the module is tall, so a placed module is unambiguously inside |
-| `tray_floor` | 0.004 m | Gives the cavity a real floor to rest on |
-| `module_size` | 0.040 m | Inside a standard parallel gripper's stroke, with approach margin |
-| `module_mass` | 0.050 kg | Light enough that hard contact flicks it away — deliberate, see below |
-| `cam_height` | 0.70 m | Sees the module start region and the tray in one frame |
+| `table_x` × `table_y` | 1.20 × 0.80 m | 容纳 850 mm 臂展机械臂的工作空间，四周留有余量 |
+| `table_thick` | 0.04 m | 仅结构用途。没有东西依赖它，因为位姿都经 `table_surface` |
+| `table_height` | 0.75 m | 标准工作台高度；与真机机械臂基座安装位置一致 |
+| `tray_x` × `tray_y` | 0.24 × 0.18 m | 可容纳若干 40 mm 模块，并为接近误差留出间隙 |
+| `tray_wall` | 0.006 m | 薄到不占据内部空间，厚到足以稳定接触 |
+| `tray_depth` | 0.05 m | 比模块高度更深，因此放入的模块明确在内部 |
+| `tray_floor` | 0.004 m | 给腔体一个真实的底面可搁置 |
+| `module_size` | 0.040 m | 在标准平行夹爪行程之内，留有接近裕量 |
+| `module_mass` | 0.050 kg | 足够轻，硬接触会把它弹飞——刻意为之，见下文 |
+| `cam_height` | 0.70 m | 一帧内同时看到模块起始区域与托盘 |
 
-### Why the module is deliberately light
+### 模块为什么刻意做得轻
 
-50 g means a badly tuned contact model throws it across the table.
+50 g 意味着调得不好的接触模型会把它甩过桌面。
 
-That is the failure mode physics tuning exists to remove. Making the module
-heavy would mask bad contact parameters — grasps would succeed for the wrong
-reason, and the same parameters would fail on real hardware where the object
-really is light.
+这正是物理调参存在的意义——消除这类失败模式。把模块做重会掩盖糟糕的接触参数——抓取会因错误的原因成功，而同样的参数会在物体确实很轻的真机上失败。
 
 ---
 
-## The tray is five parts
+## 托盘由五个部件组成
 
-Floor plus four walls, not one box.
+底面加四面墙，而不是一个盒子。
 
-The verifier decides "is the module in the tray" by spatial containment against
-`tray_cavity`. That requires an interior volume. A single box has no interior —
-containment against a solid is either intersection with the solid itself
-(meaningless) or nothing.
+验证器通过相对 `tray_cavity` 的空间包含判定「模块是否在托盘里」。这需要内部体积。单个盒子没有内部——对实体的包含要么是与实体本身相交（无意义），要么什么都没有。
 
-### Interior extents
+### 内部尺寸
 
-Consumers need these. Derived, not hardcoded:
+消费者需要这些值。它们是推导出来的，不是硬编码：
 
 ```
 x: tray_x    - 2 * tray_wall  = 0.240 - 0.012 = 0.228 m
@@ -84,96 +73,79 @@ y: tray_y    - 2 * tray_wall  = 0.180 - 0.012 = 0.168 m
 z: tray_depth -    tray_floor = 0.050 - 0.004 = 0.046 m
 ```
 
-`tray_cavity`'s origin is at the centre of that volume.
+`tray_cavity` 的原点在该体积的中心。
 
-**Read them from the model, not from a constant in Python.** A hardcoded
-0.228 in the verifier goes stale the first time someone widens the tray here,
-and the resulting failure looks like a perception problem.
+**从模型读取它们，而不是用 Python 里的常量。** 验证器里硬编码的 0.228 会在有人第一次在这里加宽托盘时过时，而由此产生的失败看起来会像感知问题。
 
 ---
 
-## Containment is three-valued
+## 包含判定是三值的
 
-| Overlap ratio | Status | Meaning |
+| 重叠比 | 状态 | 含义 |
 |---|---|---|
-| ≥ 0.95 | `confirmed` | fully inside |
-| 0.01 – 0.95 | `insufficient_evidence` | caught on the rim — retry, don't replan |
-| ≤ 0.01 | `refuted` | outside |
+| ≥ 0.95 | `confirmed` | 完全在内 |
+| 0.01 – 0.95 | `insufficient_evidence` | 卡在边缘——重试动作，不要重新规划 |
+| ≤ 0.01 | `refuted` | 在外 |
 
-The middle band is the reason the cavity has to be geometrically real. A
-boolean test forces "wedged on the tray edge" into success or failure, when it
-actually means *placed badly, retry the action*.
+中间区间就是腔体必须几何上真实存在的原因。布尔判定把「卡在托盘边缘」强行归为成功或失败，而它实际意味着*放得不好，重试该动作*。
 
-Full reasoning: `docs/algorithms/world-model.md`.
+完整推理：`docs/algorithms/world-model.md`。
 
 ---
 
-## `camera_optical` is not `camera_body`
+## `camera_optical` 不是 `camera_body`
 
-Two frames, 90° apart, and getting them confused is the classic silent bug.
+两个坐标系，相差 90°，混淆它们是经典的无声 bug。
 
-| Frame | Convention |
+| 坐标系 | 约定 |
 |---|---|
-| `camera_body` | the physical box. x forward in body terms |
-| `camera_optical` | REP-103. **z forward, x right, y down** |
+| `camera_body` | 物理盒体。x 按机体向前 |
+| `camera_optical` | REP-103。**z 向前，x 向右，y 向下** |
 
-The ROS image pipeline and every tag detector assume the optical convention.
-Publish detections in the body frame and poses come out rotated 90°.
+ROS 图像流水线和每个标签检测器都假设光学约定。若以机体坐标系发布检测结果，位姿会旋转 90°。
 
-It still looks plausible in RViz. Nothing errors. The detections are simply in
-the wrong place, and the first symptom is grasps missing by a consistent offset
-that gets blamed on calibration.
+它在 RViz 里看起来仍然合理。没有任何报错。检测结果只是在错误的位置，第一个症状是抓取以一个稳定的偏差落空，然后被归咎于标定。
 
-**Verify visually once.** `check_urdf` will not catch this — it validates
-structure, not whether a rotation makes physical sense.
+**目视验证一次。** `check_urdf` 抓不住这一点——它校验结构，而不校验旋转是否物理合理。
 
 ---
 
-## Camera noise is non-zero on purpose
+## 相机噪声刻意非零
 
-`stddev = 0.007`.
+`stddev = 0.007`。
 
-A noiseless camera lets perception pass with confidence thresholds that would
-fail immediately on real hardware. Detection would look solved in simulation
-and collapse at hardware bring-up, with no way to tell whether the regression
-came from the camera, the lighting, or the detector.
+无噪声相机让感知以真机上会立刻失败的置信度阈值通过。检测在仿真里看起来已解决，却在硬件启动调试时崩溃，而且无法判断回归来自相机、光照还是检测器。
 
-The value is a placeholder until real-camera jitter is measured. Same
-measurement feeds the pose quantisation step in
-`docs/algorithms/world-model.md` §6.
+在测量真机相机抖动之前，这个值只是占位。同一测量还供 `docs/algorithms/world-model.md` §6 的位姿量化步骤使用。
 
 ---
 
-## Friction values will change
+## 摩擦系数会变
 
-| Link | `mu1` / `mu2` | Note |
+| 连杆 | `mu1` / `mu2` | 备注 |
 |---|---|---|
-| `module_red` | 0.8 | plastic on plastic, starting point |
+| `module_red` | 0.8 | 塑料对塑料，起始值 |
 | `tray_floor` | 0.6 | |
 | `table` | 0.7 | |
 
-These are the numbers physics tuning moves. They start plausible and are
-expected to change.
+这些数字是物理调参会动的值。它们起步合理，预期会变。
 
-**Tuning rule: one parameter at a time.** Friction and solver settings both
-affect grasp success. Change both between runs and the result cannot be
-attributed. This is why physics tuning is measured in weeks and cannot be
-parallelised across two people working independently.
+**调参规则：一次只动一个参数。** 摩擦与求解器设置都影响抓取成功率。两次运行之间两者都改，结果就无法归因。这就是物理调参以周计、无法由两个人独立并行推进的原因。
 
 ---
 
-## What is not in this file
+## 本文件不包含什么
 
-| Not here | Where | Why |
+| 不在本文件 | 位置 | 原因 |
 |---|---|---|
-| The arm | official vendor package, composed at launch | Lets the world and the arm be built in parallel |
-| Joint limits, controllers | `robot/control/` | Different owner, different review path |
-| Scenario object poses | `sim/scenarios/frozen/*.yaml` | Seeded per run; the same seed must rebuild the same scene |
-| Bit-exact camera intrinsics | calibration output, real hardware | Simulated intrinsics are not the real ones |
+| 机械臂 | 官方厂商包，启动时组合 | 让世界与机械臂可以并行构建 |
+| 关节限位、控制器 | `robot/control/` | 不同 Owner，不同评审路径 |
+| 场景物体位姿 | `sim/scenarios/frozen/*.yaml` | 按 run 播种；同一种子必须重建同一场景 |
+| 逐位精确的相机内参 | 标定输出，真机 | 仿真内参不是真实内参 |
 
 ---
 
-## Checks
+## 检查
 
 ```bash
 # Expand and validate structure
@@ -187,20 +159,14 @@ urdf_to_graphiz /tmp/wb.urdf
 # This is the one thing the tools cannot check for you.
 ```
 
-`check_urdf` catches unparented links and malformed joints. It does not catch a
-frame rotated the wrong way, a cavity that does not line up with its walls, or
-an inertia tensor that is physically impossible.
+`check_urdf` 能抓住无父连杆和格式错误的关节。它抓不住转错方向的坐标系、与墙壁不对齐的腔体，或物理上不可能的惯量张量。
 
 ---
 
-## On CAD
+## 关于 CAD
 
-ROS does not consume SolidWorks files. The pipeline is CAD → STL/DAE mesh →
-referenced from URDF. Official arm packages already ship both URDF and meshes.
+ROS 不消费 SolidWorks 文件。流水线是 CAD → STL/DAE 网格 → 从 URDF 引用。官方机械臂包已同时发布 URDF 与网格。
 
-Everything here is primitives, so nothing needs machining at this stage.
+这里的一切都是基本几何体，因此本阶段无需机加工。
 
-If a part does need machining later, the order matters: **lock the dimensions
-and frames in URDF first, then model CAD to match those numbers.** Doing it the
-other way round means joint axes and frame origins drift from what the software
-already assumes, and reconciling them afterwards is worse than it sounds.
+若日后某部件确实需要机加工，顺序很重要：**先在 URDF 中锁定尺寸与坐标系，再按这些数字建模 CAD。** 反过来做会让关节轴与坐标系原点偏离软件已假定的值，事后调和比听上去更糟。

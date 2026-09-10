@@ -1,12 +1,10 @@
 # mobile_base
 
-Mobile base integration. The verifier contract generalises to navigation goals,
-so adding a mobile base doesn't require changing the verification layer.
+移动底盘集成。验证器契约泛化到导航目标，因此加入移动底盘无需改动验证层。
 
-Planned for v0.4. The verifier will check "robot reached goal pose within
-tolerance, with confirmed localisation confidence."
+规划于 v0.4。验证器将检查「机器人在容差内到达目标位姿，且定位置信度已确认」。
 
-Subdirectories (when implemented):
-- `description/`   base URDF / TF
-- `control/`       ros2_control hardware interface or Nav2 integration
-- `bringup/`       launch files
+子目录（实现后）：
+- `description/`   底盘 URDF / TF
+- `control/`       ros2_control 硬件接口或 Nav2 集成
+- `bringup/`       launch 文件

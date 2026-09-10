@@ -109,9 +109,9 @@ bool hal_can_recv(hal_can_frame *frame)
         return false;
     }
 
-    /* The fake models a set of frames that completed arbitration before the
-     * receiver polls. Lower standard IDs win; equal IDs retain insertion
-     * order. This is deterministic logic evidence, not physical bus timing. */
+    /* 该假实现建模一组在接收方轮询之前已完成仲裁的帧。
+     * 标准 ID 较小者胜出；ID 相等时保持插入顺序。
+     * 这是确定性逻辑证据，不是物理总线时序。 */
     for (index = 1u; index < host_can_rx_count; index++) {
         if (host_can_rx[index].arbitration_id <
             host_can_rx[selected].arbitration_id) {

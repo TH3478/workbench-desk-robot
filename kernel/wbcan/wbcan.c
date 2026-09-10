@@ -1,26 +1,24 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * wbcan - a virtual CAN device with programmable fault injection.
+ * wbcan——支持可编程故障注入的虚拟 CAN 设备。
  *
- * vcan is a perfect wire: every frame you write comes back out. Real CAN is
- * not. Controllers go bus-off, TX mailboxes fill up, arbitration is lost, bit
- * errors corrupt payloads. Firmware that has only ever seen vcan has never
- * executed its own error paths.
+ * vcan 是一条完美的导线：写进去的每一帧都会原样回来。真实 CAN 并非如此。
+ * 控制器会进入 bus-off，TX 邮箱会填满，仲裁会失败，
+ * 位错误会破坏负载。只见过 vcan 的固件从未执行过自己的错误路径。
  *
- * This driver is vcan plus a fault plane. You arm a fault over debugfs, the
- * next N frames hit it, and the error surfaces the way the CAN core expects:
- * error frames on the socket, state transitions through CAN_STATE_*, and the
- * TX/RX error counters moving. So the firmware under test sees a bus going
- * bad rather than a special test API.
+ * 本驱动就是 vcan 加上一个故障平面。你通过 debugfs 武装一个故障，
+ * 接下来的 N 帧就会命中它，错误则以 CAN 核心预期的方式浮现：
+ * 套接字上的错误帧、经过 CAN_STATE_* 的状态迁移、
+ * 以及移动中的 TX/RX 错误计数器。因此被测固件看到的是
+ * 一条逐渐变坏的总线，而不是一个特殊的测试 API。
  *
- * Used by firmware/mcu task FW13 (register-level fault injection) and by the
- * 40-fault suite in FW15. See docs/decisions/ADR-0003-mcu-riscv-qemu.md.
+ * 供 firmware/mcu 任务 FW13（寄存器级故障注入）与
+ * FW15 的 40 故障套件使用。参见 docs/decisions/ADR-0003-mcu-riscv-qemu.md。
  *
- * Why a kernel module and not userspace: bus-off state, error counters and
- * error-frame generation live in the kernel CAN core. A userspace bridge can
- * drop or mangle frames, but it cannot make can_get_state() report
- * CAN_STATE_BUS_OFF, and that transition is exactly what the firmware's
- * recovery path keys on.
+ * 为什么是内核模块而不是用户态程序：bus-off 状态、错误计数器与
+ * 错误帧的生成都位于内核 CAN 核心中。用户态桥接器可以丢弃或篡改帧，
+ * 却无法让 can_get_state() 报告 CAN_STATE_BUS_OFF，
+ * 而这一迁移正是固件恢复路径所依赖的关键。
  */
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
@@ -67,16 +65,16 @@ static const char *const wbcan_ethtool_stat_names[WBCAN_ETHTOOL_STAT_COUNT] = {
 	[WBCAN_ETHTOOL_STOP_ATTEMPTS]	= "stop_attempts",
 };
 
-/* Fault modes. Values are the debugfs ABI; do not renumber. */
+/* 故障模式。取值即 debugfs ABI；不得重新编号。 */
 enum wbcan_fault {
 	WBCAN_FAULT_NONE	= 0,
-	WBCAN_FAULT_DROP_TX	= 1,	/* frame vanishes after being accepted */
-	WBCAN_FAULT_DROP_RX	= 2,	/* frame never reaches the peer socket */
-	WBCAN_FAULT_BIT_FLIP	= 3,	/* corrupt one payload bit */
-	WBCAN_FAULT_BUS_OFF	= 4,	/* controller leaves the bus */
-	WBCAN_FAULT_TX_FULL	= 5,	/* mailboxes full: -ENOBUFS to the stack */
-	WBCAN_FAULT_ARB_LOST	= 6,	/* lost arbitration, TX aborted */
-	WBCAN_FAULT_STUFF_ERR	= 7,	/* protocol violation on the wire */
+	WBCAN_FAULT_DROP_TX	= 1,	/* 帧在被接受后消失 */
+	WBCAN_FAULT_DROP_RX	= 2,	/* 帧永远不会到达对端套接字 */
+	WBCAN_FAULT_BIT_FLIP	= 3,	/* 破坏一个负载位 */
+	WBCAN_FAULT_BUS_OFF	= 4,	/* 控制器离开总线 */
+	WBCAN_FAULT_TX_FULL	= 5,	/* 邮箱已满：向协议栈返回 -ENOBUFS */
+	WBCAN_FAULT_ARB_LOST	= 6,	/* 仲裁失败，TX 中止 */
+	WBCAN_FAULT_STUFF_ERR	= 7,	/* 线上的协议违规 */
 	WBCAN_FAULT_MAX
 };
 
@@ -106,24 +104,24 @@ MODULE_PARM_DESC(test_stop_delay_ms,
 		 "test-only delay around TX drain and stop publication");
 
 struct wbcan_priv {
-	struct can_priv		can;	/* must be first: can_priv contract */
+	struct can_priv		can;	/* 必须位于首位：can_priv 契约 */
 	struct net_device	*dev;
 	struct dentry		*dbg_dir;
 
-	spinlock_t		lock;	/* guards fault configuration and stats */
-	struct u64_stats_sync	stats_sync;	/* protects netdev stat snapshots */
+	spinlock_t		lock;	/* 保护故障配置与统计 */
+	struct u64_stats_sync	stats_sync;	/* 保护 netdev 统计快照 */
 
 	enum wbcan_fault	fault;
-	u32			fault_count;	/* frames left to affect; 0 = off */
-	u32			fault_after;	/* skip this many first */
-	canid_t			match_id;	/* includes CAN_EFF_FLAG */
+	u32			fault_count;	/* 剩余待作用的帧数；0 = 关闭 */
+	u32			fault_after;	/* 先跳过这么多帧 */
+	canid_t			match_id;	/* 含 CAN_EFF_FLAG */
 	bool			match_any;
 	u8			flip_byte;
 	u8			flip_bit;
 
 	/*
-	 * Observability. A fault you cannot count is a fault you cannot
-	 * assert on from a test.
+	 * 可观测性。无法计数的故障，
+	 * 就是无法在测试中断言的故障。
 	 */
 	u64			stat_tx;
 	u64			stat_rx;
@@ -189,27 +187,25 @@ struct wbcan_status_snapshot {
 };
 
 /*
- * Controller-state ownership follows the netdev/CAN-core lifecycle rather
- * than the private fault lock:
+ * 控制器状态的归属遵循 netdev/CAN 核心的生命周期，
+ * 而非私有的故障锁：
  *
- * - ndo_start_xmit() and its injected error transitions are serialized by
- *   the single netdev TX queue;
- * - bus-off stops that queue before publishing the terminal state;
- * - do_set_mode() runs only while CAN core recovery keeps the queue stopped;
- * - ndo_open()/ndo_stop() run under RTNL, and ndo_stop() disables TX before
- *   closing the CAN device.
+ * - ndo_start_xmit() 及其注入的错误迁移由单个 netdev TX 队列串行化；
+ * - bus-off 在发布终态之前先停止该队列；
+ * - do_set_mode() 仅在 CAN 核心恢复保持队列停止期间运行；
+ * - ndo_open()/ndo_stop() 在 RTNL 下运行，且 ndo_stop()
+ *   在关闭 CAN 设备之前先禁用 TX。
  *
- * Debugfs snapshots the fault plane under the private lock and reads the
- * independently published CAN state/queue bits without taking the netdev TX
- * lock. Formatting remains outside the private lock, so status observation
- * cannot extend the TX critical path. The state and queue values may describe
- * adjacent instants; they are diagnostic telemetry, not control authority.
+ * debugfs 在私有锁内为故障平面拍快照，并在不持有 netdev TX 锁的
+ * 情况下读取独立发布的 CAN 状态/队列位。格式化在私有锁之外进行，
+ * 因此状态观测不会拉长 TX 关键路径。状态与队列的取值可能描述
+ * 相邻的两个瞬间；它们是诊断遥测，不是控制权。
  */
 
-/* ------------------------------------------------------------------ helpers */
+/* ------------------------------------------------------------------ 辅助函数 */
 
-/* Decide whether this frame takes the fault, and consume one shot if so.
- * Called with the lock held.
+/* 判定这一帧是否命中故障，命中则消耗一次机会。
+ * 在持有锁的情况下调用。
  */
 static canid_t wbcan_match_key(canid_t id)
 {
@@ -249,11 +245,11 @@ static bool wbcan_should_inject(struct wbcan_priv *priv, struct sk_buff *skb,
 	return true;
 }
 
-/* Push a CAN error frame up to userspace and move the controller state.
+/* 向用户态上抛一个 CAN 错误帧，并推进控制器状态。
  *
- * This is the part a userspace shim cannot do. can_change_state() updates
- * can_priv state and berr counters, and the error frame is what candump
- * renders as "ERRORFRAME" and what a firmware's error handler reads.
+ * 这是用户态垫片做不到的部分。can_change_state() 更新
+ * can_priv 状态与 berr 计数器，而错误帧正是 candump
+ * 渲染为 "ERRORFRAME"、固件错误处理程序所读取的内容。
  */
 static void wbcan_emit_error(struct net_device *dev, enum wbcan_fault fault)
 {
@@ -269,10 +265,9 @@ static void wbcan_emit_error(struct net_device *dev, enum wbcan_fault fault)
 	switch (fault) {
 	case WBCAN_FAULT_BUS_OFF:
 		/*
-		 * Bus-off is terminal until the driver is restarted. The CAN
-		 * core handles the restart timer if restart-ms is set, which
-		 * is what FW19 exercises. State recovery must not depend on
-		 * allocating the optional error frame.
+		 * bus-off 在驱动重启之前是终态。若设置了 restart-ms，
+		 * CAN 核心会处理重启定时器，这正是 FW19 所验证的。
+		 * 状态恢复绝不能依赖分配可选错误帧。
 		 */
 		netif_stop_queue(dev);
 		tx_state = CAN_STATE_BUS_OFF;
@@ -292,23 +287,23 @@ static void wbcan_emit_error(struct net_device *dev, enum wbcan_fault fault)
 			break;
 		cf->can_id |= CAN_ERR_LOSTARB;
 		/*
-		 * Bit position that lost. 0 means unspecified, which is
-		 * honest here: we are not modelling a real bit timeline.
+		 * 仲裁失败所处的位位置。0 表示未指定——在这里这是实话：
+		 * 我们并未建模真实的位时间线。
 		 */
 		cf->data[0] = 0;
 		break;
 
 	case WBCAN_FAULT_STUFF_ERR:
 		/*
-		 * This is a bounded protocol-error model: one warning per
-		 * injected frame, then the next fault-free frame recovers to
-		 * active. We do not pretend to model TEC/REC progression.
+		 * 这是一个受限的协议错误模型：每个注入帧产生一次警告，
+		 * 下一帧无故障帧即恢复到 active。
+		 * 我们不假装建模 TEC/REC 的演进过程。
 		 */
 		spin_lock_irqsave(&priv->lock, flags);
 		priv->can.can_stats.bus_error++;
 		spin_unlock_irqrestore(&priv->lock, flags);
 		tx_state = CAN_STATE_ERROR_WARNING;
-		/* can_change_state() warns when the calculated state is unchanged. */
+		/* 当计算出的状态未变化时，can_change_state() 会发出警告。 */
 		if (max(tx_state, rx_state) != READ_ONCE(priv->can.state))
 			can_change_state(dev, cf, tx_state, rx_state);
 		if (!cf)
@@ -329,7 +324,7 @@ static void wbcan_emit_error(struct net_device *dev, enum wbcan_fault fault)
 		wbcan_stats_add(priv, 0, 0, 0, 0, 0, 0, 1);
 }
 
-/* --------------------------------------------------------------- netdev ops */
+/* ------------------------------------------------------------ netdev 操作 */
 
 static int wbcan_open(struct net_device *dev)
 {
@@ -352,7 +347,7 @@ static int wbcan_stop(struct net_device *dev)
 	unsigned int delay_ms;
 	unsigned long flags;
 
-	/* Stop new submissions and wait for an in-flight start_xmit(). */
+	/* 停止新提交，并等待在途的 start_xmit() 结束。 */
 	netif_tx_disable(dev);
 	spin_lock_irqsave(&priv->lock, flags);
 	priv->stat_stop_attempts++;
@@ -366,9 +361,9 @@ static int wbcan_stop(struct net_device *dev)
 	netif_tx_unlock_bh(dev);
 	if (delay_ms)
 		msleep(delay_ms);
-	/* A restart worker that was queued before STOPPED must be cancelled. */
+	/* 在 STOPPED 之前排队的重启工作线程必须被取消。 */
 	close_candev(dev);
-	/* A worker may have committed ACTIVE before STOPPED was published. */
+	/* 工作线程可能在 STOPPED 发布之前已提交 ACTIVE。 */
 	netif_tx_disable(dev);
 	return 0;
 }
@@ -389,7 +384,7 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (can_dev_dropped_skb(dev, skb))
 		return NETDEV_TX_OK;
 
-	/* Loopback of our own error frames would be circular. */
+	/* 回环我们自己的错误帧会形成循环。 */
 	if (cf->can_id & CAN_ERR_FLAG) {
 		kfree_skb(skb);
 		return NETDEV_TX_OK;
@@ -399,9 +394,9 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (state == CAN_STATE_BUS_OFF || state == CAN_STATE_STOPPED ||
 	    state == CAN_STATE_SLEEPING) {
 		/*
-		 * Queue lifecycle should keep these states out of start_xmit().
-		 * If a future caller violates that boundary, consume the frame
-		 * rather than accepting traffic in a terminal controller state.
+		 * 队列生命周期应当让这些状态进不了 start_xmit()。
+		 * 若未来的调用方破坏该边界，则应消费该帧，
+		 * 而不是在控制器的终态下接受流量。
 		 */
 		netif_stop_queue(dev);
 		wbcan_stats_add(priv, 0, 0, 0, 1, 0, 0, 0);
@@ -417,15 +412,15 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	switch (fault) {
 	case WBCAN_FAULT_TX_FULL:
 		/*
-		 * Mailboxes full. Stopping the queue and returning BUSY is
-		 * how a real driver applies backpressure; the stack will
-		 * retry when we wake it.
+		 * 邮箱已满。停止队列并返回 BUSY，
+		 * 是真实驱动施加背压的方式；
+		 * 协议栈会在我们唤醒它之后重试。
 		 */
 		netif_stop_queue(dev);
 		wbcan_emit_error(dev, fault);
 		/*
-		 * Wake immediately: we are modelling a transient full
-		 * condition, not a wedge. Without this the test hangs.
+		 * 立即唤醒：我们建模的是瞬时满的状态，
+		 * 不是卡死。没有这一步测试会挂起。
 		 */
 		netif_wake_queue(dev);
 		return NETDEV_TX_BUSY;
@@ -434,7 +429,7 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		break;
 	}
 
-	/* The frame is now accepted and will not be retried by the stack. */
+	/* 该帧现在已被接受，协议栈不会再重试它。 */
 	skb_tx_timestamp(skb);
 
 	switch (fault) {
@@ -451,8 +446,8 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	case WBCAN_FAULT_DROP_TX:
 		/*
-		 * Accepted, counted, never delivered. This is the nastiest
-		 * failure for firmware: no error, no frame.
+		 * 已接受、已计数、永不送达。对固件而言这是最阴险的
+		 * 故障：没有错误，也没有帧。
 		 */
 		spin_lock_irqsave(&priv->lock, flags);
 		priv->stat_tx++;
@@ -465,7 +460,7 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		break;
 	}
 
-	/* Count frames accepted by the driver; a BUSY retry is not a frame. */
+	/* 统计被驱动接受的帧；BUSY 重试不算一帧。 */
 	spin_lock_irqsave(&priv->lock, flags);
 	priv->stat_tx++;
 	spin_unlock_irqrestore(&priv->lock, flags);
@@ -482,9 +477,9 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	}
 
 	/*
-	 * Preserve the originating socket so CAN_RAW_RECV_OWN_MSGS and receive
-	 * confirmation flags retain their standard SocketCAN meaning. Bit-flip
-	 * needs a private data copy because packet taps may hold shared clones.
+	 * 保留原始套接字，使 CAN_RAW_RECV_OWN_MSGS 与接收确认标志
+	 * 维持标准的 SocketCAN 语义。位翻转需要私有数据副本，
+	 * 因为包抓取点可能持有共享克隆。
 	 */
 	if (fault == WBCAN_FAULT_BIT_FLIP) {
 		rx_skb = skb_copy(skb, GFP_ATOMIC);
@@ -530,8 +525,9 @@ static netdev_tx_t wbcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-/* Called by the CAN core's restart timer, and by `ip link set can0 type can
- * restart`. FW19's bus-off recovery test drives this path.
+/* 由 CAN 核心的重启定时器调用，也由
+ * `ip link set can0 type can restart` 调用。
+ * FW19 的 bus-off 恢复测试驱动此路径。
  */
 static int wbcan_set_mode(struct net_device *dev, enum can_mode mode)
 {
@@ -549,7 +545,7 @@ static int wbcan_set_mode(struct net_device *dev, enum can_mode mode)
 		if (delay_ms)
 			msleep(delay_ms);
 
-		/* CAN core recovery owns this callback and keeps TX stopped. */
+		/* CAN 核心恢复拥有此回调，并保持 TX 停止。 */
 		netif_tx_lock_bh(dev);
 		if (READ_ONCE(priv->can.state) != CAN_STATE_BUS_OFF) {
 			netif_tx_unlock_bh(dev);
@@ -558,9 +554,8 @@ static int wbcan_set_mode(struct net_device *dev, enum can_mode mode)
 
 		spin_lock_irqsave(&priv->lock, flags);
 		/*
-		 * Clear the armed fault on restart. Leaving it armed would
-		 * make recovery tests flap for reasons the test did not ask
-		 * for.
+		 * 重启时清除已武装的故障。若让其保持武装，
+		 * 恢复测试会因测试并未要求的缘由而反复抖动。
 		 */
 		priv->fault = WBCAN_FAULT_NONE;
 		priv->fault_count = 0;
@@ -639,17 +634,17 @@ static const struct ethtool_ops wbcan_ethtool_ops = {
 	.get_sset_count		= wbcan_get_sset_count,
 };
 
-/* --------------------------------------------------------------- debugfs ABI
+/* ------------------------------------------------------------ debugfs ABI
  *
  * echo "<mode> <count> [after] [id] [byte] [bit]" > /sys/kernel/debug/wbcan/<dev>/inject
  *
- *   arm 3 frames of drop-tx:            echo "drop-tx 3" > inject
- *   flip bit 2 of byte 0, 4th frame on: echo "bit-flip 1 3 any 0 2" > inject
- *   bus-off only for standard id 0x123: echo "bus-off 1 0 s:123" > inject
- *   drop extended id 0x123:             echo "drop-tx 1 0 e:123" > inject
+ *   武装 3 帧 drop-tx：                echo "drop-tx 3" > inject
+ *   翻转字节 0 的位 2，第 4 帧起生效：echo "bit-flip 1 3 any 0 2" > inject
+ *   仅对标准 ID 0x123 触发 bus-off：  echo "bus-off 1 0 s:123" > inject
+ *   丢弃扩展 ID 0x123：               echo "drop-tx 1 0 e:123" > inject
  *
- * Text, not ioctl: a shell script in CI has to drive this, and a text ABI is
- * one line of bash instead of a helper binary.
+ * 采用文本而非 ioctl：CI 中的 shell 脚本需要驱动它，
+ * 文本 ABI 只需一行 bash，而无需辅助二进制。
  */
 
 static int wbcan_parse_match_id(const char *value, bool *match_any,
@@ -853,7 +848,7 @@ static const struct file_operations wbcan_status_fops = {
 	.release = single_release,
 };
 
-/* ----------------------------------------------------------------- lifecycle */
+/* --------------------------------------------------------------- 生命周期 */
 
 static struct net_device *wbcan_dev;
 static struct dentry *wbcan_dbg_root;
@@ -869,9 +864,9 @@ static int wbcan_debugfs_err(const struct dentry *entry)
 }
 
 /*
- * Lifecycle is intentionally singleton-only: module load creates wbcan0 and
- * module unload removes it. This is not an RTNL link kind, so `ip link add
- * ... type wbcan` is intentionally unsupported.
+ * 生命周期有意设计为仅支持单例：模块加载创建 wbcan0，
+ * 模块卸载移除它。它不是一种 RTNL 链路类型，因此
+ * `ip link add ... type wbcan` 有意不受支持。
  */
 static int __init wbcan_init(void)
 {
@@ -880,9 +875,9 @@ static int __init wbcan_init(void)
 	int err;
 
 	/*
-	 * echo_skb_max 0: we do our own loopback in start_xmit rather than
-	 * using can_put_echo_skb, because the fault plane needs to decide
-	 * whether the frame comes back at all.
+	 * echo_skb_max 取 0：我们在 start_xmit 中自行回环，
+	 * 而不是使用 can_put_echo_skb，因为故障平面需要决定
+	 * 该帧到底要不要回来。
 	 */
 	wbcan_dev = alloc_candev(sizeof(struct wbcan_priv), 0);
 	if (!wbcan_dev)
@@ -901,10 +896,9 @@ static int __init wbcan_init(void)
 	strscpy(wbcan_dev->name, "wbcan0", IFNAMSIZ);
 
 	/*
-	 * No real bit timing: there is no wire. Advertising fixed bitrate
-	 * keeps `ip link set up` from demanding timing parameters, and makes
-	 * it obvious this device does not model the physical layer. That is
-	 * FW18's job, on the board.
+	 * 没有真实的位时序：这里没有物理导线。声明固定比特率可避免
+	 * `ip link set up` 索要时序参数，也明确表明
+	 * 本设备并不建模物理层。那是板子上的 FW18 的职责。
 	 */
 	priv->can.bittiming.bitrate = 1000000;
 	priv->can.ctrlmode_supported = CAN_CTRLMODE_LOOPBACK |
@@ -912,9 +906,9 @@ static int __init wbcan_init(void)
 	priv->can.do_set_mode = wbcan_set_mode;
 	WRITE_ONCE(priv->can.state, CAN_STATE_STOPPED);
 	/*
-	 * alloc_candev() leaves the TX queue runnable until ndo_open(). Keep
-	 * the queue stopped while the singleton is registered but down, so a
-	 * fresh load has one coherent stopped-state snapshot.
+	 * alloc_candev() 会让 TX 队列保持可运行直至 ndo_open()。
+	 * 在单例已注册但未启用期间保持队列停止，
+	 * 使一次全新加载拥有一份一致的停止状态快照。
 	 */
 	netif_stop_queue(wbcan_dev);
 

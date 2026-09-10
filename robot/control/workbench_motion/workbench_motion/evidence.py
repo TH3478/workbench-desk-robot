@@ -1,19 +1,16 @@
-"""Execution-event structure and the EvidenceSink interface.
+"""执行事件结构与 EvidenceSink 接口。
 
-Design boundary:
+设计边界：
 
-- Motion does NOT own a fact store. This module defines *what* an execution
-  event looks like and the *append-only* sink interface Motion talks to. It does
-  not implement persistence, and it deliberately exposes no ``get``/query.
-- Motion calls ``append(event)`` and receives back a **stable reference** it can
-  drop into an ActionResult's ``evidence_refs``. Production persistence is
-  provided by the World Model side (Event Store adapter); that adapter is a
-  cross-module dependency and is NOT assumed to exist yet.
-- Unit tests use :class:`FakeEvidenceSink`.
+- Motion 不拥有事实库。本模块定义执行事件*长什么样*以及 Motion 与之对话的*仅追加*
+  sink 接口。它不实现持久化，并且刻意不暴露任何 ``get``/查询。
+- Motion 调用 ``append(event)`` 并收到一个**稳定引用**，可放入 ActionResult 的
+  ``evidence_refs``。生产持久化由 World Model 侧（事件库适配器）提供；该适配器是
+  跨模块依赖，目前假定尚不存在。
+- 单元测试使用 :class:`FakeEvidenceSink`。
 
-Why events and not log lines: ``evidence_refs`` must point at something with a
-stable id (an MCU frame number, or a structured event with a stable
-``event_id``). Log lines are for humans and are not referenceable evidence.
+为什么用事件而不是日志行：``evidence_refs`` 必须指向具有稳定 id 的对象（MCU 帧号，
+或带稳定 ``event_id`` 的结构化事件）。日志行是给人看的，不是可引用的证据。
 """
 
 from __future__ import annotations
@@ -26,25 +23,23 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Protocol, runtime_checkable
 
-# A stable, opaque reference returned by a sink after it durably records an
-# event. Motion treats it as an opaque token and only stores it in evidence_refs.
+# 稳定、不透明的引用，由 sink 持久记录事件后返回。Motion 将其视为不透明令牌，
+# 仅存入 evidence_refs。
 EvidenceRef = str
 
 
 def _freeze(value: Any, *, _ancestors: set[int] | None = None) -> Any:
-    """Recursively rebuild ``value`` into a deeply-immutable structure.
+    """递归地把 ``value`` 重建为深层不可变结构。
 
-    - ``dict``/``Mapping`` -> ``MappingProxyType`` of frozen items.
-    - ``list``/``tuple`` (non-str Sequence) -> ``tuple`` of frozen items.
-    - ``set``/``frozenset`` -> ``frozenset`` of frozen items.
-    - strict-JSON scalar values are returned as-is; NaN/Infinity are rejected.
-    - unsupported values, non-string mapping keys, and cycles fail closed.
+    - ``dict``/``Mapping`` -> 冻结元素组成的 ``MappingProxyType``。
+    - ``list``/``tuple``（非 str 的 Sequence）-> 冻结元素组成的 ``tuple``。
+    - ``set``/``frozenset`` -> 冻结元素组成的 ``frozenset``。
+    - 严格 JSON 标量值原样返回；NaN/Infinity 被拒绝。
+    - 不支持的值、非字符串映射键、循环结构一律失败即拒绝。
 
-    Because containers are rebuilt from scratch, the result shares no mutable
-    object with the caller's input — passing an existing dict OR MappingProxyType
-    and then mutating the original cannot reach the frozen copy. This is what
-    ``frozen=True`` alone does NOT give you (it only blocks field reassignment,
-    not mutation of a dict the field points at).
+    由于容器是从零重建的，结果与调用方输入不共享任何可变对象——传入已有的 dict 或
+    MappingProxyType 后再修改原对象，都无法触及冻结副本。这正是单独 ``frozen=True``
+    给不了你的保证（它只阻止字段重新赋值，不阻止字段所指向的 dict 被修改）。
     """
     if isinstance(value, float):
         if not math.isfinite(value):
@@ -88,7 +83,7 @@ def _freeze(value: Any, *, _ancestors: set[int] | None = None) -> Any:
 
 
 def _json_sort_key(value: Any) -> str:
-    """Return a stable key for values thawed from an unordered set."""
+    """为从无序集合解冻的值返回稳定键。"""
     return json.dumps(
         value,
         allow_nan=False,
@@ -99,13 +94,12 @@ def _json_sort_key(value: Any) -> str:
 
 
 def _thaw(value: Any) -> Any:
-    """Inverse of :func:`_freeze`: rebuild plain ``dict``/``list`` for serialization.
+    """:func:`_freeze` 的逆操作：为序列化重建普通 ``dict``/``list``。
 
-    ``MappingProxyType`` is not JSON-serializable and breaks ``json.dumps`` /
-    ``dataclasses.asdict``. Consumers that need to persist an event call
-    :meth:`ExecutionEvent.as_serializable` (which routes through this) to get a
-    plain, JSON-ready structure back. Frozen sets become deterministically
-    ordered lists so repeated serialization produces stable evidence bytes.
+    ``MappingProxyType`` 不可 JSON 序列化，会破坏 ``json.dumps`` /
+    ``dataclasses.asdict``。需要持久化事件的消费方调用
+    :meth:`ExecutionEvent.as_serializable`（内部经由此函数）来取回普通的、可直接
+    JSON 的结构。冻结集合变成确定性排序的列表，使重复序列化产生稳定的证据字节。
     """
     if isinstance(value, Mapping):
         return {key: _thaw(item) for key, item in value.items()}
@@ -118,23 +112,20 @@ def _thaw(value: Any) -> Any:
 
 @dataclass(frozen=True)
 class ExecutionEvent:
-    """An observed execution fact emitted by Motion.
+    """Motion 发出的一条已观测执行事实。
 
-    An archived event must be tamper-proof. ``frozen=True`` alone is not enough:
-    it blocks field reassignment but not mutation of a ``dict``/``list`` a field
-    points at. So ``__post_init__`` recursively rebuilds ``payload`` into a
-    deeply-immutable structure (``MappingProxyType``/``tuple``, see :func:`_freeze`)
-    that shares no mutable object with the caller — nested values cannot be
-    changed, and the input reference (dict OR MappingProxyType) cannot reach the
-    stored copy afterwards.
+    归档事件必须防篡改。单独 ``frozen=True`` 不够：它阻止字段重新赋值，但不阻止字段
+    所指向的 ``dict``/``list`` 被修改。因此 ``__post_init__`` 递归地把 ``payload``
+    重建为深层不可变结构（``MappingProxyType``/``tuple``，见 :func:`_freeze`），与
+    调用方不共享任何可变对象——嵌套值无法修改，输入引用（dict 或 MappingProxyType）
+    事后也无法触及存储的副本。
 
-    Because that structure is not JSON-serializable, :meth:`as_serializable`
-    thaws it back to plain ``dict``/``list`` for a persisting EvidenceSink.
+    由于该结构不可 JSON 序列化，:meth:`as_serializable` 把它解冻回普通
+    ``dict``/``list``，供持久化的 EvidenceSink 使用。
 
-    Carries ``run_id``/``action_id`` so it can be correlated with the (separate)
-    human log stream, and a monotonic-clock-friendly ``clock_id`` for consistent
-    timestamps. Intentionally minimal for phase 0; richer fields land alongside
-    the adapter in later phases.
+    携带 ``run_id``/``action_id`` 以便与（独立的）人类日志流关联，以及一个对单调时钟
+    友好的 ``clock_id`` 以保持时间戳一致。阶段 0 刻意保持最小；更丰富的字段随适配器
+    在后续阶段落地。
     """
 
     event_type: str
@@ -144,19 +135,18 @@ class ExecutionEvent:
     clock_id: str = "monotonic"
 
     def __post_init__(self) -> None:
-        # Deep-freeze payload. frozen=True blocks reassignment, so set via
-        # object.__setattr__. _freeze rebuilds every container, so this is safe
-        # (and correct) whether payload came in as a dict or a MappingProxyType.
+        # 深度冻结 payload。frozen=True 阻止重新赋值，故通过 object.__setattr__ 设置。
+        # _freeze 重建每个容器，因此无论 payload 以 dict 还是 MappingProxyType 传入，
+        # 这样设置都是安全（且正确）的。
         if not isinstance(self.payload, Mapping):
             raise TypeError("payload must be a mapping")
         object.__setattr__(self, "payload", _freeze(self.payload))
 
     def as_serializable(self) -> dict[str, Any]:
-        """Return a plain, strict-JSON-ready dict of this event (payload thawed).
+        """返回本事件的普通、严格 JSON 就绪的 dict（payload 已解冻）。
 
-        Use this for persistence/serialization — ``json.dumps`` and
-        ``dataclasses.asdict`` cannot handle the frozen ``MappingProxyType``
-        payload directly.
+        用于持久化/序列化——``json.dumps`` 与 ``dataclasses.asdict`` 无法直接处理
+        冻结的 ``MappingProxyType`` payload。
         """
         return {
             "event_type": self.event_type,
@@ -169,39 +159,33 @@ class ExecutionEvent:
 
 @runtime_checkable
 class EvidenceSink(Protocol):
-    """Append-only sink Motion writes execution events to.
+    """Motion 写入执行事件的仅追加 sink。
 
-    The *only* operation Motion needs. Implementations must return a reference
-    that is:
-      - **stable**: identifies exactly the event that was appended, for later
-        lookup by whoever owns the store.
-      - **unique**: distinct per appended event, even for identical payloads.
+    Motion 需要的*唯一*操作。实现必须返回满足以下条件的引用：
+      - **稳定**：准确标识所追加的那个事件，供存储拥有方日后查找。
+      - **唯一**：每次追加都不同，即使 payload 相同。
 
-    Motion holds no persistence itself and never reads back — there is no
-    ``get`` here on purpose (no second event store).
+    Motion 自身不持有持久化，也从不回读——这里刻意没有 ``get``（不设第二个事件库）。
 
-    ``ExecutionEvent`` deliberately stores a deeply immutable payload and is
-    therefore not directly JSON-serializable. A persisting implementation MUST
-    serialize :meth:`ExecutionEvent.as_serializable`; it must not use
-    ``json.dumps(event)`` or ``dataclasses.asdict(event)``.
+    ``ExecutionEvent`` 刻意存储深层不可变的 payload，因此不能直接 JSON 序列化。
+    持久化实现必须序列化 :meth:`ExecutionEvent.as_serializable`；不得使用
+    ``json.dumps(event)`` 或 ``dataclasses.asdict(event)``。
 
-    Validation, serialization, or durable-write failures MUST be raised to the
-    caller. An implementation must not swallow a failure or mint an evidence
-    reference for an event that was not durably recorded.
+    校验、序列化或持久写入的失败必须抛给调用方。实现不得吞掉失败，也不得为未被持久
+    记录的事件签发证据引用。
     """
 
     def append(self, event: ExecutionEvent) -> EvidenceRef:
-        """Durably record ``event.as_serializable()`` and return its reference."""
+        """持久记录 ``event.as_serializable()`` 并返回其引用。"""
         ...
 
 
 class FakeEvidenceSink:
-    """In-memory test double implementing :class:`EvidenceSink`.
+    """实现 :class:`EvidenceSink` 的内存测试替身。
 
-    For unit tests only. Keeps appended events so tests can assert on them, and
-    mints a stable unique reference per append. This is NOT the production
-    store — it exists so Motion tests never depend on the World Model adapter.
-    ``append_error`` provides deterministic failure injection for caller tests.
+    仅供单元测试。保留已追加事件以便测试断言，并为每次追加签发稳定且唯一的引用。
+    它不是生产存储——它存在是为了让 Motion 测试永不依赖 World Model 适配器。
+    ``append_error`` 为调用方测试提供确定性的故障注入。
     """
 
     def __init__(self, *, append_error: Exception | None = None) -> None:
@@ -215,16 +199,16 @@ class FakeEvidenceSink:
         self._events.append((ref, event))
         return ref
 
-    # --- test-only inspection helpers (not part of the EvidenceSink interface) ---
+    # --- 仅供测试的检查辅助（不属于 EvidenceSink 接口） ---
 
     @property
     def events(self) -> list[ExecutionEvent]:
-        """Events in append order."""
+        """按追加顺序排列的事件。"""
         return [event for _, event in self._events]
 
     @property
     def refs(self) -> list[EvidenceRef]:
-        """References in append order."""
+        """按追加顺序排列的引用。"""
         return [ref for ref, _ in self._events]
 
     def __len__(self) -> int:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and validate repeated idle-versus-load wbcan latency evidence."""
+"""构建并验证重复的空闲与负载对比的 wbcan 延迟证据。"""
 
 from __future__ import annotations
 

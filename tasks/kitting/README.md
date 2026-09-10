@@ -1,13 +1,10 @@
 # kitting
 
-Assemble a kit by placing multiple specific parts into a tray in any order.
+通过把多个指定零件按任意顺序放入托盘来装配一个套件。
 
-Verifier checks:
-- Each required part is present in the tray
-- No extra parts
-- Each part has sufficient detection confidence
+验证器检查：
+- 每个必需零件都在托盘中
+- 没有多余零件
+- 每个零件有足够的检测置信度
 
-The v0.2 offline template now emits independent observe/grasp/place branches
-for `red_block`, `blue_cylinder`, and `green_gear`. The verifier is
-order-independent and fails closed when a required part is missing, an extra
-part is in the tray, confidence is below threshold, or evidence is absent.
+v0.2 离线模板现在为 `red_block`、`blue_cylinder` 与 `green_gear` 发出独立的 observe/grasp/place 分支。验证器与顺序无关，并在必需零件缺失、托盘中有多余零件、置信度低于阈值或证据缺失时失败即拒绝。

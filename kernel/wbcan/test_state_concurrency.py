@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded wbcan controller-state and queue concurrency probe."""
+"""受限的 wbcan 控制器状态与队列并发探针。"""
 
 import argparse
 import dataclasses
@@ -57,10 +57,10 @@ MAX_STATS_SAMPLES = 100_000
 
 @dataclasses.dataclass(frozen=True)
 class StressProfile:
-    """A reproducible, bounded workload definition.
+    """一份可复现、受限的工作负载定义。
 
-    The release values are intentionally fixed.  They are the workload used
-    by the privileged CI job and are not a latency or hard-real-time SLA.
+    release 档取值有意固定。它们是特权 CI 任务所用的工作负载，
+    并非延迟或硬实时 SLA。
     """
 
     name: str
@@ -111,13 +111,12 @@ PROFILES: dict[str, StressProfile] = {
     ),
 }
 
-# These are the three previously successful privileged virtual-CAN runs used
-# to derive the fixed release budget.  The first run predates a stress JSON
-# artifact, so its duration is the conservative interval between the last
-# timestamp-probe line and the stress completion line in the job log.  The
-# latter two use the elapsed duration in their stress JSON artifacts, rounded
-# up to a whole millisecond. Keeping the method in the artifact prevents these
-# values from being mistaken for a physical or hard-real-time benchmark.
+# 以下是三次既往成功的特权虚拟 CAN 运行记录，用于推导固定的
+# release 档预算。第一次运行早于 stress JSON 产物，因此其时长取
+# 任务日志中最后一行时间戳探针与压力测试完成行之间的保守区间。
+# 后两次使用其 stress JSON 产物中的耗时，向上取整到整毫秒。
+# 把测量方法留在产物中，可避免这些数值被误认为
+# 物理或硬实时基准测试结果。
 RELEASE_BASELINE_EVIDENCE: tuple[dict[str, int | str], ...] = (
     {
         "milestone": "#274",
@@ -165,15 +164,15 @@ RELEASE_BASELINE_EVIDENCE: tuple[dict[str, int | str], ...] = (
 
 
 class NotExecutedError(RuntimeError):
-    """The host cannot execute the privileged virtual-kernel probe."""
+    """主机无法运行该特权虚拟内核探针。"""
 
 
 class BudgetExceededError(AssertionError):
-    """The probe crossed its declared wall-clock budget."""
+    """探针越过了其声明的墙钟预算。"""
 
 
 def profile_config(name: str) -> StressProfile:
-    """Return a named immutable profile or fail before touching the device."""
+    """返回指定的不可变档位，或在触碰设备之前失败。"""
 
     try:
         return PROFILES[name]
@@ -191,7 +190,7 @@ def resolve_profile(
     slow_receiver_frames: int | None = None,
     reload_cycles: int | None = None,
 ) -> StressProfile:
-    """Apply bounded developer overrides while keeping release reproducible."""
+    """应用受限的开发者覆盖项，同时保持 release 档可复现。"""
 
     base = profile_config(name)
     values = {
@@ -265,7 +264,7 @@ def _profile_payload(profile: StressProfile) -> dict[str, int | str]:
 
 
 def _baseline_payload(profile: StressProfile) -> dict[str, Any]:
-    """Serialize the evidence that supports a profile's wall-clock budget."""
+    """序列化支撑某档位墙钟预算的证据。"""
 
     if profile.name != "release":
         return {
@@ -301,7 +300,7 @@ SATURATION_RESERVED_TAIL = b"\0" * 4
 
 
 def decode_saturation_frame(raw_frame: bytes, expected_ids: set[int]) -> tuple[int, int] | None:
-    """Decode only a canonical saturation frame; reject corrupt reserved bytes."""
+    """只解码规范的饱和帧；拒绝损坏的保留字节。"""
 
     if len(raw_frame) != FRAME.size:
         return None
@@ -434,9 +433,9 @@ class Probe:
     def raw_socket(self) -> socket.socket:
         self.ensure_budget()
         can_socket = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-        # A broken queue must turn into a bounded probe failure, never an
-        # unbounded blocking send.  The driver-level retry contract is tested
-        # by the tx-full stage; this timeout is the outer safety net.
+        # 队列损坏必须转化为受限的探针失败，绝不能变成无界的阻塞发送。
+        # 驱动级重试契约由 tx-full 阶段测试；
+        # 此超时是外层安全网。
         can_socket.settimeout(0.2)
         try:
             can_socket.bind((self.interface,))
@@ -544,11 +543,11 @@ class Probe:
     def capture(self, operation: Callable[..., None], *arguments: object) -> None:
         try:
             operation(*arguments)
-        except Exception as exc:  # noqa: BLE001 - propagate worker failure to the main probe.
+        except Exception as exc:  # noqa: BLE001 - 把工作线程故障传播给主探针。
             self.errors.put(exc)
-            # Stop sibling workers promptly.  The main thread still drains
-            # and reports the queued exception, while bounded workers that
-            # observe this event can leave their own resources cleanly.
+            # 迅速停止其余兄弟工作线程。主线程仍会排空并上报
+            # 队列中的异常，而观察到该事件的受限工作线程
+            # 可以干净地释放自己的资源。
             self.abort.set()
 
     def finish_threads(self, *threads: threading.Thread) -> None:
@@ -608,7 +607,7 @@ class Probe:
         return {"frames_requested": frames, "status_reads": status_reads, "fault_rearms": fault_rearms}
 
     def exercise_drop_faults(self, attempts: int = 4) -> dict[str, int]:
-        """Prove that intentional loss is counted and normal delivery recovers."""
+        """证明有意的丢失会被计数，且正常送达可以恢复。"""
 
         self.ensure_budget()
         sender = self.raw_socket()
@@ -691,7 +690,7 @@ class Probe:
             time.sleep(0.075)
             if self.counter("tx_frames") != stopped_tx:
                 raise AssertionError("TX advanced after link stop returned")
-        except Exception as exc:  # noqa: BLE001 - combine the cutover and worker failures.
+        except Exception as exc:  # noqa: BLE001 - 合并切换与工作线程的故障。
             failures.append(exc)
         finally:
             stop.set()
@@ -699,7 +698,7 @@ class Probe:
 
         try:
             self.finish_threads(sender)
-        except Exception as exc:  # noqa: BLE001 - combine the cutover and worker failures.
+        except Exception as exc:  # noqa: BLE001 - 合并切换与工作线程的故障。
             failures.append(exc)
         if failures:
             raise ExceptionGroup("link-stop drain failures", failures)
@@ -751,10 +750,10 @@ class Probe:
                 self.command("ip", "link", "set", self.interface, "up")
                 before_restart = self.counter("restart_attempts")
                 before_stop = self.counter("stop_attempts")
-                # Hold stop on both sides of STOPPED publication. Restart
-                # deterministically wins after the first drain, then status
-                # observes the atomic STOPPED + queue-stopped commit before
-                # close_candev() can perform the final defensive drain.
+                # 把 stop 挡在 STOPPED 发布的两侧。第一次排空之后，
+                # 重启确定性地获胜；随后 status 在 close_candev()
+                # 执行最终防御性排空之前，观测到原子的
+                # STOPPED + 队列停止提交。
                 self.restart_delay.write_text("100\n", encoding="ascii")
                 self.stop_delay.write_text("250\n", encoding="ascii")
                 sender = self.raw_socket()
@@ -797,10 +796,10 @@ class Probe:
                 finally:
                     sender.close()
 
-                # In the opposite ordering, restart has entered the
-                # callback but stop publishes STOPPED before the callback
-                # takes the TX lock. The BUS_OFF guard must reject the stale
-                # restart after close_candev() waits for it.
+                # 在相反的顺序下，重启已进入回调，
+                # 但 stop 在回调取得 TX 锁之前就发布了 STOPPED。
+                # 在 close_candev() 等待该回调之后，
+                # BUS_OFF 守卫必须拒绝这次过期的重启。
                 self.command("ip", "link", "set", self.interface, "up")
                 self.restart_delay.write_text("300\n", encoding="ascii")
                 self.stop_delay.write_text("0\n", encoding="ascii")
@@ -1031,9 +1030,9 @@ class Probe:
                         received[can_id].append(sequence)
                         arrivals[can_id].append(time.monotonic())
                     else:
-                        # Do not silently discard a frame from another CAN
-                        # ID, an error frame, or a frame with an unexpected
-                        # DLC.  These are unexplained delivery anomalies.
+                        # 不得静默丢弃来自其他 CAN ID 的帧、
+                        # 错误帧或 DLC 异常的帧。
+                        # 这些都属于无法解释的送达异常。
                         unexpected_frames += 1
                     quiet_since = None
                     continue
@@ -1166,20 +1165,20 @@ class Probe:
         self.wait_for_absence(self.debugfs_root, timeout=2.0)
 
     def _restore_device(self) -> None:
-        """Best-effort fail-safe restoration after a reload failure."""
+        """重载失败后尽力而为的故障安全恢复。"""
 
         previous_cleanup_mode = self.cleanup_mode
-        # Restoration is part of failure handling. It must remain possible
-        # after the workload deadline has expired, while still keeping every
-        # individual command bounded by command()/wait_*() timeouts.
+        # 恢复属于故障处理的一部分。即使工作负载截止时间已过，
+        # 它也必须仍然可行，同时每一条单独命令仍受
+        # command()/wait_*() 超时约束。
         self.cleanup_mode = True
         try:
             self.close_all_sockets()
             if not self._module_paths_ready():
-                # A failed insmod can leave a partially initialized module
-                # behind.  Remove that partial instance before trying a clean
-                # load; otherwise the next insmod may fail on a stale
-                # netdev/debugfs name and cleanup would not be recoverable.
+                # 一次失败的 insmod 可能留下初始化一半的模块。
+                # 在尝试干净加载之前先移除该残缺实例；
+                # 否则下一次 insmod 可能因陈旧的 netdev/debugfs
+                # 名称而失败，且清理将无法恢复。
                 if self.module_sys.exists():
                     self.command("rmmod", "wbcan", enforce_budget=False)
                     self._wait_module_absence()
@@ -1201,14 +1200,14 @@ class Probe:
             self.cleanup_mode = previous_cleanup_mode
 
     def _restore_for_cleanup(self) -> None:
-        """Retry restoration once, but never hide a failed first attempt."""
+        """重试一次恢复，但绝不掩盖第一次失败的尝试。"""
 
         try:
             self._restore_device()
         except Exception as first_error:
             try:
                 self._restore_device()
-            except Exception as second_error:  # noqa: BLE001 - both failures are actionable.
+            except Exception as second_error:  # noqa: BLE001 - 两种失败都有处理价值。
                 raise ExceptionGroup(
                     "wbcan cleanup restoration failed twice",
                     [first_error, second_error],
@@ -1216,7 +1215,7 @@ class Probe:
             raise RuntimeError("wbcan cleanup restoration recovered on its second attempt") from first_error
 
     def exercise_unload_reload(self, cycles: int) -> dict[str, int | bool]:
-        """Unload and reload the singleton repeatedly under a fixed bound."""
+        """在固定界限内反复卸载并重载单例。"""
 
         self.ensure_budget()
         initial_open_sockets = self.open_socket_count()
@@ -1246,7 +1245,7 @@ class Probe:
         except Exception as exc:
             try:
                 self._restore_device()
-            except Exception as restore_exc:  # noqa: BLE001 - both failures are actionable.
+            except Exception as restore_exc:  # noqa: BLE001 - 两种失败都有处理价值。
                 raise ExceptionGroup("reload failure and restoration failure", [exc, restore_exc]) from exc
             raise
 
@@ -1263,7 +1262,7 @@ class Probe:
         }
 
     def cleanup(self) -> dict[str, int | bool]:
-        """Reap probe resources and leave a usable, fault-free interface."""
+        """回收探针资源，并留下一个可用且无故障的接口。"""
 
         self.cleanup_mode = True
         self.abort.set()
@@ -1308,12 +1307,11 @@ def analyze_delivery(
     requested: int,
     producer_started: dict[int, float] | None = None,
 ) -> list[dict[str, int | str]]:
-    """Return per-producer delivery metrics and arrival-gap fairness evidence.
+    """返回每个生产者的送达指标与到达间隔公平性证据。
 
-    The no-progress interval starts at producer start and covers the gaps up
-    to each delivered frame.  Idle time after a producer has delivered its
-    final frame is intentionally excluded because no further delivery was
-    pending during that interval.
+    无进展区间从生产者启动时开始，覆盖到每一帧送达之前的间隔。
+    生产者送达最后一帧之后的空闲时间有意不计入，
+    因为该区间内已没有待完成的送达。
     """
 
     metrics: list[dict[str, int | str]] = []
@@ -2075,14 +2073,14 @@ def run_probe(
         )
         for name, operation in operations:
             _stage(name, operation, stages, probe, profile.max_stage_duration_ms)
-    except Exception as exc:  # noqa: BLE001 - preserve the probe failure through cleanup.
+    except Exception as exc:  # noqa: BLE001 - 让探针故障穿过清理阶段保留下来。
         failure = exc
     finally:
         cleanup_started = time.monotonic()
         probe.cleanup_mode = True
         try:
             cleanup_details = probe.cleanup()
-        except Exception as exc:  # noqa: BLE001 - report probe and cleanup failures together.
+        except Exception as exc:  # noqa: BLE001 - 同时上报探针与清理的失败。
             stages.append(
                 {
                     "name": "cleanup",

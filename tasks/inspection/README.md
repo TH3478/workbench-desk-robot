@@ -1,11 +1,7 @@
 # inspection
 
-Check one or more attributes of an object: colour, orientation, presence of
-markings, dimensional check via depth camera.
+检查物体的一个或多个属性：颜色、朝向、标记存在性、经深度相机的尺寸检查。
 
-Verifier outputs per-attribute results and an overall pass/fail.
-"Insufficient evidence" on any attribute propagates to the overall result.
+验证器输出逐属性结果与总体 pass/fail。任一属性的「证据不足」（`insufficient_evidence`）传播到总体结果。
 
-The v0.2 offline template observes three workpieces and requests presence,
-identity, and orientation evidence. The verifier requires every entity to be
-observed above the confidence threshold and refuses completion without evidence.
+v0.2 离线模板观测三个工件，并要求存在、身份与朝向证据。验证器要求每个实体以高于置信度阈值被观测，且没有证据就拒绝完成。

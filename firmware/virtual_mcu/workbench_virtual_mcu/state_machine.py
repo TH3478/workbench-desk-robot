@@ -52,7 +52,7 @@ _COMMAND_ALLOWED_STATES: dict[str, frozenset[McuState]] = {
 
 
 class VirtualMcu:
-    """Tiny deterministic model of the P0 safety boundary."""
+    """P0 安全边界的小型确定性模型。"""
 
     def __init__(self) -> None:
         self.state = McuState.IDLE

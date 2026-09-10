@@ -1,8 +1,8 @@
-"""ROS-free, fail-closed trajectory preflight and hard-limit loading.
+"""无 ROS、失败即拒绝的轨迹预检与硬限位加载。
 
-The module owns one validator implementation: :func:`preflight_trajectory`.
-The Phase-2 :func:`check_trajectory` API is retained as a compatibility wrapper.
-Nothing here clamps, repairs, dispatches, imports ROS, or emits events.
+本模块拥有一个验证器实现：:func:`preflight_trajectory`。
+阶段 2 的 :func:`check_trajectory` API 作为兼容包装保留。
+这里的一切都不会钳制、修复、派发、导入 ROS 或发出事件。
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ _MAX_DURATION_SEC = 2**31 - 1
 
 
 class ReasonCode(StrEnum):
-    """Stable machine codes for trajectory rejection; values are append-only."""
+    """轨迹拒绝的稳定机器码；取值仅追加。"""
 
     JOINT_NAMES = "joint_names"
     CURRENT_STATE = "current_state"
@@ -56,7 +56,7 @@ class ConfigurationCode(StrEnum):
 
 
 class PreflightConfigurationError(ValueError):
-    """A readiness/configuration failure, distinct from a trajectory violation."""
+    """就绪/配置失败，与轨迹违规区分开。"""
 
     def __init__(self, code: ConfigurationCode, message: str) -> None:
         self.code = code
@@ -90,8 +90,8 @@ class PreflightContext:
 
 @dataclass(frozen=True)
 class Violation:
-    # ``kind`` remains a real field so dataclasses.asdict retains the six-field
-    # Phase-2 evidence shape. StrEnum remains JSON-serializable as a string.
+    # ``kind`` 仍是真实字段，使 dataclasses.asdict 保留六字段的阶段 2 证据结构。
+    # StrEnum 作为字符串仍然可 JSON 序列化。
     kind: ReasonCode
     message: str
     joint: str | None = None
@@ -121,7 +121,7 @@ class NormalizedTrajectory:
 
 @dataclass(frozen=True, slots=True, init=False)
 class AcceptedTrajectory:
-    """Deeply immutable accepted snapshot, constructible only by this module."""
+    """深层不可变的已接受快照，只能由本模块构造。"""
 
     snapshot: NormalizedTrajectory
     canonical_bytes: bytes
@@ -130,7 +130,7 @@ class AcceptedTrajectory:
     effective_limits_sha256: str
     context_sha256: str
 
-    def __new__(cls):  # pragma: no cover - the public rejection is tested
+    def __new__(cls):  # pragma: no cover - 公共拒绝路径已测试
         raise TypeError("AcceptedTrajectory can only be created by preflight_trajectory")
 
 
@@ -170,7 +170,7 @@ def _number(value: Any, label: str) -> float:
 
 
 def load_hard_limits(vendor_description_pkg: str, ur_type: str) -> dict[str, JointLimit]:
-    """Load vendor limits dynamically, including UR's custom ``!degrees`` tag."""
+    """动态加载厂商限位，包括 UR 的自定义 ``!degrees`` 标签。"""
     path = _package_share(vendor_description_pkg) / "config" / ur_type / "joint_limits.yaml"
     if not path.is_file():
         raise FileNotFoundError(f"vendor joint limits not found: {path}")
@@ -227,7 +227,7 @@ def load_hw_override(
     *,
     hard_limits: Mapping[str, JointLimit] | None = None,
 ) -> dict[str, JointLimit]:
-    """Load hardware overrides and reject anything outside vendor hard limits."""
+    """加载硬件覆盖并拒绝任何超出厂商硬限位的值。"""
     hard = dict(_default_hard_limits() if hard_limits is None else hard_limits)
     override_path = Path(path) if path is not None else _default_override_path()
     if not override_path.is_file():
@@ -308,7 +308,7 @@ def _validate_override_within_hard(hard: Mapping[str, JointLimit], override: Map
 
 
 def effective_limits(hard: Mapping[str, JointLimit], override: Mapping[str, JointLimit]) -> dict[str, JointLimit]:
-    """Intersect hard and override limits, independently taking tighter bounds."""
+    """取硬限位与覆盖限位的交集，各自独立取更紧的界。"""
     _validate_override_within_hard(hard, override)
     return {
         joint: JointLimit(
@@ -365,7 +365,7 @@ def _validate_policy(policy: PreflightPolicy) -> PreflightPolicy:
 
 
 def load_preflight_policy(path: Path | str | None = None) -> PreflightPolicy:
-    """Load and strictly validate the versioned preflight policy file."""
+    """加载并严格校验带版本的预检策略文件。"""
     policy_path = Path(path) if path is not None else _default_policy_path()
     try:
         data = yaml.safe_load(policy_path.read_text(encoding="utf-8"))
@@ -456,7 +456,7 @@ def build_preflight_context(
     hard_limits: Mapping[str, JointLimit] | None = None,
     override_limits: Mapping[str, JointLimit] | None = None,
 ) -> PreflightContext:
-    """Build an immutable readiness snapshot from controlled or explicit inputs."""
+    """从受控或显式输入构建不可变就绪快照。"""
     try:
         if policy is None:
             validated_policy = load_preflight_policy()
@@ -636,7 +636,7 @@ def preflight_trajectory(
     *,
     context: PreflightContext,
 ) -> AcceptedTrajectory | Violation:
-    """Return an immutable accepted snapshot or the first stable violation."""
+    """返回不可变已接受快照或第一个稳定违规。"""
     expected, limits, policy = _validated_context(context)
 
     raw_names = _array(_field(traj, "joint_names", _MISSING))
@@ -866,7 +866,7 @@ def check_trajectory(
     *,
     limit_epsilon: float = DEFAULT_LIMIT_EPSILON,
 ) -> Violation | None:
-    """Compatibility wrapper returning ``Violation | None`` without mutation."""
+    """兼容包装，返回 ``Violation | None`` 且不发生变更。"""
     try:
         epsilon = _number(limit_epsilon, "limit_epsilon")
     except ValueError as exc:

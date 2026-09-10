@@ -1,9 +1,8 @@
-"""Unit tests for the ROS-free reachability logic.
+"""无 ROS 可达性逻辑的单元测试。
 
-These are behaviour tests for the phase-1 acceptance gate's deterministic half:
-sampling is reproducible and bounded, and scoring enforces the >=95% threshold
-exactly at the boundary. They run under ``uv run pytest`` with no ROS/MoveIt.
-The MoveIt-connected IK run is verified separately as PR local evidence.
+这些是阶段 1 验收闸门确定性半边的行为测试：采样可复现且有界，打分恰在边界处执行
+>=95% 阈值。它们在 ``uv run pytest`` 下运行，无 ROS/MoveIt。
+连接 MoveIt 的 IK 运行作为 PR 本地证据另行验证。
 """
 
 from __future__ import annotations
@@ -34,7 +33,7 @@ from workbench_motion.reachability import (
 def test_sampling_is_deterministic_for_a_seed():
     a = sample_positions(BLOCK_REGION, 20, random.Random(0))
     b = sample_positions(BLOCK_REGION, 20, random.Random(0))
-    assert a == b  # same seed -> identical positions (archived numbers are replayable)
+    assert a == b  # 同种子 -> 相同位置（归档数值可回放）
 
 
 def test_different_seeds_differ():
@@ -64,9 +63,9 @@ def test_candidate_yaws_span_symmetric_half_turn():
     yaws = candidate_yaws(12)
     assert len(yaws) == 12
     assert yaws[0] == 0.0
-    # Parallel-jaw grasp is symmetric mod pi: all candidates live in [0, pi).
+    # 平行爪抓取在 mod pi 下对称：所有候选位于 [0, pi)。
     assert all(0.0 <= y < math.pi for y in yaws)
-    assert yaws == tuple(sorted(yaws))  # deterministic, ascending
+    assert yaws == tuple(sorted(yaws))  # 确定性、升序
 
 
 def test_candidate_yaws_rejects_nonpositive():
@@ -81,7 +80,7 @@ def test_poses_at_builds_one_top_down_pose_per_yaw():
     assert len(poses) == 6
     for p in poses:
         assert (p.x, p.y, p.z) == pos
-        # every pose is a unit quaternion pointing down (R[2][2] == -1)
+        # 每个位姿都是朝下的单位四元数（R[2][2] == -1）
         assert math.isclose(p.qx**2 + p.qy**2 + p.qz**2 + p.qw**2, 1.0, rel_tol=1e-9)
         r22 = 1.0 - 2.0 * (p.qx**2 + p.qy**2)
         assert math.isclose(r22, -1.0, abs_tol=1e-9)
@@ -91,9 +90,9 @@ def test_top_down_quat_is_normalised_and_points_down():
     for yaw in (-math.pi, -1.0, 0.0, 1.0, math.pi):
         qx, qy, qz, qw = top_down_quat(yaw)
         assert math.isclose(qx * qx + qy * qy + qz * qz + qw * qw, 1.0, rel_tol=1e-9)
-        # Rotating the body +z axis by this quaternion must yield world -z (down).
-        # v' = q * (0,0,1) * q^-1 ; z-component check is enough for "points down".
-        # Using the rotation-matrix element R[2][2] = 1 - 2(qx^2 + qy^2).
+        # 用该四元数旋转机体 +z 轴必须得到世界 -z（向下）。
+        # v' = q * (0,0,1) * q^-1；检查 z 分量足以证明「朝下」。
+        # 使用旋转矩阵元素 R[2][2] = 1 - 2(qx^2 + qy^2)。
         r22 = 1.0 - 2.0 * (qx * qx + qy * qy)
         assert math.isclose(r22, -1.0, abs_tol=1e-9)
 
@@ -108,7 +107,7 @@ def test_score_region_rate_and_pass():
     assert res.total == 20
     assert res.successes == 19
     assert math.isclose(res.rate, 0.95)
-    assert res.passed  # exactly at threshold passes
+    assert res.passed  # 恰在阈值处通过
 
 
 def test_score_region_just_below_threshold_fails():
@@ -127,14 +126,14 @@ def test_all_passed_requires_every_region():
     bad = score_region("b", [True] * 10 + [False] * 10, threshold=0.95)
     assert all_passed([good])
     assert not all_passed([good, bad])
-    assert not all_passed([])  # empty is not a pass
+    assert not all_passed([])  # 空列表不是通过
 
 
-# --- run-parameter guards (defends against weakened-green reports) ---
+# --- 运行参数守卫（防「弱化的绿色」报告） ---
 
 
 def test_validate_run_params_accepts_gate_defaults():
-    validate_run_params(samples=20, yaws=12, threshold=0.95)  # no raise
+    validate_run_params(samples=20, yaws=12, threshold=0.95)  # 不抛错
 
 
 @pytest.mark.parametrize(
@@ -160,26 +159,26 @@ def test_gate_qualifying_true_only_at_or_above_gate():
 @pytest.mark.parametrize(
     "samples,threshold",
     [
-        (1, 0.0),  # the exact weakened-green case the reviewer flagged
-        (1, 0.95),  # too few samples
-        (20, 0.0),  # threshold too weak
-        (19, 0.95),  # one short of the sample floor
-        (20, 0.94),  # just under the threshold floor
+        (1, 0.0),  # 评审者指出的精确「弱化绿色」案例
+        (1, 0.95),  # 采样数太少
+        (20, 0.0),  # 阈值太弱
+        (19, 0.95),  # 比采样下限少一个
+        (20, 0.94),  # 恰在阈值下限之下
     ],
 )
 def test_gate_qualifying_false_for_weak_params(samples, threshold):
-    # These are valid (no raise) but must NOT count as a gate pass.
+    # 这些参数合法（不抛错），但绝不能算作闸门通过。
     validate_run_params(samples=samples, yaws=12, threshold=threshold)
     assert not is_gate_qualifying(samples=samples, threshold=threshold)
 
 
-# --- output-path resolution (regression: JSON must land at repo root, not cwd) --
+# --- 输出路径解析（回归：JSON 必须落在仓库根而非 cwd） --
 
 
 def test_resolve_output_anchors_relative_path_to_repo_root(tmp_path):
-    # A relative --output resolves against the git repo root, not the caller's cwd,
-    # so `ros2 run ... reachability_check` from robot/control still writes the
-    # archive to <repo>/docs/evaluation/... (regression for the cwd-relative bug).
+    # 相对 --output 相对 git 仓库根解析，而非调用方 cwd，因此从 robot/control 运行
+    # `ros2 run ... reachability_check` 仍把归档写到 <repo>/docs/evaluation/...
+    # （cwd 相对 bug 的回归）。
     from workbench_motion.reachability_check import _resolve_output_path
 
     repo = tmp_path / "repo"
@@ -199,9 +198,9 @@ def test_resolve_output_keeps_absolute_path_verbatim(tmp_path):
 
 
 def test_resolve_output_falls_back_to_relative_without_git(tmp_path, monkeypatch):
-    # No .git anywhere up the tree -> return the relative path unchanged
-    # (resolved against cwd by the caller), never crashing. Force every ancestor
-    # to look git-less so the test does not depend on the real fs above tmp_path.
+    # 树上任何地方都没有 .git -> 原样返回相对路径（由调用方相对 cwd 解析），
+    # 绝不崩溃。强制所有祖先目录看起来没有 git，使测试不依赖 tmp_path 之上的
+    # 真实文件系统。
     from pathlib import Path as _P
 
     from workbench_motion import reachability_check as rc

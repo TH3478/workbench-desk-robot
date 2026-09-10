@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Privileged SocketCAN software TX timestamp regression probe."""
+"""特权 SocketCAN 软件 TX 时间戳回归探针。"""
 
 from __future__ import annotations
 

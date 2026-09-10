@@ -67,8 +67,8 @@ static void enter_safe_stop(mcu_state_machine_t *machine)
 
 static void enter_fault(mcu_state_machine_t *machine, mcu_fault_code_t fault_code)
 {
-    /* Preserve the first active cause. Later traffic must not overwrite the
-     * evidence that originally latched the fault. */
+    /* 保留第一个活动原因。后续流量不得覆盖
+     * 最初锁存故障的证据。 */
     if (machine->state != MCU_STATE_FAULT || !active_fault_is_valid(machine->fault_code)) {
         machine->fault_code = fault_code;
     }
@@ -170,9 +170,9 @@ void mcu_sm_dispatch(mcu_state_machine_t *machine,
 
     result_missing = result == 0;
     if (result_missing) {
-        /* A caller cannot suppress safety processing by omitting the output
-         * buffer. The local buffer preserves the normal dispatch path for
-         * STOP, while non-STOP events are rejected below as invalid input. */
+        /* 调用方不能通过省略输出缓冲区来压制安全处理。
+         * 本地缓冲区为 STOP 保留正常派发路径，
+         * 而非 STOP 事件将在下方作为无效输入被拒绝。 */
         result = &ignored_result;
     }
     if (machine == 0) {

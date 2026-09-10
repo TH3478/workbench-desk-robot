@@ -1,14 +1,10 @@
-# Simulation
+# 仿真
 
-Perception owns scenarios; Integration owns world assets. The repository currently
-contains deterministic scenario manifests and a bounded runner control surface,
-but it does **not** contain a complete Gazebo world, perception bridge, or grasp
-adapter yet. Scripted event logs are pipeline fixtures, never hardware or Gazebo
-evidence.
+感知 Owner 拥有场景；集成 Owner 拥有世界资产。仓库目前包含确定性场景清单与一个受限的 runner 控制面，但**尚不**包含完整的 Gazebo 世界、感知桥接或抓取适配器。脚本化事件日志是流水线固定装置，绝不是硬件或 Gazebo 证据。
 
-## Operator entry points
+## 操作入口
 
-Run these from the repository root:
+从仓库根目录运行：
 
 ```bash
 python tools/scripts/sim_cli.py doctor
@@ -17,26 +13,14 @@ python tools/scripts/sim_cli.py run normal-001 --runner scripted --output-dir ru
 python tools/scripts/sim_cli.py run --all --runner gazebo
 ```
 
-`doctor` only diagnoses dependencies. `list` validates every manifest and shows
-the deterministic materialized-scene hash. `sim_cli run` publishes an atomic run
-artifact containing the source manifest, materialized scene, event log (when one
-exists), stdout/stderr, metadata, and checksums.
+`doctor` 只诊断依赖。`list` 校验每个清单并显示确定性的物化场景 hash。`sim_cli run` 发布一个原子运行产物，包含源清单、物化场景、事件日志（存在时）、stdout/stderr、元数据与校验和。
 
-The default Gazebo runner requires a configured, tokenized command in
-`WORKBENCH_GAZEBO_COMMAND` or an explicit `--command` argument. A missing
-adapter is `NOT_EXECUTED` with a non-zero exit code. A scripted run is always
-labelled `SCRIPTED_FIXTURE` and `release_eligible: false`.
+默认 Gazebo runner 需要 `WORKBENCH_GAZEBO_COMMAND` 中已配置、令牌化的命令，或显式的 `--command` 参数。适配器缺失时记为 `NOT_EXECUTED` 且退出码非零。脚本化运行始终标记为 `SCRIPTED_FIXTURE` 与 `release_eligible: false`。
 
-## Reproducibility boundary
+## 可复现性边界
 
-The same manifest and seed produce the same materialized scene and scene hash.
-That guarantee does not extend to Gazebo event ordering, physics timing, sensor
-noise, or hardware behavior. Raw runner logs and metadata are retained so those
-differences remain inspectable.
+同一清单与种子产生相同的物化场景与场景 hash。该保证不延伸到 Gazebo 事件顺序、物理时序、传感器噪声或硬件行为。原始 runner 日志与元数据被保留，使这些差异保持可检查。
 
-## Ownership boundary
+## 所有权边界
 
-Do not modify robot control logic to make scenarios easier. A future real-world
-runner must apply the manifest seed, world version, fault type, reset isolation,
-and timeout, then emit the existing validated event-log contract. It must not
-promote a fixture or a missing dependency to a passing regression.
+不要为了让场景变简单而修改机器人控制逻辑。未来的真实世界 runner 必须应用清单种子、世界版本、故障类型、重置隔离与超时，然后发出既有的、已验证的事件日志契约。它不得把一个固定装置或缺失的依赖提升为通过的回归。

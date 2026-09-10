@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real MuJoCo EGL capability smoke, isolated from project domain contracts."""
+"""真实的 MuJoCo EGL 能力冒烟测试，与项目领域契约隔离。"""
 
 from __future__ import annotations
 

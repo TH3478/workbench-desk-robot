@@ -1,12 +1,11 @@
 # operator_console
 
-Operator-facing console for monitoring, manual override, and replay review.
+面向操作员的控制台，用于监控、手动接管与回放审查。
 
-Separate from `apps/dashboard` (which is task-status display for bystanders).
-This is for operators who need to:
-- Cancel a running task
-- Trigger manual recovery
-- Review failure evidence
-- Approve a re-attempt after insufficient_evidence
+与 `apps/dashboard`（面向旁观者的任务状态展示）分开。这是给需要以下能力的操作员的：
+- 取消运行中的任务
+- 触发手动恢复
+- 审查失败证据
+- 在 insufficient_evidence 之后批准重试
 
-Not implemented yet. Waiting for core task loop to stabilise in v0.1.
+尚未实现。等待 v0.1 核心任务循环稳定。

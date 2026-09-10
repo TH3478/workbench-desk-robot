@@ -10,8 +10,8 @@
 #include "state_machine.h"
 #include "watchdog.h"
 
-/* Exact diagnostics for the boundary at which an input was rejected.  A
- * rejected raw or Wire V1 frame never reaches the safety state machine. */
+/* 针对输入被拒绝的具体边界的精确诊断。
+ * 被拒绝的原始帧或 Wire V1 帧绝不会到达安全状态机。 */
 typedef enum {
     MCU_CAN_BRIDGE_OK = 0,
     MCU_CAN_BRIDGE_NO_FRAME,
@@ -51,22 +51,21 @@ typedef struct {
     mcu_wire_frame_t response;
 } mcu_can_bridge_record_t;
 
-/* These conversion functions are the only mapping between the raw HAL
- * envelope and Wire V1. Outputs remain untouched when conversion fails. */
+/* 这两个转换函数是原始 HAL 封装与 Wire V1 之间的唯一映射。
+ * 转换失败时输出保持不变。 */
 mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
                                               hal_can_frame *encoded);
 mcu_can_bridge_status_t mcu_can_bridge_decode(const hal_can_frame *encoded,
                                               mcu_wire_frame_t *frame);
 
-/* Encode one complete Wire V1 frame and hand it to the target HAL. A true HAL
- * return means transport handoff only, not bus delivery or actuator proof. */
+/* 编码一个完整的 Wire V1 帧并交给目标 HAL。HAL 返回 true 仅表示
+ * 传输交接完成，不表示总线送达或执行器证明。 */
 mcu_can_bridge_status_t mcu_can_bridge_send(const mcu_wire_frame_t *frame);
 
-/* Process one already-received raw envelope without calling hal_can_send().
- * This is shared by Host/QEMU logic tests. dedup may be null or corrupt for a
- * STOP because the safety path is independent; an ordinary command then
- * fails closed. If an accepted STOP response is returned, the caller still
- * owns transport handoff confirmation. */
+/* 处理一个已收到的原始封装，不调用 hal_can_send()。
+ * 此函数由 Host/QEMU 逻辑测试共用。对于 STOP，dedup 可以为 null 或损坏，
+ * 因为安全路径相互独立；此时普通命令会失败即拒绝。
+ * 若返回被接受的 STOP 响应，传输交接确认仍由调用方负责。 */
 bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
                                   mcu_state_machine_t *machine,
                                   mcu_watchdog_t *watchdog,
@@ -74,11 +73,10 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
                                   uint64_t now_us,
                                   mcu_can_bridge_record_t *record);
 
-/* Consume at most one frame from the non-blocking HAL, route STOP directly to
- * the watchdog path before ordinary-command handling, and send any response.
- * Successful handoff of an accepted STOP_ACK confirms its bounded core slot.
- * The owning target must serialize calls and configure controller/FIFO
- * priority; this function does not hide an unbounded receive queue. */
+/* 从非阻塞 HAL 至多取出一帧，在处理普通命令之前将 STOP 直接送入
+ * 看门狗路径，并发送任何响应。被接受的 STOP_ACK 交接成功即确认
+ * 其受限的 core 槽位。所属目标必须串行化调用并配置控制器/FIFO 优先级；
+ * 本函数不会隐藏无界的接收队列。 */
 bool mcu_can_bridge_poll(mcu_command_dedup_t *dedup,
                          mcu_state_machine_t *machine,
                          mcu_watchdog_t *watchdog,

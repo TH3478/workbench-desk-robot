@@ -1,24 +1,22 @@
-"""Bring up move_group for the composed UR5e + Robotiq arm (phase 1).
+"""为合成 UR5e + Robotiq 机械臂启动 move_group（阶段 1）。
 
-Purpose: provide ``/compute_ik`` (and a planning scene from the merged URDF) so
-the ``reachability_check`` console script can run the batch IK reachability gate,
-and so the arm can be inspected in RViz. This is Motion's own minimal launch — it
-does NOT depend on any external bringup (PLAN.md §阶段 1).
+目的：提供 ``/compute_ik``（以及合并 URDF 的规划场景），使 ``reachability_check``
+console script 能运行批量 IK 可达性闸门，并能在 RViz 中检查机械臂。这是 Motion 自己
+的最小 launch——它不依赖任何外部启动调试（PLAN.md §阶段 1）。
 
-Path resolution: everything is resolved from the *installed* package share via
-``ament_index`` (``get_package_share_directory``), so it works after a normal
-``colcon build`` (not only ``--symlink-install``). setup.py installs the config
-tree and a vendored copy of the workbench world xacro into the share dir, and the
-composed xacro finds the world via ``$(find workbench_motion)`` — no reliance on
-the source-tree layout at runtime. Requires the workspace to be sourced::
+路径解析：一切都通过 ``ament_index``（``get_package_share_directory``）从*安装后*的
+包 share 解析，因此在普通 ``colcon build`` 之后即可工作（不仅限于
+``--symlink-install``）。setup.py 把配置树与工作台世界 xacro 的 vendored 副本安装到
+share 目录，合成 xacro 通过 ``$(find workbench_motion)`` 找到世界——运行时完全不依赖
+源码树布局。需要先 source 工作区::
 
     colcon build --packages-select workbench_motion
     source install/setup.bash
     ros2 launch workbench_motion move_group.launch.py
 
-The arm xacro path is exposed as an overridable, validated launch argument.
+机械臂 xacro 路径以可覆盖、已校验的 launch 参数暴露。
 
-Requires: ros-jazzy-moveit, ros-jazzy-trac-ik-kinematics-plugin (kinematics.yaml).
+依赖：ros-jazzy-moveit、ros-jazzy-trac-ik-kinematics-plugin（kinematics.yaml）。
 """
 
 from __future__ import annotations
@@ -55,8 +53,7 @@ def _setup(context, *_args, **_kwargs) -> list[Node]:
         output="screen",
         parameters=[description, {"use_sim_time": False}],
     )
-    # Static joint states so TF is complete for IK/collision (no controllers yet;
-    # ros2_control lands in phase 2).
+    # 静态关节状态使 TF 对 IK/碰撞完整（尚无控制器；ros2_control 在阶段 2 落地）。
     jsp = Node(
         package="joint_state_publisher",
         executable="joint_state_publisher",

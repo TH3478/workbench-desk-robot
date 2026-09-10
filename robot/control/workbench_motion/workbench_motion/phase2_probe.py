@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Phase-2 controller/TF/collision/mimic evidence probe.
+"""阶段 2 控制器/TF/碰撞/mimic 证据探针。
 
-ROS imports are lazy. Classification, path densification, mimic math, report
-validation, and orchestration stay ROS-free and are unit-tested with fake IO.
+ROS 导入是惰性的。分类、路径加密、mimic 数学、报告校验与编排保持无 ROS，并用假 IO
+做单元测试。
 """
 
 from __future__ import annotations
@@ -110,7 +110,7 @@ def hardware_is_gazebo(robot_description: str) -> bool:
 
 
 def snapshot_is_complete(snapshot: JointSnapshot, required_joints: Sequence[str]) -> bool:
-    """Return true only for a finite snapshot containing every controlled joint."""
+    """仅当快照数值有限且包含每个受控关节时返回真。"""
     if not math.isfinite(snapshot.stamp_s) or snapshot.stamp_s <= 0.0:
         return False
     return all(joint in snapshot.positions and math.isfinite(snapshot.positions[joint]) for joint in required_joints)
@@ -134,12 +134,11 @@ def _outside(
 def classify_over_limit(
     observation: ActionObservation, limits: Mapping[str, JointLimit], tolerance: float = 0.01
 ) -> str:
-    """Classify actual controller behavior into the frozen six-class taxonomy."""
+    """把实际控制器行为分类到冻结的六类分类法。"""
     required = tuple(limits)
     snapshots = (observation.before, *observation.samples, observation.after)
-    # An incomplete /joint_states message is evidence failure, never evidence
-    # that an aborted goal was safe.  This is deliberately checked before the
-    # action status so an empty after snapshot cannot produce "aborted".
+    # 不完整的 /joint_states 消息是证据失败，绝不是「被中止的目标是安全的」的证据。
+    # 这一检查刻意放在动作状态之前，使空的 after 快照无法产生 "aborted"。
     if any(not snapshot_is_complete(sample, required) for sample in snapshots):
         return "unclassified"
     if observation.timed_out:
@@ -177,7 +176,7 @@ def smoothness_report(
     velocity_jump_limit: float = 1.0,
     overshoot_tolerance: float = 0.01,
 ) -> dict[str, Any]:
-    """Machine-check sampled trajectory timing, velocity jumps and overshoot."""
+    """机器检查采样轨迹的时序、速度跳变与超调。"""
     joints = tuple(target)
     report: dict[str, Any] = {
         "samples_checked": len(samples),
@@ -400,7 +399,7 @@ def run_probe(
     staleness_s: float = 1.0,
     collision_check_resolution_rad: float = 0.05,
 ) -> int:
-    """Run the probe and publish evidence only after every gate has data."""
+    """运行探针，仅在每个闸门都有数据后才发布证据。"""
 
     def fail(code: int, reason: str) -> int:
         print(f"phase2_probe: {reason}", file=sys.stderr)
@@ -435,9 +434,8 @@ def run_probe(
         collision = io.collision_check(path)
         collision["resolution_rad"] = collision_check_resolution_rad
         legal_samples = [legal.before, *legal.samples, legal.after]
-        # A fake or controller may report the terminal sample both in its
-        # history and as ``after``; retain one copy so equal timestamps do not
-        # masquerade as a discontinuity.
+        # 假 IO 或控制器可能同时在其历史与 ``after`` 中报告终止采样；保留一份副本，
+        # 避免相等时间戳被伪装成不连续。
         legal_samples = [
             sample
             for index, sample in enumerate(legal_samples)
@@ -524,7 +522,7 @@ def run_probe(
 
 
 class RosProbeIO:
-    """Small synchronous adapter over the ROS services/actions used by the probe."""
+    """探针所用 ROS 服务/动作之上的小型同步适配器。"""
 
     def __init__(self, arm: ArmConfig, timeout_s: float = 10.0):
         import rclpy
@@ -567,9 +565,8 @@ class RosProbeIO:
             return
         stamp = float(message.header.stamp.sec) + float(message.header.stamp.nanosec) / 1e9
         snapshot = JointSnapshot(dict(zip(message.name, message.position, strict=False)), stamp)
-        # Keep malformed messages visible as a missing fresh sample.  The
-        # consumer then times out/fails closed instead of treating them as a
-        # safe action result.
+        # 让畸形消息以「缺少新鲜采样」的形式可见。消费方随之超时/失败即拒绝，
+        # 而不是把它们当作安全的动作结果。
         if snapshot_is_complete(snapshot, self.arm.joints):
             self.latest = snapshot
             self.history.append(snapshot)

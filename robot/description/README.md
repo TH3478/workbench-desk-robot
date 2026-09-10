@@ -1,3 +1,3 @@
-# Robot description (Owner: Motion)
+# 机器人描述（Owner: Motion）
 
-Store URDF/Xacro, joint limits, collision geometry and controller mappings here. The simulator world does not own robot kinematics.
+在这里存放 URDF/Xacro、关节限位、碰撞几何与控制器映射。仿真世界不拥有机器人运动学。

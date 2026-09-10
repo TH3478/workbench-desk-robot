@@ -1,19 +1,19 @@
-## Related Issue
+## 相关 Issue
 
-## What changed
+## 改了什么
 
-## Interfaces affected
+## 受影响的接口
 
-## Tests and commands
+## 测试与命令
 
-## Evidence
+## 证据
 
-## Risks and rollback
+## 风险与回滚
 
-## Checklist
+## 清单
 
-- [ ] I changed only approved paths.
-- [ ] Tests and contract checks pass.
-- [ ] I covered normal and failure behavior.
-- [ ] I updated examples/docs when an interface changed.
-- [ ] I did not add secrets, private data or unreviewed assets.
+- [ ] 我只改了已批准的路径。
+- [ ] 测试与契约检查通过。
+- [ ] 我覆盖了正常与失败行为。
+- [ ] 接口变更时我更新了示例/文档。
+- [ ] 我没有添加密钥、私有数据或未经评审的资产。

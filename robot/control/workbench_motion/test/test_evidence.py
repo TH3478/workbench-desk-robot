@@ -1,8 +1,7 @@
-"""Unit tests for the EvidenceSink interface and FakeEvidenceSink.
+"""EvidenceSink 接口与 FakeEvidenceSink 的单元测试。
 
-Proves the phase-0 acceptance criterion: ``append()`` returns a stable, unique
-reference, and Motion holds no persistence implementation (no ``get`` on the
-interface).
+证明阶段 0 验收标准：``append()`` 返回稳定且唯一的引用，且 Motion 不持有持久化实现
+（接口上没有 ``get``）。
 """
 
 from __future__ import annotations
@@ -25,7 +24,7 @@ def _event(action_id: str = "a-1") -> ExecutionEvent:
 
 def test_fake_sink_satisfies_interface() -> None:
     sink = FakeEvidenceSink()
-    # runtime_checkable Protocol: the fake structurally implements EvidenceSink.
+    # runtime_checkable Protocol：该假实现结构上实现了 EvidenceSink。
     assert isinstance(sink, EvidenceSink)
 
 
@@ -39,7 +38,7 @@ def test_append_returns_reference() -> None:
 def test_reference_is_unique_even_for_identical_events() -> None:
     sink = FakeEvidenceSink()
     ref_a = sink.append(_event())
-    ref_b = sink.append(_event())  # identical payload/ids
+    ref_b = sink.append(_event())  # 相同 payload/id
     assert ref_a != ref_b
     assert len(set(sink.refs)) == len(sink.refs) == 2
 
@@ -48,8 +47,7 @@ def test_reference_is_stable_and_maps_to_its_event() -> None:
     sink = FakeEvidenceSink()
     ref_first = sink.append(_event("a-1"))
     ref_second = sink.append(_event("a-2"))
-    # The reference returned for an append does not change and keeps pointing at
-    # the same event position it was minted for.
+    # 追加返回的引用不会变化，并持续指向为其签发时的同一事件位置。
     assert sink.refs == [ref_first, ref_second]
     assert sink.events[0].action_id == "a-1"
     assert sink.events[1].action_id == "a-2"
@@ -65,11 +63,10 @@ def test_events_are_immutable() -> None:
 
 
 def test_payload_is_deeply_immutable_from_dict_input() -> None:
-    """Archived events cannot be tampered with, at ANY nesting depth.
+    """归档事件在任何嵌套深度都不可篡改。
 
-    Covers the review concern that the earlier fix was only shallow: mutating the
-    original dict (top-level or nested), or writing through ``event.payload`` at
-    top level or into a nested dict/list, must all fail to reach the archive.
+    覆盖评审关切：早前的修复只是浅层的——修改原始 dict（顶层或嵌套），或经由
+    ``event.payload`` 在顶层或嵌套 dict/list 中写入，都必须无法触及归档。
     """
     original = {"status": "ok", "nested": {"count": 1}, "items": [1, 2]}
     event = ExecutionEvent(event_type="t", run_id="r", action_id="a", payload=original)
@@ -77,7 +74,7 @@ def test_payload_is_deeply_immutable_from_dict_input() -> None:
     sink.append(event)
     archived = sink.events[0]
 
-    # 1. Mutating the ORIGINAL input (any depth) must not reach the archive.
+    # 1. 修改原始输入（任何深度）都不得触及归档。
     original["status"] = "corrupted"
     original["nested"]["count"] = 999
     original["items"].append(3)
@@ -85,26 +82,25 @@ def test_payload_is_deeply_immutable_from_dict_input() -> None:
     assert archived.payload["nested"]["count"] == 1
     assert archived.payload["items"] == (1, 2)
 
-    # 2. Writing through event.payload at top level must raise.
+    # 2. 在顶层经 event.payload 写入必须抛错。
     with pytest.raises(TypeError):
         archived.payload["status"] = "x"  # type: ignore[index]
 
-    # 3. Writing into a NESTED dict must also raise (this is what shallow failed).
+    # 3. 写入嵌套 dict 也必须抛错（这正是浅层修复失败之处）。
     with pytest.raises(TypeError):
         archived.payload["nested"]["count"] = 0  # type: ignore[index]
 
-    # 4. Nested sequences become tuples — no append/mutation possible.
+    # 4. 嵌套序列变为元组——无法 append/修改。
     assert isinstance(archived.payload["items"], tuple)
     with pytest.raises(AttributeError):
         archived.payload["items"].append(4)  # type: ignore[attr-defined]
 
 
 def test_payload_is_isolated_from_mappingproxy_input() -> None:
-    """Passing an existing MappingProxyType must NOT leak its backing dict.
+    """传入已有的 MappingProxyType 绝不能泄漏其底层 dict。
 
-    Covers the review concern: the earlier fix skipped copying when the input was
-    already a MappingProxyType, so a caller holding the backing dict could still
-    mutate the archived event. _freeze rebuilds regardless, closing that hole.
+    覆盖评审关切：早前的修复在输入已是 MappingProxyType 时跳过拷贝，持有底层 dict 的
+    调用方仍可修改归档事件。_freeze 无论输入如何都重建，堵上了该漏洞。
     """
     from types import MappingProxyType
 
@@ -115,7 +111,7 @@ def test_payload_is_isolated_from_mappingproxy_input() -> None:
     sink.append(event)
     archived = sink.events[0]
 
-    # Mutate the underlying dict the proxy was built from.
+    # 修改构建该 proxy 的底层 dict。
     backing["k"]["n"] = 999
     backing["added"] = True
 
@@ -124,10 +120,9 @@ def test_payload_is_isolated_from_mappingproxy_input() -> None:
 
 
 def test_as_serializable_returns_plain_json_ready_dict() -> None:
-    """The frozen payload is not JSON-serializable; as_serializable() thaws it.
+    """冻结 payload 不可 JSON 序列化；as_serializable() 将其解冻。
 
-    Covers the serialization-regression concern: json.dumps must work on the
-    output, and nested structures come back as plain dict/list.
+    覆盖序列化回归关切：json.dumps 必须能处理输出，且嵌套结构以普通 dict/list 返回。
     """
     event = ExecutionEvent(
         event_type="grasp_done",
@@ -137,7 +132,7 @@ def test_as_serializable_returns_plain_json_ready_dict() -> None:
     )
     data = event.as_serializable()
 
-    # Plain types, round-trips through JSON without error.
+    # 普通类型，经 JSON 往返不出错。
     assert isinstance(data["payload"], dict)
     assert isinstance(data["payload"]["joints"], list)
     assert isinstance(data["payload"]["meta"], dict)
@@ -220,7 +215,7 @@ def test_sink_append_error_propagates_without_minting_reference() -> None:
 
 
 def test_motion_side_holds_no_read_api() -> None:
-    # Enforce the boundary: the interface Motion talks to exposes append only,
-    # never a get/query. Motion must not become a second event store.
+    # 强化边界：Motion 对话的接口只暴露 append，绝不暴露 get/查询。
+    # Motion 不能变成第二个事件库。
     assert hasattr(EvidenceSink, "append")
     assert not hasattr(EvidenceSink, "get")

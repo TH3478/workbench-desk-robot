@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- Reuse the vendor's six-arm-joint interface declaration. Hard limits stay
-       in the UR macro/URDF; this file does not duplicate their values. -->
+  <!-- 复用厂商的六臂关节接口声明。硬限位留在 UR 宏/URDF 中；本文件不重复其数值。 -->
   <xacro:include filename="$(find ur_description)/urdf/inc/ur_joint_control.xacro"/>
 
-  <!-- The Robotiq vendor simulation macro is tied to ign_ros2_control. Reuse
-       its follower list and multipliers so joint_state_broadcaster exposes the
-       complete linkage under gz_ros2_control; only the driver is commanded. -->
+  <!-- Robotiq 厂商仿真宏与 ign_ros2_control 绑定。复用其跟随关节列表与倍率，使
+       joint_state_broadcaster 在 gz_ros2_control 下暴露完整连杆链；仅驱动关节被
+       命令。 -->
   <xacro:macro name="workbench_gripper_control" params="tf_prefix driver_joint">
     <joint name="${tf_prefix}${driver_joint}">
       <command_interface name="position"/>

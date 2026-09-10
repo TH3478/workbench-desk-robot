@@ -1,4 +1,4 @@
-# Versioned, fail-closed policy for the ROS-free trajectory preflight gate.
+# 面向无 ROS 轨迹预检闸门的带版本、失败即拒绝策略。
 trajectory_preflight:
   version: "1"
   limit_epsilon: 0.000001

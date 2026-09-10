@@ -1,5 +1,5 @@
-# Container-only CPython 3.12 / linux-amd64 lock, resolved from PyPI on 2026-08-28.
-# This capability environment is intentionally outside the portable project contract.
+# 仅限容器的 CPython 3.12 / linux-amd64 锁文件，于 2026-08-28 从 PyPI 解析。
+# 该能力环境有意置于可移植项目契约之外。
 absl-py==2.5.0
 etils==1.14.0
 fsspec==2026.7.0

@@ -1,8 +1,7 @@
-"""Phase-0 self-test launch: bring up the scaffold node in an empty world.
+"""阶段 0 自测 launch：在空世界中启动 scaffold 节点。
 
-Deliberately depends on nothing external (no bringup, no Gazebo, no arm). It
-only proves the package installs and its node starts and logs. Later phases add
-the arm + world launches.
+刻意不依赖任何外部组件（无启动调试、无 Gazebo、无机械臂）。它只证明包能安装、
+其节点能启动并记录日志。后续阶段加入机械臂 + 世界 launch。
 """
 
 from launch import LaunchDescription

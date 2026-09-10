@@ -1,4 +1,4 @@
-"""Structural consistency checks for phase-2 control configuration."""
+"""阶段 2 控制配置的结构一致性检查。"""
 
 from __future__ import annotations
 
