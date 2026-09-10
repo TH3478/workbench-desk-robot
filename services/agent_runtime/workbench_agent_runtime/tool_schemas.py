@@ -1,4 +1,4 @@
-"""七种语义动作工具的参数 schema。
+"""九种语义动作工具的参数 schema。
 
 每个工具由其 ActionType、一组必需与可选的参数键、以及每个参数值的
 期望 Python 类型定义。这里的 schema 是 ToolRegistry 消费的唯一事实
@@ -113,6 +113,24 @@ TOOL_SCHEMAS: dict[ActionType, dict[str, object]] = {
     },
     ActionType.NAVIGATE: {
         "description": "Navigate to a configured waypoint; the executor resolves target_id.",
+        "target_id_required": True,
+        "required_params": frozenset[str](),
+        "optional_params": frozenset[str](),
+        "param_types": {},
+        "param_constraints": {},
+        "relational_constraints": frozenset[str](),
+    },
+    ActionType.OPEN: {
+        "description": "Open a configured articulated entity; motion policy and geometry remain executor-owned.",
+        "target_id_required": True,
+        "required_params": frozenset[str](),
+        "optional_params": frozenset[str](),
+        "param_types": {},
+        "param_constraints": {},
+        "relational_constraints": frozenset[str](),
+    },
+    ActionType.CLOSE: {
+        "description": "Close a configured articulated entity; motion policy and geometry remain executor-owned.",
         "target_id_required": True,
         "required_params": frozenset[str](),
         "optional_params": frozenset[str](),

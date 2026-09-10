@@ -20,7 +20,9 @@ from . import tool_schemas as _schemas
 # 公开类型
 # ---------------------------------------------------------------------------
 
-_TARGET_REQUIRED_ACTIONS: frozenset[ActionType] = frozenset({ActionType.GRASP, ActionType.PLACE, ActionType.NAVIGATE})
+_TARGET_REQUIRED_ACTIONS: frozenset[ActionType] = frozenset(
+    {ActionType.GRASP, ActionType.PLACE, ActionType.NAVIGATE, ActionType.OPEN, ActionType.CLOSE}
+)
 _SCHEMA_KEYS: frozenset[str] = frozenset(
     {
         "description",
@@ -74,12 +76,12 @@ class ValidationResult:
 
 
 class ToolRegistry:
-    """注册并校验七种受限语义动作工具。
+    """注册并校验九种受限语义动作工具。
 
     校验层次按顺序依次应用：
 
     1. **存在性**——action_type 必须已注册。
-    2. **目标**——GRASP 与 PLACE 要求非空 ``target_id``。
+    2. **目标**——携带目标的动作要求非空 ``target_id``。
     3. **字段集合**——parameters 必须包含全部必需键，且不得包含
        必需 + 可选并集之外的键。
     4. **类型安全**——每个参数值必须与其声明类型相符。``bool`` 在

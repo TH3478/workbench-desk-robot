@@ -59,6 +59,11 @@ class LocalModelError(RuntimeError):
     """当本地模型无法产出可信路由时抛出。"""
 
 
+class _RejectRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, response, code, msg, headers, newurl):
+        raise LocalModelError(f"local model endpoint redirect rejected: {newurl}")
+
+
 @dataclass(frozen=True)
 class RouteDecision:
     task_family: str
@@ -133,7 +138,7 @@ class OllamaModelProvider:
         self.model = model.strip()
         self.endpoint = validate_local_endpoint(endpoint, allowed_hosts)
         self.timeout_s = timeout_s
-        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _RejectRedirects())
         self.last_call: dict[str, object] = {}
 
     def route(self, goal: str) -> RouteDecision:
@@ -204,11 +209,6 @@ def build_local_model_plan(goal: str, provider: ModelProvider) -> TaskGraph:
             f"got {decision.task_family}"
         )
     unsafe = [requirement for requirement in UNSAFE_REQUIREMENTS if getattr(decision, requirement)]
-    # 确定性分类器对受限的桌面语言具有权威性。
-    # 小模型可能对普通包裹处理过度上报导航需求，但它绝不能
-    # 推翻上面捕获到的明确越界措辞。
-    if known_family and decision.task_family == known_family:
-        unsafe = [requirement for requirement in unsafe if requirement != "requires_navigation"]
     if unsafe:
         raise LocalModelError(f"request is outside the safe semantic boundary: {', '.join(unsafe)}")
     builders = {
