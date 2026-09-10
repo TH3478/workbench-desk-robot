@@ -1,3 +1,15 @@
+/* 看门狗与 STOP 时序测试套件。对应 Issue #60（FW5）的时序安全路径。
+ *
+ * 被测契约：docs/architecture/mcu-watchdog-v1.md 冻结的时序安全
+ * 路径——受控常量关系、只有「有效且序号为新的普通帧」才刷新
+ * 链路期限、期限到达单条故障遥测、uint64 回绕、STOP ACK 交接
+ * 期限（恰在期限算通过、迟到拒绝）、精确/协议重试回放、递减
+ * 计数过期、STOP 超时锁存与可信复位双闸门。
+ *
+ * 时间由本文件自己的 fake_clock_t 假时钟驱动，与真实定时器无关；
+ * 真实中断下的对应证据在 hal/qemu/main_qemu.c 的
+ * run_qemu_timing_evidence 中给出。
+ */
 #include "watchdog_tests.h"
 
 #include <stdbool.h>
@@ -6,10 +18,12 @@
 
 #include "watchdog.h"
 
+/* 假时钟：只携带一个微秒时间戳，由各测试显式推进，保证确定性。 */
 typedef struct {
     uint64_t now_us;
 } fake_clock_t;
 
+/* 单条断言：递增计数；失败时记录失败数与首个失败序号。 */
 static void check(mcu_test_report_t *report, bool condition)
 {
     report->assertions++;
@@ -21,6 +35,7 @@ static void check(mcu_test_report_t *report, bool condition)
     }
 }
 
+/* 构造一个指定类别的事件（无故障、未授权、原因未清除）并派发。 */
 static void dispatch(mcu_state_machine_t *machine,
                      mcu_event_kind_t kind,
                      mcu_transition_result_t *result)
@@ -34,6 +49,7 @@ static void dispatch(mcu_state_machine_t *machine,
     mcu_sm_dispatch(machine, &event, result);
 }
 
+/* 初始化状态机并派发 BEGIN_MOVE，送入 EXECUTING 状态。 */
 static void start_move(mcu_state_machine_t *machine)
 {
     mcu_transition_result_t result;
@@ -42,6 +58,7 @@ static void start_move(mcu_state_machine_t *machine)
     dispatch(machine, MCU_EVENT_BEGIN_MOVE, &result);
 }
 
+/* 构造一个结构上合法的 Wire V1 STOP 帧。 */
 static void make_stop(mcu_wire_frame_t *stop, uint16_t command_id, uint8_t retry_count)
 {
     stop->kind = MCU_WIRE_FRAME_STOP;
@@ -54,6 +71,8 @@ static void make_stop(mcu_wire_frame_t *stop, uint16_t command_id, uint8_t retry
     stop->device_mode = MCU_WIRE_MODE_IDLE;
 }
 
+/* 记录携带的 Wire V1 帧必须能被编解码器编码为 DLC-8 帧
+ * （发布记录前先验证线上表示合法）。 */
 static bool record_frame_encodes(const mcu_watchdog_record_t *record)
 {
     uint16_t arbitration_id;
@@ -65,6 +84,7 @@ static bool record_frame_encodes(const mcu_watchdog_record_t *record)
            length == MCU_WIRE_DLC;
 }
 
+/* 逻辑帧逐字段相等比较。 */
 static bool frames_equal(const mcu_wire_frame_t *left, const mcu_wire_frame_t *right)
 {
     return left->kind == right->kind && left->command_id == right->command_id &&
@@ -73,6 +93,7 @@ static bool frames_equal(const mcu_wire_frame_t *left, const mcu_wire_frame_t *r
            left->fault_code == right->fault_code && left->device_mode == right->device_mode;
 }
 
+/* 看门狗记录逐字段相等比较（含观测/期限时间戳与线上帧）。 */
 static bool records_equal(const mcu_watchdog_record_t *left,
                           const mcu_watchdog_record_t *right)
 {
@@ -82,6 +103,9 @@ static bool records_equal(const mcu_watchdog_record_t *left,
            left->retry_count == right->retry_count && frames_equal(&left->frame, &right->frame);
 }
 
+/* 受控常量关系（mcu-watchdog-v1.md 的常量表）：
+ * 心跳周期为正；软件期限 ≥ 2 倍心跳；STOP ACK 期限为正且严格
+ * 短于软件期限；硬件看门狗周期为正。 */
 static void test_controlled_constants(mcu_test_report_t *report)
 {
     check(report, MCU_HEARTBEAT_PERIOD_US > 0u);
@@ -91,8 +115,13 @@ static void test_controlled_constants(mcu_test_report_t *report)
     check(report, MCU_HARDWARE_WATCHDOG_PERIOD_MS > 0u);
 }
 
+/* 只有有效新活动才喂链路看门狗：IDLE 时 VALID_NEW 不武装
+ * （无执行期间）；EXECUTING 时武装后，重试/重复/过期/畸形/STOP
+ * 与越界类别都不能刷新期限。 */
 static void test_only_valid_new_activity_feeds(mcu_test_report_t *report)
 {
+    /* 不得刷新链路期限的活动类别：重试、重复、过期、畸形与 STOP
+     * （mcu-watchdog-v1.md「软件链路看门狗」）。 */
     static const mcu_watchdog_activity_t rejected_activity[] = {
         MCU_WATCHDOG_ACTIVITY_RETRY,
         MCU_WATCHDOG_ACTIVITY_DUPLICATE,
@@ -136,6 +165,9 @@ static void test_only_valid_new_activity_feeds(mcu_test_report_t *report)
     check(report, watchdog.link_deadline_us == deadline);
 }
 
+/* 期限与单条记录：deadline-1 未到期；恰在 deadline 到期并恰好
+ * 发布一条 watchdog_expired 故障遥测（序号 = 初始化参数）；
+ * 之后轮询不再产生记录（锁存）。 */
 static void test_watchdog_deadline_and_single_record(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -176,6 +208,8 @@ static void test_watchdog_deadline_and_single_record(mcu_test_report_t *report)
     check(report, record.kind == MCU_WATCHDOG_RECORD_STOP_ACK);
 }
 
+/* uint64 时钟回绕：假时钟放在 UINT64_MAX 附近，期限越过
+ * UINT64_MAX 仍按无符号半区间规则正确到期，遥测序号也回绕到 0。 */
 static void test_uint64_wraparound(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -198,6 +232,9 @@ static void test_uint64_wraparound(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_FAULT);
 }
 
+/* STOP ACK 交接在期限内：有效 STOP 进入 SAFE_STOP、禁用链路
+ * 期限并挂起 ACK；ID 不匹配的确认被拒；恰在期限的匹配确认
+ * 被接受并关闭挂起槽位。 */
 static void test_stop_ack_within_bound(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -246,6 +283,9 @@ static void test_stop_ack_within_bound(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_SAFE_STOP);
 }
 
+/* 故障后精确链路重试回放原始 STOP ACK：状态机先入 FAULT，同 ID
+ * 同 retry_count 的 STOP 仍返回与首条逐字段相等的记录，且不
+ * 延长期限、不重复副作用。 */
 static void test_stop_ack_retry_replays_original_after_fault(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -284,6 +324,9 @@ static void test_stop_ack_retry_replays_original_after_fault(mcu_test_report_t *
     check(report, watchdog.stop_ack_pending);
 }
 
+/* 协议重试回显计数：retry_count + 1 的 STOP 回放原始线上结果
+ * 与设备模式、回显新计数、记录新观测时间但不延长期限；再次
+ * 相同计数为精确链路回放；随后确认即关闭挂起槽位。 */
 static void test_stop_ack_protocol_retry_echoes_count(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -338,6 +381,8 @@ static void test_stop_ack_protocol_retry_echoes_count(mcu_test_report_t *report)
     check(report, !watchdog.stop_ack_pending);
 }
 
+/* 递减/过期重试被拒：接受 0→1→2 后，回退的 1 被拒绝且不改变
+ * 挂起槽位；255→0 的回绕同理。两种过期计数都不能完成确认。 */
 static void test_stop_ack_rejects_stale_protocol_retry(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -404,6 +449,10 @@ static void test_stop_ack_rejects_stale_protocol_retry(mcu_test_report_t *report
     check(report, !watchdog.stop_ack_pending);
 }
 
+/* STOP 超时独立且锁存：期限后未确认关闭挂起槽位并恰好发布一条
+ * 本地 STOP_TIMEOUT 记录（不是有效 Wire V1 帧）；安全状态保持；
+ * 迟到确认被拒；stop_timeout_cause_active 必须在原因清除后才能
+ * 通过双闸门可信复位。 */
 static void test_stop_timeout_is_distinct_and_latched(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -451,6 +500,9 @@ static void test_stop_timeout_is_distinct_and_latched(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_IDLE);
 }
 
+/* 可信复位要求原因清除「现场」：看门狗到期后未清除原因的重置
+ * 被拒（RESET_CAUSE_ACTIVE）；mark_causes_cleared 之后才被接受
+ * 进入 idle，且未发出任何看门狗记录。 */
 static void test_watchdog_reset_requires_live_cause_clear(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -478,6 +530,9 @@ static void test_watchdog_reset_requires_live_cause_clear(mcu_test_report_t *rep
     check(report, !watchdog.watchdog_record_emitted);
 }
 
+/* 锁存故障下的硬件喂狗策略：到期进入 FAULT 后 core 停止喂
+ * 硬件看门狗；清除时序原因不复活锁存的 FAULT 状态，仍不喂；
+ * 由畸形帧进入的 FAULT（无时序原因）同样不喂。 */
 static void test_hardware_feed_policy_in_latched_fault(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -516,6 +571,9 @@ static void test_hardware_feed_policy_in_latched_fault(mcu_test_report_t *report
     check(report, !mcu_watchdog_should_feed_hardware(&watchdog, &machine));
 }
 
+/* 无效输入与喂狗闸门：空指针参数失败即拒绝；模式与状态不一致
+ * 时不喂狗；STOP 帧 opcode 非 stop 被拒且无副作用；未初始化的
+ * 看门狗对象不可用。 */
 static void test_invalid_inputs_and_hardware_feed_gate(mcu_test_report_t *report)
 {
     mcu_watchdog_t watchdog;
@@ -549,6 +607,8 @@ static void test_invalid_inputs_and_hardware_feed_gate(mcu_test_report_t *report
     check(report, !mcu_watchdog_poll(&watchdog, &machine, 0u, &record));
 }
 
+/* 套件入口：清零报告后依次运行十二个测试组。Host 侧断言总数
+ * 为 184，QEMU 侧运行同一份源码（共享套件）。 */
 void mcu_watchdog_run_tests(mcu_test_report_t *report)
 {
     if (report == 0) {

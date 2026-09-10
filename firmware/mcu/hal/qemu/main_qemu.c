@@ -35,6 +35,8 @@ static volatile uint32_t timer_fault_records;
 static volatile bool timer_record_available;
 static mcu_watchdog_record_t timer_record;
 
+/* 把定时器路径产出的看门狗记录拷贝到静态缓冲，供 main 之后断言。
+ * 逐字段拷贝：记录含 mcu_wire_frame_t，整体赋值会连带填充字节。 */
 static void copy_timer_record(const mcu_watchdog_record_t *source)
 {
     timer_record.kind = source->kind;
@@ -73,6 +75,8 @@ void mcu_qemu_timer_interrupt(void)
     hal_timer_arm_us(now_us + MCU_HEARTBEAT_PERIOD_US);
 }
 
+/* 探测 .bss 是否被 crt0 清零：bss_probe 刻意不初始化，
+ * 任何非零值都说明清零循环被跳过。失败返回 1。 */
 static int check_bss_zeroed(void)
 {
     for (unsigned i = 0; i < 4; i++) {
@@ -87,6 +91,8 @@ static int check_bss_zeroed(void)
     return 0;
 }
 
+/* 验证 CLINT mtime 确实在走时：这是 FW5 看门狗时钟可信的前提。
+ * 失败返回 2。 */
 static int check_clock_advances(void)
 {
     uint64_t t0 = hal_now_us();
@@ -106,6 +112,8 @@ static int check_clock_advances(void)
     return 0;
 }
 
+/* 读取当前 sp 并断言它落在 link.ld 保留的 .stack 区间内。
+ * 失败返回 3。 */
 static int check_stack_sane(void)
 {
     /* sp 应位于链接器保留的区域之内。此处的越界偏差要到很久之后
@@ -124,6 +132,9 @@ static int check_stack_sane(void)
     return 0;
 }
 
+/* 运行与 Host 共享的状态机套件并上报断言/失败计数。
+ * 断言协议语义由 docs/architecture/mcu-protocol-v1.md 冻结；
+ * 失败返回 4。 */
 static int run_state_machine_tests(void)
 {
     mcu_test_report_t report;
@@ -139,6 +150,8 @@ static int run_state_machine_tests(void)
     return report.failures == 0u ? 0 : 4;
 }
 
+/* 运行 Wire V1 编解码器套件（含规范黄金向量与模糊测试）。
+ * 二进制契约见 docs/architecture/mcu-wire-v1.md；失败返回 5。 */
 static int run_frame_codec_tests(void)
 {
     mcu_test_report_t report;
@@ -154,6 +167,8 @@ static int run_frame_codec_tests(void)
     return report.failures == 0u ? 0 : 5;
 }
 
+/* 运行看门狗/STOP 时序套件，契约见
+ * docs/architecture/mcu-watchdog-v1.md；失败返回 6。 */
 static int run_watchdog_tests(void)
 {
     mcu_test_report_t report;
@@ -169,6 +184,8 @@ static int run_watchdog_tests(void)
     return report.failures == 0u ? 0 : 6;
 }
 
+/* 运行命令去重套件（穷举 15 位 delta 语料），契约见
+ * docs/architecture/mcu-command-dedup-v1.md；失败返回 10。 */
 static int run_command_dedup_tests(void)
 {
     mcu_test_report_t report;
@@ -184,6 +201,8 @@ static int run_command_dedup_tests(void)
     return report.failures == 0u ? 0 : 10;
 }
 
+/* 运行 CAN 桥（原始 HAL/Wire V1 包络映射）套件，契约见
+ * docs/architecture/mcu-can-hal-boundary-v1.md；失败返回 11。 */
 static int run_can_bridge_tests(void)
 {
     mcu_test_report_t report;
@@ -199,6 +218,12 @@ static int run_can_bridge_tests(void)
     return report.failures == 0u ? 0 : 11;
 }
 
+/* 真实机器定时器中断下的看门狗证据：把状态机送入 EXECUTING、
+ * 武装链路期限与硬件看门狗，然后等待 4 次心跳中断。
+ * 断言：恰好 1 条故障遥测记录、状态机锁存 FAULT、
+ * 且 core 在故障后停止喂建模硬件看门狗（最终到期）。
+ * 这是 QEMU 独有的证据，对应 firmware/mcu/README.md
+ * 「QEMU 证明什么」表中的真实定时器中断项；失败返回 7/8/9。 */
 static int run_qemu_timing_evidence(void)
 {
     mcu_event_t begin_move;
@@ -260,6 +285,11 @@ static int run_qemu_timing_evidence(void)
     return 0;
 }
 
+/* QEMU 构建的 main。启动流程：
+ *   1. crt0.S 已设置好 sp/gp、清零 .bss、安装 mtvec（见 crt0.S 横幅）；
+ *   2. 依次运行四个平台无关检查与五个共享测试套件，逐项 OR 失败码；
+ *   3. 退出码约定：0 = 全部通过，1..11 = 对应检查/套件失败
+ *      （见下方各返回值），由 hal_report_exit 交给测试终结器。 */
 int main(void)
 {
     hal_puts("\n[mcu] FW1/FW2 smoke test\n");

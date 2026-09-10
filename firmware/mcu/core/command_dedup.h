@@ -1,3 +1,14 @@
+/* command_dedup.h —— 普通命令回放保护接口（冻结的八槽定长窗口）。
+ *
+ * 职责：15 位序号半区间分类常量、回放窗口状态与接收入口的公共类型；
+ * STOP 走不相交分区与独立看门狗路径，不进入本窗口。
+ *
+ * 契约文档：docs/architecture/mcu-command-dedup-v1.md（「序号分类」「新命令
+ *   与回放行为」「会话与重置边界」「STOP 独立性」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
 #ifndef MCU_COMMAND_DEDUP_H
 #define MCU_COMMAND_DEDUP_H
 

@@ -1,13 +1,37 @@
+/* watchdog.c —— 平台无关时序安全路径实现（软件链路看门狗与 STOP ACK 期限）。
+ *
+ * 职责：只在完整有效且序号全新的普通活动上装载/刷新绝对链路期限；
+ * 期限到期派发 MCU_EVENT_WATCHDOG_EXPIRED 并恰发布一条故障遥测。
+ * 管理 STOP_ACK 的 10 ms 交接期限：合法 STOP 立即派发，挂起槽位支持
+ * 精确链路重放与协议重试回放，交接迟到时发布恰一条本地 STOP_TIMEOUT。
+ *
+ * 契约文档：docs/architecture/mcu-watchdog-v1.md（「受控常量」「软件链路
+ *   看门狗」「STOP 确认时序」）；无符号半区间比较与故障码语义来自
+ *   docs/architecture/mcu-protocol-v1.md（「时间与期限语义」「故障码
+ *   注册表」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
+
 #include "watchdog.h"
 
+/* 初始化 cookie（ASCII "WDT1"）。 */
 #define MCU_WATCHDOG_COOKIE 0x57445431u
+/* 无符号时间比较的半区间 2^63：按契约假设任一计时窗口都短于
+ * 计数器区间的一半，期限跨越 UINT64_MAX 仍保持确定性
+ * （mcu-watchdog-v1.md「软件链路看门狗」）。 */
 #define MCU_TIME_HALF_RANGE (UINT64_C(1) << 63)
 
+/* 无符号半区间「已到期限」：delta = now - deadline < 2^63，
+ * 包含恰好相等（闭区间端点）。 */
 static bool deadline_reached(uint64_t now_us, uint64_t deadline_us)
 {
     return (uint64_t)(now_us - deadline_us) < MCU_TIME_HALF_RANGE;
 }
 
+/* 无符号半区间「严格超过期限」：delta != 0 且 < 2^63；
+ * 恰好相等不算迟到。 */
 static bool deadline_after(uint64_t now_us, uint64_t deadline_us)
 {
     uint64_t delta = now_us - deadline_us;
@@ -15,6 +39,7 @@ static bool deadline_after(uint64_t now_us, uint64_t deadline_us)
     return delta != 0u && delta < MCU_TIME_HALF_RANGE;
 }
 
+/* 把帧置为安全中性初值（kind == COMMAND、opcode == reserved、全零）。 */
 static void clear_frame(mcu_wire_frame_t *frame)
 {
     frame->kind = MCU_WIRE_FRAME_COMMAND;
@@ -27,6 +52,7 @@ static void clear_frame(mcu_wire_frame_t *frame)
     frame->device_mode = MCU_WIRE_MODE_IDLE;
 }
 
+/* 逐字段复制帧。 */
 static void copy_frame(mcu_wire_frame_t *destination, const mcu_wire_frame_t *source)
 {
     destination->kind = source->kind;
@@ -39,12 +65,14 @@ static void copy_frame(mcu_wire_frame_t *destination, const mcu_wire_frame_t *so
     destination->device_mode = source->device_mode;
 }
 
+/* 清空缓存的 STOP_ACK 槽位（观测时间与帧一并归零）。 */
 static void clear_stop_ack_cache(mcu_watchdog_t *watchdog)
 {
     watchdog->stop_ack_observed_at_us = 0u;
     clear_frame(&watchdog->stop_ack_frame);
 }
 
+/* 缓存最近一次发出的 STOP_ACK 观测，供精确链路重放使用。 */
 static void cache_stop_ack(mcu_watchdog_t *watchdog,
                            const mcu_watchdog_record_t *record)
 {
@@ -52,6 +80,7 @@ static void cache_stop_ack(mcu_watchdog_t *watchdog,
     copy_frame(&watchdog->stop_ack_frame, &record->frame);
 }
 
+/* 看门狗记录清零：kind == NONE 表示无输出。 */
 static void clear_record(mcu_watchdog_record_t *record)
 {
     record->kind = MCU_WATCHDOG_RECORD_NONE;
@@ -63,11 +92,14 @@ static void clear_record(mcu_watchdog_record_t *record)
     clear_frame(&record->frame);
 }
 
+/* 活动分类枚举范围校验。 */
 static bool activity_is_valid(mcu_watchdog_activity_t activity)
 {
     return activity >= MCU_WATCHDOG_ACTIVITY_VALID_NEW && activity < MCU_WATCHDOG_ACTIVITY_COUNT;
 }
 
+/* 挂起 STOP 槽位的关联匹配：只有 command_id 相同且重试计数不低于
+ * 最近发出尝试的 STOP 才命中挂起槽位（详见函数体注释）。 */
 static bool stop_matches_pending(const mcu_watchdog_t *watchdog,
                                  const mcu_wire_frame_t *stop)
 {
@@ -79,6 +111,8 @@ static bool stop_matches_pending(const mcu_watchdog_t *watchdog,
            stop->retry_count >= watchdog->stop_retry_count;
 }
 
+/* 状态机 MCU 侧故障码到 Wire V1 故障码；NONE 与未知值映射为 NONE
+ * （mcu-wire-v1.md「数字注册表」）。 */
 static mcu_wire_fault_t map_fault(mcu_fault_code_t fault_code)
 {
     switch (fault_code) {
@@ -99,6 +133,8 @@ static mcu_wire_fault_t map_fault(mcu_fault_code_t fault_code)
     }
 }
 
+/* 构造故障遥测：sequence_no 单调递增（uint32 允许回绕），
+ * fault_code == watchdog_expired、device_mode == faulted。 */
 static void make_watchdog_telemetry(mcu_watchdog_t *watchdog,
                                     uint64_t now_us,
                                     uint64_t deadline_us,
@@ -115,6 +151,9 @@ static void make_watchdog_telemetry(mcu_watchdog_t *watchdog,
     record->frame.device_mode = MCU_WIRE_MODE_FAULTED;
 }
 
+/* 从 STOP 迁移结果构造 STOP_ACK：失败要求 fault_code == stop_rejected
+ * 且 device_mode == faulted，成功要求 stopped
+ * （mcu-protocol-v1.md「结果语义」）。 */
 static void make_stop_ack(const mcu_wire_frame_t *stop,
                           const mcu_transition_result_t *transition,
                           uint64_t now_us,
@@ -141,6 +180,10 @@ static void make_stop_ack(const mcu_wire_frame_t *stop,
                                     : MCU_WIRE_MODE_STOPPED;
 }
 
+/* 挂起槽位存活期内的 STOP 重试回放（mcu-watchdog-v1.md「STOP 确认
+ * 时序」）：精确重试回放原始观测时间与缓存帧；协议重试使用新观测
+ * 时间并回显收到的 retry_count，保留原始 result / fault / device
+ * mode；两类重放都不重复 STOP 副作用、不延长期限。 */
 static void replay_pending_stop_ack(mcu_watchdog_t *watchdog,
                                     const mcu_wire_frame_t *stop,
                                     uint64_t now_us,
@@ -168,6 +211,10 @@ static void replay_pending_stop_ack(mcu_watchdog_t *watchdog,
     watchdog->stop_retry_count = stop->retry_count;
 }
 
+/* ---- 初始化与合法性 ---- */
+
+/* 初始化时序状态：链路期限与 STOP 槽位全部解除，遥测序号从
+ * first_telemetry_sequence 起算。 */
 void mcu_watchdog_init(mcu_watchdog_t *watchdog, uint32_t first_telemetry_sequence)
 {
     if (watchdog == 0) {
@@ -189,6 +236,8 @@ void mcu_watchdog_init(mcu_watchdog_t *watchdog, uint32_t first_telemetry_sequen
     clear_stop_ack_cache(watchdog);
 }
 
+/* 合法性：cookie 匹配，挂起的 STOP command_id 必须处于
+ * 0x8000..0xffff 分区。 */
 bool mcu_watchdog_is_valid(const mcu_watchdog_t *watchdog)
 {
     if (watchdog == 0 || watchdog->initialized != MCU_WATCHDOG_COOKIE) {
@@ -200,6 +249,11 @@ bool mcu_watchdog_is_valid(const mcu_watchdog_t *watchdog)
     return true;
 }
 
+/* ---- 软件链路看门狗 ---- */
+
+/* 只有 EXECUTING 状态下、VALID_NEW 活动且无活动看门狗原因时才装载
+ * 或刷新绝对期限 now + MCU_SOFTWARE_WATCHDOG_TIMEOUT_US（150 ms）。
+ * 重试、重复、过期、畸形与 STOP 活动永不刷新执行期限。 */
 bool mcu_watchdog_note_activity(mcu_watchdog_t *watchdog,
                                 const mcu_state_machine_t *machine,
                                 mcu_watchdog_activity_t activity,
@@ -222,6 +276,12 @@ bool mcu_watchdog_note_activity(mcu_watchdog_t *watchdog,
     return true;
 }
 
+/* ---- 轮询 ---- */
+
+/* 每次调用至多发布一条记录。先检查 STOP 交接期限（迟到即关闭挂起
+ * 槽位并发布恰一条 STOP_TIMEOUT，这是本地诊断、不是线上故障帧）；
+ * 再检查软件链路期限：到期派发 MCU_EVENT_WATCHDOG_EXPIRED、进入锁存
+ * FAULT 并恰发布一条遥测，后续轮询不再发布记录。 */
 bool mcu_watchdog_poll(mcu_watchdog_t *watchdog,
                        mcu_state_machine_t *machine,
                        uint64_t now_us,
@@ -274,6 +334,14 @@ bool mcu_watchdog_poll(mcu_watchdog_t *watchdog,
     return true;
 }
 
+/* ---- STOP 路径与交接确认 ---- */
+
+/* 前置条件：stop 是完整有效、编码后仲裁 ID 为 0x080 的 STOP 帧。
+ * 挂起槽位存活期内且未过期时，匹配重试走回放；否则派发 STOP 事件、
+ * 禁用链路期限、建立 now + MCU_STOP_ACK_DEADLINE_US（10 ms）的交接
+ * 期限并缓存 STOP_ACK；状态机拒绝（FAULT）时返回 stop_rejected 的
+ * STOP_ACK 且不建立挂起交接。调用方必须通过
+ * mcu_watchdog_confirm_stop_ack() 确认传输交接。 */
 bool mcu_watchdog_receive_stop(mcu_watchdog_t *watchdog,
                                mcu_state_machine_t *machine,
                                const mcu_wire_frame_t *stop,
@@ -325,6 +393,8 @@ bool mcu_watchdog_receive_stop(mcu_watchdog_t *watchdog,
     return true;
 }
 
+/* 传输交接确认：command_id 与 retry_count 必须匹配最近发出的
+ * 尝试，且恰在期限上的确认被接受（闭区间端点）、迟到被拒绝。 */
 bool mcu_watchdog_confirm_stop_ack(mcu_watchdog_t *watchdog,
                                    uint16_t command_id,
                                    uint8_t retry_count,
@@ -341,6 +411,8 @@ bool mcu_watchdog_confirm_stop_ack(mcu_watchdog_t *watchdog,
     return true;
 }
 
+/* 可信安全控制操作：记录外部 Owner 已清除存续的时序原因；
+ * 它本身不授权复位。 */
 void mcu_watchdog_mark_causes_cleared(mcu_watchdog_t *watchdog)
 {
     if (watchdog == 0 || !mcu_watchdog_is_valid(watchdog)) {
@@ -351,6 +423,10 @@ void mcu_watchdog_mark_causes_cleared(mcu_watchdog_t *watchdog)
     watchdog->stop_timeout_cause_active = false;
 }
 
+/* 复位请求：存续的时序原因（活动原因或挂起 STOP 槽位）强制
+ * cause_cleared == false，无论调用方传入什么；复位成功（进入 IDLE）
+ * 后清除全部时序状态与发射标志。协议帧不能直接调用本函数——
+ * 授权位来自可信控制路径。 */
 bool mcu_watchdog_request_reset(mcu_watchdog_t *watchdog,
                                 mcu_state_machine_t *machine,
                                 bool reset_authorized,
@@ -385,6 +461,8 @@ bool mcu_watchdog_request_reset(mcu_watchdog_t *watchdog,
     return true;
 }
 
+/* 硬件看门狗喂狗资格：状态合法、非 FAULT 且无活动时序原因；
+ * 锁存 FAULT 即使原因已清除也不恢复喂狗资格。 */
 bool mcu_watchdog_should_feed_hardware(const mcu_watchdog_t *watchdog,
                                        const mcu_state_machine_t *machine)
 {

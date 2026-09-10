@@ -1,3 +1,18 @@
+/* Host 测试运行器入口。
+ *
+ * 职责：在 x86_64 上依次运行六个共享套件并打印各自的
+ * 断言/失败计数。断言总数是冻结的验收证据（见任务包
+ * mcu-comment-documentation.json 的 evidence 字段），任何
+ * 变更都意味着代码或数据被改动。
+ *
+ * 六个套件对应的契约：
+ *   state_machine_tests.c   —— docs/architecture/mcu-protocol-v1.md
+ *   frame_codec_tests.c     —— docs/architecture/mcu-wire-v1.md
+ *   watchdog_tests.c        —— docs/architecture/mcu-watchdog-v1.md
+ *   command_dedup_tests.c   —— docs/architecture/mcu-command-dedup-v1.md
+ *   can_bridge_tests.c      —— docs/architecture/mcu-can-hal-boundary-v1.md
+ *   can_bridge_host_tests.c —— 同上（经由 hal/host 的假 CAN 传输）
+ */
 #include <stdio.h>
 
 #include "can_bridge_host_tests.h"
@@ -7,6 +22,8 @@
 #include "state_machine_tests.h"
 #include "watchdog_tests.h"
 
+/* 依次运行六个套件；退出码 0 = 全部零失败，1 = 任一失败。
+ * 每个套件先运行再打印，保证失败信息完整可读。 */
 int main(void)
 {
     mcu_test_report_t state_machine_report;

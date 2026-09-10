@@ -1,3 +1,14 @@
+/* can_bridge.h —— 原始 HAL CAN 封装与 Wire V1 编解码器之间的桥接接口。
+ *
+ * 职责：唯一原始包络映射的公共类型与入口——封装校验拒绝诊断、
+ * STOP 优先路由结果与响应交接状态。
+ *
+ * 契约文档：docs/architecture/mcu-can-hal-boundary-v1.md（「唯一编码权威」
+ *   「MCU 入口方向与路由」「响应交接」）；原始封装定义见 core/hal.h。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
 #ifndef MCU_CAN_BRIDGE_H
 #define MCU_CAN_BRIDGE_H
 

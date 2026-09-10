@@ -1,0 +1,42 @@
+{
+  "issue": 2028,
+  "human_owner": "Quchaosheng",
+  "objective": "为 firmware/mcu 的 C/汇编/测试代码补齐规范中文注释：文件横幅、段落分隔、函数级说明与关键逻辑行内注释，引用 docs/architecture/mcu-*.md 中已冻结的契约条款，不改动任何代码与数据。",
+  "allowed_paths": [
+    "firmware/mcu/**",
+    "docs/task_packets/mcu-comment-documentation.json"
+  ],
+  "read_only_paths": [
+    "docs/architecture/mcu-protocol-v1.md",
+    "docs/architecture/mcu-wire-v1.md",
+    "docs/architecture/mcu-command-dedup-v1.md",
+    "docs/architecture/mcu-watchdog-v1.md",
+    "docs/architecture/mcu-can-hal-boundary-v1.md"
+  ],
+  "forbidden": [
+    "robot/control/**",
+    "services/**",
+    "libs/**",
+    "interfaces/**",
+    "kernel/**"
+  ],
+  "acceptance": [
+    "firmware/mcu 下全部 .c/.h/.S/.ld 文件的公共符号均有中文说明注释",
+    "所有注释引用对应的冻结契约条款与行号来源",
+    "注释不得改变任何代码 token、宏、条件编译或链接脚本语义"
+  ],
+  "commands": [
+    "make -C firmware/mcu host test-host",
+    "make -C firmware/mcu clean"
+  ],
+  "evidence": [
+    "host 测试运行器输出（各套件断言数不变、失败数为 0）",
+    "git diff 仅包含注释行",
+    "gcc -Wall -Wextra -Werror 编译通过"
+  ],
+  "stop_conditions": [
+    "任何测试断言数或失败数发生变化",
+    "需要修改代码、宏或链接脚本来使注释成立",
+    "Owner 未批准 firmware/ 的写入"
+  ]
+}

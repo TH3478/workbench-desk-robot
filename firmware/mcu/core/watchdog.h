@@ -1,3 +1,14 @@
+/* watchdog.h —— 平台无关时序安全路径接口（软件链路看门狗与 STOP ACK 期限）。
+ *
+ * 职责：受控时序常量（心跳周期、软件链路期限、STOP_ACK 交接期限、
+ * 硬件看门狗周期）、活动分类、记录类型与对象状态。
+ *
+ * 契约文档：docs/architecture/mcu-watchdog-v1.md（「受控常量」「软件链路
+ *   看门狗」「STOP 确认时序」「硬件看门狗与 HAL 边界」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
 #ifndef MCU_WATCHDOG_H
 #define MCU_WATCHDOG_H
 

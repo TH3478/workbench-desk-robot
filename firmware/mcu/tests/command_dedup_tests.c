@@ -1,9 +1,21 @@
+/* 命令去重测试套件。对应 Issue #61 的普通命令回放边界。
+ *
+ * 被测契约：docs/architecture/mcu-command-dedup-v1.md 冻结的普通
+ * 命令回放边界——启动会话闸门、八条记录的固定回放窗口、
+ * 15 位半区间序号分类、精确/协议重试回放、冲突与过期失败即
+ * 拒绝（duplicate_frame）、回绕纪元清除、STOP 独立路径与可信
+ * 复位保留回放历史。
+ *
+ * 本套件包含穷举全部 0..32767 候选 delta 的语料，Host 侧断言
+ * 总数 65778 由此而来；QEMU 运行同一份源码。
+ */
 #include "command_dedup_tests.h"
 
 #include <stdbool.h>
 
 #include "command_dedup.h"
 
+/* 单条断言：递增计数；失败时记录失败数与首个失败序号。 */
 static void check(mcu_test_report_t *report, bool condition)
 {
     report->assertions++;
@@ -15,6 +27,7 @@ static void check(mcu_test_report_t *report, bool condition)
     }
 }
 
+/* 构造一个结构上合法的普通 COMMAND 帧。 */
 static void make_command(mcu_wire_frame_t *command,
                          uint16_t command_id,
                          mcu_wire_opcode_t opcode,
@@ -30,12 +43,14 @@ static void make_command(mcu_wire_frame_t *command,
     command->device_mode = MCU_WIRE_MODE_IDLE;
 }
 
+/* 基于 make_command 构造 STOP 帧（kind 改为 STOP）。 */
 static void make_stop(mcu_wire_frame_t *stop, uint16_t command_id, uint8_t retry_count)
 {
     make_command(stop, command_id, MCU_WIRE_OPCODE_STOP, retry_count);
     stop->kind = MCU_WIRE_FRAME_STOP;
 }
 
+/* 初始化去重对象、状态机与看门狗，并打开可信会话闸门。 */
 static void init_open(mcu_command_dedup_t *dedup,
                       mcu_state_machine_t *machine,
                       mcu_watchdog_t *watchdog)
@@ -46,6 +61,7 @@ static void init_open(mcu_command_dedup_t *dedup,
     (void)mcu_command_dedup_open_session(dedup, true);
 }
 
+/* 便捷接收：构造命令帧并送入 mcu_command_dedup_receive。 */
 static bool receive(mcu_command_dedup_t *dedup,
                     mcu_state_machine_t *machine,
                     mcu_watchdog_t *watchdog,
@@ -62,6 +78,8 @@ static bool receive(mcu_command_dedup_t *dedup,
       dedup, machine, watchdog, &command, now_us, record);
 }
 
+/* ACK 必须能被编码为 CAN ID 0x101、DLC-8 的合法 Wire V1 帧
+ * （拒绝/接受的线上表示都必须是可编码的）。 */
 static bool ack_is_encodable(const mcu_wire_frame_t *ack)
 {
     uint16_t arbitration_id;
@@ -76,6 +94,8 @@ static bool ack_is_encodable(const mcu_wire_frame_t *ack)
            arbitration_id == MCU_CAN_ID_ACK && encoded_length == MCU_WIRE_DLC;
 }
 
+/* 语义 ACK 相等：比较种类、命令 ID、opcode、结果、故障与设备
+ * 模式（retry_count 是尝试元数据，不属于命令语义元组）。 */
 static bool semantic_ack_equal(const mcu_wire_frame_t *left,
                                const mcu_wire_frame_t *right)
 {
@@ -84,6 +104,7 @@ static bool semantic_ack_equal(const mcu_wire_frame_t *left,
            left->fault_code == right->fault_code && left->device_mode == right->device_mode;
 }
 
+/* 回放窗口内有效条目计数（valid 标志为真的条目数）。 */
 static unsigned valid_entry_count(const mcu_command_dedup_t *dedup)
 {
     unsigned count = 0u;
@@ -97,6 +118,10 @@ static unsigned valid_entry_count(const mcu_command_dedup_t *dedup)
     return count;
 }
 
+/* 会话闸门与重启策略：会话关闭时命令不派发（SESSION_CLOSED）；
+ * 打开闸门后首个序号被接受；关闭会话清空历史与 last_accepted；
+ * 新会话中同一 ID 可再次成为首个序号（重启/新会话不是重置授权，
+ * 但清空后的首个序号可被接受）。 */
 static void test_session_gate_and_restart_policy(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -170,8 +195,15 @@ static void test_session_gate_and_restart_policy(mcu_test_report_t *report)
     check(report, record.outcome == MCU_COMMAND_OUTCOME_ACCEPTED_NEW);
 }
 
+/* 首条命令的 opcode 映射（mcu-command-dedup-v1.md 表格）：
+ * move/grip_open/grip_close → moving，hold → holding，
+ * heartbeat → 当前无故障模式（idle）；除 heartbeat 外都刷新
+ * 链路看门狗；ACK 可编码。 */
 static void test_first_command_opcode_mapping(mcu_test_report_t *report)
 {
+    /* 逐项对应的 opcode → 成功模式映射（与下表的 modes 逐位对齐）：
+     * move/grip_open/grip_close → moving，hold → holding，
+     * heartbeat → idle。 */
     static const mcu_wire_opcode_t opcodes[] = {
         MCU_WIRE_OPCODE_MOVE,
         MCU_WIRE_OPCODE_GRIP_OPEN,
@@ -179,6 +211,7 @@ static void test_first_command_opcode_mapping(mcu_test_report_t *report)
         MCU_WIRE_OPCODE_HOLD,
         MCU_WIRE_OPCODE_HEARTBEAT,
     };
+    /* 与 opcodes 逐项对齐的期望 ACK 设备模式。 */
     static const mcu_wire_device_mode_t modes[] = {
         MCU_WIRE_MODE_MOVING,
         MCU_WIRE_MODE_MOVING,
@@ -218,6 +251,10 @@ static void test_first_command_opcode_mapping(mcu_test_report_t *report)
     }
 }
 
+/* 重复与重试只回放一次：相同计数精确回放（不派发、不刷新
+ * 期限）；更大计数协议重试回显新计数；此后回退到旧计数是
+ * 递减 → 拒绝并进入锁存 FAULT（duplicate_frame）；FAULT 后
+ * 原语义结果仍可回放且不可变。 */
 static void test_duplicate_and_retry_replay_once(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -308,6 +345,8 @@ static void test_duplicate_and_retry_replay_once(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_FAULT);
 }
 
+/* 重试计数不回绕：254 → 255（协议重试）→ 0（回绕视为递减，
+ * 过期）被拒绝并返回 duplicate_frame。 */
 static void test_retry_count_does_not_wrap(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -349,6 +388,8 @@ static void test_retry_count_does_not_wrap(mcu_test_report_t *report)
     check(report, record.ack.fault_code == MCU_WIRE_FAULT_DUPLICATE_FRAME);
 }
 
+/* 冲突重复失败即拒绝：同 ID 换 opcode → REJECTED_CONFLICT、
+ * 不派发、duplicate_frame、机器锁存 FAULT；原语义仍可回放。 */
 static void test_conflicting_duplicate_fails_closed(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -398,6 +439,9 @@ static void test_conflicting_duplicate_fails_closed(mcu_test_report_t *report)
     check(report, !replay.ordinary_event_dispatched);
 }
 
+/* 被拒新结果同样缓存回放：SAFE_STOP 状态下序号为新的 move 被拒
+ * （REJECTED_NEW，malformed_frame 响应）后，重试回放该拒绝结果
+ * 而不再次派发——防止同一 ID 在状态变化后变成可执行。 */
 static void test_rejected_new_result_is_replayed(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -445,6 +489,9 @@ static void test_rejected_new_result_is_replayed(mcu_test_report_t *report)
     check(report, semantic_ack_equal(&first.ack, &replay.ack));
 }
 
+/* 定长窗口与淘汰：填满八条记录后，窗口内旧 ID 重试可回放；
+ * 第九条新命令覆盖最旧槽位；被淘汰 ID 的流量以
+ * REJECTED_STALE + duplicate_frame 失败即拒绝。 */
 static void test_fixed_window_and_eviction(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -505,6 +552,9 @@ static void test_fixed_window_and_eviction(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_FAULT);
 }
 
+/* 穷举全部 15 位 delta：以 last=12345 为基准遍历候选 0..32767，
+ * 断言 delta=0 → 回放、1..16383 → 接受、16384..32767 → 过期。
+ * 这是契约中 delta=(candidate-last) mod 32768 分类的穷举证据。 */
 static void test_all_serial_deltas(mcu_test_report_t *report)
 {
     const uint16_t last = 12345u;
@@ -545,6 +595,9 @@ static void test_all_serial_deltas(mcu_test_report_t *report)
     }
 }
 
+/* 回绕边界与旧纪元拒绝：32766 → 32767 → 0 → 1 正常推进且
+ * 32767→0 的前向回绕只保留一条新记录；回绕前延迟到达的 32767
+ * 是过期（REJECTED_STALE），不能回放旧 ACK。 */
 static void test_wrap_boundaries_and_old_epoch_rejection(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -626,8 +679,11 @@ static void test_wrap_boundaries_and_old_epoch_rejection(mcu_test_report_t *repo
     check(report, record.ack.fault_code == MCU_WIRE_FAULT_DUPLICATE_FRAME);
 }
 
+/* 前向回绕胜过同数字缓存：满窗口后重收 0（半区间新的前向
+ * 转换）清除全部回绕前记录、派发事件，last_accepted 更新为 0。 */
 static void test_forward_wrap_beats_same_numeric_cached_id(mcu_test_report_t *report)
 {
+    /* 覆盖 15 位序号空间各段的代表性序号，最终跨过 32767 → 0 回绕。 */
     static const uint16_t serials[] = {
         0u, 5000u, 10000u, 15000u, 20000u, 25000u, 30000u, 32767u,
     };
@@ -667,6 +723,10 @@ static void test_forward_wrap_beats_same_numeric_cached_id(mcu_test_report_t *re
     check(report, dedup.last_accepted_id == 0u);
 }
 
+/* STOP 绕过已满的普通窗口：满窗口时 STOP 仍走
+ * mcu_watchdog_receive_stop 并被处理（重复 STOP 回放原观测
+ * 时间与期限）；启动/会话闸门只管普通命令——会话关闭时 STOP
+ * 依然有效。 */
 static void test_stop_bypasses_full_ordinary_window(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -731,6 +791,9 @@ static void test_stop_bypasses_full_ordinary_window(mcu_test_report_t *report)
     check(report, duplicate_stop.frame.result_code == MCU_WIRE_RESULT_ACCEPTED);
 }
 
+/* 可信复位保留回放历史：move → STOP → 确认 → 可信复位进入
+ * idle 后，同 ID 重试仍回放原 ACK 而不重新派发运动，链路
+ * 期限保持未武装（复位不是重置授权）。 */
 static void test_trusted_reset_preserves_replay_history(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -780,6 +843,9 @@ static void test_trusted_reset_preserves_replay_history(mcu_test_report_t *repor
     check(report, !watchdog.link_watchdog_armed);
 }
 
+/* 无效输入与损坏对象：空指针任一参数即拒绝且输出记录不变；
+ * STOP 帧不进普通去重入口；initialized 被破坏或空对象一律
+ * 失败即拒绝。 */
 static void test_invalid_input_and_corruption(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -829,6 +895,9 @@ static void test_invalid_input_and_corruption(mcu_test_report_t *report)
     check(report, !mcu_command_dedup_close_session(0));
 }
 
+/* 套件入口：清零报告后按顺序运行全部十三个测试组。Host 侧
+ * 断言总数为 65778（含穷举 delta 语料），QEMU 侧运行同一份
+ * 源码（共享套件）。 */
 void mcu_command_dedup_run_tests(mcu_test_report_t *report)
 {
     report->assertions = 0u;

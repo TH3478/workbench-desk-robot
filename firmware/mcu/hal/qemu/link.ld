@@ -6,6 +6,8 @@
  * is why link.ld is per-HAL and not shared.
  */
 
+/* 内存模型：QEMU riscv32 virt 只有一块 RAM，代码、数据、栈全部
+ * 落在 0x80000000 起的 8 MiB 内。 */
 MEMORY
 {
   RAM (rwx) : ORIGIN = 0x80000000, LENGTH = 8M
@@ -16,8 +18,16 @@ MEMORY
  */
 __stack_size = 4K;
 
+/* 程序入口：加载器（QEMU 直接跳 ORIGIN）与调试器都从这里解析
+ * 入口符号，指向 crt0.S 的 _start。 */
 ENTRY(_start)
 
+/* 段布局（自低地址向高地址）：
+ *   .text  —— 代码与只读数据（crt0 的 .text.entry 被 KEEP 在最前）
+ *   .data  —— 已初始化数据 + gp 小数据区
+ *   .bss   —— 零初始化数据（NOLOAD，由 crt0 清零）
+ *   .stack —— 4 KiB 栈，向下生长，__stack_top 供 crt0 装载 sp
+ */
 SECTIONS
 {
   .text : ALIGN(4)
@@ -58,6 +68,8 @@ SECTIONS
   } > RAM
 
   /* Stack at the top, growing down. __stack_top is what crt0 loads into sp. */
+  /* 栈区：16 字节对齐、向下生长；crt0 把 __stack_top 装入 sp，
+   * main_qemu.c 用它校验 sp 未越界。 */
   .stack (NOLOAD) : ALIGN(16)
   {
     __stack_bottom = .;

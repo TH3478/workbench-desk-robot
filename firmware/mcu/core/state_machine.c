@@ -1,15 +1,36 @@
+/* state_machine.c —— 平台无关的 C 安全状态机实现。
+ *
+ * 职责：维护 IDLE / EXECUTING / SAFE_STOP / FAULT 四个安全状态及其协议
+ * 设备模式，分发 mcu_event_t 事件并产出 mcu_transition_result_t；任何
+ * 非法输入、非法状态或非法转移都失败即拒绝并锁存 malformed_frame。
+ *
+ * 契约文档：docs/architecture/mcu-protocol-v1.md（「结果语义」「遥测语义」
+ *   「重置授权」「失败即拒绝处理」）；看门狗期限经由
+ *   MCU_EVENT_WATCHDOG_EXPIRED 注入（docs/architecture/mcu-watchdog-v1.md
+ *   「软件链路看门狗」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
+
 #include "state_machine.h"
 
+/* 故障码枚举范围校验（NONE..COUNT 前）。 */
 static bool fault_code_is_valid(mcu_fault_code_t fault_code)
 {
     return fault_code >= MCU_FAULT_NONE && fault_code < MCU_FAULT_COUNT;
 }
 
+/* 活动（锁存的）故障码必须是非 NONE 的合法值。 */
 static bool active_fault_is_valid(mcu_fault_code_t fault_code)
 {
     return fault_code > MCU_FAULT_NONE && fault_code < MCU_FAULT_COUNT;
 }
 
+/* 状态不变量：每个状态的设备模式与故障码组合固定——
+ * IDLE/idle/none；EXECUTING/moving 或 holding/none；
+ * SAFE_STOP/stopped/none；FAULT/faulted/活动故障码。
+ * 任何其他组合都视为损坏状态，失败即拒绝。 */
 bool mcu_sm_is_valid(const mcu_state_machine_t *machine)
 {
     if (machine == 0 || !fault_code_is_valid(machine->fault_code)) {
@@ -33,6 +54,7 @@ bool mcu_sm_is_valid(const mcu_state_machine_t *machine)
     }
 }
 
+/* 复位为初始安全状态 IDLE/idle/none；空指针为无效调用方输入，直接返回。 */
 void mcu_sm_init(mcu_state_machine_t *machine)
 {
     if (machine == 0) {
@@ -44,6 +66,10 @@ void mcu_sm_init(mcu_state_machine_t *machine)
     machine->fault_code = MCU_FAULT_NONE;
 }
 
+/* ---- 状态进入辅助函数 ---- */
+
+/* 进入 IDLE。三个字段（state、device_mode、fault_code）总是一起写，
+ * 保证任何观察点都不会看到撕裂的中间组合。 */
 static void enter_idle(mcu_state_machine_t *machine)
 {
     machine->state = MCU_STATE_IDLE;
@@ -51,6 +77,7 @@ static void enter_idle(mcu_state_machine_t *machine)
     machine->fault_code = MCU_FAULT_NONE;
 }
 
+/* 进入 EXECUTING；mode 由调用方给定（moving 或 holding）。 */
 static void enter_executing(mcu_state_machine_t *machine, mcu_device_mode_t mode)
 {
     machine->state = MCU_STATE_EXECUTING;
@@ -58,6 +85,7 @@ static void enter_executing(mcu_state_machine_t *machine, mcu_device_mode_t mode
     machine->fault_code = MCU_FAULT_NONE;
 }
 
+/* 进入 SAFE_STOP/stopped/none。 */
 static void enter_safe_stop(mcu_state_machine_t *machine)
 {
     machine->state = MCU_STATE_SAFE_STOP;
@@ -65,6 +93,8 @@ static void enter_safe_stop(mcu_state_machine_t *machine)
     machine->fault_code = MCU_FAULT_NONE;
 }
 
+/* 进入 FAULT：state 与 device_mode 无条件置位，fault_code 保留
+ * 第一个活动原因（详见函数体注释）。 */
 static void enter_fault(mcu_state_machine_t *machine, mcu_fault_code_t fault_code)
 {
     /* 保留第一个活动原因。后续流量不得覆盖
@@ -76,6 +106,10 @@ static void enter_fault(mcu_state_machine_t *machine, mcu_fault_code_t fault_cod
     machine->device_mode = MCU_DEVICE_MODE_FAULTED;
 }
 
+/* ---- 迁移结果构造与失败即拒绝路径 ---- */
+
+/* 从当前机器状态填充迁移结果。execution_active 仅当状态为
+ * EXECUTING；force_safe_outputs 为「非 EXECUTING 即强制安全输出」。 */
 static void make_result(mcu_transition_result_t *result,
                         const mcu_state_machine_t *machine,
                         mcu_state_t previous_state,
@@ -94,6 +128,8 @@ static void make_result(mcu_transition_result_t *result,
     result->force_safe_outputs = machine->state != MCU_STATE_EXECUTING;
 }
 
+/* machine == 0 时构造合成的 FAULT 结果：拒绝 + invalid_argument +
+ * malformed_frame，绝不让空机器对象伪装成安全状态。 */
 static void null_machine_result(mcu_transition_result_t *result)
 {
     mcu_state_machine_t safe;
@@ -109,6 +145,8 @@ static void null_machine_result(mcu_transition_result_t *result)
                 MCU_FAULT_MALFORMED_FRAME);
 }
 
+/* 非 IDLE 状态收到 BEGIN_MOVE / BEGIN_HOLD 时的失败即拒绝路径：
+ * 进入 FAULT 并锁存 malformed_frame（INVALID_TRANSITION）。 */
 static void reject_start(mcu_state_machine_t *machine,
                           mcu_state_t previous_state,
                           mcu_transition_result_t *result)
@@ -122,6 +160,10 @@ static void reject_start(mcu_state_machine_t *machine,
                 MCU_FAULT_MALFORMED_FRAME);
 }
 
+/* 可信重置的三重闸门（mcu-protocol-v1.md「重置授权」）：
+ * 必须 reset_authorized、cause_cleared 且不处于 EXECUTING；
+ * 接受的重置只进入 IDLE，绝不进入执行模式。协议 v1.0 帧
+ * 永不携带这两个闸门位——它们来自可信控制路径。 */
 static void handle_reset(mcu_state_machine_t *machine,
                          mcu_state_t previous_state,
                          const mcu_event_t *event,
@@ -160,6 +202,15 @@ static void handle_reset(mcu_state_machine_t *machine,
     make_result(result, machine, previous_state, MCU_RESULT_ACCEPTED, MCU_REASON_NONE, MCU_FAULT_NONE);
 }
 
+/* ---- 事件分发入口 ---- */
+
+/* 分发校验顺序：结果缓冲区缺失（STOP 仍走本地缓冲区派发，其余事件
+ * 按无效输入拒绝）→ machine / event 空指针 → 状态不变量。
+ * 转移规则：BEGIN_MOVE / BEGIN_HOLD 仅从 IDLE 接受；COMPLETE 仅从
+ * EXECUTING 接受；HEARTBEAT 除 FAULT 外接受且不改变模式；STOP 在
+ * FAULT 中拒绝（stop_rejected）否则进入 SAFE_STOP；WATCHDOG_EXPIRED
+ * 进入锁存 FAULT；RAISE_FAULT 不接受 STOP_REJECTED（该故障只由
+ * STOP 路径产生）；未知事件种类进入 FAULT 并锁存 malformed_frame。 */
 void mcu_sm_dispatch(mcu_state_machine_t *machine,
                      const mcu_event_t *event,
                      mcu_transition_result_t *result)

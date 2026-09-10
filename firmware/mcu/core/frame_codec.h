@@ -1,3 +1,14 @@
+/* frame_codec.h —— 固件自有的 Classic CAN Wire V1 编解码器接口。
+ *
+ * 职责：冻结的仲裁标识符、载荷布局、数字注册表、逻辑帧结构与
+ * 编解码状态码的公共类型。逻辑协议语义仍以 mcu-protocol-v1.md 为准。
+ *
+ * 契约文档：docs/architecture/mcu-wire-v1.md（「仲裁标识符」「载荷布局」
+ *   「数字注册表」「规范黄金向量」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
 #ifndef MCU_FRAME_CODEC_H
 #define MCU_FRAME_CODEC_H
 

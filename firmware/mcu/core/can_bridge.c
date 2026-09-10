@@ -1,10 +1,31 @@
+/* can_bridge.c —— 原始 HAL CAN 封装与 Wire V1 逻辑帧之间的唯一映射实现。
+ *
+ * 职责：编码时构造 flags == NONE 的标准 Classic CAN 数据信封；解码时先
+ * 做严格封装校验（flags、11 位仲裁 ID、DLC 恰为 8）再复用
+ * mcu_frame_decode()。MCU 入口只接受 STOP 与普通 COMMAND：STOP 分支在
+ * 普通命令之前路由到看门狗路径，COMMAND 走回放窗口；响应经
+ * hal_can_send() 交接，被接受的 STOP_ACK 交接成功才确认挂起槽位。
+ *
+ * 契约文档：docs/architecture/mcu-can-hal-boundary-v1.md（「唯一编码权威」
+ *   「MCU 入口方向与路由」「响应交接」）；载荷与 ID 布局来自
+ *   docs/architecture/mcu-wire-v1.md（「仲裁标识符」「载荷布局」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
+
 #include "can_bridge.h"
 
+/* 编译期不变量：HAL 载荷容量与 Wire V1 DLC（8）一致；
+ * 五个冻结仲裁 ID 全部落在 11 位标准 ID 范围（<= 0x7ff）内。 */
 _Static_assert(HAL_CAN_CLASSIC_DLC_MAX == MCU_WIRE_DLC,
                "HAL Classic CAN payload must match Wire V1 DLC");
 _Static_assert(MCU_CAN_ID_TELEMETRY <= HAL_CAN_STANDARD_ID_MAX,
                "Wire V1 identifiers must fit the standard CAN envelope");
 
+/* ---- 帧与记录的复制/清零 ---- */
+
+/* 把逻辑帧置为安全中性初值（kind == COMMAND、opcode == reserved）。 */
 static void clear_wire_frame(mcu_wire_frame_t *frame)
 {
     frame->kind = MCU_WIRE_FRAME_COMMAND;
@@ -17,6 +38,7 @@ static void clear_wire_frame(mcu_wire_frame_t *frame)
     frame->device_mode = MCU_WIRE_MODE_IDLE;
 }
 
+/* 逐字段复制逻辑帧。 */
 static void copy_wire_frame(mcu_wire_frame_t *destination,
                             const mcu_wire_frame_t *source)
 {
@@ -30,6 +52,7 @@ static void copy_wire_frame(mcu_wire_frame_t *destination,
     destination->device_mode = source->device_mode;
 }
 
+/* 逐字段复制原始 HAL 封装（含全部 8 个数据字节）。 */
 static void copy_hal_frame(hal_can_frame *destination,
                            const hal_can_frame *source)
 {
@@ -43,6 +66,7 @@ static void copy_hal_frame(hal_can_frame *destination,
     }
 }
 
+/* 桥接记录清零：无结果、无请求/响应、无交接。 */
 static void clear_record(mcu_can_bridge_record_t *record)
 {
     record->outcome = MCU_CAN_BRIDGE_OUTCOME_NONE;
@@ -56,6 +80,7 @@ static void clear_record(mcu_can_bridge_record_t *record)
     clear_wire_frame(&record->response);
 }
 
+/* 逐字段复制桥接记录（含内嵌的两帧逻辑帧）。 */
 static void copy_record(mcu_can_bridge_record_t *destination,
                         const mcu_can_bridge_record_t *source)
 {
@@ -70,6 +95,8 @@ static void copy_record(mcu_can_bridge_record_t *destination,
     copy_wire_frame(&destination->response, &source->response);
 }
 
+/* 编解码拒绝原因到桥接状态码的映射；缓冲区过小在桥接路径视为
+ * core 拒绝（MCU_CAN_BRIDGE_CORE_REJECTED）。 */
 static mcu_can_bridge_status_t map_codec_status(mcu_codec_status_t status)
 {
     switch (status) {
@@ -93,6 +120,11 @@ static mcu_can_bridge_status_t map_codec_status(mcu_codec_status_t status)
     }
 }
 
+/* ---- 编码与解码 ---- */
+
+/* 编码 Wire V1 帧并构造标准 Classic CAN 信封：flags == NONE、
+ * DLC 由编解码器确定；只有编解码成功且仲裁 ID 落在 11 位范围内
+ * 才写出输出，失败即拒绝且输出保持不变。 */
 mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
                                               hal_can_frame *encoded)
 {
@@ -127,6 +159,10 @@ mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
     return MCU_CAN_BRIDGE_OK;
 }
 
+/* 原始封装校验顺序（mcu-can-hal-boundary-v1.md「唯一编码权威」）：
+ * flags 恰为 NONE → arbitration_id <= 0x7ff → DLC 恰为 8 → 复用
+ * mcu_frame_decode()。任一失败即拒绝，输出保持不变；
+ * 被拒绝的帧绝不产生状态机事件。 */
 mcu_can_bridge_status_t mcu_can_bridge_decode(const hal_can_frame *encoded,
                                               mcu_wire_frame_t *frame)
 {
@@ -158,6 +194,8 @@ mcu_can_bridge_status_t mcu_can_bridge_decode(const hal_can_frame *encoded,
     return MCU_CAN_BRIDGE_OK;
 }
 
+/* 编码并交给目标 HAL。hal_can_send() == true 只表示传输交接完成，
+ * 不证明仲裁、线上送达、远端接收或执行器动作。 */
 mcu_can_bridge_status_t mcu_can_bridge_send(const mcu_wire_frame_t *frame)
 {
     hal_can_frame encoded;
@@ -170,12 +208,21 @@ mcu_can_bridge_status_t mcu_can_bridge_send(const mcu_wire_frame_t *frame)
                                   : MCU_CAN_BRIDGE_HAL_SEND_FAILED;
 }
 
+/* 安全依赖合法性：状态机与看门狗对象都必须是合法状态。 */
 static bool safety_dependencies_are_valid(const mcu_state_machine_t *machine,
                                           const mcu_watchdog_t *watchdog)
 {
     return mcu_sm_is_valid(machine) && mcu_watchdog_is_valid(watchdog);
 }
 
+/* ---- MCU 入口路由 ---- */
+
+/* 处理一个已收到的原始封装（不调用 hal_can_send()）。
+ * 解码成功后的路由顺序：STOP 先行（绕过会话闸门与回放窗口，
+ * 经 mcu_watchdog_receive_stop() 派发）；随后是普通 COMMAND
+ * （经 mcu_command_dedup_receive()，dedup 为 null 或损坏时
+ * 失败即拒绝）；ACK / STOP_ACK / 遥测在 MCU 入口是方向错误
+ * 流量，返回 UNEXPECTED_DIRECTION，绝不触及安全状态。 */
 bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
                                   mcu_state_machine_t *machine,
                                   mcu_watchdog_t *watchdog,
@@ -260,6 +307,12 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
     return true;
 }
 
+/* ---- 单帧轮询 ---- */
+
+/* 每次调用至多从非阻塞 hal_can_recv() 取出一帧并处理；有响应时经
+ * hal_can_send() 交接，被接受的 STOP_ACK 交接成功后立即确认挂起
+ * 槽位（确认失败记为 CORE_REJECTED）。调用方必须串行化本入口并
+ * 配置控制器过滤器/FIFO 优先级；core 不隐藏无界接收队列。 */
 bool mcu_can_bridge_poll(mcu_command_dedup_t *dedup,
                          mcu_state_machine_t *machine,
                          mcu_watchdog_t *watchdog,

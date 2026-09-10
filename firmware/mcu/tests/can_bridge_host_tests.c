@@ -1,3 +1,15 @@
+/* CAN 桥宿主测试套件（假 HAL 传输路径）。对应 Issue #180 的
+ * 原始 HAL/Wire V1 桥的宿主传输交接（FW10）。
+ *
+ * 被测契约：docs/architecture/mcu-can-hal-boundary-v1.md 的传输
+ * 交接部分，经由 hal/host/hal_host.c 的固定测试队列验证——五种
+ * Wire 帧的发送交接、轮询无帧与畸形输入、假仲裁让 STOP 优先、
+ * 损坏去重对象不压制 STOP、以及发送队列已满时 STOP 交接失败
+ * 仍保持挂起（ACK 仅在 hal_can_send 接受交接后才确认）。
+ *
+ * 本套件只在 Host 运行（can_bridge_tests.c 的平台无关部分在
+ * QEMU 同样运行）；假仲裁是确定性逻辑证据，不是物理总线时序。
+ */
 #include "can_bridge_host_tests.h"
 
 #include <stdbool.h>
@@ -5,6 +17,7 @@
 #include "can_bridge.h"
 #include "hal_host_test.h"
 
+/* 单条断言：递增计数；失败时记录失败数与首个失败序号。 */
 static void check(mcu_test_report_t *report, bool condition)
 {
     report->assertions++;
@@ -16,6 +29,7 @@ static void check(mcu_test_report_t *report, bool condition)
     }
 }
 
+/* 把逻辑帧重置为合法「空白」COMMAND 帧。 */
 static void clear_wire_frame(mcu_wire_frame_t *frame)
 {
     frame->kind = MCU_WIRE_FRAME_COMMAND;
@@ -28,6 +42,7 @@ static void clear_wire_frame(mcu_wire_frame_t *frame)
     frame->device_mode = MCU_WIRE_MODE_IDLE;
 }
 
+/* 按种类构造五种合法逻辑帧（各字段取固定值）。 */
 static void make_frame(mcu_wire_frame_kind_t kind, mcu_wire_frame_t *frame)
 {
     clear_wire_frame(frame);
@@ -60,6 +75,7 @@ static void make_frame(mcu_wire_frame_kind_t kind, mcu_wire_frame_t *frame)
     }
 }
 
+/* 逻辑帧逐字段相等比较。 */
 static bool wire_frames_equal(const mcu_wire_frame_t *left,
                               const mcu_wire_frame_t *right)
 {
@@ -69,6 +85,7 @@ static bool wire_frames_equal(const mcu_wire_frame_t *left,
            left->fault_code == right->fault_code && left->device_mode == right->device_mode;
 }
 
+/* 初始化去重/状态机/看门狗（会话保持关闭，由各测试自行打开）。 */
 static void initialize_core(mcu_command_dedup_t *dedup,
                             mcu_state_machine_t *machine,
                             mcu_watchdog_t *watchdog)
@@ -78,6 +95,8 @@ static void initialize_core(mcu_command_dedup_t *dedup,
     mcu_watchdog_init(watchdog, 1u);
 }
 
+/* 假 HAL 发送全部五种 Wire 帧：send 交接入队 → 取出 → 解码
+ * 逐字段还原（发送交接的确定性闭环）。 */
 static void test_fake_hal_sends_all_wire_kinds(mcu_test_report_t *report)
 {
     unsigned kind;
@@ -99,6 +118,8 @@ static void test_fake_hal_sends_all_wire_kinds(mcu_test_report_t *report)
     }
 }
 
+/* 轮询无帧与畸形输入：队列空 → NO_FRAME；带 RTR 标志的帧
+ * 被拒且无响应、无状态机副作用、core 保持未触碰。 */
 static void test_poll_no_frame_and_malformed_input(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -130,6 +151,9 @@ static void test_poll_no_frame_and_malformed_input(mcu_test_report_t *report)
     check(report, !dedup.has_last_accepted);
 }
 
+/* 假仲裁先路由 STOP：普通帧先注入、STOP 后注入，轮询仍先
+ * 取仲裁 ID 较小的 STOP；STOP_ACK 完成交接；随后队列里的
+ * 普通命令因会话关闭被拒且不能撤销 STOP。 */
 static void test_fake_arbitration_routes_stop_first(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -180,6 +204,8 @@ static void test_fake_arbitration_routes_stop_first(mcu_test_report_t *report)
     check(report, hal_host_can_tx_count() == 0u);
 }
 
+/* 轮询 STOP 忽略损坏的去重对象：initialized 清零不影响
+ * STOP 路径——仍进入 SAFE_STOP 并完成响应交接。 */
 static void test_poll_stop_ignores_corrupt_dedup(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -202,6 +228,9 @@ static void test_poll_stop_ignores_corrupt_dedup(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_SAFE_STOP);
 }
 
+/* STOP 交接失败保持挂起：先塞满假发送队列，STOP_ACK 交接被
+ * hal_can_send 拒绝（HAL_SEND_FAILED），槽位保持挂起、
+ * stop_command_id 不变——ACK 只在接受交接后才确认。 */
 static void test_failed_stop_handoff_remains_pending(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -235,6 +264,8 @@ static void test_failed_stop_handoff_remains_pending(mcu_test_report_t *report)
     check(report, watchdog.stop_command_id == stop.command_id);
 }
 
+/* 套件入口：清零报告后依次运行五个测试组。仅 Host 构建运行，
+ * 断言总数为 106。 */
 void mcu_can_bridge_host_run_tests(mcu_test_report_t *report)
 {
     if (report == 0) {

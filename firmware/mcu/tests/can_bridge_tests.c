@@ -1,15 +1,30 @@
+/* CAN 桥（原始 HAL/Wire V1 包络映射）测试套件。对应 Issue #180
+ * 的原始 HAL/Wire V1 桥（FW10 传输）。
+ *
+ * 被测契约：docs/architecture/mcu-can-hal-boundary-v1.md 冻结的
+ * 原始包络规则——HAL 暴露 11 位 arbitration_id、DLC、显式
+ * extended/RTR/error/FD 标志与八个数据字节；只有无标志、DLC-8
+ * 且带已知 Wire V1 ID 的标准帧才能解码；格式错误或方向错误的
+ * 流量不产生状态机事件；有效 STOP 绕过普通启动会话闸门与去重
+ * 窗口（firmware/mcu/README.md 的「CAN HAL/Wire 边界」）。
+ *
+ * 本套件是平台无关的部分，Host 与 QEMU 共享；经由假 HAL 传输
+ * 的宿主专属部分在 can_bridge_host_tests.c。
+ */
 #include "can_bridge_tests.h"
 
 #include <stdbool.h>
 
 #include "can_bridge.h"
 
+/* 桥接向量：五种逻辑帧 ↔ 对应 CAN ID 的规范映射。 */
 typedef struct {
     mcu_wire_frame_t frame;
     uint16_t arbitration_id;
 } bridge_vector_t;
 
 static const bridge_vector_t bridge_vectors[] = {
+    /* ① command（move，重试 2）→ 0x100。 */
     {
         .frame = {
             .kind = MCU_WIRE_FRAME_COMMAND,
@@ -19,6 +34,7 @@ static const bridge_vector_t bridge_vectors[] = {
         },
         .arbitration_id = MCU_CAN_ID_COMMAND,
     },
+    /* ② ack（接受的 move 确认）→ 0x101。 */
     {
         .frame = {
             .kind = MCU_WIRE_FRAME_ACK,
@@ -31,6 +47,7 @@ static const bridge_vector_t bridge_vectors[] = {
         },
         .arbitration_id = MCU_CAN_ID_ACK,
     },
+    /* ③ telemetry（序号 9，健康）→ 0x180。 */
     {
         .frame = {
             .kind = MCU_WIRE_FRAME_TELEMETRY,
@@ -40,6 +57,7 @@ static const bridge_vector_t bridge_vectors[] = {
         },
         .arbitration_id = MCU_CAN_ID_TELEMETRY,
     },
+    /* ④ stop（STOP 分区下界）→ 0x080。 */
     {
         .frame = {
             .kind = MCU_WIRE_FRAME_STOP,
@@ -49,6 +67,7 @@ static const bridge_vector_t bridge_vectors[] = {
         },
         .arbitration_id = MCU_CAN_ID_STOP,
     },
+    /* ⑤ stop_ack（接受的停止确认）→ 0x081。 */
     {
         .frame = {
             .kind = MCU_WIRE_FRAME_STOP_ACK,
@@ -63,6 +82,7 @@ static const bridge_vector_t bridge_vectors[] = {
     },
 };
 
+/* 单条断言：递增计数；失败时记录失败数与首个失败序号。 */
 static void check(mcu_test_report_t *report, bool condition)
 {
     report->assertions++;
@@ -74,6 +94,7 @@ static void check(mcu_test_report_t *report, bool condition)
     }
 }
 
+/* 逐字段拷贝逻辑帧。 */
 static void copy_wire_frame(mcu_wire_frame_t *destination,
                             const mcu_wire_frame_t *source)
 {
@@ -87,6 +108,7 @@ static void copy_wire_frame(mcu_wire_frame_t *destination,
     destination->device_mode = source->device_mode;
 }
 
+/* 逻辑帧逐字段相等比较。 */
 static bool wire_frames_equal(const mcu_wire_frame_t *left,
                               const mcu_wire_frame_t *right)
 {
@@ -96,6 +118,7 @@ static bool wire_frames_equal(const mcu_wire_frame_t *left,
            left->fault_code == right->fault_code && left->device_mode == right->device_mode;
 }
 
+/* 逐字段拷贝 HAL 帧（含 8 字节数据）。 */
 static void copy_hal_frame(hal_can_frame *destination,
                            const hal_can_frame *source)
 {
@@ -109,6 +132,7 @@ static void copy_hal_frame(hal_can_frame *destination,
     }
 }
 
+/* HAL 帧逐字段相等比较。 */
 static bool hal_frames_equal(const hal_can_frame *left,
                              const hal_can_frame *right)
 {
@@ -126,6 +150,8 @@ static bool hal_frames_equal(const hal_can_frame *left,
     return true;
 }
 
+/* 逻辑帧哨兵（0xa5/0x5a 模式）：解码失败时输出必须保持哨兵
+ * 不变，证明拒绝时不写输出。 */
 static void set_wire_sentinel(mcu_wire_frame_t *frame)
 {
     frame->kind = MCU_WIRE_FRAME_KIND_COUNT;
@@ -138,6 +164,7 @@ static void set_wire_sentinel(mcu_wire_frame_t *frame)
     frame->device_mode = MCU_WIRE_MODE_COUNT;
 }
 
+/* HAL 帧哨兵：编码失败时输出必须保持哨兵不变。 */
 static void set_hal_sentinel(hal_can_frame *frame)
 {
     unsigned i;
@@ -150,6 +177,7 @@ static void set_hal_sentinel(hal_can_frame *frame)
     }
 }
 
+/* 初始化去重/状态机/看门狗，可选打开可信会话闸门。 */
 static void initialize_core(mcu_command_dedup_t *dedup,
                             mcu_state_machine_t *machine,
                             mcu_watchdog_t *watchdog,
@@ -164,6 +192,8 @@ static void initialize_core(mcu_command_dedup_t *dedup,
     }
 }
 
+/* 解码失败断言辅助：以哨兵帧为输入，断言返回 expected 且
+ * 输出帧未被写入。 */
 static void expect_decode_failure(mcu_test_report_t *report,
                                   const hal_can_frame *encoded,
                                   mcu_can_bridge_status_t expected)
@@ -177,6 +207,9 @@ static void expect_decode_failure(mcu_test_report_t *report,
     check(report, wire_frames_equal(&decoded, &before));
 }
 
+/* 五种 Wire 帧往返：断言 CAN ID 优先级链、DLC/标志/版本字节，
+ * 再对每条向量做 编码 → 解码 → 逻辑帧比对；编码器对非法
+ * command_id 失败且不写 HAL 输出。 */
 static void test_all_wire_kinds_round_trip(mcu_test_report_t *report)
 {
     unsigned index;
@@ -222,6 +255,9 @@ static void test_all_wire_kinds_round_trip(mcu_test_report_t *report)
     check(report, mcu_can_bridge_decode(0, 0) == MCU_CAN_BRIDGE_INVALID_ARGUMENT);
 }
 
+/* 原始信封与 Wire 拒绝：flags 非零（穷举 1..255）、ID 越界、
+ * DLC ≠ 8、未知 CAN ID、版本字节、保留字节、ID 分区与 opcode
+ * 分区错误，各自映射到精确状态码。 */
 static void test_raw_envelope_and_wire_rejections(mcu_test_report_t *report)
 {
     hal_can_frame valid;
@@ -272,6 +308,8 @@ static void test_raw_envelope_and_wire_rejections(mcu_test_report_t *report)
     expect_decode_failure(report, &invalid, MCU_CAN_BRIDGE_INVALID_WIRE_FIELD);
 }
 
+/* 断言 core 三对象未被触碰：去重仍有效且无 last_accepted、
+ * 状态机 idle 无故障、看门狗未武装且无挂起 STOP ACK。 */
 static void check_core_unchanged(mcu_test_report_t *report,
                                  const mcu_command_dedup_t *dedup,
                                  const mcu_state_machine_t *machine,
@@ -286,6 +324,8 @@ static void check_core_unchanged(mcu_test_report_t *report,
     check(report, !watchdog->stop_ack_pending);
 }
 
+/* 被拒入口无安全副作用：带标志位/坏版本/错误方向的流量被拒后，
+ * 去重、状态机与看门狗全部保持原状；损坏的去重对象整体拒绝。 */
 static void test_rejected_ingress_has_no_safety_side_effect(mcu_test_report_t *report)
 {
     static const unsigned wrong_direction_vectors[] = {1u, 2u, 4u};
@@ -358,6 +398,9 @@ static void test_rejected_ingress_has_no_safety_side_effect(mcu_test_report_t *r
     check(report, machine.state == MCU_STATE_IDLE);
 }
 
+/* 会话闸门与合法命令：闸门关闭 → SESSION_CLOSED 且无响应；
+ * 打开后合法命令派发事件、产生 ACK 响应（未交接）；重发
+ * 回放相同结果且不刷新链路期限。 */
 static void test_session_gate_and_valid_command(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -411,6 +454,9 @@ static void test_session_gate_and_valid_command(mcu_test_report_t *report)
     check(report, watchdog.link_deadline_us == 201u + MCU_SOFTWARE_WATCHDOG_TIMEOUT_US);
 }
 
+/* STOP 绕过普通会话：会话关闭时 STOP 仍被处理（STOP_HANDLED、
+ * 进入 stop 路径、产生可编码的 STOP_ACK、状态机 SAFE_STOP、
+ * 挂起交接）；去重对象缺失也不能压制 STOP 路径。 */
 static void test_stop_bypasses_ordinary_session(mcu_test_report_t *report)
 {
     mcu_command_dedup_t dedup;
@@ -456,6 +502,8 @@ static void test_stop_bypasses_ordinary_session(mcu_test_report_t *report)
     check(report, machine.state == MCU_STATE_SAFE_STOP);
 }
 
+/* 套件入口：清零报告后依次运行五个测试组。Host 侧断言总数
+ * 为 1192，QEMU 侧运行同一份源码（共享套件）。 */
 void mcu_can_bridge_run_tests(mcu_test_report_t *report)
 {
     if (report == 0) {

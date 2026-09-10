@@ -1,3 +1,15 @@
+/* state_machine.h —— 平台无关 C 安全状态机接口。
+ *
+ * 职责：IDLE / EXECUTING / SAFE_STOP / FAULT 安全状态、协议设备模式、
+ * MCU 侧故障码、事件与迁移结果类型；重置闸门来自可信控制路径，
+ * 绝不来自协议 v1.0 帧。
+ *
+ * 契约文档：docs/architecture/mcu-protocol-v1.md（「遥测语义」「故障码
+ *   注册表」「重置授权」）。
+ *
+ * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
+ *   （firmware/mcu/README.md「唯一规则」）。
+ */
 #ifndef MCU_STATE_MACHINE_H
 #define MCU_STATE_MACHINE_H
 
