@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "EmotionIntent",
-  "description": "Display-only expression state. Never gates execution and never reaches the control path.",
+  "description": "仅用于展示的表情状态。永不作为执行闸门，也永远不会进入控制路径。",
   "type": "object",
   "required": ["intent_id", "run_id", "state", "triggered_by", "issued_at"],
   "properties": {

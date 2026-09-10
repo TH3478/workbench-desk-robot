@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Pose",
-  "description": "Rigid-body pose in a named frame. Position in metres, orientation as a unit quaternion.",
+  "description": "命名坐标系中的刚体位姿。位置单位为米，姿态为单位四元数。",
   "type": "object",
   "required": ["frame_id", "position", "orientation"],
   "properties": {

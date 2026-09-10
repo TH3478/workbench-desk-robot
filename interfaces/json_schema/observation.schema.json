@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Observation",
-  "description": "A single perception result about one entity. Carries its own evidence refs so a downstream verification conclusion can be traced back to raw sensor data.",
+  "description": "关于单个实体的单条感知结果。自带证据引用，使下游的验证结论可以追溯到原始传感器数据。",
   "type": "object",
   "required": ["observation_id", "run_id", "entity_id", "entity_type", "pose", "confidence", "observed_at", "source", "evidence_refs"],
   "properties": {

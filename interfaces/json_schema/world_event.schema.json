@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "WorldEvent",
-  "description": "Append-only event. Replaying the same event stream in sequence_no order must reproduce an identical WorldState hash.",
+  "description": "只追加事件。按 sequence_no 顺序回放同一事件流，必须复现完全一致的 WorldState 哈希。",
   "type": "object",
   "required": [
     "event_id",

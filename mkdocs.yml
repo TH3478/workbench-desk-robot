@@ -1,40 +1,40 @@
 site_name: Workbench Desk Robot
-site_description: Controlled engineering and operator documentation
+site_description: 受控工程与操作员文档
 docs_dir: docs
 strict: true
 theme:
   name: mkdocs
 nav:
-  - User manual: user-guide/index.md
-  - Installation: user-guide/installation.md
-  - Daily operation: user-guide/operation.md
-  - Maintenance: user-guide/maintenance.md
-  - Troubleshooting: user-guide/troubleshooting.md
-  - 90-minute demo: user-guide/demo-runbook.md
-  - Project status: project-management/status.md
-  - Project plan: project-management/plan.md
-  - Product evidence layer:
-      - Overview: product/README.md
-      - Product brief: product/product-brief.md
-      - 90-day execution: product/90-day-plan.md
-      - Problem card template: product/problem-card-template.md
-      - Design Partner scenario template: product/design-partner-scenario-template.md
-      - Design Partner handoff boundary: product/design-partner-handoff.md
-      - External feedback template: product/feedback-record-template.md
-      - Metrics and decision log: product/metrics-and-decision-log.md
-  - Risk management: project-management/risk-management.md
-  - Dashboard design: design/dashboard-design-system.md
-  - Dashboard usability test: design/dashboard-usability-test.md
-  - Security program: security/README.md
-  - Secure review: security/secure-review-standard.md
-  - Incident response: security/incident-response.md
-  - System architecture: architecture/system.md
-  - Linux driver architecture: architecture/linux-drivers.md
-  - Hardware:
-      - Overview: hardware/README.md
-      - Wiring: hardware/wiring.md
-      - Bring-up and debugging: hardware/bringup.md
-  - API reference: api.md
+  - 用户手册: user-guide/index.md
+  - 安装: user-guide/installation.md
+  - 日常操作: user-guide/operation.md
+  - 维护: user-guide/maintenance.md
+  - 故障排查: user-guide/troubleshooting.md
+  - 90 分钟演示: user-guide/demo-runbook.md
+  - 项目状态: project-management/status.md
+  - 项目计划: project-management/plan.md
+  - 产品证据层:
+      - 概述: product/README.md
+      - 产品简介: product/product-brief.md
+      - 90 天执行: product/90-day-plan.md
+      - 问题卡模板: product/problem-card-template.md
+      - 设计伙伴场景模板: product/design-partner-scenario-template.md
+      - 设计伙伴交接边界: product/design-partner-handoff.md
+      - 外部反馈模板: product/feedback-record-template.md
+      - 指标与决策日志: product/metrics-and-decision-log.md
+  - 风险管理: project-management/risk-management.md
+  - 看板设计: design/dashboard-design-system.md
+  - 看板可用性测试: design/dashboard-usability-test.md
+  - 安全计划: security/README.md
+  - 安全评审: security/secure-review-standard.md
+  - 事件响应: security/incident-response.md
+  - 系统架构: architecture/system.md
+  - Linux 驱动架构: architecture/linux-drivers.md
+  - 硬件:
+      - 概述: hardware/README.md
+      - 接线: hardware/wiring.md
+      - 启动调试与问题排查: hardware/bringup.md
+  - API 参考: api.md
 plugins:
   - search
   - mkdocstrings:

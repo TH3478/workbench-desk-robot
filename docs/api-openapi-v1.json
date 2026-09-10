@@ -1,36 +1,36 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Workbench Desk Robot read-only API",
+    "title": "Workbench Desk Robot 只读 API",
     "version": "1.0.0",
-    "description": "Read-only run, event, readiness, and expression projections. No endpoint grants robot or ROS control authority."
+    "description": "只读的运行、事件、就绪与表情投影。任何端点都不授予机器人或 ROS 控制权限。"
   },
   "servers": [{"url": "/"}],
   "paths": {
     "/healthz": {
       "get": {
         "operationId": "health",
-        "responses": {"200": {"description": "Process is responding.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Health"}}}}}
+        "responses": {"200": {"description": "进程正在响应。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Health"}}}}}
       }
     },
     "/readyz": {
       "get": {
         "operationId": "readiness",
         "responses": {
-          "200": {"description": "Event source is readable.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Readiness"}}}},
-          "503": {"description": "Event source is unavailable or malformed.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+          "200": {"description": "事件源可读。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Readiness"}}}},
+          "503": {"description": "事件源不可用或格式错误。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
         }
       }
     },
     "/api/v1/openapi.json": {
-      "get": {"operationId": "apiContract", "responses": {"200": {"description": "This contract.", "content": {"application/json": {"schema": {"type": "object"}}}}}}
+      "get": {"operationId": "apiContract", "responses": {"200": {"description": "本契约。", "content": {"application/json": {"schema": {"type": "object"}}}}}}
     },
     "/api/v1/runs": {
       "get": {
         "operationId": "listRuns",
         "responses": {
-          "200": {"description": "Ordered run summaries.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunList"}}}},
-          "503": {"description": "Invalid source.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+          "200": {"description": "有序的运行摘要。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunList"}}}},
+          "503": {"description": "无效数据源。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
         }
       }
     },
@@ -39,10 +39,10 @@
         "operationId": "getRun",
         "parameters": [{"$ref": "#/components/parameters/RunId"}],
         "responses": {
-          "200": {"description": "Run summary.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunDetail"}}}},
-          "400": {"description": "Identifier is empty or outside the allowed character set.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
-          "404": {"description": "Run does not exist.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
-          "413": {"description": "Response exceeds 4 MiB.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+          "200": {"description": "运行摘要。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunDetail"}}}},
+          "400": {"description": "标识符为空或超出允许字符集。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "404": {"description": "运行不存在。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "413": {"description": "响应超过 4 MiB。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
         }
       }
     },
@@ -51,16 +51,16 @@
         "operationId": "getRunEvents",
         "parameters": [{"$ref": "#/components/parameters/RunId"}],
         "responses": {
-          "200": {"description": "Run summary and contiguous events.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunEvents"}}}},
-          "400": {"description": "Invalid run identifier.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
-          "404": {"description": "Run does not exist.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
-          "413": {"description": "Response exceeds 4 MiB.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
-          "503": {"description": "Event source is unavailable or malformed.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+          "200": {"description": "运行摘要与连续事件。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RunEvents"}}}},
+          "400": {"description": "无效的运行标识符。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "404": {"description": "运行不存在。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "413": {"description": "响应超过 4 MiB。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "503": {"description": "事件源不可用或格式错误。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
         }
       }
     },
     "/api/v1/expression-states": {
-      "get": {"operationId": "expressionContract", "responses": {"200": {"description": "Expression states and transitions.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ExpressionContract"}}}}}}
+      "get": {"operationId": "expressionContract", "responses": {"200": {"description": "表情状态与转移。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ExpressionContract"}}}}}}
     }
   },
   "components": {
@@ -69,7 +69,7 @@
         "name": "run_id",
         "in": "path",
         "required": true,
-        "description": "1-128 ASCII letters, digits, dot, underscore, colon, or hyphen.",
+        "description": "1-128 位 ASCII 字母、数字、点、下划线、冒号或连字符。",
         "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"}
       }
     },
@@ -147,7 +147,7 @@
   "x-compatibility": {
     "current": "/api/v1",
     "legacy_alias": "/api",
-    "policy": "v1 is additive and read-only; aliases remain until a documented v2 migration."
+    "policy": "v1 是增量且只读的；别名保留到有文档化的 v2 迁移为止。"
   },
   "x-limits": {"max_response_bytes": 4194304, "max_event_log_bytes": 10485760, "max_events_per_run": 10000},
   "x-headers": {"content_type": "application/json; charset=utf-8", "api_version": "X-API-Version"}

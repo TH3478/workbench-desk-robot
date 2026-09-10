@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "McuFrame",
-  "description": "Workbench MCU logical-frame protocol v1.0. This contract freezes frame meaning, not the binary CAN payload encoding.",
+  "description": "Workbench MCU 逻辑帧协议 v1.0。本契约冻结的是帧的含义，而不是 CAN 载荷的二进制编码。",
   "type": "object",
   "additionalProperties": false,
   "required": ["frame_id", "frame_kind"],
@@ -45,7 +45,7 @@
     "clock_id": {"type": "string", "enum": ["monotonic"]},
     "sent_at": {
       "type": "string",
-      "description": "Legacy Schema Compiler compatibility field; every protocol v1.0 frame branch rejects it."
+      "description": "旧版 Schema Compiler 兼容字段；每个协议 v1.0 帧分支都会拒绝它。"
     }
   },
   "allOf": [

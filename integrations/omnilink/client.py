@@ -1,4 +1,4 @@
-"""Small, fail-closed REST client for a separately hosted OmniLink instance."""
+"""面向独立托管 OmniLink 实例的小型、失败即拒绝 REST 客户端。"""
 
 from __future__ import annotations
 
@@ -14,11 +14,11 @@ DEFAULT_TIMEOUT_SECONDS = 5.0
 
 
 class OmniLinkError(RuntimeError):
-    """OmniLink is unavailable or returned an invalid response."""
+    """OmniLink 不可用，或返回了无效响应。"""
 
 
 class OmniLinkResponseTooLarge(OmniLinkError):
-    """The remote response exceeded the integration limit."""
+    """远端响应超过了集成层限制。"""
 
 
 @dataclass(frozen=True)
