@@ -1,16 +1,14 @@
-"""Bounded ROS 2 boundary for the existing hardware ``DeviceRuntime``.
+"""为现有硬件 ``DeviceRuntime`` 提供的受限 ROS 2 边界。
 
-The module deliberately keeps its core free of ROS imports.  A
-``SafeCANBus`` already owns a ``DeviceRuntime``; the bridge reuses that
-runtime instead of wrapping it in another worker or lifecycle state machine.
-For a plain injected adapter, the core creates exactly one runtime and owns
-it for the adapter's lifetime.
+本模块刻意让核心部分不依赖任何 ROS 导入。``SafeCANBus`` 已经拥有一个
+``DeviceRuntime``；桥接直接复用该运行时，而不是再包一层工作线程或
+生命周期状态机。对于普通注入的适配器，核心只创建一个运行时，并在
+适配器的整个生命周期内拥有它。
 
-Only validated, immutable ``CanExternalRecord`` and ``CanDiagnostic`` values
-can cross the read-only projection.  The ROS integration uses ``String`` as a
-temporary JSON carrier until a separately approved public message schema is
-available.  Fast DDS remains a deployment-selected RMW, never a dependency
-of this module's core.
+只有经过验证的、不可变的 ``CanExternalRecord`` 与 ``CanDiagnostic`` 值
+才能穿过只读投影。在独立批准的公开消息 schema 可用之前，ROS 集成使用
+``String`` 作为临时 JSON 载体。Fast DDS 始终是部署时选定的 RMW，
+而绝不是本模块核心的依赖。
 """
 
 from __future__ import annotations
@@ -49,8 +47,7 @@ DEFAULT_TELEMETRY_TOPIC = "/workbench/device/telemetry"
 DEFAULT_ACK_TOPIC = "/workbench/device/ack"
 DEFAULT_HEALTH_TOPIC = "/workbench/device/health"
 
-# These are intentionally explicit.  Adding a field to CanExternalRecord
-# does not automatically make it externally visible.
+# 此处刻意保持显式。给 CanExternalRecord 添加字段并不会自动使其对外可见。
 EXTERNAL_PROJECTION_ALLOWLIST = (
     "status",
     "source",
@@ -97,7 +94,7 @@ HEALTH_PROJECTION_ALLOWLIST = (
 
 
 class RuntimeBridgeState(StrEnum):
-    """Lifecycle owned by the bridge around one adapter runtime instance."""
+    """桥接围绕一个适配器运行时实例所拥有的生命周期。"""
 
     UNCONFIGURED = "unconfigured"
     INACTIVE = "inactive"
@@ -107,14 +104,14 @@ class RuntimeBridgeState(StrEnum):
 
 
 class PublisherPort(Protocol):
-    """Minimal publisher contract used by the ROS-free core."""
+    """不依赖 ROS 的核心所使用的最小发布者契约。"""
 
     def publish(self, payload: str) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)
 class BridgeQoS:
-    """A ROS-independent description of one bounded DDS QoS profile."""
+    """对单个受限 DDS QoS 配置的、与 ROS 无关的描述。"""
 
     reliability: str
     depth: int
@@ -145,11 +142,10 @@ class BridgeQoS:
 
 @dataclass(frozen=True, slots=True)
 class DeviceRuntimeBridgeConfig:
-    """Fixed, bounded bridge and deployment settings.
+    """固定的、受限的桥接与部署设置。
 
-    ``executor_threads`` describes the executor the caller must construct
-    with :func:`create_bounded_executor`; the node never silently creates an
-    auto-sized executor.
+    ``executor_threads`` 描述调用方必须通过 :func:`create_bounded_executor`
+    构造的执行器；节点绝不会悄悄创建自动调整大小的执行器。
     """
 
     node_name: str = DEFAULT_NODE_NAME
@@ -242,7 +238,7 @@ class DeviceRuntimeBridgeConfig:
 
 @dataclass(frozen=True, slots=True)
 class BridgePublishers:
-    """Three independently routed read-only publication planes."""
+    """三个独立路由的只读发布平面。"""
 
     telemetry: PublisherPort
     ack: PublisherPort
@@ -257,7 +253,7 @@ class BridgePublishers:
 
 @dataclass(frozen=True, slots=True)
 class BridgeHealthRecord:
-    """Bounded bridge-local health record for lifecycle/projection failures."""
+    """用于生命周期 / 投影故障的受限桥接本地健康记录。"""
 
     sequence: int
     code: str
@@ -283,7 +279,7 @@ class BridgeHealthRecord:
 
 @dataclass(frozen=True, slots=True)
 class BridgeMetrics:
-    """Immutable snapshot of bounded bridge work and source-plane counters."""
+    """受限桥接工作量与源平面计数器的不可变快照。"""
 
     state: RuntimeBridgeState
     drain_cycles: int
@@ -348,7 +344,7 @@ AdapterFactory = Callable[[], DeviceAdapter]
 
 
 def serialize_external_projection(record: CanExternalRecord) -> str:
-    """Serialize one exposed CAN record using only the fixed allowlist."""
+    """仅使用固定允许列表序列化一条对外暴露的 CAN 记录。"""
 
     if not isinstance(record, CanExternalRecord):
         raise TypeError("external projection requires CanExternalRecord")
@@ -400,7 +396,7 @@ def serialize_external_projection(record: CanExternalRecord) -> str:
 
 
 def serialize_health_projection(record: CanDiagnostic | BridgeHealthRecord) -> str:
-    """Serialize one runtime or bridge health record using a fixed allowlist."""
+    """使用固定允许列表序列化一条运行时或桥接健康记录。"""
 
     if isinstance(record, CanDiagnostic):
         if not isinstance(record.code, CanDiagnosticCode):
@@ -443,7 +439,7 @@ def serialize_health_projection(record: CanDiagnostic | BridgeHealthRecord) -> s
 
 
 class RuntimeBridgeCore:
-    """ROS-free, bounded controller for one adapter/runtime boundary."""
+    """针对单个适配器 / 运行时边界的、不依赖 ROS 的受限控制器。"""
 
     def __init__(
         self,
@@ -506,14 +502,14 @@ class RuntimeBridgeCore:
             self._publishers = publishers
 
     def configure(self) -> bool:
-        """Construct the adapter and its single runtime without opening I/O."""
+        """构造适配器及其单一运行时，但不打开 I/O。"""
 
         with self._lock:
             if self._state is not RuntimeBridgeState.UNCONFIGURED:
                 return False
             try:
                 self._create_runtime_locked()
-            except Exception as exc:  # noqa: BLE001 - boundary fails closed.
+            except Exception as exc:  # noqa: BLE001 - 边界失败即拒绝。
                 self._record_bridge_health_locked("configure_failed", str(exc))
                 self._state = RuntimeBridgeState.FAILED
                 return False
@@ -521,7 +517,7 @@ class RuntimeBridgeCore:
             return True
 
     def activate(self) -> bool:
-        """Start the adapter through its existing single DeviceRuntime worker."""
+        """通过其现有的单一 DeviceRuntime 工作线程启动适配器。"""
 
         with self._lock:
             if self._state is not RuntimeBridgeState.INACTIVE:
@@ -531,7 +527,7 @@ class RuntimeBridgeCore:
                     self._create_runtime_locked()
                 runtime = self._require_runtime_locked()
                 started = runtime.start(background=True)
-            except Exception as exc:  # noqa: BLE001 - boundary fails closed.
+            except Exception as exc:  # noqa: BLE001 - 边界失败即拒绝。
                 self._record_bridge_health_locked("activate_failed", str(exc))
                 self._state = RuntimeBridgeState.FAILED
                 return False
@@ -546,7 +542,7 @@ class RuntimeBridgeCore:
             return True
 
     def deactivate(self) -> bool:
-        """Stop and discard the current runtime so a later activation is fresh."""
+        """停止并丢弃当前运行时，以便后续激活时状态全新。"""
 
         with self._lock:
             if self._state is RuntimeBridgeState.INACTIVE:
@@ -559,7 +555,7 @@ class RuntimeBridgeCore:
                 return True
             try:
                 stopped = runtime.shutdown(timeout_s=self._config.shutdown_timeout_s)
-            except Exception as exc:  # noqa: BLE001 - boundary fails closed.
+            except Exception as exc:  # noqa: BLE001 - 边界失败即拒绝。
                 self._record_bridge_health_locked("deactivate_failed", str(exc))
                 self._state = RuntimeBridgeState.FAILED
                 return False
@@ -575,7 +571,7 @@ class RuntimeBridgeCore:
             return True
 
     def cleanup(self) -> bool:
-        """Release the configured adapter and return to the unconfigured state."""
+        """释放已配置的适配器，并回到未配置状态。"""
 
         with self._lock:
             if self._state is RuntimeBridgeState.UNCONFIGURED:
@@ -585,7 +581,7 @@ class RuntimeBridgeCore:
             if self._runtime is not None:
                 try:
                     stopped = self._runtime.shutdown(timeout_s=self._config.shutdown_timeout_s)
-                except Exception as exc:  # noqa: BLE001 - boundary fails closed.
+                except Exception as exc:  # noqa: BLE001 - 边界失败即拒绝。
                     self._record_bridge_health_locked("cleanup_failed", str(exc))
                     self._state = RuntimeBridgeState.FAILED
                     return False
@@ -602,7 +598,7 @@ class RuntimeBridgeCore:
             return True
 
     def shutdown(self) -> bool:
-        """Perform terminal cleanup; a failed stop remains observable."""
+        """执行最终的清理；即使停止失败也仍然可观测。"""
 
         with self._lock:
             if self._state is RuntimeBridgeState.SHUTDOWN:
@@ -613,7 +609,7 @@ class RuntimeBridgeCore:
             if self._runtime is not None:
                 try:
                     stopped = self._runtime.shutdown(timeout_s=self._config.shutdown_timeout_s)
-                except Exception as exc:  # noqa: BLE001 - boundary fails closed.
+                except Exception as exc:  # noqa: BLE001 - 边界失败即拒绝。
                     self._record_bridge_health_locked("shutdown_failed", str(exc))
                     self._state = RuntimeBridgeState.FAILED
                     return False
@@ -629,17 +625,17 @@ class RuntimeBridgeCore:
             return True
 
     def record_failure(self, code: str, detail: str) -> None:
-        """Record a bounded bridge-local failure for the health topic."""
+        """为健康主题记录一次受限的桥接本地故障。"""
 
         with self._lock:
             self._record_bridge_health_locked(code, detail)
 
     def drain_once(self, *, limit: int | None = None) -> int:
-        """Drain at most ``limit`` records without blocking on hardware I/O.
+        """在不阻塞硬件 I/O 的前提下，最多排出 ``limit`` 条记录。
 
-        Health receives a small quota first, then external records are routed
-        to ACK or telemetry.  A publisher exception consumes that record and
-        increments a metric; it never escapes into the runtime worker.
+        健康记录先获得一小份配额，随后外部记录被路由到 ACK 或遥测。
+        发布者异常会消耗该条记录并递增一个指标；它绝不会逃逸到运行时
+        工作线程中。
         """
 
         if limit is None:
@@ -675,11 +671,10 @@ class RuntimeBridgeCore:
                 self._counters.records_processed += 1
                 self._publish_external_locked(record, publishers)
 
-            # If no external record was available, use the remaining budget
-            # for health so a quiet device still flushes diagnostics promptly.
-            # Records created while handling this tick are intentionally left
-            # for the next tick; this prevents publisher failures from
-            # recursively consuming the whole budget.
+            # 如果没有可用的外部记录，就把剩余预算用于健康记录，
+            # 让安静的设备也能及时刷新诊断信息。
+            # 处理本次 tick 期间新产生的记录会被刻意留给下一个 tick；
+            # 这可以防止发布者故障递归地耗尽全部预算。
             if external_processed == 0:
                 while processed < limit:
                     record = self._take_health_locked(runtime)
@@ -801,7 +796,7 @@ class RuntimeBridgeCore:
     def _publish_locked(self, publisher: PublisherPort, payload: str, *, plane: str) -> None:
         try:
             publisher.publish(payload)
-        except Exception as exc:  # noqa: BLE001 - publisher faults are isolated.
+        except Exception as exc:  # noqa: BLE001 - 发布者故障被隔离处理。
             self._counters.publisher_errors += 1
             self._record_bridge_health_locked("publisher_failed", f"{plane}: {exc}")
             return
@@ -815,7 +810,7 @@ class RuntimeBridgeCore:
     def _record_bridge_health_locked(self, code: str, detail: str) -> None:
         try:
             observed_at = self._wall_clock()
-        except Exception:  # noqa: BLE001 - health recording must not raise.
+        except Exception:  # noqa: BLE001 - 健康记录不得抛出异常。
             observed_at = time.time()
         try:
             record = BridgeHealthRecord(
@@ -876,7 +871,7 @@ def create_socketcan_adapter_factory(
     source: str = "socketcan",
     transport_kwargs: Mapping[str, object] | None = None,
 ) -> AdapterFactory:
-    """Create a fresh ``SafeCANBus(SocketCANTransport(...))`` per activation."""
+    """每次激活时创建一个全新的 ``SafeCANBus(SocketCANTransport(...))``。"""
 
     bridge_config = _resolve_config(config)
     if not isinstance(interface, str) or not interface.strip() or interface != interface.strip():
@@ -908,12 +903,12 @@ def create_socketcan_adapter_factory(
 
 
 def create_bounded_executor(config: DeviceRuntimeBridgeConfig | None = None, *, context: Any = None) -> Any:
-    """Construct the explicitly sized ROS 2 executor selected by the config."""
+    """构造由配置选定的、显式指定大小的 ROS 2 执行器。"""
 
     bridge_config = _resolve_config(config)
     try:
         from rclpy.executors import MultiThreadedExecutor
-    except ImportError as exc:  # pragma: no cover - depends on host ROS install.
+    except ImportError as exc:  # pragma: no cover - 依赖主机上的 ROS 安装。
         raise RuntimeError("ROS 2 rclpy is required to create the executor") from exc
     kwargs: dict[str, object] = {"num_threads": bridge_config.executor_threads}
     if context is not None:
@@ -927,10 +922,10 @@ def create_lifecycle_node(
     config: DeviceRuntimeBridgeConfig | None = None,
     context: Any = None,
 ) -> Any:
-    """Lazily create a ROS 2 ``LifecycleNode`` around ``RuntimeBridgeCore``.
+    """围绕 ``RuntimeBridgeCore`` 延迟创建一个 ROS 2 ``LifecycleNode``。
 
-    Importing this module does not import ``rclpy``.  Callers must initialize
-    the desired ROS context before invoking this factory.
+    导入本模块不会导入 ``rclpy``。调用方必须在调用本工厂之前初始化
+    所需的 ROS 上下文。
     """
 
     bridge_config = _resolve_config(config)
@@ -939,7 +934,7 @@ def create_lifecycle_node(
         from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn
         from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
         from std_msgs.msg import String
-    except ImportError as exc:  # pragma: no cover - depends on host ROS install.
+    except ImportError as exc:  # pragma: no cover - 依赖主机上的 ROS 安装。
         raise RuntimeError("ROS 2 Jazzy rclpy and std_msgs are required for the lifecycle bridge") from exc
 
     def ros_qos(profile: BridgeQoS) -> QoSProfile:
@@ -1028,7 +1023,7 @@ def create_lifecycle_node(
                     autostart=False,
                 )
                 result = super().on_configure(state)
-            except Exception as exc:  # noqa: BLE001 - failed configure is terminal for this transition.
+            except Exception as exc:  # noqa: BLE001 - 配置失败会终止本次转换。
                 self._bridge.record_failure("ros_configure_failed", str(exc))
                 self._bridge.cleanup()
                 self._destroy_entities()
@@ -1089,7 +1084,7 @@ def create_lifecycle_node(
         def _on_timer(self) -> None:
             try:
                 self._bridge.drain_once()
-            except Exception as exc:  # noqa: BLE001 - executor callback must fail closed.
+            except Exception as exc:  # noqa: BLE001 - 执行器回调必须失败即拒绝。
                 self._bridge.record_failure("timer_failed", str(exc))
 
         def _destroy_entities(self) -> bool:
@@ -1117,7 +1112,7 @@ def create_socketcan_lifecycle_node(
     transport_kwargs: Mapping[str, object] | None = None,
     context: Any = None,
 ) -> Any:
-    """Convenience factory for the concrete SocketCAN read-only bridge path."""
+    """用于具体 SocketCAN 只读桥接路径的便捷工厂。"""
 
     bridge_config = _resolve_config(config)
     factory = create_socketcan_adapter_factory(
@@ -1218,7 +1213,7 @@ def _dump_json(payload: Mapping[str, object | None]) -> str:
 def _safe_clock(clock: Callable[[], float]) -> float | None:
     try:
         value = clock()
-    except Exception:  # noqa: BLE001 - metrics are best-effort and never control lifecycle.
+    except Exception:  # noqa: BLE001 - 指标采集是尽力而为的，绝不控制生命周期。
         return None
     if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
         return None

@@ -98,9 +98,9 @@ def _normalize_attribute_schema_version(value: object) -> str:
 
 
 def _looks_like_legacy_attribute_payload(payload: dict[str, Any]) -> bool:
-    # Old reducer events carried only entity/location/confidence. Once a
-    # producer supplies modern identity/timing fields, omission of the
-    # explicit version is treated as malformed rather than silently migrated.
+    # 旧的 reducer 事件只携带 entity/location/confidence。一旦生产者提供了
+    # 现代的身份/时间字段，显式版本的缺省就会被视为格式错误，
+    # 而不是被静默迁移。
     return not any(field in payload for field in ("entity_type", "observed_at", "clock_id", "source"))
 
 

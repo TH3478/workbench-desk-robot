@@ -45,7 +45,7 @@ def _validated_utc_wall_time(value: object) -> str:
 
 
 class VerificationContext(BaseModel):
-    """Validated metadata supplied at the World Model verification boundary."""
+    """在 World Model 验证边界提供的、经过校验的元数据。"""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -204,7 +204,7 @@ def _attribute_quality_summary(
 
 
 def _append_unique(values: list[str], additions: list[str]) -> None:
-    """Append deterministic diagnostics without reporting one defect twice."""
+    """追加确定性诊断信息，且不会重复报告同一缺陷。"""
     seen = set(values)
     for value in additions:
         if value not in seen:

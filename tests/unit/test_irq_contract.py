@@ -59,7 +59,7 @@ def test_stop_cancels_pending_bottom_half_and_waits_for_active_handler() -> None
     def stop() -> None:
         try:
             irq.stop(timeout_s=1.0)
-        except IRQError as exc:  # pragma: no cover - assertion captures this path
+        except IRQError as exc:  # pragma: no cover - 断言已捕获该路径
             stop_result.append(exc)
 
     thread = threading.Thread(target=stop)
@@ -133,7 +133,7 @@ def test_concurrent_close_calls_are_serialized() -> None:
         try:
             barrier.wait(timeout=1.0)
             irq.close()
-        except (IRQError, threading.BrokenBarrierError) as exc:  # pragma: no cover - assertion captures this path
+        except (IRQError, threading.BrokenBarrierError) as exc:  # pragma: no cover - 断言已捕获该路径
             errors.append(exc)
 
     first = threading.Thread(target=close)

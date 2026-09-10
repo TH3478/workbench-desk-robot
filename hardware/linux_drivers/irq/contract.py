@@ -1,4 +1,4 @@
-"""Bounded IRQ/top-half/bottom-half lifecycle model for software tests."""
+"""用于软件测试的受限 IRQ / 顶半部 / 底半部生命周期模型。"""
 
 from __future__ import annotations
 
@@ -9,19 +9,19 @@ from time import monotonic
 
 
 class IRQError(RuntimeError):
-    """Base class for invalid IRQ operations."""
+    """无效 IRQ 操作的基类。"""
 
 
 class IRQHandlerTimeout(TimeoutError, IRQError):
-    """An active handler or bottom-half did not stop before the deadline."""
+    """活跃的处理函数或底半部未在截止时间前停止。"""
 
 
 class IRQNotShared(IRQError):
-    """A shared line was triggered without a registered owner."""
+    """共享中断线在没有已注册所有者的情况下被触发。"""
 
 
 class IRQWorkCancelled(IRQError):
-    """Work was cancelled before execution."""
+    """工作在执行之前被取消。"""
 
 
 class IRQState(StrEnum):
@@ -54,7 +54,7 @@ class IRQWork:
 
 
 class FakeIRQProvider:
-    """Thread-safe IRQ router with explicit top/bottom-half ownership."""
+    """线程安全的 IRQ 路由器，显式区分顶半部 / 底半部所有权。"""
 
     def __init__(self, line: IRQLine, *, work_capacity: int = 16) -> None:
         if type(work_capacity) is not int or not 1 <= work_capacity <= 1024:
@@ -104,7 +104,7 @@ class FakeIRQProvider:
             self._state = IRQState.ENABLED
 
     def trigger(self, owner: str) -> IRQWork:
-        """Confirm an interrupt in the top-half and enqueue one bottom-half work item."""
+        """在顶半部确认一次中断，并将一个底半部工作项入队。"""
         with self._lock:
             self._ensure_not_closed()
             if self._state is not IRQState.ENABLED:
@@ -158,9 +158,8 @@ class FakeIRQProvider:
             return count
 
     def close(self, *, timeout_s: float = 1.0) -> None:
-        # Serialize the check/stop/owner-clear sequence.  ``stop`` waits on a
-        # condition and therefore releases ``_lock``; a separate close lock
-        # prevents another close from interleaving during that wait.
+        # 将「检查 / 停止 / 清空所有者」流程串行化。``stop`` 会等待条件变量，
+        # 因而释放 ``_lock``；独立的关闭锁可防止在该等待期间另一个 close 交错执行。
         with self._close_lock:
             with self._lock:
                 if self._state is IRQState.CLOSED:

@@ -33,7 +33,7 @@ def _non_blank_policy_label(value: object, field_name: str) -> str:
 
 
 def parse_utc_wall_time(value: object) -> datetime:
-    """Parse the only timestamp form that can be compared during replay."""
+    """解析回放期间唯一可比较的时间戳形式。"""
     if type(value) is not str or _UTC_WALL_TIME_PATTERN.fullmatch(value) is None:
         raise ValueError("wall time must be an RFC3339 UTC timestamp")
     try:
@@ -47,7 +47,7 @@ def parse_utc_wall_time(value: object) -> datetime:
 
 @dataclass(frozen=True)
 class FreshnessThresholds:
-    """Finite freshness bounds for one explicit source/entity tuple."""
+    """针对一个显式 source/entity 元组的有限新鲜度界限。"""
 
     stale_after_s: float
     lost_after_s: float
@@ -67,7 +67,7 @@ class FreshnessThresholds:
 
 @dataclass(frozen=True)
 class ObservationFreshnessPolicy:
-    """Explicit policy with no wildcard or permissive fallback rule."""
+    """不含通配符或宽松回退规则的显式策略。"""
 
     rules: Mapping[tuple[str, str], FreshnessThresholds]
 
@@ -94,7 +94,7 @@ class ObservationFreshnessPolicy:
         self,
         overrides: Mapping[tuple[str, str], FreshnessThresholds],
     ) -> ObservationFreshnessPolicy:
-        """Return a deployment policy that can only make bounds shorter."""
+        """返回一个只能缩短界限的部署策略。"""
         if not isinstance(overrides, Mapping):
             raise ValueError("freshness overrides must be a mapping")
         merged = dict(self.rules)
@@ -112,7 +112,7 @@ class ObservationFreshnessPolicy:
 
 @dataclass(frozen=True)
 class ObservationAgingBoundary:
-    """Immutable caller-supplied boundary; it never reads process time."""
+    """调用方提供的不可变边界；它从不读取进程时间。"""
 
     as_of: str
     clock_id: ClockId
@@ -136,7 +136,7 @@ def comparable_wall_observation_is_older(
     incoming_observed_at: object,
     incoming_clock_id: object,
 ) -> bool:
-    """Return true only when both wall timestamps prove the incoming value older."""
+    """仅当两个 wall 时间戳都证明新来的观测更旧时才返回 true。"""
     if current_clock_id not in (ClockId.WALL, ClockId.WALL.value):
         return False
     if incoming_clock_id not in (ClockId.WALL, ClockId.WALL.value):
@@ -223,7 +223,7 @@ def age_world_state(
     freshness_policy: ObservationFreshnessPolicy,
     aging_boundary: ObservationAgingBoundary,
 ) -> WorldState:
-    """Return a detached state aged only against explicit replay inputs."""
+    """返回仅依据显式回放输入进行老化处理的分离状态。"""
     if not isinstance(freshness_policy, ObservationFreshnessPolicy):
         raise TypeError("freshness_policy must be an ObservationFreshnessPolicy")
     if not isinstance(aging_boundary, ObservationAgingBoundary):

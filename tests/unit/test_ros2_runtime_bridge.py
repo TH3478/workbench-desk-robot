@@ -1,4 +1,4 @@
-"""Tests for the ROS-free and optional ROS 2 DeviceRuntime bridge."""
+"""不依赖 ROS 的核心与可选 ROS 2 DeviceRuntime 桥接的测试。"""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Bounded observed-attribute vocabulary shared by producers and consumers."""
+"""生产者与消费者共享的受限「已观测属性」词汇表。"""
 
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ _SLOT_ENTITY_TYPES = frozenset({"slot", "managed_slot", "rack_slot", "dishwasher
 
 
 class AttributeUpdateMode(StrEnum):
-    """How an Observation's attributes update the existing entity map."""
+    """描述 Observation 的 attributes 如何更新已有的实体映射。"""
 
     COMPLETE = "complete"
     PARTIAL = "partial"
@@ -92,7 +92,7 @@ AttributeBelief = Literal["observed", "inferred", "stale", "lost"]
 
 
 class ObservedAttributeMetadata(BaseModel):
-    """Evidence metadata attached to one observed attribute value."""
+    """附加到单个已观测属性值的证据元数据。"""
 
     model_config = ConfigDict(extra="forbid", strict=True)
 
@@ -188,7 +188,7 @@ def validate_attribute_evidence_refs(
     field_name: str = "attribute evidence_refs",
     require_non_empty: bool = True,
 ) -> list[str]:
-    """Validate the bounded, ordered evidence list attached to one attribute."""
+    """验证附加到单个属性的受限、有序证据列表。"""
     if type(value) is not list:
         raise ValueError(f"{field_name} must be a list of strings")
     if require_non_empty and not value:
@@ -230,10 +230,9 @@ def _applicable_keys(entity_type: str | None) -> frozenset[str] | None:
     if entity_type is None:
         return None
     normalized = entity_type.strip().casefold().replace("-", "_")
-    # Legacy reducer events do not carry an entity type.  The reducer records
-    # that uncertainty explicitly as ``legacy``; migration may therefore use
-    # any key from the finite vocabulary, but it must never bypass the
-    # vocabulary itself.
+    # 遗留 reducer 事件不携带实体类型。reducer 将这种不确定性显式记录为
+    # ``legacy``；因此迁移可以使用有限词汇表中的任意键，但绝不能绕过
+    # 词汇表本身。
     if normalized == "legacy":
         return SUPPORTED_ATTRIBUTE_KEYS
     if normalized in _PARCEL_ENTITY_TYPES:
@@ -255,7 +254,7 @@ def validate_observed_attributes(
     entity_type: str | None = None,
     allow_unknown_keys: bool = False,
 ) -> dict[str, str]:
-    """Validate and detach one bounded observed-attribute mapping."""
+    """验证并分离一个受限的已观测属性映射。"""
     if type(value) is not dict:
         raise ValueError("attributes must be a string-to-string mapping")
     if type(allow_unknown_keys) is not bool:
@@ -312,7 +311,7 @@ def validate_attribute_metadata_map(
     require_complete: bool = False,
     expected_clock_id: object | None = None,
 ) -> dict[str, dict[str, object]]:
-    """Validate and detach metadata for a bounded attribute mapping."""
+    """验证并分离受限属性映射的元数据。"""
     if type(value) is not dict:
         raise ValueError("attribute_metadata must be a mapping")
     if type(allow_unknown_keys) is not bool:
@@ -387,7 +386,7 @@ def materialize_attribute_metadata(
     entity_type: str | None = None,
     allow_unknown_keys: bool = False,
 ) -> dict[str, dict[str, object]]:
-    """Fill omitted per-attribute metadata from the enclosing observation."""
+    """用所属观测（observation）补全缺失的逐属性元数据。"""
     validate_observed_attributes(
         attributes,
         entity_type=entity_type,
@@ -439,7 +438,7 @@ def materialize_attribute_metadata(
 
 
 def observed_attributes_json_schema() -> dict[str, object]:
-    """Return the schema fragment for the bounded attribute map."""
+    """返回受限属性映射的 schema 片段。"""
     properties: dict[str, dict[str, object]] = {}
     for key in sorted(SUPPORTED_ATTRIBUTE_KEYS):
         definition: dict[str, object] = {
@@ -468,7 +467,7 @@ OBSERVED_ATTRIBUTES_JSON_SCHEMA = observed_attributes_json_schema()
 
 
 def observed_attribute_metadata_json_schema() -> dict[str, object]:
-    """Return the schema fragment for one attribute's evidence metadata."""
+    """返回单个属性证据元数据的 schema 片段。"""
     text_definition = {
         "type": "string",
         "minLength": 1,
@@ -506,7 +505,7 @@ OBSERVED_ATTRIBUTE_METADATA_JSON_SCHEMA = observed_attribute_metadata_json_schem
 
 
 def observed_attribute_metadata_map_json_schema() -> dict[str, object]:
-    """Return the finite-key schema fragment for an attribute metadata map."""
+    """返回属性元数据映射的有限键 schema 片段。"""
     return {
         "type": "object",
         "description": (
@@ -525,8 +524,8 @@ OBSERVED_ATTRIBUTE_METADATA_MAP_JSON_SCHEMA = observed_attribute_metadata_map_js
 
 
 def _pydantic_validate_attribute_metadata_map(value: object) -> object:
-    # Entity-specific and version-specific checks happen in Observation and
-    # WorldEntity. This field-level pass still enforces metadata shape/bounds.
+    # 实体特定与版本特定的检查在 Observation 与 WorldEntity 中进行。
+    # 该字段级校验仍然强制元数据的形状与边界。
     validate_attribute_metadata_map(value)
     return value
 
@@ -550,8 +549,8 @@ ObservedAttributes = Annotated[
 
 
 def _pydantic_validate_versioned_observed_attributes(value: object) -> dict[str, str]:
-    # The enclosing model applies entity-type and migration semantics. The
-    # field-level validator enforces the bounded vocabulary and value shape.
+    # 外层模型应用实体类型与迁移语义。字段级验证器强制受限词汇表
+    # 与值的形状。
     return validate_observed_attributes(value)
 
 
@@ -563,16 +562,16 @@ VersionedObservedAttributes = Annotated[
 
 
 def attribute_keys_for_entity_type(entity_type: str) -> frozenset[str] | None:
-    """Return the restricted vocabulary for a recognized entity type."""
+    """返回已识别实体类型的受限词汇表。"""
     return _applicable_keys(entity_type)
 
 
 def legacy_attribute_keys_allowed(entity_type: str | None) -> bool:
-    """Return whether a legacy payload may bypass the finite v1 vocabulary.
+    """返回遗留载荷是否可以绕过有限的 v1 词汇表。
 
-    Issue #168 uses the legacy marker only to migrate missing metadata and
-    schema-version fields. It never grants arbitrary keys; the return value is
-    kept as a named policy hook so all consumers apply the same decision.
+    Issue #168 仅使用遗留标记迁移缺失的元数据与 schema 版本字段。
+    它从不授予任意键；返回值保留为命名策略钩子，以便所有消费者
+    应用相同的决策。
     """
     del entity_type
     return False

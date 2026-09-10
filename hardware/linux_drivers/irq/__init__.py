@@ -1,4 +1,4 @@
-"""Software-only IRQ lifecycle and cancellation contract."""
+"""纯软件的 IRQ 生命周期与取消契约。"""
 
 from .contract import (
     FakeIRQProvider,

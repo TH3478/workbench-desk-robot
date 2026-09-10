@@ -146,7 +146,7 @@ def _apply_observed_attributes(
     *,
     observation_is_older: bool = False,
 ) -> bool:
-    """Apply only attribute values accepted by timestamp ordering."""
+    """仅应用按时间戳排序所接受的属性值。"""
     if "attributes" not in payload:
         return False
     attributes = dict(payload["attributes"])
@@ -187,10 +187,9 @@ def _apply_observed_attributes(
                 f"attribute schema version conflict for entity_id {entity_id!r}: {existing_version!r} and {version!r}"
             )
 
-    # A complete observation is a snapshot. If its enclosing observation is
-    # provably older, accepting a new key from it could resurrect an attribute
-    # that a newer complete snapshot intentionally omitted. Partial updates
-    # remain key-wise mergeable below.
+    # 完整观测是一次快照。如果它所属的观测被证明更旧，接受其中的新键
+    # 可能会让某个被更新的完整快照刻意省略的属性「复活」。
+    # 部分更新仍按下方方式逐键合并。
     if mode == AttributeUpdateMode.COMPLETE.value and observation_is_older:
         return False
 
@@ -449,7 +448,7 @@ def _relation_from_location(
 
 
 def canonical_world_state_bytes(snapshot: ContractWorldState) -> bytes:
-    """Return canonical semantic hash material without snapshot metadata."""
+    """返回不含快照元数据的规范语义哈希素材。"""
     if not isinstance(snapshot, ContractWorldState):
         raise TypeError("snapshot must be a contract WorldState")
     entities = sorted(snapshot.entities, key=lambda entity: entity.entity_id)
@@ -486,7 +485,7 @@ def create_world_state_snapshot(
     freshness_policy: ObservationFreshnessPolicy | None = None,
     aging_boundary: ObservationAgingBoundary | None = None,
 ) -> ContractWorldState:
-    """Project a validated ordered stream into the public WorldState contract."""
+    """将经过验证的有序事件流投影到公开的 WorldState 契约。"""
     ordered_events = _validated_event_stream(run_id, events)
     if not ordered_events:
         raise ValueError("cannot create a WorldState snapshot from an empty event stream")
