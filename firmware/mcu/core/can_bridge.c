@@ -10,6 +10,21 @@
  *   「MCU 入口方向与路由」「响应交接」）；载荷与 ID 布局来自
  *   docs/architecture/mcu-wire-v1.md（「仲裁标识符」「载荷布局」）。
  *
+ * 线上标识符速览（mcu-wire-v1.md「仲裁标识符」）：
+ *   0x080 STOP      主机 → MCU，最高协议优先级（较低 ID 赢仲裁）；
+ *   0x081 STOP_ACK  MCU → 主机，关联的安全响应；
+ *   0x100 COMMAND   主机 → MCU，普通命令流量；
+ *   0x101 ACK       MCU → 主机，普通关联响应；
+ *   0x180 TELEMETRY MCU → 主机，最低协议优先级。
+ * 五种帧的 DLC 恒为 8：载荷布局固定、帧长从不随字段变化，接收侧
+ * 无需长度协商；下方 _Static_assert 把 HAL 载荷容量钉在 8。
+ *
+ * 桥接生命周期不变量：上电初始化后普通会话处于「未同步」状态
+ * （mcu_command_dedup_t.session_open == false），COMMAND 只得到
+ * SESSION_CLOSED 结果；所属传输丢弃排队的会话前流量并通过可信闸门
+ * mcu_command_dedup_open_session() 之后才进入「已同步」状态。
+ * STOP 不经过该闸门，任何时刻都按安全路径处理。
+ *
  * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
  *   （firmware/mcu/README.md「唯一规则」）。
  */
@@ -17,7 +32,10 @@
 #include "can_bridge.h"
 
 /* 编译期不变量：HAL 载荷容量与 Wire V1 DLC（8）一致；
- * 五个冻结仲裁 ID 全部落在 11 位标准 ID 范围（<= 0x7ff）内。 */
+ * 五个冻结仲裁 ID 全部落在 11 位标准 ID 范围（<= 0x7ff）内。
+ * DLC == 8 恒定的原因：Wire V1 为每种帧类型固定八字节载荷
+ * （mcu-wire-v1.md「载荷布局」），帧长从不随字段变化，接收侧只需
+ * 比较长度即可在解析前拒绝错误 DLC。 */
 _Static_assert(HAL_CAN_CLASSIC_DLC_MAX == MCU_WIRE_DLC,
                "HAL Classic CAN payload must match Wire V1 DLC");
 _Static_assert(MCU_CAN_ID_TELEMETRY <= HAL_CAN_STANDARD_ID_MAX,
@@ -124,7 +142,10 @@ static mcu_can_bridge_status_t map_codec_status(mcu_codec_status_t status)
 
 /* 编码 Wire V1 帧并构造标准 Classic CAN 信封：flags == NONE、
  * DLC 由编解码器确定；只有编解码成功且仲裁 ID 落在 11 位范围内
- * 才写出输出，失败即拒绝且输出保持不变。 */
+ * 才写出输出，失败即拒绝且输出保持不变。
+ * 线上构造细节：flags == NONE 表示标准 11 位标识符的普通数据帧
+ * （无 extended-ID、无远程帧、无错误帧、无 CAN FD）；载荷八个字节
+ * 由 mcu_frame_encode() 按帧类型以网络字节序（大端）写入。 */
 mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
                                               hal_can_frame *encoded)
 {
@@ -136,9 +157,13 @@ mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
         return MCU_CAN_BRIDGE_INVALID_ARGUMENT;
     }
 
+    /* 先在局部信封上构造，全部校验通过后才 copy_hal_frame 写出，
+     * 保证失败即拒绝时调用方的输出保持不变。 */
     local.arbitration_id = 0u;
     local.dlc = 0u;
     local.flags = (uint8_t)HAL_CAN_FRAME_FLAG_NONE;
+    /* 帧类型 → 五个冻结仲裁 ID 之一；八字节载荷按大端写入
+     * local.data，encoded_length 恒为 MCU_WIRE_DLC（8）。 */
     codec_status = mcu_frame_encode(frame,
                                     &local.arbitration_id,
                                     local.data,
@@ -150,6 +175,7 @@ mcu_can_bridge_status_t mcu_can_bridge_encode(const mcu_wire_frame_t *frame,
     if (local.arbitration_id > HAL_CAN_STANDARD_ID_MAX) {
         return MCU_CAN_BRIDGE_INVALID_ARBITRATION_ID;
     }
+    /* DLC 恒为 8 的双保险：编解码器返回的长度与 HAL 载荷容量双重校验。 */
     if (encoded_length != MCU_WIRE_DLC || encoded_length > HAL_CAN_CLASSIC_DLC_MAX) {
         return MCU_CAN_BRIDGE_CORE_REJECTED;
     }
@@ -172,16 +198,24 @@ mcu_can_bridge_status_t mcu_can_bridge_decode(const hal_can_frame *encoded,
     if (encoded == 0 || frame == 0) {
         return MCU_CAN_BRIDGE_INVALID_ARGUMENT;
     }
+    /* 过滤第一步：extended-ID、远程帧、错误帧、CAN FD 与任何未知标志
+     * 都在 Wire V1 之外——Wire V1 只承载标准 Classic CAN 数据帧。 */
     if (encoded->flags != (uint8_t)HAL_CAN_FRAME_FLAG_NONE) {
         return MCU_CAN_BRIDGE_INVALID_FLAGS;
     }
+    /* 过滤第二步：仲裁 ID 必须是 11 位标准 ID（<= 0x7ff）。 */
     if (encoded->arbitration_id > HAL_CAN_STANDARD_ID_MAX) {
         return MCU_CAN_BRIDGE_INVALID_ARBITRATION_ID;
     }
+    /* 过滤第三步：DLC 必须恰为 8——Wire V1 每种帧类型固定八字节载荷，
+     * 远程帧已在 flags 一步被拒，长度过滤只需这一种比较。 */
     if (encoded->dlc != MCU_WIRE_DLC) {
         return MCU_CAN_BRIDGE_INVALID_DLC;
     }
 
+    /* 过滤第四步：仲裁 ID 必须恰为五个冻结 Wire V1 ID 之一
+     * （0x080/0x081/0x100/0x101/0x180），随后版本、保留字节、
+     * 枚举值、ID 分区与跨字段语义全部通过才发布逻辑帧。 */
     codec_status = mcu_frame_decode(encoded->arbitration_id,
                                     encoded->data,
                                     encoded->dlc,
@@ -195,7 +229,9 @@ mcu_can_bridge_status_t mcu_can_bridge_decode(const hal_can_frame *encoded,
 }
 
 /* 编码并交给目标 HAL。hal_can_send() == true 只表示传输交接完成，
- * 不证明仲裁、线上送达、远端接收或执行器动作。 */
+ * 不证明仲裁、线上送达、远端接收或执行器动作。
+ * 响应帧按帧类型携带冻结仲裁 ID：ACK 0x101、STOP_ACK 0x081、
+ * 遥测 0x180——全部为 MCU → 主机方向。 */
 mcu_can_bridge_status_t mcu_can_bridge_send(const mcu_wire_frame_t *frame)
 {
     hal_can_frame encoded;
@@ -218,11 +254,11 @@ static bool safety_dependencies_are_valid(const mcu_state_machine_t *machine,
 /* ---- MCU 入口路由 ---- */
 
 /* 处理一个已收到的原始封装（不调用 hal_can_send()）。
- * 解码成功后的路由顺序：STOP 先行（绕过会话闸门与回放窗口，
- * 经 mcu_watchdog_receive_stop() 派发）；随后是普通 COMMAND
+ * 解码成功后的路由顺序：STOP（0x080）先行（绕过会话闸门与回放窗口，
+ * 经 mcu_watchdog_receive_stop() 派发）；随后是普通 COMMAND（0x100）
  * （经 mcu_command_dedup_receive()，dedup 为 null 或损坏时
- * 失败即拒绝）；ACK / STOP_ACK / 遥测在 MCU 入口是方向错误
- * 流量，返回 UNEXPECTED_DIRECTION，绝不触及安全状态。 */
+ * 失败即拒绝）；ACK（0x101）/ STOP_ACK（0x081）/ 遥测（0x180）在
+ * MCU 入口是方向错误流量，返回 UNEXPECTED_DIRECTION，绝不触及安全状态。 */
 bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
                                   mcu_state_machine_t *machine,
                                   mcu_watchdog_t *watchdog,
@@ -248,6 +284,9 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
     }
     local.request_decoded = true;
 
+    /* 路由顺序与仲裁优先级一致：0x080 STOP（主机 → MCU）先于
+     * 0x100 COMMAND（主机 → MCU）检查，保证普通会话关闭、回放窗口
+     * 已满或去重对象损坏时安全停止仍可派发。 */
     /* STOP 有意在普通路径之前先行检查。它绕过会话闸门与回放窗口，
      * 且永远不会被转换为命令。 */
     if (local.request.kind == MCU_WIRE_FRAME_STOP) {
@@ -274,6 +313,9 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
     if (local.request.kind == MCU_WIRE_FRAME_COMMAND) {
         mcu_command_record_t command_record;
 
+        /* COMMAND（0x100，主机 → MCU）：普通命令经回放窗口派发。
+         * 上电未同步（session_open == false）或去重对象缺失/损坏时
+         * 失败即拒绝；仅序号全新的命令才派发普通事件。 */
         if (dedup == 0 || !mcu_command_dedup_is_valid(dedup) ||
             !mcu_command_dedup_receive(dedup,
                                        machine,
@@ -300,7 +342,8 @@ bool mcu_can_bridge_process_frame(mcu_command_dedup_t *dedup,
     }
 
     /* ACK、STOP_ACK 与遥测在 Wire V1 下均由 MCU 发出。携带这些 ID 之一的帧
-     * 出现在 MCU 入口时，虽然编码合法但方向错误，绝不能到达安全状态。 */
+     * 出现在 MCU 入口时，虽然编码合法但方向错误，绝不能到达安全状态。
+     * 对应仲裁 ID：ACK 0x101、STOP_ACK 0x081、遥测 0x180（MCU → 主机）。 */
     local.outcome = MCU_CAN_BRIDGE_OUTCOME_REJECTED;
     local.status = MCU_CAN_BRIDGE_UNEXPECTED_DIRECTION;
     copy_record(record, &local);
@@ -327,6 +370,9 @@ bool mcu_can_bridge_poll(mcu_command_dedup_t *dedup,
         !safety_dependencies_are_valid(machine, watchdog)) {
         return false;
     }
+    /* 每次调用至多消费一帧：非阻塞 hal_can_recv() 无帧时输出
+     * NO_FRAME 记录并返回；core 不隐藏无界接收队列，排队与优先级
+     * 由目标 HAL 的过滤器/FIFO 策略负责。 */
     if (!hal_can_recv(&encoded)) {
         clear_record(&local);
         local.outcome = MCU_CAN_BRIDGE_OUTCOME_NO_FRAME;
@@ -347,6 +393,8 @@ bool mcu_can_bridge_poll(mcu_command_dedup_t *dedup,
         return true;
     }
 
+    /* 响应交接：ACK（0x101）或 STOP_ACK（0x081）经 hal_can_send()
+     * 发出；交接失败记为 HAL_SEND_FAILED，且不确认任何槽位。 */
     send_status = mcu_can_bridge_send(&local.response);
     if (send_status != MCU_CAN_BRIDGE_OK) {
         local.status = send_status;
@@ -355,6 +403,9 @@ bool mcu_can_bridge_poll(mcu_command_dedup_t *dedup,
     }
     local.response_handed_off = true;
 
+    /* 仅被接受的 STOP_ACK 在交接成功后才确认挂起的看门狗槽位
+     * （mcu-can-hal-boundary-v1.md「响应交接」）；失败的 STOP_ACK
+     * 与普通 ACK 不经过确认路径，挂起的 STOP 期限保持活动。 */
     if (local.response.kind == MCU_WIRE_FRAME_STOP_ACK &&
         local.response.result_code == MCU_WIRE_RESULT_ACCEPTED &&
         !mcu_watchdog_confirm_stop_ack(watchdog,

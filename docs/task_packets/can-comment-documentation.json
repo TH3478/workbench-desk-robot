@@ -1,0 +1,55 @@
+{
+  "issue": 2029,
+  "human_owner": "Quchaosheng",
+  "objective": "为 CAN 通信链路的实现代码加入规范且详细的注释：MCU 帧编解码与 CAN 桥、Linux wbcan 驱动、主机侧受限 CAN 适配器与 SocketCAN 传输层、虚拟 MCU 状态机及其单元测试。注释须引用 docs/architecture/mcu-wire-v1.md、mcu-can-hal-boundary-v1.md、host-can-transport-v1.md、robot-bsp-can-v0.1.md 与 kernel/wbcan/LATENCY.md 的冻结条款，不改动任何代码与数据。",
+  "allowed_paths": [
+    "kernel/wbcan/wbcan.c",
+    "libs/hardware/workbench/hardware/can_driver_safe.py",
+    "libs/hardware/workbench/hardware/socketcan_transport.py",
+    "firmware/mcu/core/can_bridge.c",
+    "firmware/mcu/core/can_bridge.h",
+    "firmware/mcu/core/frame_codec.c",
+    "firmware/mcu/core/frame_codec.h",
+    "firmware/virtual_mcu/workbench_virtual_mcu/state_machine.py",
+    "tests/unit/test_can_transport.py",
+    "tests/unit/test_socketcan_transport.py",
+    "tests/unit/test_socketcan_ingress.py",
+    "tests/unit/test_virtual_mcu.py",
+    "docs/task_packets/can-comment-documentation.json"
+  ],
+  "read_only_paths": [
+    "docs/architecture/mcu-wire-v1.md",
+    "docs/architecture/mcu-can-hal-boundary-v1.md",
+    "docs/architecture/host-can-transport-v1.md",
+    "docs/architecture/robot-bsp-can-v0.1.md",
+    "kernel/wbcan/LATENCY.md",
+    "interfaces/json_schema/mcu_protocol.schema.json"
+  ],
+  "forbidden": [
+    "robot/control/**",
+    "services/**",
+    "hardware/pcb/**",
+    "hardware/motor_driver/**"
+  ],
+  "acceptance": [
+    "链路每个模块的公共符号、状态机转移、线上常量与错误路径均有中文注释",
+    "注释引用冻结契约文档的条款来源",
+    "git diff 仅含注释行，无任何代码、宏、寄存器或时序改动"
+  ],
+  "commands": [
+    "make -C kernel/wbcan all",
+    "make -C firmware/mcu host test-host",
+    "python -m pytest tests/unit/test_can_transport.py tests/unit/test_socketcan_transport.py tests/unit/test_socketcan_ingress.py tests/unit/test_virtual_mcu.py"
+  ],
+  "evidence": [
+    "wbcan.ko 编译通过（含 -Wall）",
+    "MCU host 测试断言数与基线一致且 failures=0",
+    "CAN 相关 pytest 全部通过",
+    "ruff check/format 通过"
+  ],
+  "stop_conditions": [
+    "任何测试断言数或失败数发生变化",
+    "需要修改代码、寄存器偏移、线上常量或时序参数来使注释成立",
+    "内核头文件或工具链不可用导致无法验证"
+  ]
+}

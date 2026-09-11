@@ -9,6 +9,23 @@
  *   「数字注册表」「失败即拒绝行为与限制」）；跨字段语义以
  *   docs/architecture/mcu-protocol-v1.md（「结果语义」「故障码注册表」）为准。
  *
+ * 黄金向量对照（tests/frame_codec_tests.c ①–⑧，共享 Host/QEMU 语料
+ * 固定这些字节向量；⑦ 即 interfaces/examples/mcu-frame-stop-ack.json
+ * 的线上表示）：
+ *   ① command   0x100  10 7f ff 06 ff 00 00 00（ID 32767、heartbeat、重试 255）
+ *   ② ack       0x101  10 00 13 04 01 00 00 02（hold 接受、holding）
+ *   ③ ack       0x101  10 00 14 03 00 01 07 04（grip_close 拒绝、malformed_frame、faulted）
+ *   ④ telemetry 0x180  10 ff ff ff ff 00 00 00（序号 0xffffffff、健康）
+ *   ⑤ telemetry 0x180  10 00 00 00 00 06 04 00（序号 0、watchdog_expired、faulted）
+ *   ⑥ stop      0x080  10 80 00 05 00 00 00 00（STOP 分区下界 32768）
+ *   ⑦ stop_ack  0x081  10 80 01 05 00 00 00 03（规范成功停止确认）
+ *   ⑧ stop_ack  0x081  10 ff ff 05 02 01 03 04（STOP 分区上界 65535、失败停止确认）
+ * 每条向量的共同骨架：字节 0 = 版本 0x10；命令/STOP 与 ACK/STOP_ACK 的
+ * 字节 1..2 = command_id、字节 3 = opcode、字节 4 = retry_count；
+ * ACK/STOP_ACK 字节 5..7 = result_code / fault_code / device_mode；
+ * 遥测字节 1..4 = sequence_no、字节 5..6 = fault_code / device_mode、
+ * 字节 7 = 保留零；命令/STOP 字节 5..7 = 保留零。
+ *
  * 编译目标：host、qemu、ch32v307 三目标共源；core/ 不含厂商或平台头文件
  *   （firmware/mcu/README.md「唯一规则」）。
  */
@@ -20,7 +37,9 @@
 /* ---- 逻辑帧跨字段不变量 ---- */
 
 /* 普通 opcode 恰为 move、grip_open、grip_close、hold、heartbeat 五种
- * （mcu-wire-v1.md「数字注册表」）；reserved 与 stop 不在此列。 */
+ * （mcu-wire-v1.md「数字注册表」）；reserved 与 stop 不在此列。
+ * 这就是普通 opcode 白名单：reserved（0x00）保证全零填充的 opcode
+ * 永远不可执行；stop（0x05）只允许出现在 stop / stop_ack 帧中。 */
 static bool is_ordinary_opcode(mcu_wire_opcode_t opcode)
 {
     return opcode == MCU_WIRE_OPCODE_MOVE || opcode == MCU_WIRE_OPCODE_GRIP_OPEN ||
@@ -35,14 +54,18 @@ static bool is_non_faulted_mode(mcu_wire_device_mode_t mode)
 }
 
 /* 遥测与响应类帧中不存在的命令字段必须保持安全中性零值，
- * 防止结构体被意外复用后静默携带过期字段（失败即拒绝）。 */
+ * 防止结构体被意外复用后静默携带过期字段（失败即拒绝）。
+ * 线上对应关系：遥测载荷根本没有这些字段的位置——字节 1..4 被
+ * sequence_no 占据，字节 7 是保留零（mcu-wire-v1.md「载荷布局」）。 */
 static bool absent_command_fields_are_zero(const mcu_wire_frame_t *frame)
 {
     return frame->command_id == 0u && frame->opcode == MCU_WIRE_OPCODE_RESERVED &&
            frame->retry_count == 0u && frame->result_code == MCU_WIRE_RESULT_ACCEPTED;
 }
 
-/* 命令与 STOP 帧中不存在的响应字段必须保持零值。 */
+/* 命令与 STOP 帧中不存在的响应字段必须保持零值。
+ * 线上对应关系：命令/STOP 载荷字节 5..7 就是这些字段的零值占位
+ * （保留字节必须为 0x00，mcu-wire-v1.md「载荷布局」）。 */
 static bool absent_response_fields_are_zero(const mcu_wire_frame_t *frame)
 {
     return frame->sequence_no == 0u && frame->result_code == MCU_WIRE_RESULT_ACCEPTED &&
@@ -102,17 +125,27 @@ static bool frame_is_valid(const mcu_wire_frame_t *frame)
 {
     switch (frame->kind) {
     case MCU_WIRE_FRAME_COMMAND:
+        /* 普通分区（最高位 0）+ 白名单 opcode + 响应字段零值
+         * （线上字节 5..7 保留零）。 */
         return frame->command_id <= MCU_COMMAND_ID_MAX && is_ordinary_opcode(frame->opcode) &&
                absent_response_fields_are_zero(frame);
     case MCU_WIRE_FRAME_ACK:
+        /* 普通分区 + 白名单 opcode + sequence_no 零值 + 结果语义
+         * （成功：none + 无故障模式；失败：faulted + duplicate_frame
+         * 或 malformed_frame）。 */
         return frame->command_id <= MCU_COMMAND_ID_MAX && is_ordinary_opcode(frame->opcode) &&
                frame->sequence_no == 0u && ordinary_ack_is_valid(frame);
     case MCU_WIRE_FRAME_TELEMETRY:
+        /* 无命令关联字段 + 健康/故障组合（none + 无故障模式，
+         * 或 faulted + link_lost / watchdog_expired）。 */
         return telemetry_is_valid(frame);
     case MCU_WIRE_FRAME_STOP:
+        /* STOP 分区（最高位 1）+ opcode == stop + 响应字段零值。 */
         return frame->command_id >= MCU_STOP_ID_MIN && frame->opcode == MCU_WIRE_OPCODE_STOP &&
                absent_response_fields_are_zero(frame);
     case MCU_WIRE_FRAME_STOP_ACK:
+        /* STOP 分区 + opcode == stop + sequence_no 零值 + 结果语义
+         * （成功：none + stopped；失败：stop_rejected + faulted）。 */
         return frame->command_id >= MCU_STOP_ID_MIN && frame->opcode == MCU_WIRE_OPCODE_STOP &&
                frame->sequence_no == 0u && stop_ack_is_valid(frame);
     case MCU_WIRE_FRAME_KIND_COUNT:
@@ -123,7 +156,10 @@ static bool frame_is_valid(const mcu_wire_frame_t *frame)
 
 /* ---- 仲裁标识符与帧种类的一一映射 ---- */
 
-/* 帧种类到冻结仲裁 ID（mcu-wire-v1.md「仲裁标识符」）。
+/* 帧种类到冻结仲裁 ID（mcu-wire-v1.md「仲裁标识符」）：
+ *   COMMAND → 0x100（主机 → MCU）、ACK → 0x101（MCU → 主机）、
+ *   TELEMETRY → 0x180（MCU → 主机）、STOP → 0x080（主机 → MCU）、
+ *   STOP_ACK → 0x081（MCU → 主机）。
  * 未知种类返回 0xffff，必然无法通过 11 位标准 ID 上限校验。 */
 static uint16_t frame_kind_to_id(mcu_wire_frame_kind_t kind)
 {
@@ -172,7 +208,8 @@ static bool id_to_frame_kind(uint16_t arbitration_id, mcu_wire_frame_kind_t *kin
 /* ---- 网络字节序（大端）读写与帧维护 ---- */
 
 /* 16 位大端写出：多字节整数在载荷中高位在前
- * （mcu-wire-v1.md「传输边界」）。 */
+ * （mcu-wire-v1.md「传输边界」）。
+ * 用于载荷字节 1..2 的 command_id（命令/STOP/ACK/STOP_ACK）。 */
 static void write_u16_be(uint8_t *destination, uint16_t value)
 {
     destination[0] = (uint8_t)(value >> 8);
@@ -194,7 +231,8 @@ static uint16_t read_u16_be(const uint8_t *source)
     return (uint16_t)(((uint16_t)source[0] << 8) | source[1]);
 }
 
-/* 32 位大端读出，用于遥测 sequence_no。 */
+/* 32 位大端读出，用于遥测 sequence_no。
+ * 对应线上载荷字节 1..4；序号可能回绕，消费者不得用作命令 ID。 */
 static uint32_t read_u32_be(const uint8_t *source)
 {
     return ((uint32_t)source[0] << 24) | ((uint32_t)source[1] << 16) |
@@ -258,25 +296,36 @@ mcu_codec_status_t mcu_frame_encode(const mcu_wire_frame_t *frame,
     }
 
     encoded_id = frame_kind_to_id(frame->kind);
+    /* 字节 0：紧凑协议版本 0x10（逻辑版本 "1.0"），所有帧类型共用。 */
     encoded[0] = MCU_WIRE_VERSION_V1;
     switch (frame->kind) {
     case MCU_WIRE_FRAME_COMMAND:
     case MCU_WIRE_FRAME_STOP:
+        /* 字节 1..2：command_id，16 位大端（高位在前）。 */
         write_u16_be(&encoded[1], frame->command_id);
+        /* 字节 3：opcode（8 位）；字节 4：retry_count（8 位，0..255）。 */
         encoded[3] = (uint8_t)frame->opcode;
         encoded[4] = frame->retry_count;
+        /* 字节 5..7：保留零——encoded 已零初始化，无需显式写出；
+         * 解码侧会校验这三个字节恰为 0x00。 */
         break;
     case MCU_WIRE_FRAME_ACK:
     case MCU_WIRE_FRAME_STOP_ACK:
+        /* 字节 1..2：command_id（大端）；字节 3：opcode。 */
         write_u16_be(&encoded[1], frame->command_id);
         encoded[3] = (uint8_t)frame->opcode;
+        /* 字节 4：回显的 retry_count（ACK 逐字节回显请求的计数）。 */
         encoded[4] = frame->retry_count;
+        /* 字节 5：result_code；字节 6：fault_code；字节 7：device_mode。 */
         encoded[5] = (uint8_t)frame->result_code;
         encoded[6] = (uint8_t)frame->fault_code;
         encoded[7] = (uint8_t)frame->device_mode;
         break;
     case MCU_WIRE_FRAME_TELEMETRY:
+        /* 字节 1..4：sequence_no，32 位大端；遥测没有命令 ID、
+         * opcode、重试计数或结果码，从不确认命令。 */
         write_u32_be(&encoded[1], frame->sequence_no);
+        /* 字节 5：fault_code；字节 6：device_mode；字节 7：保留零。 */
         encoded[5] = (uint8_t)frame->fault_code;
         encoded[6] = (uint8_t)frame->device_mode;
         break;
@@ -314,9 +363,12 @@ mcu_codec_status_t mcu_frame_decode(uint16_t arbitration_id,
         return MCU_CODEC_INVALID_ARGUMENT;
     }
     clear_frame(&decoded);
+    /* 仲裁 ID 必须恰为五个冻结 Wire V1 ID 之一（0x080/0x081/0x100/
+     * 0x101/0x180）；ID 恰好选择一种帧类型，其余标识符整体拒绝。 */
     if (!id_to_frame_kind(arbitration_id, &decoded.kind)) {
         return MCU_CODEC_UNSUPPORTED_ID;
     }
+    /* 字节 0 必须是紧凑版本 0x10（逻辑版本 "1.0"）；未知版本整体拒绝。 */
     if (source[0] != MCU_WIRE_VERSION_V1) {
         return MCU_CODEC_INVALID_VERSION;
     }
@@ -324,15 +376,21 @@ mcu_codec_status_t mcu_frame_decode(uint16_t arbitration_id,
     switch (decoded.kind) {
     case MCU_WIRE_FRAME_COMMAND:
     case MCU_WIRE_FRAME_STOP:
+        /* 字节 5..7 必须全零（保留字节），先于字段解析整体拒绝。 */
         if (source[5] != 0u || source[6] != 0u || source[7] != 0u) {
             return MCU_CODEC_NONZERO_RESERVED;
         }
+        /* 字节 1..2：command_id（大端）；字节 3：opcode；
+         * 字节 4：retry_count。 */
         decoded.command_id = read_u16_be(&source[1]);
         decoded.opcode = (mcu_wire_opcode_t)source[3];
         decoded.retry_count = source[4];
         break;
     case MCU_WIRE_FRAME_ACK:
     case MCU_WIRE_FRAME_STOP_ACK:
+        /* 字节 1..2：command_id（大端）；字节 3：opcode；
+         * 字节 4：回显的 retry_count；字节 5：result_code；
+         * 字节 6：fault_code；字节 7：device_mode。 */
         decoded.command_id = read_u16_be(&source[1]);
         decoded.opcode = (mcu_wire_opcode_t)source[3];
         decoded.retry_count = source[4];
@@ -341,9 +399,12 @@ mcu_codec_status_t mcu_frame_decode(uint16_t arbitration_id,
         decoded.device_mode = (mcu_wire_device_mode_t)source[7];
         break;
     case MCU_WIRE_FRAME_TELEMETRY:
+        /* 字节 7 必须为零（保留字节）。 */
         if (source[7] != 0u) {
             return MCU_CODEC_NONZERO_RESERVED;
         }
+        /* 字节 1..4：sequence_no（大端）；字节 5：fault_code；
+         * 字节 6：device_mode。 */
         decoded.sequence_no = read_u32_be(&source[1]);
         decoded.fault_code = (mcu_wire_fault_t)source[5];
         decoded.device_mode = (mcu_wire_device_mode_t)source[6];
