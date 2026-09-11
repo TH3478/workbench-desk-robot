@@ -1,0 +1,57 @@
+{
+  "issue": "local-init-agents-guide-2026-09-11",
+  "human_owner": "本次会话中发起 /init 的用户",
+  "objective": "响应本地 /init 请求，仅补全根 AGENTS.md 的仓库导航、环境准备和验证说明；此本地任务标识不代表已创建远端 Issue。",
+  "allowed_paths": [
+    "AGENTS.md",
+    "docs/task_packets/init-agents-guide.json"
+  ],
+  "read_only_paths": [
+    "README.md",
+    "README.zh-CN.md",
+    "CONTRIBUTING.md",
+    "Makefile",
+    "pyproject.toml",
+    "docs/architecture/**",
+    "docs/context/**",
+    "interfaces/**",
+    "libs/**",
+    "services/**",
+    "tools/**",
+    "tests/**",
+    "CLAUDE.md"
+  ],
+  "forbidden": [
+    "robot/control/**",
+    "firmware/**"
+  ],
+  "acceptance": [
+    "保留现有安全、模块职责、人工评审和必做检查要求",
+    "新增环境、目录与命令说明均有当前仓库文件依据",
+    "本次文件修改仅包含 allowed_paths，不改变运行时行为",
+    "任务包校验通过，并如实记录四项必做检查的结果与环境限制"
+  ],
+  "commands": [
+    "make task-check PACKET=docs/task_packets/init-agents-guide.json",
+    "make test",
+    "make contract",
+    "make scenario-check",
+    "make context-check",
+    "git diff --check",
+    "git diff -- AGENTS.md"
+  ],
+  "evidence": [
+    "本次会话的校验命令、退出码与测试摘要",
+    "AGENTS.md 差异与任务包内容",
+    "Makefile、pyproject.toml、CONTRIBUTING.md 和 docs/architecture/system.md 的对应说明",
+    "2026-09-11：make context-check 与 git diff --check 均退出 0",
+    "2026-09-11：make test 退出 2，Python 3.10.12 下收集阶段出现 43 个错误，包含 StrEnum/UTC 不可用以及缺少 jsonschema/pydantic；未通过测试验收",
+    "2026-09-11：make contract 与 make scenario-check 均退出 2，默认 Python 3.10 无法导入 StrEnum",
+    "2026-09-11：make task-check PACKET=docs/task_packets/init-agents-guide.json 退出 2，缺少 jsonschema，任务包完整校验待在 Python 3.12+ 开发环境中执行"
+  ],
+  "stop_conditions": [
+    "需要修改允许路径以外的文件时停止扩大范围",
+    "检查失败且修复需要修改生产代码或环境配置时，记录失败并交回用户",
+    "不得通过本次初始化降低人工审批或硬件安全要求"
+  ]
+}
